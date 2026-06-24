@@ -44,10 +44,12 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.Root)
         ],
         .Root: [
-            .microFeature(.Splash)
+            .microFeature(.Splash),
+            .microFeature(.SignIn)
         ]
     ],
     microFeatureDependencies: [
-        .Splash: .init()
+        .Splash: .init(),
+        .SignIn: .init()
     ]
 )

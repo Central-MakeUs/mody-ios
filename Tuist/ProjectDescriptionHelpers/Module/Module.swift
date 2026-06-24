@@ -12,6 +12,7 @@ public enum Module: Hashable {
 }
 
 public enum MicroFeatureModule {
+    case SignIn
     case Splash
     
     var name: String {
@@ -34,6 +35,7 @@ public enum MicroFeatureModule {
     var path: String {
         switch self {
         case .Splash: "Projects/Feature/Splash"
+        case .SignIn: "Projects/Feature/SignIn"
         }
     }
 }
