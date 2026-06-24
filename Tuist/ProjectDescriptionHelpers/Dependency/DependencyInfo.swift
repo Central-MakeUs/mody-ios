@@ -41,7 +41,10 @@ public struct MicroFeatureDependencies {
 public let dependencyInfo: DependencyInfo = DependencyInfo(
     moduleDependencies: [
         .App: [
-            
+            .module(.Root)
+        ],
+        .Root: [
+            .microFeature(.Splash)
         ]
     ],
     microFeatureDependencies: [

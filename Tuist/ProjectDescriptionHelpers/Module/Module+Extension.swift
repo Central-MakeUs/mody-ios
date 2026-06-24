@@ -85,23 +85,29 @@ extension Module {
         }
     }
     
+    var bundlePrefix: String {
+        let organizationName = projectEnvironment.organizationName
+
+        return "com.\(organizationName)"
+    }
+    
     var bundleID: String {
         if case .App = self { return "${BUNDLE_IDENTIFIER}" }
         
-        let organizationName = projectEnvironment.organizationName
-        let appName = projectEnvironment.appName
+        let appName = projectEnvironment.appName.lowercased()
         
         let moduleName = switch self {
         case .MicroFeature(let module): module.name.lowercased()
         default: name.lowercased()
         }
         
-        return "com.\(organizationName).\(appName)-\(moduleName)"
+        return "\(bundlePrefix).\(appName)-\(moduleName)"
     }
     
     var path: Path {
         switch self {
         case .MicroFeature(let module): .relativeToRoot(module.path)
+        case .Root: .relativeToRoot("Projects/Feature/Root")
         default: .relativeToRoot("Projects/\(name)")
         }
     }

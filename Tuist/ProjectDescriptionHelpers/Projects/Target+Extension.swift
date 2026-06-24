@@ -24,12 +24,13 @@ public extension Target {
     
     static func demo(moduleType: Module) -> Target {
         let demoName = "\(moduleType.name)Demo"
+        let bundleID = "\(moduleType.bundlePrefix)-demo-\(demoName)"
         
         return .target(
             name: demoName,
             destinations: projectEnvironment.destination,
             product: .app,
-            bundleId: "\(moduleType.bundleID)-demo",
+            bundleId: bundleID,
             deploymentTargets: projectEnvironment.deploymentTargets,
             infoPlist: .file(path: "Demo/Support/Info.plist"),
             sources: .demo,
