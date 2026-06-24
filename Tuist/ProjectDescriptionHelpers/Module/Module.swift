@@ -13,6 +13,7 @@ public enum Module: Hashable {
 }
 
 public enum MicroFeatureModule {
+    case Challenge
     case Feed
     case OnBoarding
     case SignIn
@@ -41,6 +42,7 @@ public enum MicroFeatureModule {
         case .SignIn: "Projects/Feature/SignIn"
         case .OnBoarding: "Projects/Feature/OnBoarding"
         case .Feed: "Projects/Feature/Feed"
+        case .Challenge: "Projects/Feature/Challenge"
         }
     }
 }
