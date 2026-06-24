@@ -11,6 +11,8 @@ extension Module {
     var name: String {
         switch self {
         case .App: projectEnvironment.targetName
+        case .MicroFeature(let microFeatureModule): microFeatureModule.name
+        default: "\(self)"
         }
     }
     
@@ -18,12 +20,26 @@ extension Module {
         switch self {
         case .App:
             return [.target(moduleType: self)]
+        case .MicroFeature(let module):
+            var targets: [Target] = hasDemo ? [.demo(moduleType: self)] : []
+            
+            targets.append(contentsOf: [
+                .target(moduleType: self),
+                .interface(module),
+                .testing(module),
+                .tests(module)
+            ])
+            
+            return targets
+        default:
+            return [.target(moduleType: self)]
         }
     }
     
     var product: Product {
         switch self {
         case .App: .app
+        default: .staticLibrary
         }
     }
     
@@ -31,6 +47,8 @@ extension Module {
         switch self {
         case .App:
             true
+        default:
+            false
         }
     }
     
@@ -38,6 +56,8 @@ extension Module {
         switch self {
         case .App:
             .file(path: "Support/Info.plist")
+        default:
+            .default
         }
     }
     
@@ -45,12 +65,17 @@ extension Module {
         switch self {
         case .App:
             .scheme(name: projectEnvironment.appName, environments: .all)
+        case .MicroFeature(let module):
+            hasDemo ? [.implements(targetName: module.demoName)] : []
+        default:
+            []
         }
     }
     
     var additionalFiles: [FileElement]? {
         switch self {
         case .App: ["../../XCConfig/Shared.xcconfig"]
+        default: nil
         }
     }
     
@@ -61,11 +86,22 @@ extension Module {
     }
     
     var bundleID: String {
-        return "${BUNDLE_IDENTIFIER}"
+        if case .App = self { return "${BUNDLE_IDENTIFIER}" }
+        
+        let organizationName = projectEnvironment.organizationName
+        let appName = projectEnvironment.appName
+        
+        let moduleName = switch self {
+        case .MicroFeature(let module): module.name.lowercased()
+        default: name.lowercased()
+        }
+        
+        return "com.\(organizationName).\(appName)-\(moduleName)"
     }
     
     var path: Path {
         switch self {
+        case .MicroFeature(let module): .relativeToRoot(module.path)
         default: .relativeToRoot("Projects/\(name)")
         }
     }

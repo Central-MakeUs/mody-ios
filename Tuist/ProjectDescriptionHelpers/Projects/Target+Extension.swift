@@ -40,6 +40,48 @@ public extension Target {
             )
         )
     }
+    
+    static func interface(_ module: MicroFeatureModule) -> Target {
+        return .target(
+            name: module.interfaceName,
+            destinations: projectEnvironment.destination,
+            product: .staticLibrary,
+            bundleId: "\(module.bundleID).interface",
+            deploymentTargets: projectEnvironment.deploymentTargets,
+            infoPlist: .default,
+            sources: .interface,
+            dependencies: module.interfaceDependencies,
+            settings: .settings(configurations: .default)
+        )
+    }
+    
+    static func testing(_ module: MicroFeatureModule) -> Target {
+        return .target(
+            name: module.testingName,
+            destinations: projectEnvironment.destination,
+            product: .staticLibrary,
+            bundleId: "\(module.bundleID).testing",
+            deploymentTargets: projectEnvironment.deploymentTargets,
+            infoPlist: .default,
+            sources: .testing,
+            dependencies: module.testingDependencies,
+            settings: .settings(configurations: .default)
+        )
+    }
+    
+    static func tests(_ module: MicroFeatureModule) -> Target {
+        return .target(
+            name: module.testsName,
+            destinations: projectEnvironment.destination,
+            product: .unitTests,
+            bundleId: "\(module.bundleID).tests",
+            deploymentTargets: projectEnvironment.deploymentTargets,
+            infoPlist: .default,
+            sources: .tests,
+            dependencies: module.testDependencies,
+            settings: .settings(configurations: .default)
+        )
+    }
 }
 
 // MARK: Implement
@@ -82,6 +124,8 @@ extension SourceFilesList? {
 private extension Module {
     var demoDependencies: [TargetDependency] {
         switch self {
+        case .MicroFeature(let module):
+            module.demoDependencies
         default:
             [.target(name: name)]
         }
