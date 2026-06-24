@@ -6,6 +6,7 @@
 //
 
 public enum Module: Hashable {
+    case Main
     case Root
     case App
     case MicroFeature(MicroFeatureModule)
