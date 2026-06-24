@@ -50,12 +50,13 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.OnBoarding)
         ],
         .Main: [
-            
+            .microFeature(.Feed)
         ]
     ],
     microFeatureDependencies: [
         .Splash: .init(),
         .SignIn: .init(),
-        .OnBoarding: .init()
+        .OnBoarding: .init(),
+        .Feed: .init()
     ]
 )
