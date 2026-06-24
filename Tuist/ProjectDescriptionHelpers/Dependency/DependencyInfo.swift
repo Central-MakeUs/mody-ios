@@ -51,7 +51,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ],
         .Main: [
             .microFeature(.Feed),
-            .microFeature(.Challenge)
+            .microFeature(.Challenge),
+            .microFeature(.MyPage)
         ]
     ],
     microFeatureDependencies: [
@@ -59,6 +60,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .SignIn: .init(),
         .OnBoarding: .init(),
         .Feed: .init(),
-        .Challenge: .init()
+        .Challenge: .init(),
+        .MyPage: .init()
     ]
 )
