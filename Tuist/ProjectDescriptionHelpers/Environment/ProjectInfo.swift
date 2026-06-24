@@ -20,7 +20,7 @@ public struct ProjectEnvironment: @unchecked Sendable {
 public let projectEnvironment = ProjectEnvironment(
     appName: "Mody",
     targetName: "Mody",
-    organizationName: "jumy", // TODO: 팀 명 채워넣기
+    organizationName: "jagsim",
     deploymentTargets: .iOS("18.0"),
     destination: [.iPhone],
     baseSetting: [
