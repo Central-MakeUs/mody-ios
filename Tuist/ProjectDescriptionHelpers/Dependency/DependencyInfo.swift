@@ -45,11 +45,13 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ],
         .Root: [
             .microFeature(.Splash),
-            .microFeature(.SignIn)
+            .microFeature(.SignIn),
+            .microFeature(.OnBoarding)
         ]
     ],
     microFeatureDependencies: [
         .Splash: .init(),
-        .SignIn: .init()
+        .SignIn: .init(),
+        .OnBoarding: .init()
     ]
 )
