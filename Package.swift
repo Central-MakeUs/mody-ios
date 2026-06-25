@@ -14,6 +14,7 @@ import PackageDescription
 let package = Package(
     name: "Mody",
     dependencies: [
-        
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture.git", from: "1.26.0"),
+        .package(url: "https://github.com/Swinject/Swinject.git", from: "2.10.0")
     ]
 )
