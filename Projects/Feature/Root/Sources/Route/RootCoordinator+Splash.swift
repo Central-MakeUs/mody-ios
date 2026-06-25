@@ -13,7 +13,7 @@ extension RootCoordinator: SplashRouter {
         case .routeToMain:
             delegate?.didFinishAuthentication(self)
         case .routeToSignIn:
-            break
+            showSignIn()
         }
     }
 }

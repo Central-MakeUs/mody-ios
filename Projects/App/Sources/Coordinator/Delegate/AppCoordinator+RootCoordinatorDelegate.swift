@@ -7,8 +7,8 @@
 
 import Root
 
+@MainActor
 extension AppCoordinator: RootCoordinatorDelegate {
-    @MainActor
     func didFinishAuthentication(_ coordinator: RootCoordinator) {
         // TODO: Main 전환
     }

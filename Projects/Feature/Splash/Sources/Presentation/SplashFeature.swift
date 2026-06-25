@@ -26,11 +26,17 @@ public struct SplashFeature {
     }
     
     public var body: some ReducerOf<Self> {
-                
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return .none
+                return .concatenate([
+                    .run { send in
+                        try await Task.sleep(for: .seconds(1))
+                    },
+                    .run { [router] _ in
+                        await router(.routeToSignIn)
+                    }
+                ])
             }
         }
     }

@@ -7,14 +7,17 @@
 
 import Root
 import SplashInterface
+import SignInInterface
 import Swinject
 
 extension AppAssembly {
     func assembleRoot(in container: Container) {
         container.register(RootCoordinator.self) { (resolver: Resolver, delegate: RootCoordinatorDelegate) in
             let splashBuilder: SplashBuildable = resolver.resolve()
+            let signInBuilder: SignInBuildable = resolver.resolve()
             return RootCoordinator(
                 splashBuilder: splashBuilder,
+                signInBuilder: signInBuilder,
                 delegate: delegate
             )
         }
