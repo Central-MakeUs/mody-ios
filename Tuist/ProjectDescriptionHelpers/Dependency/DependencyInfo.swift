@@ -12,6 +12,7 @@ public struct DependencyInfo: @unchecked Sendable {
 
 public enum Dependency {
     case module(Module)
+    case external(ExternalModule)
     case microFeature(MicroFeatureModule) // Interface
     case microFeatureTesting(MicroFeatureModule) // Testing
 }
@@ -42,7 +43,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
     moduleDependencies: [
         .App: [
             .module(.Root),
-            .module(.Main)
+            .module(.Main),
+            .module(.MicroFeature(.Splash)),
+            .module(.MicroFeature(.SignIn)),
+            .module(.MicroFeature(.OnBoarding)),
+            .external(.Swinject)
         ],
         .Root: [
             .microFeature(.Splash),
@@ -56,9 +61,21 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ]
     ],
     microFeatureDependencies: [
-        .Splash: .init(),
-        .SignIn: .init(),
-        .OnBoarding: .init(),
+        .Splash: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
+        .SignIn: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
+        .OnBoarding: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
         .Feed: .init(),
         .Challenge: .init(),
         .MyPage: .init()

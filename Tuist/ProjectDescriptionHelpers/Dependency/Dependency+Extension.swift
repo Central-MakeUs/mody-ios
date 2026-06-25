@@ -28,6 +28,8 @@ extension TargetDependency {
                 target: module.name,
                 path: module.path
             )
+        case .external(let module):
+            return .external(name: module.name)
         case .microFeature(let module):
             return .microFeatureInterface(module)
         case .microFeatureTesting(let module):

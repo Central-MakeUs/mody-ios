@@ -10,6 +10,18 @@ public enum Module: Hashable {
     case Root
     case App
     case MicroFeature(MicroFeatureModule)
+    case External(ExternalModule)
+}
+
+public enum ExternalModule {
+    case ComposableArchitecture
+    case Swinject
+
+    var name: String {
+        switch self {
+        default: "\(self)"
+        }
+    }
 }
 
 public enum MicroFeatureModule {
