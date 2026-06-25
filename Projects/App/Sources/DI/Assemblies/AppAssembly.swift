@@ -9,7 +9,12 @@ import Swinject
 
 struct AppAssembly: Assembly {
     func assemble(container: Container) {
+        assembleFeature(in: container)
         assembleRoot(in: container)
         assembleApp(in: container)
+    }
+    
+    private func assembleFeature(in container: Container) {
+        assembleSplashFeature(in: container)
     }
 }
