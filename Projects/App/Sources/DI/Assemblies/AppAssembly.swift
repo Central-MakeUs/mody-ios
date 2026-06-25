@@ -16,5 +16,6 @@ struct AppAssembly: Assembly {
     
     private func assembleFeature(in container: Container) {
         assembleSplashFeature(in: container)
+        assembleSignInFeature(in: container)
     }
 }
