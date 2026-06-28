@@ -11,6 +11,7 @@ extension Module {
     var name: String {
         switch self {
         case .App: projectEnvironment.targetName
+        case .External(let externalModule): externalModule.name
         case .MicroFeature(let microFeatureModule): microFeatureModule.name
         default: "\(self)"
         }

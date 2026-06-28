@@ -12,6 +12,7 @@ public struct DependencyInfo: @unchecked Sendable {
 
 public enum Dependency {
     case module(Module)
+    case external(ExternalModule)
     case microFeature(MicroFeatureModule) // Interface
     case microFeatureTesting(MicroFeatureModule) // Testing
 }
@@ -42,12 +43,18 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
     moduleDependencies: [
         .App: [
             .module(.Root),
-            .module(.Main)
+            .module(.Main),
+            .module(.MicroFeature(.Splash)),
+            .module(.MicroFeature(.SignIn)),
+            .module(.MicroFeature(.OnBoarding)),
+            .module(.MicroFeature(.SignUpDone)),
+            .external(.Swinject)
         ],
         .Root: [
             .microFeature(.Splash),
             .microFeature(.SignIn),
-            .microFeature(.OnBoarding)
+            .microFeature(.OnBoarding),
+            .microFeature(.SignUpDone)
         ],
         .Main: [
             .microFeature(.Feed),
@@ -56,9 +63,26 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ]
     ],
     microFeatureDependencies: [
-        .Splash: .init(),
-        .SignIn: .init(),
-        .OnBoarding: .init(),
+        .Splash: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
+        .SignIn: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
+        .OnBoarding: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
+        .SignUpDone: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
         .Feed: .init(),
         .Challenge: .init(),
         .MyPage: .init()
