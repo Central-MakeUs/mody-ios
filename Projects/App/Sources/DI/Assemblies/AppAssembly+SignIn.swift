@@ -11,8 +11,18 @@ import SignIn
 
 extension AppAssembly {
     func assembleSignInFeature(in container: Container) {
+        container.register(SignInFeature.self) { (resolver: Resolver, router: SignInRouter) in
+            return SignInFeature { [weak router] route in
+                router?.route(from: route)
+            }
+        }
+        
         container.register(SignInBuildable.self) { resolver in
-            return SignInBuilder()
+            return SignInBuilder(
+                makeSignInFeature: { router in
+                    resolver.resolve(argument: router)
+                }
+            )
         }
     }
 }

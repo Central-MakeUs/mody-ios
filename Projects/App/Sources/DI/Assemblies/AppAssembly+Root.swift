@@ -8,6 +8,8 @@
 import Root
 import SplashInterface
 import SignInInterface
+import OnBoardingInterface
+import SignUpDoneInterface
 import Swinject
 
 extension AppAssembly {
@@ -15,9 +17,14 @@ extension AppAssembly {
         container.register(RootCoordinator.self) { (resolver: Resolver, delegate: RootCoordinatorDelegate) in
             let splashBuilder: SplashBuildable = resolver.resolve()
             let signInBuilder: SignInBuildable = resolver.resolve()
+            let onBoardingBuilder: OnBoardingBuildable = resolver.resolve()
+            let signUpDoneBuilder: SignUpDoneBuildable = resolver.resolve()
+
             return RootCoordinator(
                 splashBuilder: splashBuilder,
                 signInBuilder: signInBuilder,
+                onBoardingBuilder: onBoardingBuilder,
+                signUpDoneBuilder: signUpDoneBuilder,
                 delegate: delegate
             )
         }

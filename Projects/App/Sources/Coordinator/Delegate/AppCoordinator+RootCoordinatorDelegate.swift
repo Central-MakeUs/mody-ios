@@ -11,5 +11,6 @@ import Root
 extension AppCoordinator: RootCoordinatorDelegate {
     func didFinishAuthentication(_ coordinator: RootCoordinator) {
         // TODO: Main 전환
+        print("Main 전환 감지")
     }
 }

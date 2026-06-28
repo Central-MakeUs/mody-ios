@@ -11,8 +11,18 @@ import OnBoarding
 
 extension AppAssembly {
     func assembleOnBoardingFeature(in container: Container) {
+        container.register(OnBoardingFeature.self) { (resolver: Resolver, router: OnBoardingRouter) in
+            return OnBoardingFeature { [weak router] route in
+                router?.route(from: route)
+            }
+        }
+        
         container.register(OnBoardingBuildable.self) { resolver in
-            return OnBoardingBuilder()
+            return OnBoardingBuilder(
+                makeOnBoardingFeature: { router in
+                    resolver.resolve(argument: router)
+                }
+            )
         }
     }
 }
