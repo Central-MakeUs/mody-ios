@@ -12,6 +12,13 @@ public struct OnBoardingView: View {
     var store: StoreOf<OnBoardingFeature>
     
     public var body: some View {
-        Text("OnBoarding!!")
+        VStack(spacing: 0) {
+            Text("OnBoarding!!")
+            Button {
+                store.send(.signUpDoneButtonTapped)
+            } label: {
+                Text("SignUpDone 으로 ㄱㄱ")
+            }
+        }
     }
 }

@@ -8,16 +8,24 @@
 import UIKit
 import SwiftUI
 import OnBoardingInterface
+import ComposableArchitecture
 
 public struct OnBoardingBuilder: OnBoardingBuildable {
-    public init() {}
+    private let makeOnBoardingFeature: (OnBoardingRouter) -> OnBoardingFeature
+
+    public init(
+        makeOnBoardingFeature: @escaping (OnBoardingRouter) -> OnBoardingFeature
+    ) {
+        self.makeOnBoardingFeature = makeOnBoardingFeature
+    }
 
     @MainActor
     public func makeOnBoardingViewController(router: OnBoardingRouter) -> UIViewController {
-        let view = OnBoardingRootView(
+        let view = OnBoardingView(
             store: .init(initialState: .init()) {
-            OnBoardingRootFeature()
-        })
+                makeOnBoardingFeature(router)
+            }
+        )
 
         return UIHostingController(rootView: view)
     }
