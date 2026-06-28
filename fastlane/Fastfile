@@ -1,0 +1,409 @@
+require "base64"
+require "fileutils"
+require "shellwords"
+
+PROJECT_ROOT = File.expand_path("..", __dir__)
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and distribute the app selected by CI/CD tag metadata"
+  lane :cicd do
+    scheme = required_env("CICD_SCHEME")
+    deployment_kind = required_env("CICD_DEPLOYMENT_KIND")
+    distribution_type = required_env("CICD_DISTRIBUTION_TYPE")
+    version = required_env("CICD_VERSION")
+    fallback_build_number = ENV["CICD_BUILD_NUMBER"].to_s
+    info_plist = required_env("CICD_INFO_PLIST")
+
+    output_directory = ENV.fetch("CICD_OUTPUT_DIRECTORY", "build/#{deployment_kind.downcase}")
+    output_name = "#{scheme}-#{version}.ipa"
+    export_method = export_method_for(distribution_type)
+    signing_options = signing_options_for(distribution_type)
+
+    setup_ci if ENV["CI"] && !uses_installed_signing_assets?
+    sync_signing_if_needed(distribution_type)
+    configure_installed_signing!(scheme) if uses_installed_signing_assets?
+    build_number = next_build_number_for(
+      distribution_type: distribution_type,
+      version: version,
+      fallback_build_number: fallback_build_number
+    )
+    configure_info_plist_version!(
+      info_plist: info_plist,
+      version: version,
+      build_number: build_number
+    )
+
+    build_options = {
+      workspace: "Mody.xcworkspace",
+      scheme: scheme,
+      clean: true,
+      export_method: export_method,
+      output_directory: output_directory,
+      output_name: output_name,
+      build_path: "#{output_directory}/archives",
+      archive_path: "#{output_directory}/archives/#{scheme}.xcarchive"
+    }
+    build_options[:xcargs] = signing_options[:archive_xcargs] unless signing_options[:archive_xcargs].empty?
+    build_options[:export_xcargs] = signing_options[:export_xcargs] unless signing_options[:export_xcargs].empty?
+    build_options[:export_options] = signing_options[:export_options] if signing_options[:export_options]
+
+    ipa_path = build_ios_app(build_options)
+
+    UI.message("Built #{scheme} #{version}#{build_number.empty? ? "" : " (#{build_number})"}")
+
+    case distribution_type
+    when "appstore"
+      upload_to_testflight_release(ipa_path)
+    when "firebase"
+      distribute_to_firebase(ipa_path)
+    else
+      UI.user_error!("Unsupported distribution type: #{distribution_type}")
+    end
+  end
+end
+
+def required_env(name)
+  value = ENV[name].to_s
+  UI.user_error!("Missing required environment variable: #{name}") if value.empty?
+  value
+end
+
+def configure_info_plist_version!(info_plist:, version:, build_number:)
+  info_plist_path = File.expand_path(info_plist, PROJECT_ROOT)
+  UI.user_error!("Info.plist does not exist: #{info_plist}") unless File.exist?(info_plist_path)
+
+  UI.message("Configuring #{info_plist} version #{version} (#{build_number})")
+
+  set_plist_value!(info_plist_path, "CFBundleShortVersionString", version)
+  set_plist_value!(info_plist_path, "CFBundleVersion", build_number)
+end
+
+def set_plist_value!(plist_path, key, value)
+  system("/usr/libexec/PlistBuddy", "-c", "Set :#{key} #{value}", plist_path) ||
+    UI.user_error!("Failed to set #{key} in #{plist_path}")
+end
+
+def next_build_number_for(distribution_type:, version:, fallback_build_number:)
+  local_build_number = numeric_build_number(fallback_build_number)
+
+  latest_build_number = case distribution_type
+                        when "appstore"
+                          latest_testflight_uploaded_build_number(version)
+                        when "firebase"
+                          latest_firebase_uploaded_build_number
+                        else
+                          UI.user_error!("Unsupported distribution type: #{distribution_type}")
+                        end
+
+  next_build_number = [latest_build_number, local_build_number].compact.max.to_i + 1
+  UI.message("Resolved next build number: #{next_build_number} (latest uploaded: #{latest_build_number || "none"}, local: #{local_build_number || "none"})")
+  next_build_number.to_s
+end
+
+def numeric_build_number(value)
+  value = value.to_s
+  return nil if value.empty?
+  UI.user_error!("CFBundleVersion must be numeric: #{value}") unless value.match?(/\A[0-9]+\z/)
+
+  value.to_i
+end
+
+def latest_testflight_uploaded_build_number(version)
+  bundle_identifier = required_env("CICD_PROVISIONING_PROFILE_BUNDLE_IDENTIFIER")
+
+  latest_testflight_build_number(
+    api_key: app_store_connect_api_key_options,
+    app_identifier: bundle_identifier,
+    version: version,
+    initial_build_number: 0
+  ).to_i
+rescue => error
+  UI.message("No TestFlight build number resolved for #{version}: #{error.message}")
+  nil
+end
+
+def latest_firebase_uploaded_build_number
+  latest_release = firebase_app_distribution_get_latest_release(
+    app: firebase_app_id_for_current_target,
+    firebase_cli_token: required_env("FIREBASE_TOKEN")
+  )
+
+  numeric_build_number(latest_release[:buildVersion])
+rescue => error
+  UI.message("No Firebase App Distribution build number resolved: #{error.message}")
+  nil
+end
+
+def export_method_for(distribution_type)
+  case distribution_type
+  when "appstore"
+    "app-store"
+  when "firebase"
+    ENV.fetch("CICD_FIREBASE_EXPORT_METHOD", "ad-hoc")
+  else
+    UI.user_error!("Unsupported distribution type: #{distribution_type}")
+  end
+end
+
+def signing_mode
+  ENV.fetch("CICD_SIGNING_MODE", "automatic")
+end
+
+def sync_signing_if_needed(distribution_type)
+  return unless signing_mode == "match"
+  UI.user_error!("MATCH_GIT_URL is required when CICD_SIGNING_MODE=match") if ENV["MATCH_GIT_URL"].to_s.empty?
+
+  match(
+    type: distribution_type == "appstore" ? "appstore" : ENV.fetch("MATCH_FIREBASE_TYPE", "adhoc"),
+    readonly: true
+  )
+end
+
+def signing_options_for(_distribution_type)
+  case signing_mode
+  when "automatic"
+    automatic_signing_options
+  when "manual"
+    installed_signing_options(
+      team_id: required_env("APPLE_TEAM_ID"),
+      profile_name: required_env("CICD_PROVISIONING_PROFILE_SPECIFIER"),
+      bundle_identifier: required_env("CICD_PROVISIONING_PROFILE_BUNDLE_IDENTIFIER")
+    )
+  when "match"
+    {
+      archive_xcargs: "",
+      export_xcargs: "",
+      export_options: nil
+    }
+  else
+    UI.user_error!("Unsupported signing mode: #{signing_mode}")
+  end
+end
+
+def automatic_signing_options
+  team_id = required_env("APPLE_TEAM_ID")
+
+  key_id = required_env("APP_STORE_CONNECT_API_KEY_KEY_ID")
+  issuer_id = required_env("APP_STORE_CONNECT_API_KEY_ISSUER_ID")
+  key_path = write_app_store_connect_api_key_file(key_id)
+
+  {
+    archive_xcargs: [
+      "-allowProvisioningUpdates",
+      "-authenticationKeyPath #{Shellwords.escape(key_path)}",
+      "-authenticationKeyID #{Shellwords.escape(key_id)}",
+      "-authenticationKeyIssuerID #{Shellwords.escape(issuer_id)}",
+      "DEVELOPMENT_TEAM=#{Shellwords.escape(team_id)}",
+      "CODE_SIGN_STYLE=Automatic"
+    ].join(" "),
+    export_xcargs: "",
+    export_options: nil
+  }
+end
+
+def uses_installed_signing_assets?
+  signing_mode == "manual"
+end
+
+def installed_signing_options(team_id:, profile_name:, bundle_identifier:)
+  {
+    archive_xcargs: [
+      "DEVELOPMENT_TEAM=#{Shellwords.escape(team_id)}"
+    ].join(" "),
+    export_xcargs: "",
+    export_options: {
+      signingStyle: "manual",
+      teamID: team_id,
+      provisioningProfiles: {
+        bundle_identifier => profile_name
+      }
+    }
+  }
+end
+
+def configure_installed_signing!(scheme)
+  team_id = required_env("APPLE_TEAM_ID")
+  profile_name = required_env("CICD_PROVISIONING_PROFILE_SPECIFIER")
+  project_path = xcodeproj_path_for_scheme(scheme)
+  target_name = build_target_name_for_scheme(scheme)
+
+  UI.message("Configuring #{target_name} for installed signing assets")
+
+  update_app_target_signing_settings(
+    project_path: project_path,
+    product_name: target_name,
+    team_id: team_id,
+    profile_name: profile_name
+  )
+end
+
+def xcodeproj_path_for_scheme(scheme)
+  scheme_glob = File.join(PROJECT_ROOT, "Projects/**/*.xcodeproj/xcshareddata/xcschemes/#{scheme}.xcscheme")
+  scheme_path = Dir.glob(scheme_glob).first
+  UI.user_error!("Shared scheme does not exist: #{scheme}") if scheme_path.to_s.empty?
+
+  scheme_path.sub(%r{/xcshareddata/xcschemes/#{Regexp.escape(scheme)}\.xcscheme\z}, "")
+end
+
+def xcscheme_path_for_scheme(scheme)
+  scheme_glob = File.join(PROJECT_ROOT, "Projects/**/*.xcodeproj/xcshareddata/xcschemes/#{scheme}.xcscheme")
+  scheme_path = Dir.glob(scheme_glob).first
+  UI.user_error!("Shared scheme does not exist: #{scheme}") if scheme_path.to_s.empty?
+
+  scheme_path
+end
+
+def build_target_name_for_scheme(scheme)
+  scheme_path = xcscheme_path_for_scheme(scheme)
+  content = File.read(scheme_path)
+  target_name = content[/BlueprintName = "([^"]+)"/, 1]
+  UI.user_error!("Could not resolve build target for scheme: #{scheme}") if target_name.to_s.empty?
+
+  target_name
+end
+
+def update_app_target_signing_settings(project_path:, product_name:, team_id:, profile_name:)
+  pbxproj_path = File.join(project_path, "project.pbxproj")
+  UI.user_error!("Xcode project file does not exist: #{pbxproj_path}") unless File.exist?(pbxproj_path)
+
+  content = File.read(pbxproj_path)
+  changed = false
+
+  content = content.gsub(/(\n\t\t[0-9A-F]+ \/\* .*? \*\/ = \{\n\t\t\tisa = XCBuildConfiguration;\n(?:.*?\n)*?\t\t\tbuildSettings = \{\n)(.*?)(\n\t\t\t\};\n\t\t\tname = .*?;\n\t\t\};)/m) do
+    prefix = Regexp.last_match(1)
+    settings = Regexp.last_match(2)
+    suffix = Regexp.last_match(3)
+
+    unless app_product_settings?(settings, product_name)
+      "#{prefix}#{settings}#{suffix}"
+    else
+      changed = true
+      "#{prefix}#{upsert_signing_settings(settings, team_id, profile_name)}#{suffix}"
+    end
+  end
+
+  UI.user_error!("Could not find app target build settings for product: #{product_name}") unless changed
+
+  File.write(pbxproj_path, content)
+  verify_app_target_signing_settings!(pbxproj_path, product_name, profile_name)
+end
+
+def app_product_settings?(settings, product_name)
+  explicit_product_name = [
+    "PRODUCT_NAME = #{product_name};",
+    "PRODUCT_NAME = \"#{product_name}\";"
+  ].any? { |line| settings.include?(line) }
+  target_name_product = settings.include?("PRODUCT_NAME = \"$(TARGET_NAME)\";") &&
+    settings.include?("BUNDLE_NAME = #{product_name};")
+
+  explicit_product_name || target_name_product
+end
+
+def upsert_signing_settings(settings, team_id, profile_name)
+  setting_indent = "\t\t\t\t"
+  signing_settings = {
+    "CODE_SIGN_IDENTITY" => "\"Apple Distribution\"",
+    "CODE_SIGN_STYLE" => "Manual",
+    "DEVELOPMENT_TEAM" => team_id,
+    "PROVISIONING_PROFILE_SPECIFIER" => "\"#{profile_name}\""
+  }
+
+  signing_settings.each do |key, value|
+    if settings.match?(/^\t+#{Regexp.escape(key)} = .*;$/)
+      settings = settings.gsub(/^\t+#{Regexp.escape(key)} = .*;$/, "#{setting_indent}#{key} = #{value};")
+    else
+      settings = "#{setting_indent}#{key} = #{value};\n#{settings}"
+    end
+  end
+
+  settings
+end
+
+def verify_app_target_signing_settings!(pbxproj_path, product_name, profile_name)
+  content = File.read(pbxproj_path)
+  matching_blocks = content.scan(/buildSettings = \{\n(.*?)\n\t\t\t\};/m).flatten.select do |settings|
+    app_product_settings?(settings, product_name)
+  end
+
+  UI.user_error!("Could not verify app target build settings for product: #{product_name}") if matching_blocks.empty?
+
+  invalid_block = matching_blocks.find do |settings|
+    !settings.include?("CODE_SIGN_STYLE = Manual;") ||
+      !settings.include?("CODE_SIGN_IDENTITY = \"Apple Distribution\";") ||
+      !settings.include?("PROVISIONING_PROFILE_SPECIFIER = \"#{profile_name}\";") ||
+      settings.include?("CODE_SIGN_IDENTITY = \"iPhone Developer\";")
+  end
+
+  UI.user_error!("Failed to apply manual demo signing settings for #{product_name}") if invalid_block
+end
+
+def upload_to_testflight_release(ipa_path)
+  api_key = app_store_connect_api_key_options
+
+  upload_to_testflight(
+    api_key: api_key,
+    ipa: ipa_path,
+    skip_waiting_for_build_processing: true
+  )
+end
+
+def app_store_connect_api_key_options
+  app_store_connect_api_key(
+    key_id: required_env("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+    issuer_id: required_env("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+    key_content: required_env("APP_STORE_CONNECT_API_KEY_KEY"),
+    is_key_content_base64: app_store_connect_key_base64?,
+    in_house: false
+  )
+end
+
+def app_store_connect_key_base64?
+  value = ENV["APP_STORE_CONNECT_API_KEY_IS_BASE64"].to_s
+  value.empty? || value == "true"
+end
+
+def write_app_store_connect_api_key_file(key_id)
+  key_content = required_env("APP_STORE_CONNECT_API_KEY_KEY")
+  key_content = Base64.decode64(key_content) if app_store_connect_key_base64?
+  output_directory = ENV.fetch("RUNNER_TEMP", "build/app-store-connect")
+  key_path = File.join(output_directory, "AuthKey_#{key_id}.p8")
+
+  FileUtils.mkdir_p(output_directory)
+  File.write(key_path, key_content)
+  key_path
+end
+
+def distribute_to_firebase(ipa_path)
+  firebase_app_id = firebase_app_id_for_current_target
+  firebase_app_id = ENV["FIREBASE_GOOGLE_APP_ID_#{ENV.fetch("CICD_ENVIRONMENT", "DEV")}"].to_s if firebase_app_id.empty?
+  UI.user_error!("Missing Firebase App Distribution app id for #{ENV["CICD_SCHEME"]}") if firebase_app_id.empty?
+  UI.user_error!("Missing Firebase App Distribution auth. Set FIREBASE_TOKEN.") if ENV["FIREBASE_TOKEN"].to_s.empty?
+
+  firebase_options = {
+    app: firebase_app_id,
+    ipa_path: ipa_path,
+    release_notes: ENV.fetch("FIREBASE_RELEASE_NOTES", "CI/CD #{ENV["CICD_BRANCH"]}")
+  }
+  firebase_options[:groups] = ENV["FIREBASE_DISTRIBUTION_GROUPS"] unless ENV["FIREBASE_DISTRIBUTION_GROUPS"].to_s.empty?
+  firebase_options[:firebase_cli_token] = ENV["FIREBASE_TOKEN"]
+
+  firebase_app_distribution(firebase_options)
+end
+
+def firebase_app_id_for_current_target
+  scheme = ENV["CICD_SCHEME"].to_s.upcase.gsub(/[^A-Z0-9]/, "_")
+  kind = ENV["CICD_DEPLOYMENT_KIND"].to_s.upcase.gsub(/[^A-Z0-9]/, "_")
+
+  [
+    "FIREBASE_APP_ID_#{scheme}",
+    "FIREBASE_APP_ID_#{kind}",
+    "FIREBASE_APP_ID"
+  ].each do |key|
+    value = ENV[key].to_s
+    return value unless value.empty?
+  end
+
+  ""
+end
