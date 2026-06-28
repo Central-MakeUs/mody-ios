@@ -44,3 +44,22 @@ jobs:
           API_BASE_URL_DEV: ${{ secrets.API_BASE_URL_DEV }}
           API_BASE_URL_PROD: ${{ secrets.API_BASE_URL_PROD }}
         run: ci_scripts/github/pre-build/setup_xcconfig.sh
+
+      - name: Setup Firebase
+        id: setup-firebase
+        if: steps.setup-xcconfig.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          FIREBASE_API_KEY_DEV: ${{ secrets.FIREBASE_API_KEY_DEV }}
+          FIREBASE_API_KEY_PROD: ${{ secrets.FIREBASE_API_KEY_PROD }}
+          FIREBASE_GOOGLE_APP_ID_DEV: ${{ secrets.FIREBASE_GOOGLE_APP_ID_DEV }}
+          FIREBASE_GOOGLE_APP_ID_PROD: ${{ secrets.FIREBASE_GOOGLE_APP_ID_PROD }}
+          FIREBASE_GCM_SENDER_ID_DEV: ${{ secrets.FIREBASE_GCM_SENDER_ID_DEV }}
+          FIREBASE_GCM_SENDER_ID_PROD: ${{ secrets.FIREBASE_GCM_SENDER_ID_PROD }}
+          FIREBASE_PROJECT_ID_DEV: ${{ secrets.FIREBASE_PROJECT_ID_DEV }}
+          FIREBASE_PROJECT_ID_PROD: ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
+          FIREBASE_STORAGE_BUCKET_DEV: ${{ secrets.FIREBASE_STORAGE_BUCKET_DEV }}
+          FIREBASE_STORAGE_BUCKET_PROD: ${{ secrets.FIREBASE_STORAGE_BUCKET_PROD }}
+          FIREBASE_BUNDLE_ID_DEV: ${{ secrets.FIREBASE_BUNDLE_ID_DEV }}
+          FIREBASE_BUNDLE_ID_PROD: ${{ secrets.FIREBASE_BUNDLE_ID_PROD }}
+        run: ci_scripts/github/pre-build/setup_firebase.sh
