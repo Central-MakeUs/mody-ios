@@ -78,3 +78,16 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: ci_scripts/github/distribution/setup_ruby.sh
+
+      - name: Install iOS signing assets
+        id: install-ios-signing-assets
+        if: steps.setup-ruby.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          IOS_SIGNING_KEYCHAIN_PASSWORD: ${{ secrets.IOS_SIGNING_KEYCHAIN_PASSWORD }}
+          DEMO_IOS_ADHOC_PROFILE_BASE64: ${{ secrets.DEMO_IOS_ADHOC_PROFILE_BASE64 }}
+          DEV_IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.DEV_IOS_APPSTORE_PROFILE_BASE64 }}
+          PROD_IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.PROD_IOS_APPSTORE_PROFILE_BASE64 }}
+        run: ci_scripts/github/distribution/install_ios_signing_assets.sh
