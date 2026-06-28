@@ -63,3 +63,11 @@ jobs:
           FIREBASE_BUNDLE_ID_DEV: ${{ secrets.FIREBASE_BUNDLE_ID_DEV }}
           FIREBASE_BUNDLE_ID_PROD: ${{ secrets.FIREBASE_BUNDLE_ID_PROD }}
         run: ci_scripts/github/pre-build/setup_firebase.sh
+
+      - name: Setup Tuist
+        id: setup-tuist
+        if: steps.setup-firebase.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ci_scripts/github/pre-build/setup_tuist.sh
