@@ -6,11 +6,33 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 public struct SignInView: View {
-    public init() {}
+    private let store: StoreOf<SignInFeature>
+    
+    public init(store: StoreOf<SignInFeature>) {
+        self.store = store
+    }
     
     public var body: some View {
-        Text("Hello, SignInView~")
+        VStack(spacing: 0) {
+            Text("Hello, SignInView~")
+            Button {
+                store.send(.mainButtonTapped)
+            } label: {
+                Text("Main 으로 가기")
+                    .padding()
+                    .background(.brown)
+            }
+            
+            Button {
+                store.send(.onBoardingButtonTapped)
+            } label: {
+                Text("OnBoarding 으로 가기")
+                    .padding()
+                    .background(.cyan)
+            }
+        }
     }
 }

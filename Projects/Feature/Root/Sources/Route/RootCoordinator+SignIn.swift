@@ -13,7 +13,7 @@ extension RootCoordinator: SignInRouter {
         case .routeToMain:
             delegate?.didFinishAuthentication(self)
         case .routeToOnBoarding:
-            break
+            showOnBoarding()
         }
     }
 }

@@ -8,46 +8,37 @@
 import UIKit
 import SplashInterface
 import SignInInterface
+import OnBoardingInterface
+import SignUpDoneInterface
 
 public final class RootCoordinator {
     public let navigationController: UINavigationController
     public weak var delegate: RootCoordinatorDelegate?
     
-    private let splashBuilder: SplashBuildable
-    private let signInBuilder: SignInBuildable
-    
+    let splashBuilder: SplashBuildable
+    let signInBuilder: SignInBuildable
+    let onBoardingBuilder: OnBoardingBuildable
+    let signUpDoneBuilder: SignUpDoneBuildable
+
     public init(
         navigationController: UINavigationController = UINavigationController(), //SwipeBackNavigationController(),
         splashBuilder: SplashBuildable,
         signInBuilder: SignInBuildable,
+        onBoardingBuilder: OnBoardingBuildable,
+        signUpDoneBuilder: SignUpDoneBuildable,
         delegate: RootCoordinatorDelegate? = nil
     ) {
         self.navigationController = navigationController
         navigationController.setNavigationBarHidden(true, animated: false)
         self.splashBuilder = splashBuilder
         self.signInBuilder = signInBuilder
+        self.onBoardingBuilder = onBoardingBuilder
+        self.signUpDoneBuilder = signUpDoneBuilder
         self.delegate = delegate
     }
     
     @MainActor
     public func start() {
         showSplash()
-    }
-}
-
-@MainActor
-extension RootCoordinator {
-    func setRoot(_ viewController: UIViewController, animated: Bool) {
-        navigationController.setViewControllers([viewController], animated: animated)
-    }
-    
-    func showSplash() {
-        let viewController = splashBuilder.makeSplashViewController(router: self)
-        setRoot(viewController, animated: false)
-    }
-    
-    func showSignIn() {
-        let viewController = signInBuilder.makeSignInViewController(router: self)
-        setRoot(viewController, animated: false)
     }
 }

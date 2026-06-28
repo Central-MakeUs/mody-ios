@@ -6,22 +6,38 @@
 //
 
 import ComposableArchitecture
+import SignInInterface
 
 @Reducer
 public struct SignInFeature {
+    private let router: @MainActor (SignInRoute) -> Void
+    
+    public init(router: @escaping @MainActor (SignInRoute) -> Void) {
+        self.router = router
+    }
+
     @ObservableState
     public struct State: Equatable {
         public init() {}
     }
     
     public enum Action {
+        case mainButtonTapped
+        case onBoardingButtonTapped
     }
     
-    public init() {}
     public var body: some ReducerOf<Self> {
-                
         Reduce { state, action in
-            return .none
+            switch action {
+            case .mainButtonTapped:
+                return .run { [router] _ in
+                    await router(.routeToMain)
+                }
+            case .onBoardingButtonTapped:
+                return .run { [router] _ in
+                    await router(.routeToOnBoarding)
+                }
+            }
         }
     }
 }

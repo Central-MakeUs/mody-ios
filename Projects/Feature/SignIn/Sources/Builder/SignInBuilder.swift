@@ -8,13 +8,23 @@
 import UIKit
 import SwiftUI
 import SignInInterface
+import ComposableArchitecture
 
 public struct SignInBuilder: SignInBuildable {
-    public init() {}
+    private let makeSignInFeature: (SignInRouter) -> SignInFeature
+
+    public init(
+        makeSignInFeature: @escaping (SignInRouter) -> SignInFeature
+    ) {
+        self.makeSignInFeature = makeSignInFeature
+    }
 
     @MainActor
     public func makeSignInViewController(router: SignInRouter) -> UIViewController {
-        let view = SignInView()
+        let store: StoreOf<SignInFeature> = .init(initialState: SignInFeature.State()) {
+            makeSignInFeature(router)
+        }
+        let view = SignInView(store: store)
 
         return UIHostingController(rootView: view)
     }
