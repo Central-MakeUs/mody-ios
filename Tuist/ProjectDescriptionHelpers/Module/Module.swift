@@ -25,6 +25,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case SignUpDone
     case MyPage
     case Challenge
     case Feed
@@ -57,6 +58,7 @@ public enum MicroFeatureModule {
         case .Feed: "Projects/Feature/Feed"
         case .Challenge: "Projects/Feature/Challenge"
         case .MyPage: "Projects/Feature/MyPage"
+        case .SignUpDone: "Projects/Feature/SignUpDone"
         }
     }
 }

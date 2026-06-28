@@ -47,12 +47,14 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.Splash)),
             .module(.MicroFeature(.SignIn)),
             .module(.MicroFeature(.OnBoarding)),
+            .module(.MicroFeature(.SignUpDone)),
             .external(.Swinject)
         ],
         .Root: [
             .microFeature(.Splash),
             .microFeature(.SignIn),
-            .microFeature(.OnBoarding)
+            .microFeature(.OnBoarding),
+            .microFeature(.SignUpDone)
         ],
         .Main: [
             .microFeature(.Feed),
@@ -72,6 +74,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .OnBoarding: .init(
+            implementation: [
+                .external(.ComposableArchitecture)
+            ]
+        ),
+        .SignUpDone: .init(
             implementation: [
                 .external(.ComposableArchitecture)
             ]
