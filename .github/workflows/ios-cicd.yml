@@ -1,0 +1,46 @@
+name: iOS CI/CD
+
+on:
+  push:
+    tags:
+      - "dev/**"
+      - "prod/**"
+      - "demo/**"
+      - "design/**"
+
+jobs:
+  cicd-start:
+    name: CI/CD Start
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate deployment tag
+        id: validate-tag
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: ci_scripts/github/pre-build/validate_deployment_tag.sh
+
+      - name: Define CI/CD environment
+        id: define-cicd-environment
+        run: ci_scripts/github/pre-build/define_cicd_environment.sh
+
+      - name: Send Slack start notification
+        if: steps.define-cicd-environment.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          ci_scripts/github/webhook/send_slack.sh \
+            --status started \
+            --message "CI/CD started" \
+            --step workflow-start
+
+      - name: Setup XCConfig
+        id: setup-xcconfig
+        if: steps.define-cicd-environment.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          API_BASE_URL_DEV: ${{ secrets.API_BASE_URL_DEV }}
+          API_BASE_URL_PROD: ${{ secrets.API_BASE_URL_PROD }}
+        run: ci_scripts/github/pre-build/setup_xcconfig.sh
