@@ -71,3 +71,10 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ github.token }}
         run: ci_scripts/github/pre-build/setup_tuist.sh
+
+      - name: Setup Ruby
+        id: setup-ruby
+        if: steps.setup-tuist.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: ci_scripts/github/distribution/setup_ruby.sh
