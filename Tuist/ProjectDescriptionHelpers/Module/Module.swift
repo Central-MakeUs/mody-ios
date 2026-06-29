@@ -25,6 +25,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreKeyChainStorage
     case SignUpDone
     case MyPage
     case Challenge
@@ -59,6 +60,7 @@ public enum MicroFeatureModule {
         case .Challenge: "Projects/Feature/Challenge"
         case .MyPage: "Projects/Feature/MyPage"
         case .SignUpDone: "Projects/Feature/SignUpDone"
+        case .CoreKeyChainStorage: "Projects/Core/CoreKeyChainStorage"
         }
     }
 }
