@@ -6,6 +6,7 @@
 //
 
 public enum Module: Hashable {
+    case DesignSystem
     case Main
     case Root
     case App
