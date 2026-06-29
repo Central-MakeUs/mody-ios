@@ -120,6 +120,7 @@ extension Module {
         case .MicroFeature(let module): .relativeToRoot(module.path)
         case .Root: .relativeToRoot("Projects/Feature/Root")
         case .Main: .relativeToRoot("Projects/Feature/Main")
+        case .Base: .relativeToRoot("Projects/Feature/Base")
         default: .relativeToRoot("Projects/\(name)")
         }
     }

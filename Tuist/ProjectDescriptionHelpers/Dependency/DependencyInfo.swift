@@ -49,44 +49,64 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.OnBoarding)),
             .module(.MicroFeature(.SignUpDone)),
             .external(.Swinject),
-            .module(.MicroFeature(.CoreKeyChainStorage)),
-            .module(.DesignSystem) // TODO: 나중에 Main, Base, Root쪽으로 내리기
+            .module(.MicroFeature(.CoreKeyChainStorage))
         ],
         .Root: [
             .microFeature(.Splash),
             .microFeature(.SignIn),
             .microFeature(.OnBoarding),
-            .microFeature(.SignUpDone)
+            .microFeature(.SignUpDone),
+            .module(.Base)
         ],
         .Main: [
             .microFeature(.Feed),
             .microFeature(.Challenge),
-            .microFeature(.MyPage)
+            .microFeature(.MyPage),
+            .module(.Base)
+        ],
+        .Base: [
+            .module(.DesignSystem)
         ]
     ],
     microFeatureDependencies: [
         .Splash: .init(
             implementation: [
-                .external(.ComposableArchitecture)
+                .external(.ComposableArchitecture),
+                .module(.Base)
             ]
         ),
         .SignIn: .init(
             implementation: [
-                .external(.ComposableArchitecture)
+                .external(.ComposableArchitecture),
+                .module(.Base)
             ]
         ),
         .OnBoarding: .init(
             implementation: [
-                .external(.ComposableArchitecture)
+                .external(.ComposableArchitecture),
+                .module(.Base)
             ]
         ),
         .SignUpDone: .init(
             implementation: [
-                .external(.ComposableArchitecture)
+                .external(.ComposableArchitecture),
+                .module(.Base)
             ]
         ),
-        .Feed: .init(),
-        .Challenge: .init(),
-        .MyPage: .init()
+        .Feed: .init(
+            implementation: [
+                .module(.Base)
+            ]
+        ),
+        .Challenge: .init(
+            implementation: [
+                .module(.Base)
+            ]
+        ),
+        .MyPage: .init(
+            implementation: [
+                .module(.Base)
+            ]
+        )
     ]
 )

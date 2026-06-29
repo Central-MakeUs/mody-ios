@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Base
 import SplashInterface
 import SignInInterface
 import OnBoardingInterface
@@ -21,7 +22,7 @@ public final class RootCoordinator {
     let signUpDoneBuilder: SignUpDoneBuildable
 
     public init(
-        navigationController: UINavigationController = UINavigationController(), //SwipeBackNavigationController(),
+        navigationController: UINavigationController = SwipeBackNavigationController(),
         splashBuilder: SplashBuildable,
         signInBuilder: SignInBuildable,
         onBoardingBuilder: OnBoardingBuildable,
