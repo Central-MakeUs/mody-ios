@@ -49,7 +49,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.OnBoarding)),
             .module(.MicroFeature(.SignUpDone)),
             .external(.Swinject),
-            .module(.MicroFeature(.CoreKeyChainStorage))
+            .module(.MicroFeature(.CoreKeyChainStorage)),
+            .module(.DesignSystem) // TODO: 나중에 Main, Base, Root쪽으로 내리기
         ],
         .Root: [
             .microFeature(.Splash),

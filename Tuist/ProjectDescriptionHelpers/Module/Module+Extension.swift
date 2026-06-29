@@ -21,6 +21,8 @@ extension Module {
         switch self {
         case .App:
             return [.target(moduleType: self)]
+        case .DesignSystem:
+            return [.target(moduleType: self), .demo(moduleType: self)]
         case .MicroFeature(let module):
             var targets: [Target] = hasDemo ? [.demo(moduleType: self)] : []
             
@@ -40,13 +42,14 @@ extension Module {
     var product: Product {
         switch self {
         case .App: .app
+        case .DesignSystem: .staticFramework
         default: .staticLibrary
         }
     }
     
     var hasResources: Bool {
         switch self {
-        case .App:
+        case .App, .DesignSystem:
             true
         default:
             false
@@ -57,6 +60,10 @@ extension Module {
         switch self {
         case .App:
             .file(path: "Support/Info.plist")
+        case .DesignSystem:
+            .extendingDefault(with: [
+                "UIAppFonts": .array(Self.designSystemFontFiles)
+            ])
         default:
             .default
         }
@@ -66,6 +73,8 @@ extension Module {
         switch self {
         case .App:
             .scheme(name: projectEnvironment.appName, environments: .all)
+        case .DesignSystem:
+            [.implements(targetName: "\(self.name)Demo")]
         case .MicroFeature(let module):
             hasDemo ? [.implements(targetName: module.demoName)] : []
         default:
@@ -82,6 +91,7 @@ extension Module {
     
     var resourceSynthesizers: [ResourceSynthesizer] {
         switch self {
+        case .DesignSystem: [.assets(), .fonts()]
         default: []
         }
     }
@@ -113,4 +123,15 @@ extension Module {
         default: .relativeToRoot("Projects/\(name)")
         }
     }
+}
+
+private extension Module {
+    static let designSystemFontFiles: [Plist.Value] = [
+        .string("Fonts/Pretendard-Bold.otf"),
+        .string("Fonts/Pretendard-Light.otf"),
+        .string("Fonts/Pretendard-Medium.otf"),
+        .string("Fonts/Pretendard-Regular.otf"),
+        .string("Fonts/Pretendard-SemiBold.otf"),
+        .string("Fonts/Pretendard-Thin.otf")
+    ]
 }
