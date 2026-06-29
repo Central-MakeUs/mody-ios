@@ -1,6 +1,6 @@
 ### 📑 이슈 번호
 
-- close #
+- [MODY-xxx](https://jagsim.atlassian.net/browse/MODY-xxx)
 
 ### ✨️ 작업 내용
 
