@@ -15,6 +15,9 @@ extension AppAssembly {
                 window: window,
                 makeRootCoordinator: { delegate in
                     resolver.resolve(argument: delegate)
+                },
+                makeMainCoordinator: { delegate in
+                    resolver.resolve(argument: delegate)
                 }
             )
         }

@@ -11,6 +11,7 @@ struct AppAssembly: Assembly {
     func assemble(container: Container) {
         assembleFeature(in: container)
         assembleRoot(in: container)
+        assembleMain(in: container)
         assembleApp(in: container)
     }
     
@@ -19,5 +20,8 @@ struct AppAssembly: Assembly {
         assembleSignInFeature(in: container)
         assembleOnBoardingFeature(in: container)
         assembleSignUpDoneFeature(in: container)
+        assembleFeedReactor(in: container)
+        assembleChallengeFeature(in: container)
+        assembleMyPageFeature(in: container)
     }
 }
