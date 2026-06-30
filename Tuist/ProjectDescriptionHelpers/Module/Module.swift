@@ -18,6 +18,7 @@ public enum Module: Hashable {
 public enum ExternalModule {
     case ComposableArchitecture
     case Swinject
+    case Alamofire
 
     var name: String {
         switch self {
@@ -27,6 +28,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreNetwork
     case CoreKeyChainStorage
     case SignUpDone
     case MyPage
@@ -63,6 +65,7 @@ public enum MicroFeatureModule {
         case .MyPage: "Projects/Feature/MyPage"
         case .SignUpDone: "Projects/Feature/SignUpDone"
         case .CoreKeyChainStorage: "Projects/Core/CoreKeyChainStorage"
+        case .CoreNetwork: "Projects/Core/CoreNetwork"
         }
     }
 }
