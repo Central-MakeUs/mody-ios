@@ -48,8 +48,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.SignIn)),
             .module(.MicroFeature(.OnBoarding)),
             .module(.MicroFeature(.SignUpDone)),
+            .microFeature(.CoreNetwork),
             .external(.Swinject),
-            .module(.MicroFeature(.CoreKeyChainStorage))
+            .module(.MicroFeature(.CoreKeyChainStorage)),
+            .module(.MicroFeature(.CoreNetwork))
         ],
         .Root: [
             .microFeature(.Splash),
@@ -72,7 +74,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .Splash: .init(
             implementation: [
                 .external(.ComposableArchitecture),
-                .module(.Base)
+                .module(.Base),
+                .microFeature(.CoreNetwork)
             ]
         ),
         .SignIn: .init(
@@ -106,6 +109,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .MyPage: .init(
             implementation: [
                 .module(.Base)
+            ]
+        ),
+        .CoreNetwork: .init(
+            implementation: [
+                .external(.Alamofire)
             ]
         )
     ]
