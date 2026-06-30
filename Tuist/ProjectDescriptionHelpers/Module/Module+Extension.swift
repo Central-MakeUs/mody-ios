@@ -91,7 +91,7 @@ extension Module {
     
     var resourceSynthesizers: [ResourceSynthesizer] {
         switch self {
-        case .DesignSystem: [.assets(), .fonts()]
+        case .DesignSystem: [.assets(), .fonts(), .colors]
         default: []
         }
     }
@@ -135,4 +135,8 @@ private extension Module {
         .string("Fonts/Pretendard-SemiBold.otf"),
         .string("Fonts/Pretendard-Thin.otf")
     ]
+}
+
+private extension ResourceSynthesizer {
+    static let colors: Self = .custom(name: "Colors", parser: .assets, extensions: ["xcassets"])
 }
