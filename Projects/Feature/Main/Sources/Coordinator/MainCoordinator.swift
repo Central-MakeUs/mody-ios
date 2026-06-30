@@ -43,10 +43,13 @@ public final class MainCoordinator {
         let feedViewController = feedBuilder.makeFeedViewController(router: self)
         let myPageViewController = myPageBuilder.makeMyPageViewController(router: self)
 
-        tabBarController.setTabs([
-            MainTabRoot(tab: .dashboard, viewController: feedViewController),
-            MainTabRoot(tab: .myPage, viewController: myPageViewController)
-        ], animated: false)
+        let viewControllers = [feedViewController, myPageViewController]
+        
+        tabBarController.setTabs(
+            tabs: [.dashboard, .myPage],
+            viewControllers: viewControllers,
+            animated: false
+        )
 
         navigationController.setViewControllers([tabBarController], animated: false)
     }

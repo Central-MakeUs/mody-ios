@@ -12,16 +12,6 @@ public enum MainTab: Int, CaseIterable {
     case myPage = 1
 }
 
-public struct MainTabRoot {
-    let tab: MainTab
-    let viewController: UIViewController
-
-    public init(tab: MainTab, viewController: UIViewController) {
-        self.tab = tab
-        self.viewController = viewController
-    }
-}
-
 extension MainTab {
     var title: String {
         switch self {

@@ -13,19 +13,37 @@ final class CustomTabBarView: UIView {
 
     private let tabs: [MainTab]
     private var itemViews: [CustomTabBarItemView] = []
-    private let dividerView = UIView()
 
     init(tabs: [MainTab]) {
         self.tabs = tabs
         super.init(frame: .zero)
-        configureLayout()
+        setupUI()
+        setupLayout()
         updateSelection(index: 0)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    private let dividerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.red
+        
+        return view
+    }()
+    
+    private let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.distribution = .fillEqually
+        
+        return stackView
+    }()
+}
 
+extension CustomTabBarView {
     func updateSelection(index: Int) {
         itemViews.enumerated().forEach { itemIndex, itemView in
             itemView.configure(
@@ -37,16 +55,11 @@ final class CustomTabBarView: UIView {
 }
 
 private extension CustomTabBarView {
-    func configureLayout() {
+    func setupUI() {
         backgroundColor = UIColor.white
-
-        dividerView.backgroundColor = UIColor.red
-
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.alignment = .fill
-        stackView.distribution = .fillEqually
-
+    }
+    
+    func setupLayout() {
         addSubview(dividerView)
         addSubview(stackView)
 

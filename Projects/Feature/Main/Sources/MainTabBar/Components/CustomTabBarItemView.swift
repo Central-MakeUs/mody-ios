@@ -16,7 +16,8 @@ final class CustomTabBarItemView: UIControl {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        configureLayout()
+        setupUI()
+        setupLayout()
         addTarget(self, action: #selector(didTap), for: .touchUpInside)
     }
 
@@ -24,6 +25,12 @@ final class CustomTabBarItemView: UIControl {
         fatalError("init(coder:) has not been implemented")
     }
 
+    @objc private func didTap() {
+        onTap?()
+    }
+}
+
+extension CustomTabBarItemView {
     func configure(tab: MainTab, isSelected: Bool) {
         let color = isSelected ? UIColor.red : UIColor.black
         let image = isSelected ? tab.selectedImage : tab.normalImage
@@ -34,14 +41,18 @@ final class CustomTabBarItemView: UIControl {
         titleLabel.text = tab.title
         titleLabel.textColor = color
     }
+}
 
-    private func configureLayout() {
+private extension CustomTabBarItemView {
+    func setupUI() {
         iconImageView.backgroundColor = .clear
         iconImageView.contentMode = .scaleAspectFit
 
 //        titleLabel.font =
         titleLabel.textAlignment = .center
-
+    }
+    
+    func setupLayout() {
         addSubview(iconImageView)
         addSubview(titleLabel)
 
@@ -57,9 +68,5 @@ final class CustomTabBarItemView: UIControl {
             $0.leading.greaterThanOrEqualToSuperview().offset(MainTabBarConstants.itemHorizontalInset)
             $0.trailing.lessThanOrEqualToSuperview().offset(-MainTabBarConstants.itemHorizontalInset)
         }
-    }
-
-    @objc private func didTap() {
-        onTap?()
     }
 }

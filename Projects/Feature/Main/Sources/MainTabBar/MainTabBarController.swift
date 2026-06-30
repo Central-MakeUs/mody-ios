@@ -30,10 +30,13 @@ public final class MainTabBarController: UITabBarController {
 }
 
 public extension MainTabBarController {
-    func setTabs(_ tabs: [MainTabRoot], animated: Bool) {
-        let viewControllers = tabs.map(\.viewController)
+    func setTabs(
+        tabs: [MainTab],
+        viewControllers: [UIViewController],
+        animated: Bool
+    ) {
         setViewControllers(viewControllers, animated: animated)
-        configureCustomTabBar(tabs: tabs.map(\.tab))
+        configureCustomTabBar(tabs: tabs)
     }
 }
 
