@@ -11,8 +11,20 @@ import UIKit
 extension AppCoordinator {
     @MainActor
     func showRoot(animated: Bool) {
+        mainCoordinator = nil
+
         let coordinator = makeRootCoordinator(self)
         rootCoordinator = coordinator
+        setRoot(coordinator.navigationController, animated: animated)
+        coordinator.start()
+    }
+    
+    @MainActor
+    func showMain(animated: Bool) {
+        rootCoordinator = nil
+
+        let coordinator = makeMainCoordinator(self)
+        mainCoordinator = coordinator
         setRoot(coordinator.navigationController, animated: animated)
         coordinator.start()
     }
