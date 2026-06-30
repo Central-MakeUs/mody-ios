@@ -9,7 +9,8 @@ import UIKit
 
 public enum MainTab: Int, CaseIterable {
     case dashboard = 0
-    case myPage = 1
+    case challenge = 1
+    case myPage = 2
 }
 
 extension MainTab {
@@ -17,6 +18,8 @@ extension MainTab {
         switch self {
         case .dashboard:
             "홈"
+        case .challenge:
+            "챌린지"
         case .myPage:
             "마이"
         }
@@ -26,6 +29,8 @@ extension MainTab {
         switch self {
         case .dashboard:
             .add
+        case .challenge:
+            UIImage(systemName: "trophy")
         case .myPage:
             .checkmark
         }

@@ -21,6 +21,7 @@ struct AppAssembly: Assembly {
         assembleOnBoardingFeature(in: container)
         assembleSignUpDoneFeature(in: container)
         assembleFeedReactor(in: container)
+        assembleChallengeFeature(in: container)
         assembleMyPageFeature(in: container)
     }
 }

@@ -8,16 +8,19 @@
 import Swinject
 import Main
 import FeedInterface
+import ChallengeInterface
 import MyPageInterface
 
 extension AppAssembly {
     func assembleMain(in container: Container) {
         container.register(MainCoordinator.self) { (resolver: Resolver, delegate: MainCoordinatorDelegate) in
             let feedBuilder: FeedBuildable = resolver.resolve()
+            let challengeBuilder: ChallengeBuildable = resolver.resolve()
             let myPageBuilder: MyPageBuildable = resolver.resolve()
 
             return MainCoordinator(
                 feedBuilder: feedBuilder,
+                challengeBuilder: challengeBuilder,
                 myPageBuilder: myPageBuilder,
                 delegate: delegate
             )

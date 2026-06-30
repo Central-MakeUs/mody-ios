@@ -49,6 +49,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.OnBoarding)),
             .module(.MicroFeature(.SignUpDone)),
             .module(.MicroFeature(.Feed)),
+            .module(.MicroFeature(.Challenge)),
             .module(.MicroFeature(.MyPage)),
             .microFeature(.CoreNetwork),
             .external(.Swinject),
