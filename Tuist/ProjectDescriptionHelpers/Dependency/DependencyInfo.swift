@@ -48,6 +48,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.SignIn)),
             .module(.MicroFeature(.OnBoarding)),
             .module(.MicroFeature(.SignUpDone)),
+            .module(.MicroFeature(.Feed)),
+            .module(.MicroFeature(.MyPage)),
             .microFeature(.CoreNetwork),
             .external(.Swinject),
             .module(.MicroFeature(.CoreKeyChainStorage)),
@@ -64,7 +66,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.Feed),
             .microFeature(.Challenge),
             .microFeature(.MyPage),
-            .module(.Base)
+            .module(.Base),
+            .external(.SnapKit)
         ],
         .Base: [
             .module(.DesignSystem)

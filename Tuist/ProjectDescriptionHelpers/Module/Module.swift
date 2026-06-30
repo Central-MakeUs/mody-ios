@@ -19,6 +19,7 @@ public enum ExternalModule {
     case ComposableArchitecture
     case Swinject
     case Alamofire
+    case SnapKit
 
     var name: String {
         switch self {
