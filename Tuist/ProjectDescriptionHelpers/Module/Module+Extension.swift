@@ -135,6 +135,7 @@ extension Module {
         case .Root: .relativeToRoot("Projects/Feature/Root")
         case .Main: .relativeToRoot("Projects/Feature/Main")
         case .Base: .relativeToRoot("Projects/Feature/Base")
+        case .CommonDomain: .relativeToRoot("Projects/Domain/CommonDomain")
         default: .relativeToRoot("Projects/\(name)")
         }
     }

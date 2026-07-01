@@ -82,7 +82,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.ComposableArchitecture),
                 .module(.Base),
                 .microFeature(.CoreNetwork),
-                .microFeature(.FirebaseService)
+                .microFeature(.FirebaseService),
+                .module(.CommonDomain)
             ]
         ),
         .SignIn: .init(

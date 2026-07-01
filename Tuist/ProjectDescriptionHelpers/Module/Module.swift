@@ -6,6 +6,7 @@
 //
 
 public enum Module: Hashable {
+    case CommonDomain
     case Base
     case DesignSystem
     case Main
