@@ -9,8 +9,19 @@ import ProjectDescription
 
 public extension Target {
     static func target(moduleType: Module) -> Target {
-        let resources: ResourceFileElements? = moduleType.hasResources ? ["Resources/**"] : nil
+        var resources: ResourceFileElements? {
+            switch moduleType {
+            case .App:
+                [.glob(
+                    pattern: "Resources/**",
+                    excluding: ["Resources/Firebase/GoogleService-Info*.plist"]
+                )]
+            default:
+                moduleType.hasResources ? ["Resources/**"] : nil
+            }
+        }
         let infoPlist: InfoPlist = moduleType.infoPlist
+        let scripts: [TargetScript] = moduleType.scripts
         
         return Target.implements(
             name: moduleType.name,
@@ -18,6 +29,7 @@ public extension Target {
             bundleID: moduleType.bundleID,
             resources: resources,
             infoPlist: infoPlist,
+            scripts: scripts,
             dependencies: .dependencies(moduleType: moduleType)
         )
     }
@@ -93,6 +105,7 @@ private extension Target {
         bundleID: String,
         resources: ResourceFileElements? = nil,
         infoPlist: InfoPlist,
+        scripts: [TargetScript] = [],
         dependencies: [TargetDependency]
     ) -> Target {
         Target.target(
@@ -104,6 +117,7 @@ private extension Target {
             infoPlist: infoPlist,
             sources: .default,
             resources: resources,
+            scripts: scripts,
             dependencies: dependencies,
             settings: .settings(
                 base: projectEnvironment.baseSetting,

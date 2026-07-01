@@ -71,3 +71,4 @@ Tuist/.build
 .build/*
 
 XCConfig/
+GoogleService-info*

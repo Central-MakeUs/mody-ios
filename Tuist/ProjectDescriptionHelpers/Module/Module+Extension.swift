@@ -68,6 +68,20 @@ extension Module {
             .default
         }
     }
+
+    var scripts: [TargetScript] {
+        switch self {
+        case .App: [
+                .pre(
+                    path: .relativeToRoot("Scripts/Shell/select_google_service_info.sh"),
+                    name: "Select GoogleService-Info.plist",
+                    basedOnDependencyAnalysis: false
+                )
+            ]
+        default:
+            []
+        }
+    }
     
     func schemes(hasDemo: Bool = false) -> [Scheme] {
         switch self {

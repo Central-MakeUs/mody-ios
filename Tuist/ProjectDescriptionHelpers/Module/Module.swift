@@ -20,6 +20,10 @@ public enum ExternalModule {
     case Swinject
     case Alamofire
     case SnapKit
+    case FirebaseCore
+    case FirebaseAnalytics
+    case FirebaseCrashlytics
+    case FirebaseRemoteConfig
 
     var name: String {
         switch self {
@@ -29,6 +33,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case FirebaseService
     case CoreNetwork
     case CoreKeyChainStorage
     case SignUpDone
@@ -67,6 +72,7 @@ public enum MicroFeatureModule {
         case .SignUpDone: "Projects/Feature/SignUpDone"
         case .CoreKeyChainStorage: "Projects/Core/CoreKeyChainStorage"
         case .CoreNetwork: "Projects/Core/CoreNetwork"
+        case .FirebaseService: "Projects/Core/FirebaseService"
         }
     }
 }
