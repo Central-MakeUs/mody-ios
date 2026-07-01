@@ -4,7 +4,21 @@ import SwiftUI
 struct DesignSystemDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            Text("DesignSystem Demo")
+            DesignSystemDemoHomeView()
+        }
+    }
+}
+
+private struct DesignSystemDemoHomeView: View {
+    var body: some View {
+        NavigationStack {
+            List {
+                NavigationLink("Typography") {
+                    TypographyDemo()
+                }
+                
+            }
+            .navigationTitle("DesignSystem")
         }
     }
 }
