@@ -8,11 +8,26 @@
 import Swinject
 import SplashInterface
 import Splash
+import FirebaseServiceInterface
 
 extension AppAssembly {
     func assembleSplashFeature(in container: Container) {
+        container.register(SplashRepositoryProtocol.self) { resolver in
+            let firebaseService: FirebaseServiceInterface = resolver.resolve()
+
+            return SplashRepository(firebaseService: firebaseService)
+        }
+
+        container.register(SplashUseCase.self) { resolver in
+            let splashRepository: SplashRepositoryProtocol = resolver.resolve()
+
+            return SplashUseCase(splashRepository: splashRepository)
+        }
+
         container.register(SplashFeature.self) { (resolver: Resolver, router: SplashRouter) in
-            return SplashFeature { [weak router] route in
+            let splashUseCase: SplashUseCase = resolver.resolve()
+
+            return SplashFeature(splashUseCase: splashUseCase) { [weak router] route in
                 router?.route(from: route)
             }
         }
