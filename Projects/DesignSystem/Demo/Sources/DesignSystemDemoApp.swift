@@ -17,6 +17,9 @@ private struct DesignSystemDemoHomeView: View {
                     TypographyDemo()
                 }
                 
+                NavigationLink("Color System") {
+                    ColorSystemDemo()
+                }
             }
             .navigationTitle("DesignSystem")
         }
