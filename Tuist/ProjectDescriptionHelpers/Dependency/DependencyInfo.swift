@@ -51,6 +51,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.Feed)),
             .module(.MicroFeature(.Challenge)),
             .module(.MicroFeature(.MyPage)),
+            .module(.MicroFeature(.FirebaseService)),
+            .external(.FirebaseCore),
             .microFeature(.CoreNetwork),
             .external(.Swinject),
             .module(.MicroFeature(.CoreKeyChainStorage)),
@@ -79,7 +81,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             implementation: [
                 .external(.ComposableArchitecture),
                 .module(.Base),
-                .microFeature(.CoreNetwork)
+                .microFeature(.CoreNetwork),
+                .microFeature(.FirebaseService),
+                .module(.CommonDomain)
             ]
         ),
         .SignIn: .init(
@@ -118,6 +122,14 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .CoreNetwork: .init(
             implementation: [
                 .external(.Alamofire)
+            ]
+        ),
+        .FirebaseService: .init(
+            implementation: [
+                .external(.FirebaseCore),
+                .external(.FirebaseAnalytics),
+                .external(.FirebaseCrashlytics),
+                .external(.FirebaseRemoteConfig)
             ]
         )
     ]
