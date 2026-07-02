@@ -52,11 +52,16 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.Challenge)),
             .module(.MicroFeature(.MyPage)),
             .module(.MicroFeature(.FirebaseService)),
-            .external(.FirebaseCore),
-            .microFeature(.CoreNetwork),
-            .external(.Swinject),
             .module(.MicroFeature(.CoreKeyChainStorage)),
-            .module(.MicroFeature(.CoreNetwork))
+            .module(.MicroFeature(.CoreNetwork)),
+            .module(.MicroFeature(.CoreAuth)),
+            
+            .external(.FirebaseCore),
+            .external(.KakaoSDKUser),
+            .external(.Swinject),
+            
+            .microFeature(.CoreNetwork),
+            .microFeature(.CoreAuth)
         ],
         .Root: [
             .microFeature(.Splash),
@@ -83,13 +88,16 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .microFeature(.CoreNetwork),
                 .microFeature(.FirebaseService),
-                .module(.CommonDomain)
+                .module(.CommonDomain),
+                .microFeature(.CoreAuth)
             ]
         ),
         .SignIn: .init(
             implementation: [
                 .external(.ComposableArchitecture),
-                .module(.Base)
+                .module(.Base),
+                .module(.CommonDomain),
+                .microFeature(.CoreAuth)
             ]
         ),
         .OnBoarding: .init(
@@ -121,7 +129,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ),
         .CoreNetwork: .init(
             implementation: [
-                .external(.Alamofire)
+                .external(.Alamofire),
+                .module(.ModyLogger)
             ]
         ),
         .FirebaseService: .init(
@@ -129,7 +138,20 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.FirebaseCore),
                 .external(.FirebaseAnalytics),
                 .external(.FirebaseCrashlytics),
-                .external(.FirebaseRemoteConfig)
+                .external(.FirebaseRemoteConfig),
+                .module(.ModyLogger)
+            ]
+        ),
+        .CoreAuth: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
+            implementation: [
+                .module(.CommonDomain),
+                .microFeature(.CoreKeyChainStorage),
+                .microFeature(.CoreNetwork),
+                .external(.KakaoSDKUser),
+                .module(.ModyLogger)
             ]
         )
     ]

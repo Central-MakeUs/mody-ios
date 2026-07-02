@@ -7,6 +7,7 @@
 import UIKit
 import DesignSystem
 import FirebaseCore
+import KakaoSDKCommon
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -24,6 +25,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         DesignSystemFontFamily.registerAllCustomFonts()
         FirebaseApp.configure()
+        configureKakaoSDK()
         return true
+    }
+}
+
+private extension AppDelegate {
+    func configureKakaoSDK() {
+        guard let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String else {
+            return
+        }
+
+        KakaoSDK.initSDK(appKey: appKey)
     }
 }
