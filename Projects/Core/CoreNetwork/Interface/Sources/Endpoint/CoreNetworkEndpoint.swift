@@ -5,7 +5,7 @@
 //  Created by 김동준 on 6/30/26
 //
 
-public struct CoreNetworkEndpoint: Equatable, Sendable {
+public struct CoreNetworkEndpoint: Equatable {
     public let path: String
     public let method: HttpMethod
     public let headers: [String: String]

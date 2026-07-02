@@ -14,7 +14,7 @@ enum CoreNetworkBaseURLProvider {
             !baseURLString.isEmpty,
             let baseURL = URL(string: baseURLString)
         else {
-            fatalError("CoreNetworkBaseURL is missing or invalid in Info.plist.")
+            fatalError("BASE_URL is missing or invalid in Info.plist.")
         }
 
         return baseURL

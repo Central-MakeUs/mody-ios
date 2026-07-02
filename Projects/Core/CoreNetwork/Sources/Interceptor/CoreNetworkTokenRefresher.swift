@@ -9,7 +9,7 @@ import Alamofire
 import Foundation
 import CoreNetworkInterface
 
-final class CoreNetworkTokenRefresher: Sendable {
+final class CoreNetworkTokenRefresher {
     private let baseURL: URL
     private let refreshTokenEndpoint: CoreNetworkEndpoint
     private let tokenStore: CoreTokenStorage
@@ -74,11 +74,18 @@ private extension CoreNetworkTokenRefresher {
                 )
             )
             .validate(statusCode: 200..<300)
-            .serializingDecodable(AuthRefreshTokenResponseDTO.self, decoder: decoder)
+            .serializingDecodable(
+                CoreNetworkResponse<AuthRefreshTokenResponseDTO>.self,
+                decoder: decoder
+            )
             .response
 
         switch response.result {
-        case .success(let token):
+        case .success(let response):
+            guard let token = response.result else {
+                throw CoreNetworkClientError.refreshTokenFailed
+            }
+
             return token
         case .failure:
             throw CoreNetworkClientError.refreshTokenFailed
@@ -86,8 +93,10 @@ private extension CoreNetworkTokenRefresher {
     }
 
     func save(_ response: AuthRefreshTokenResponseDTO) async {
+        guard let accessToken = response.accessToken else { return }
+
         await tokenStore.save(
-            accessToken: response.accessToken,
+            accessToken: accessToken,
             refreshToken: response.refreshToken
         )
     }
@@ -95,6 +104,6 @@ private extension CoreNetworkTokenRefresher {
 
 // TODO: Remove later
 private struct AuthRefreshTokenResponseDTO: Decodable {
-    let accessToken: String
+    let accessToken: String?
     let refreshToken: String?
 }
