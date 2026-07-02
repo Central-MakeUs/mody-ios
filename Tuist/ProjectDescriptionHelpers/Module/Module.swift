@@ -21,6 +21,7 @@ public enum ExternalModule {
     case Swinject
     case Alamofire
     case SnapKit
+    case KakaoSDKUser
     case FirebaseCore
     case FirebaseAnalytics
     case FirebaseCrashlytics
@@ -34,6 +35,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreAuth
     case FirebaseService
     case CoreNetwork
     case CoreKeyChainStorage
@@ -74,6 +76,7 @@ public enum MicroFeatureModule {
         case .CoreKeyChainStorage: "Projects/Core/CoreKeyChainStorage"
         case .CoreNetwork: "Projects/Core/CoreNetwork"
         case .FirebaseService: "Projects/Core/FirebaseService"
+        case .CoreAuth: "Projects/Core/CoreAuth"
         }
     }
 }

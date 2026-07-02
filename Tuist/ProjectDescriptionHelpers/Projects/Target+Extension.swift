@@ -20,6 +20,11 @@ public extension Target {
                 moduleType.hasResources ? ["Resources/**"] : nil
             }
         }
+        let entitlements: Entitlements? = if case .App = moduleType {
+            "Mody.entitlements"
+        } else {
+            nil
+        }
         let infoPlist: InfoPlist = moduleType.infoPlist
         let scripts: [TargetScript] = moduleType.scripts
         
@@ -28,6 +33,7 @@ public extension Target {
             product: moduleType.product,
             bundleID: moduleType.bundleID,
             resources: resources,
+            entitlements: entitlements,
             infoPlist: infoPlist,
             scripts: scripts,
             dependencies: .dependencies(moduleType: moduleType)
@@ -104,6 +110,7 @@ private extension Target {
         product: Product,
         bundleID: String,
         resources: ResourceFileElements? = nil,
+        entitlements: Entitlements? = nil,
         infoPlist: InfoPlist,
         scripts: [TargetScript] = [],
         dependencies: [TargetDependency]
@@ -117,6 +124,7 @@ private extension Target {
             infoPlist: infoPlist,
             sources: .default,
             resources: resources,
+            entitlements: entitlements,
             scripts: scripts,
             dependencies: dependencies,
             settings: .settings(
