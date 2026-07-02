@@ -1,34 +1,27 @@
 //
-//  TempView.swift
+//  OnBoardingStepFourFeature.swift
 //  OnBoarding
 //
-//  Created by 김동준 on 6/25/26
+//  Created by 김동준 on 7/2/26
 //
 
-import SwiftUI
 import ComposableArchitecture
 
-public struct TempView: View {
-    var store: StoreOf<TempFeature>
-    
-    public var body: some View {
-        Text("Hello, World!")
-    }
-}
-
 @Reducer
-public struct TempFeature {
+public struct OnBoardingStepFourFeature {
     @ObservableState
     public struct State: Equatable {
+        var isNextButtonEnabled: Bool = true
+
         public init() {}
     }
-    
+
     public enum Action {
     }
-    
+
     public init() {}
+
     public var body: some ReducerOf<Self> {
-                
         Reduce { state, action in
             return .none
         }
