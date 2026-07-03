@@ -10,16 +10,22 @@ public struct AuthSession: Equatable {
     public let accessToken: String
     public let refreshToken: String
     public let personalInfoCompleted: Bool
+    public let mainAccessible: Bool
+    public let groupOnboardingCompleted: Bool
 
     public init(
         id: Int,
         accessToken: String,
         refreshToken: String,
-        personalInfoCompleted: Bool
+        personalInfoCompleted: Bool,
+        mainAccessible: Bool,
+        groupOnboardingCompleted: Bool
     ) {
         self.id = id
         self.accessToken = accessToken
         self.refreshToken = refreshToken
         self.personalInfoCompleted = personalInfoCompleted
+        self.mainAccessible = mainAccessible
+        self.groupOnboardingCompleted = groupOnboardingCompleted
     }
 }

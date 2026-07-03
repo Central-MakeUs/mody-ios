@@ -12,6 +12,8 @@ struct SocialLoginResponse: Decodable {
     let accessToken: String?
     let refreshToken: String?
     let personalInfoCompleted: Bool?
+    let mainAccessible: Bool?
+    let groupOnboardingCompleted: Bool?
 }
 
 extension SocialLoginResponse {
@@ -20,7 +22,9 @@ extension SocialLoginResponse {
             id: id ?? -1,
             accessToken: accessToken ?? "",
             refreshToken: refreshToken ?? "",
-            personalInfoCompleted: personalInfoCompleted ?? false
+            personalInfoCompleted: personalInfoCompleted ?? false,
+            mainAccessible: mainAccessible ?? false,
+            groupOnboardingCompleted: groupOnboardingCompleted ?? false
         )
     }
 }
