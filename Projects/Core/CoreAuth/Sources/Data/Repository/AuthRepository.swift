@@ -45,6 +45,16 @@ private extension AuthRepository {
         )
 
         try? keyChainStorage.save(
+            key: KeyChainStorageKey.mainAccessible.rawValue,
+            value: session.mainAccessible
+        )
+
+        try? keyChainStorage.save(
+            key: KeyChainStorageKey.groupOnboardingCompleted.rawValue,
+            value: session.groupOnboardingCompleted
+        )
+
+        try? keyChainStorage.save(
             key: KeyChainStorageKey.accessToken.rawValue,
             value: session.accessToken
         )
