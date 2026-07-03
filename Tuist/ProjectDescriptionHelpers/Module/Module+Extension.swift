@@ -136,6 +136,7 @@ extension Module {
         case .Main: .relativeToRoot("Projects/Feature/Main")
         case .Base: .relativeToRoot("Projects/Feature/Base")
         case .CommonDomain: .relativeToRoot("Projects/Domain/CommonDomain")
+        case .ModyLogger: .relativeToRoot("Projects/Shared/ModyLogger")
         default: .relativeToRoot("Projects/\(name)")
         }
     }
