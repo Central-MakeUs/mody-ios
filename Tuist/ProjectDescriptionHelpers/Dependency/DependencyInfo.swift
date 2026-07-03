@@ -130,6 +130,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .CoreNetwork: .init(
             implementation: [
                 .external(.Alamofire),
+                .module(.CommonDomain),
                 .module(.ModyLogger)
             ]
         ),

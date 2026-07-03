@@ -77,14 +77,12 @@ extension AFError {
                  .internationalRoamingOff,
                  .dataNotAllowed:
                 return .networkUnreachable
-            case .cancelled:
-                return .cancelled
             default:
                 return .unknown
             }
 
         case .explicitlyCancelled:
-            return .cancelled
+            return .unknown
 
         case .serverTrustEvaluationFailed:
             return .sslPinningFailed
