@@ -6,13 +6,20 @@
 //
 
 import Swinject
+import CoreAuthInterface
 import SignInInterface
 import SignIn
 
 extension AppAssembly {
     func assembleSignInFeature(in container: Container) {
         container.register(SignInFeature.self) { (resolver: Resolver, router: SignInRouter) in
-            return SignInFeature { [weak router] route in
+            let socialLoginUseCase: SocialLoginInterface = resolver.resolve()
+            let authUseCase: AuthUseCaseProtocol = resolver.resolve()
+
+            return SignInFeature(
+                socialLoginUseCase: socialLoginUseCase,
+                authUseCase: authUseCase
+            ) { [weak router] route in
                 router?.route(from: route)
             }
         }
