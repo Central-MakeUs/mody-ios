@@ -5,7 +5,7 @@
 //  Created by 김동준 on 6/30/26
 //
 
-public enum CoreNetworkClientError: Error {
+enum CoreNetworkClientError: Error, Equatable {
     case invalidURL
     case missingAccessToken
     case refreshTokenMissing
@@ -13,7 +13,6 @@ public enum CoreNetworkClientError: Error {
     case unauthorized
     case forbidden
     case notFound
-    case conflict
     case tooManyRequests
     case internalServerError
     case badGateway
@@ -25,7 +24,6 @@ public enum CoreNetworkClientError: Error {
     case emptyResponse
     case networkUnreachable
     case timeout
-    case cancelled
     case sslPinningFailed
     case sessionInvalidated
     case unknown
@@ -43,8 +41,6 @@ extension CoreNetworkClientError {
             return .forbidden
         case 404:
             return .notFound
-        case 409:
-            return .conflict
         case 429:
             return .tooManyRequests
         case 500:
