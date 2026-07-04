@@ -284,7 +284,10 @@ private extension ModyTypography {
         case .b4: "b4"
         case .b5: "b5"
         case .b6: "b6"
+        case .b7: "b7"
         case .c1: "c1"
+        case .c2: "c2"
+        case .c3: "c3"
         }
     }
 }
