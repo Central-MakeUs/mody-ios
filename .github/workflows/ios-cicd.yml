@@ -43,6 +43,8 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           API_BASE_URL_DEV: ${{ secrets.API_BASE_URL_DEV }}
           API_BASE_URL_PROD: ${{ secrets.API_BASE_URL_PROD }}
+          KAKAO_NATIVE_APP_KEY_DEV: ${{ secrets.KAKAO_NATIVE_APP_KEY_DEV }}
+          KAKAO_NATIVE_APP_KEY_PROD: ${{ secrets.KAKAO_NATIVE_APP_KEY_PROD }}
         run: ci_scripts/github/pre-build/setup_xcconfig.sh
 
       - name: Setup Firebase

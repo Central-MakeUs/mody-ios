@@ -53,12 +53,18 @@ create_xcconfigs() {
   local raw_api_base_url_prod
   local api_base_url_dev
   local api_base_url_prod
+  local kakao_native_app_key_dev
+  local kakao_native_app_key_prod
 
   raw_api_base_url_dev="${API_BASE_URL_DEV:-}"
   raw_api_base_url_prod="${API_BASE_URL_PROD:-}"
+  kakao_native_app_key_dev="${KAKAO_NATIVE_APP_KEY_DEV:-}"
+  kakao_native_app_key_prod="${KAKAO_NATIVE_APP_KEY_PROD:-}"
 
   [[ -n "$raw_api_base_url_dev" ]] || fail "required XCConfig secret/env is missing: API_BASE_URL_DEV"
   [[ -n "$raw_api_base_url_prod" ]] || fail "required XCConfig secret/env is missing: API_BASE_URL_PROD"
+  [[ -n "$kakao_native_app_key_dev" ]] || fail "required XCConfig secret/env is missing: KAKAO_NATIVE_APP_KEY_DEV"
+  [[ -n "$kakao_native_app_key_prod" ]] || fail "required XCConfig secret/env is missing: KAKAO_NATIVE_APP_KEY_PROD"
 
   api_base_url_dev="$(escape_xcconfig_value "$raw_api_base_url_dev")"
   api_base_url_prod="$(escape_xcconfig_value "$raw_api_base_url_prod")"
@@ -78,6 +84,7 @@ BUNDLE_NAME = Mody DEV
 ENV = Dev
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEV
 BASE_URL = ${api_base_url_dev}
+KAKAO_NATIVE_APP_KEY = ${kakao_native_app_key_dev}
 EOF
 
   cat > XCConfig/PROD.xcconfig <<EOF
@@ -88,6 +95,7 @@ BUNDLE_NAME = Mody
 ENV = Prod
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = PROD
 BASE_URL = ${api_base_url_prod}
+KAKAO_NATIVE_APP_KEY = ${kakao_native_app_key_prod}
 EOF
 
   cp XCConfig/PROD.xcconfig XCConfig/RELEASE.xcconfig
@@ -119,7 +127,7 @@ done
 if [[ "$dry_run" == true ]]; then
   echo "XCConfig setup dry-run"
   echo "files=XCConfig/Shared.xcconfig XCConfig/DEV.xcconfig XCConfig/PROD.xcconfig XCConfig/RELEASE.xcconfig"
-  echo "required_env=API_BASE_URL_DEV API_BASE_URL_PROD"
+  echo "required_env=API_BASE_URL_DEV API_BASE_URL_PROD KAKAO_NATIVE_APP_KEY_DEV KAKAO_NATIVE_APP_KEY_PROD"
   exit 0
 fi
 
