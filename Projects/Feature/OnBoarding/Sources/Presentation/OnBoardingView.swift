@@ -44,15 +44,9 @@ public struct OnBoardingView: View {
 
 private extension OnBoardingView {
     var stepIndicator: some View {
-        HStack(spacing: 12) {
-            ForEach(OnBoardingFeature.State.Step.allCases, id: \.self) { step in
-                Text("\(step.rawValue)")
-                    .font(.headline)
-                    .foregroundStyle(store.currentStep == step ? .black : .gray)
-            }
-        }
-        .padding(.top, 16)
-        .padding(.bottom, 32)
+        OnBoardingStepIndicator(currentStep: store.currentStep.rawValue)
+        .padding(.top, 20)
+        .padding(.bottom, 48)
     }
 
     @ViewBuilder
