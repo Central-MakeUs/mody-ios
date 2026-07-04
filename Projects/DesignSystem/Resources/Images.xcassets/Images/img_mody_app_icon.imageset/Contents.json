@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "img_mody_app_icon.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
