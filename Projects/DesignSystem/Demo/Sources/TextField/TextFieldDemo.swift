@@ -7,6 +7,8 @@ struct TextFieldDemo: View {
     @State private var textColor: TextFieldDemoColor?
     @State private var placeholderColor: TextFieldDemoColor?
     @State private var cursorColor: TextFieldDemoColor?
+    @State private var hasStroke = false
+    @State private var strokeColor: TextFieldDemoColor?
 
     var body: some View {
         ScrollView {
@@ -19,12 +21,19 @@ struct TextFieldDemo: View {
                         placeholderColor: placeholderColor?.color ?? .gray4,
                         cursorColor: cursorColor?.color ?? .main,
                         underlineColor: underlineColor?.color ?? .gray2,
-                        focusedUnderlineColor: underlineColor?.color ?? .main
+                        focusedUnderlineColor: underlineColor?.color ?? .main,
+                        hasStroke: hasStroke,
+                        strokeColor: strokeColor?.color ?? .gray2
                     )
                 }
 
                 TextFieldDemoSection(title: "Text") {
                     TextFieldDemoTextToggle(text: $text)
+                }
+
+                TextFieldDemoSection(title: "Style") {
+                    Toggle("Stroke", isOn: $hasStroke)
+                        .font(.subheadline)
                 }
 
                 TextFieldDemoSection(title: "Colors") {
@@ -50,6 +59,12 @@ struct TextFieldDemo: View {
                         title: "Cursor",
                         defaultTitle: "없음 (Main)",
                         selection: $cursorColor
+                    )
+
+                    TextFieldDemoColorPicker(
+                        title: "Stroke",
+                        defaultTitle: "없음 (Gray2)",
+                        selection: $strokeColor
                     )
                 }
             }

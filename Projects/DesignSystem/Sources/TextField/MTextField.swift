@@ -16,6 +16,8 @@ public struct MTextField: View {
     private let cursorColor: Color
     private let underlineColor: Color
     private let focusedUnderlineColor: Color
+    private let hasStroke: Bool
+    private let strokeColor: Color
     private let keyboardType: UIKeyboardType
     private let onSubmit: (() -> Void)?
 
@@ -32,6 +34,8 @@ public struct MTextField: View {
         cursorColor: Color = .main,
         underlineColor: Color = .gray2,
         focusedUnderlineColor: Color = .main,
+        hasStroke: Bool = false,
+        strokeColor: Color = .gray2,
         keyboardType: UIKeyboardType = .default,
         onSubmit: (() -> Void)? = nil
     ) {
@@ -42,6 +46,8 @@ public struct MTextField: View {
         self.cursorColor = cursorColor
         self.underlineColor = underlineColor
         self.focusedUnderlineColor = focusedUnderlineColor
+        self.hasStroke = hasStroke
+        self.strokeColor = strokeColor
         self.keyboardType = keyboardType
         self.onSubmit = onSubmit
     }
@@ -71,15 +77,19 @@ public struct MTextField: View {
                 .focused($isFocused)
                 .onSubmit { onSubmit?() }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, hasStroke ? 12 : 8)
+        .overlay {
+            if hasStroke {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(strokeColor, lineWidth: 1)
+            }
+        }
         .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(isFocused ? focusedUnderlineColor : underlineColor)
-                .frame(height: 1)
+            if !hasStroke {
+                Rectangle()
+                    .fill(isFocused ? focusedUnderlineColor : underlineColor)
+                    .frame(height: 1)
+            }
         }
     }
-}
-
-private extension MTextField {
-    
 }
