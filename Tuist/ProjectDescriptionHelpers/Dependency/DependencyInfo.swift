@@ -78,7 +78,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .external(.SnapKit)
         ],
         .Base: [
-            .module(.DesignSystem)
+            .module(.DesignSystem),
+            .module(.ModyLogger)
         ]
     ],
     microFeatureDependencies: [
