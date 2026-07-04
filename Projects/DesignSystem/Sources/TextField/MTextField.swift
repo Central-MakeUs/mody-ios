@@ -18,6 +18,8 @@ public struct MTextField: View {
     private let focusedUnderlineColor: Color
     private let hasStroke: Bool
     private let strokeColor: Color
+    private let hasClearButton: Bool
+    private let hasErrorIcon: Bool
     private let keyboardType: UIKeyboardType
     private let onSubmit: (() -> Void)?
 
@@ -36,6 +38,8 @@ public struct MTextField: View {
         focusedUnderlineColor: Color = .main,
         hasStroke: Bool = false,
         strokeColor: Color = .gray2,
+        hasClearButton: Bool = false,
+        hasErrorIcon: Bool = false,
         keyboardType: UIKeyboardType = .default,
         onSubmit: (() -> Void)? = nil
     ) {
@@ -48,34 +52,21 @@ public struct MTextField: View {
         self.focusedUnderlineColor = focusedUnderlineColor
         self.hasStroke = hasStroke
         self.strokeColor = strokeColor
+        self.hasClearButton = hasClearButton
+        self.hasErrorIcon = hasErrorIcon
         self.keyboardType = keyboardType
         self.onSubmit = onSubmit
     }
 
     public var body: some View {
-        ZStack(alignment: .leading) {
-            MText(
-                placeholder,
-                style: .b4,
-                color: placeholderColor,
-                alignment: .leading
-            )
-            .padding(.vertical, token.verticalPadding + additionalVerticalPadding)
-            .opacity(text.isEmpty ? 1 : 0)
-            .allowsHitTesting(false)
+        HStack(spacing: 0) {
+            ZStack(alignment: .leading) {
+                placeholderView
+                textFieldView
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            TextField("", text: $text)
-                .font(token.swiftUIFont)
-                .foregroundStyle(textColor)
-                .kerning(token.letterSpacing)
-                .lineSpacing(token.additionalLineSpacing)
-                .multilineTextAlignment(.leading)
-                .padding(.vertical, token.verticalPadding + additionalVerticalPadding)
-                .lineLimit(1)
-                .tint(cursorColor)
-                .keyboardType(keyboardType)
-                .focused($isFocused)
-                .onSubmit { onSubmit?() }
+            trailingButtons
         }
         .padding(.horizontal, hasStroke ? 12 : 8)
         .overlay {
@@ -89,6 +80,59 @@ public struct MTextField: View {
                 Rectangle()
                     .fill(isFocused ? focusedUnderlineColor : underlineColor)
                     .frame(height: 1)
+            }
+        }
+    }
+}
+
+private extension MTextField {
+    var placeholderView: some View {
+        MText(
+            placeholder,
+            style: .b4,
+            color: placeholderColor,
+            alignment: .leading
+        )
+        .padding(.vertical, token.verticalPadding + additionalVerticalPadding)
+        .opacity(text.isEmpty ? 1 : 0)
+        .allowsHitTesting(false)
+    }
+    
+    var textFieldView: some View {
+        TextField("", text: $text)
+            .font(token.swiftUIFont)
+            .foregroundStyle(textColor)
+            .kerning(token.letterSpacing)
+            .lineSpacing(token.additionalLineSpacing)
+            .multilineTextAlignment(.leading)
+            .padding(.vertical, token.verticalPadding + additionalVerticalPadding)
+            .lineLimit(1)
+            .tint(cursorColor)
+            .keyboardType(keyboardType)
+            .focused($isFocused)
+            .onSubmit { onSubmit?() }
+    }
+}
+
+private extension MTextField {
+    @ViewBuilder
+    var trailingButtons: some View {
+        HStack(spacing: 4) {
+            if hasClearButton {
+                Button {
+                    text = ""
+                } label: {
+                    Image.icTextClear
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(.plain)
+            }
+
+            if hasErrorIcon {
+                Image.icError24
+                    .resizable()
+                    .frame(width: 24, height: 24)
             }
         }
     }

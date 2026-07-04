@@ -9,6 +9,8 @@ struct TextFieldDemo: View {
     @State private var cursorColor: TextFieldDemoColor?
     @State private var hasStroke = false
     @State private var strokeColor: TextFieldDemoColor?
+    @State private var hasClearButton = false
+    @State private var hasErrorIcon = false
 
     var body: some View {
         ScrollView {
@@ -23,7 +25,9 @@ struct TextFieldDemo: View {
                         underlineColor: underlineColor?.color ?? .gray2,
                         focusedUnderlineColor: underlineColor?.color ?? .main,
                         hasStroke: hasStroke,
-                        strokeColor: strokeColor?.color ?? .gray2
+                        strokeColor: strokeColor?.color ?? .gray2,
+                        hasClearButton: hasClearButton,
+                        hasErrorIcon: hasErrorIcon
                     )
                 }
 
@@ -33,6 +37,12 @@ struct TextFieldDemo: View {
 
                 TextFieldDemoSection(title: "Style") {
                     Toggle("Stroke", isOn: $hasStroke)
+                        .font(.subheadline)
+
+                    Toggle("Clear Button", isOn: $hasClearButton)
+                        .font(.subheadline)
+
+                    Toggle("Error Icon", isOn: $hasErrorIcon)
                         .font(.subheadline)
                 }
 
