@@ -61,6 +61,11 @@ platform :ios do
     else
       UI.user_error!("Unsupported distribution type: #{distribution_type}")
     end
+
+    persist_resolved_cicd_version!(
+      version: version,
+      build_number: build_number
+    )
   end
 end
 
@@ -83,6 +88,35 @@ end
 def set_plist_value!(plist_path, key, value)
   system("/usr/libexec/PlistBuddy", "-c", "Set :#{key} #{value}", plist_path) ||
     UI.user_error!("Failed to set #{key} in #{plist_path}")
+end
+
+def persist_resolved_cicd_version!(version:, build_number:)
+  version_display = build_number.to_s.empty? ? version : "#{version}(#{build_number})"
+
+  ENV["CICD_BUILD_NUMBER"] = build_number
+  ENV["CICD_VERSION_DISPLAY"] = version_display
+
+  resolved_env_file = ENV["CICD_RESOLVED_ENV_FILE"].to_s
+  unless resolved_env_file.empty?
+    FileUtils.mkdir_p(File.dirname(resolved_env_file))
+    File.write(
+      resolved_env_file,
+      [
+        "CICD_BUILD_NUMBER=#{Shellwords.escape(build_number)}",
+        "CICD_VERSION_DISPLAY=#{Shellwords.escape(version_display)}"
+      ].join("\n") + "\n"
+    )
+  end
+
+  github_env = ENV["GITHUB_ENV"].to_s
+  unless github_env.empty?
+    File.open(github_env, "a") do |file|
+      file.puts("CICD_BUILD_NUMBER=#{build_number}")
+      file.puts("CICD_VERSION_DISPLAY=#{version_display}")
+    end
+  end
+
+  UI.message("Resolved CI/CD version display: #{version_display}")
 end
 
 def next_build_number_for(distribution_type:, version:, fallback_build_number:)
