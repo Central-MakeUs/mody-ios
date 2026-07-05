@@ -6,21 +6,12 @@
 //
 
 import UIKit
-import SnapKit
 
 public final class MainTabBarController: UITabBarController {
-    var customTabBarView: CustomTabBarView?
-    var customTabBarHeightConstraint: Constraint?
-
     public override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .clear
         hideSystemTabBar()
-    }
-
-    public override func viewSafeAreaInsetsDidChange() {
-        super.viewSafeAreaInsetsDidChange()
-        updateCustomTabBarHeight()
     }
 
     deinit {
@@ -35,7 +26,10 @@ public extension MainTabBarController {
         animated: Bool
     ) {
         setViewControllers(viewControllers, animated: animated)
-        configureCustomTabBar(tabs: tabs)
+    }
+
+    func selectTab(_ index: Int) {
+        selectedIndex = index
     }
 }
 

@@ -66,7 +66,8 @@ public final class MainCoordinator {
         )
 
         let mainContainerViewController = MainContainerViewController(
-            tabBarController: tabBarController
+            tabBarController: tabBarController,
+            tabs: tabs
         )
         self.mainContainerViewController = mainContainerViewController
 

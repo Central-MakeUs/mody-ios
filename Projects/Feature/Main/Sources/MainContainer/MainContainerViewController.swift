@@ -15,10 +15,17 @@ final class MainContainerViewController: UIViewController {
     weak var currentOverlayView: UIView?
 
     private let navigationBar = MainNavigationBar()
+    private let contentContainerView = UIView()
+    private let customTabBarView: CustomTabBarView
     private let mainTabBarController: MainTabBarController
+    private var customTabBarHeightConstraint: Constraint?
 
-    init(tabBarController: MainTabBarController) {
+    init(
+        tabBarController: MainTabBarController,
+        tabs: [MainTab]
+    ) {
         self.mainTabBarController = tabBarController
+        self.customTabBarView = CustomTabBarView(tabs: tabs)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -34,6 +41,12 @@ final class MainContainerViewController: UIViewController {
         setupChild()
         bind()
     }
+
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+
+        customTabBarHeightConstraint?.update(offset: MainTabBarConstants.height + view.safeAreaInsets.bottom)
+    }
 }
 
 private extension MainContainerViewController {
@@ -43,20 +56,34 @@ private extension MainContainerViewController {
 
     func setupLayout() {
         view.addSubview(navigationBar)
+        view.addSubview(contentContainerView)
+        view.addSubview(customTabBarView)
 
         navigationBar.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide)
             $0.leading.trailing.equalToSuperview()
         }
+
+        contentContainerView.snp.makeConstraints {
+            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(customTabBarView.snp.top)
+        }
+
+        customTabBarView.snp.makeConstraints {
+            $0.leading.trailing.bottom.equalToSuperview()
+            customTabBarHeightConstraint = $0.height
+                .equalTo(MainTabBarConstants.height + view.safeAreaInsets.bottom)
+                .constraint
+        }
     }
 
     func setupChild() {
         addChild(mainTabBarController)
-        view.addSubview(mainTabBarController.view)
+        contentContainerView.addSubview(mainTabBarController.view)
 
         mainTabBarController.view.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.edges.equalToSuperview()
         }
 
         mainTabBarController.didMove(toParent: self)
@@ -69,6 +96,11 @@ private extension MainContainerViewController {
 
         navigationBar.onAlarmTap = { [weak self] in
             self?.onAlarmTap?()
+        }
+
+        customTabBarView.onSelect = { [weak self] index in
+            self?.mainTabBarController.selectTab(index)
+            self?.customTabBarView.updateSelection(index: index)
         }
     }
 }
