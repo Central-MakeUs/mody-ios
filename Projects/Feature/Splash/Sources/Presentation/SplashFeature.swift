@@ -52,7 +52,7 @@ public struct SplashFeature {
             case .cachingRemoteConfig:
                 let value = splashUseCase.getChallengeTabHideFlag(key: RemoteConfigKeys.challengeTabHideFlag.rawValue)
                 print("value = \(value)")
-                // TODO: 어디서 값 가지고 있어야 함.
+                TabBarManager.shared.isChallengeTabHidden = value
                 return .send(.healthCheck)
             case .healthCheck:
                 return .run { send in

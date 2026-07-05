@@ -10,6 +10,7 @@ import UIKit
 import FeedInterface
 import ChallengeInterface
 import MyPageInterface
+import CommonDomain
 
 public final class MainCoordinator {
     public let navigationController: UINavigationController
@@ -48,14 +49,14 @@ public final class MainCoordinator {
         let challengeViewController = challengeBuilder.makeChallengeViewController(router: self)
         let myPageViewController = myPageBuilder.makeMyPageViewController(router: self)
 
-        let isChallengeHideFlag = true
+        let isChallengeHideFlag = TabBarManager.shared.isChallengeTabHidden
         let viewControllers = isChallengeHideFlag
             ? [feedViewController, myPageViewController]
             : [feedViewController, challengeViewController, myPageViewController]
         
         let tabs: [MainTab] = isChallengeHideFlag
-            ? [.dashboard, .myPage]
-            : [.dashboard, .challenge, .myPage]
+            ? [.feed, .myPage]
+            : [.feed, .challenge, .myPage]
         
         tabBarController.setTabs(
             tabs: tabs,

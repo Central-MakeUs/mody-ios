@@ -75,6 +75,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.Challenge),
             .microFeature(.MyPage),
             .module(.Base),
+            .module(.CommonDomain),
             .external(.SnapKit)
         ],
         .Base: [

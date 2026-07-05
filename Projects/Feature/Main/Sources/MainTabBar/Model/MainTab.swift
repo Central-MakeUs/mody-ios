@@ -6,9 +6,10 @@
 //
 
 import UIKit
+import DesignSystem
 
 public enum MainTab: Int, CaseIterable {
-    case dashboard = 0
+    case feed = 0
     case challenge = 1
     case myPage = 2
 }
@@ -16,8 +17,8 @@ public enum MainTab: Int, CaseIterable {
 extension MainTab {
     var title: String {
         switch self {
-        case .dashboard:
-            "홈"
+        case .feed:
+            "피드"
         case .challenge:
             "챌린지"
         case .myPage:
@@ -25,18 +26,14 @@ extension MainTab {
         }
     }
 
-    var normalImage: UIImage? {
+    var image: UIImage? {
         switch self {
-        case .dashboard:
-            .add
+        case .feed:
+            .icFeed
         case .challenge:
-            UIImage(systemName: "trophy")
+            .icAward
         case .myPage:
-            .checkmark
+            .icProfile
         }
-    }
-
-    var selectedImage: UIImage? {
-        normalImage
     }
 }

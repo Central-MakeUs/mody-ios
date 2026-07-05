@@ -7,12 +7,13 @@
 
 import UIKit
 import SnapKit
+import DesignSystem
 
 final class CustomTabBarItemView: UIControl {
     var onTap: (() -> Void)?
 
     private let iconImageView = UIImageView()
-    private let titleLabel = UILabel()
+    private let titleLabel = MUILabel(style: .c3)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -32,14 +33,17 @@ final class CustomTabBarItemView: UIControl {
 
 extension CustomTabBarItemView {
     func configure(tab: MainTab, isSelected: Bool) {
-        let color = isSelected ? UIColor.red : UIColor.black
-        let image = isSelected ? tab.selectedImage : tab.normalImage
+        let color = isSelected ? UIColor.gray10 : UIColor.gray5
+        let image = tab.image
 
         iconImageView.image = image?.withRenderingMode(.alwaysTemplate)
         iconImageView.tintColor = color
 
-        titleLabel.text = tab.title
-        titleLabel.textColor = color
+        titleLabel.configure(
+            text: tab.title,
+            style: .c3,
+            color: color
+        )
     }
 }
 
@@ -48,7 +52,6 @@ private extension CustomTabBarItemView {
         iconImageView.backgroundColor = .clear
         iconImageView.contentMode = .scaleAspectFit
 
-//        titleLabel.font =
         titleLabel.textAlignment = .center
     }
     
