@@ -18,8 +18,11 @@ public enum ModyTypography: CaseIterable {
     case b4
     case b5
     case b6
+    case b7
     case c1
-    
+    case c2
+    case c3
+
     public var token: ModyTypographyStyle {
         switch self {
         case .h1: ModyTypographyStyle(weight: .bold, size: 28)
@@ -29,9 +32,12 @@ public enum ModyTypography: CaseIterable {
         case .b2: ModyTypographyStyle(weight: .semiBold, size: 20)
         case .b3: ModyTypographyStyle(weight: .semiBold, size: 18)
         case .b4: ModyTypographyStyle(weight: .medium, size: 18)
-        case .b5: ModyTypographyStyle(weight: .semiBold, size: 16)
-        case .b6: ModyTypographyStyle(weight: .medium, size: 16)
+        case .b5: ModyTypographyStyle(weight: .bold, size: 16)
+        case .b6: ModyTypographyStyle(weight: .semiBold, size: 16)
+        case .b7: ModyTypographyStyle(weight: .medium, size: 16)
         case .c1: ModyTypographyStyle(weight: .medium, size: 14)
+        case .c2: ModyTypographyStyle(weight: .semiBold, size: 12)
+        case .c3: ModyTypographyStyle(weight: .medium, size: 12)
         }
     }
 }

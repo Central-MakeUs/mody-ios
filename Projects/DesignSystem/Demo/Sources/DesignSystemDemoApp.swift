@@ -20,6 +20,10 @@ private struct DesignSystemDemoHomeView: View {
                 NavigationLink("Color System") {
                     ColorSystemDemo()
                 }
+                
+                NavigationLink("TextField") {
+                    TextFieldDemo()
+                }
             }
             .navigationTitle("DesignSystem")
         }
