@@ -10,7 +10,8 @@ struct TextFieldDemo: View {
     @State private var hasStroke = false
     @State private var strokeColor: TextFieldDemoColor?
     @State private var hasClearButton = false
-    @State private var hasErrorIcon = false
+    @State private var showsErrorMessage = true
+    @State private var maxCount: Int? = 14
 
     var body: some View {
         ScrollView {
@@ -27,7 +28,9 @@ struct TextFieldDemo: View {
                         hasStroke: hasStroke,
                         strokeColor: strokeColor?.color ?? .gray2,
                         hasClearButton: hasClearButton,
-                        hasErrorIcon: hasErrorIcon
+                        errorMessage: errorMessage,
+                        maxCount: maxCount,
+                        isValid: isValid
                     )
                 }
 
@@ -42,8 +45,20 @@ struct TextFieldDemo: View {
                     Toggle("Clear Button", isOn: $hasClearButton)
                         .font(.subheadline)
 
-                    Toggle("Error Icon", isOn: $hasErrorIcon)
-                        .font(.subheadline)
+                    Toggle(
+                        "Error Message",
+                        isOn: $showsErrorMessage
+                    )
+                    .font(.subheadline)
+
+                    Toggle(
+                        "Text Count",
+                        isOn: Binding(
+                            get: { maxCount != nil },
+                            set: { maxCount = $0 ? 14 : nil }
+                        )
+                    )
+                    .font(.subheadline)
                 }
 
                 TextFieldDemoSection(title: "Colors") {
@@ -84,6 +99,22 @@ struct TextFieldDemo: View {
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGroupedBackground))
     }
+
+    private var isValid: Bool? {
+        if text.isEmpty {
+            return nil
+        }
+
+        return text.count <= 14
+    }
+
+    private var errorMessage: String? {
+        guard showsErrorMessage, isValid == false else {
+            return nil
+        }
+
+        return "14자 이내로 적어주세요"
+    }
 }
 
 private struct TextFieldDemoTextToggle: View {
@@ -103,6 +134,11 @@ private struct TextFieldDemoTextToggle: View {
 
             Button("Typing") {
                 text = "Typing"
+            }
+            .buttonStyle(.bordered)
+
+            Button("Over 14") {
+                text = "123456789012345"
             }
             .buttonStyle(.bordered)
         }

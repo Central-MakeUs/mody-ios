@@ -19,7 +19,9 @@ public struct MTextField: View {
     private let hasStroke: Bool
     private let strokeColor: Color
     private let hasClearButton: Bool
-    private let hasErrorIcon: Bool
+    private let errorMessage: String?
+    private let maxCount: Int?
+    private let isValid: Bool?
     private let keyboardType: UIKeyboardType
     private let onSubmit: (() -> Void)?
 
@@ -39,7 +41,9 @@ public struct MTextField: View {
         hasStroke: Bool = false,
         strokeColor: Color = .gray2,
         hasClearButton: Bool = false,
-        hasErrorIcon: Bool = false,
+        errorMessage: String? = nil,
+        maxCount: Int? = nil,
+        isValid: Bool? = nil,
         keyboardType: UIKeyboardType = .default,
         onSubmit: (() -> Void)? = nil
     ) {
@@ -53,12 +57,26 @@ public struct MTextField: View {
         self.hasStroke = hasStroke
         self.strokeColor = strokeColor
         self.hasClearButton = hasClearButton
-        self.hasErrorIcon = hasErrorIcon
+        self.errorMessage = errorMessage
+        self.maxCount = maxCount
+        self.isValid = isValid
         self.keyboardType = keyboardType
         self.onSubmit = onSubmit
     }
 
     public var body: some View {
+        VStack(spacing: 8) {
+            inputField
+
+            if hasAdditionalInfoView {
+                additionalInfoView
+            }
+        }
+    }
+}
+
+private extension MTextField {
+    var inputField: some View {
         HStack(spacing: 0) {
             ZStack(alignment: .leading) {
                 placeholderView
@@ -115,6 +133,66 @@ private extension MTextField {
 }
 
 private extension MTextField {
+    var hasAdditionalInfoView: Bool {
+        visibleErrorMessage != nil || maxCount != nil
+    }
+
+    var additionalInfoView: some View {
+        HStack(spacing: 8) {
+            if let visibleErrorMessage {
+                MText(
+                    visibleErrorMessage,
+                    style: .c1,
+                    color: .systemError,
+                    alignment: .leading
+                )
+            }
+
+            Spacer()
+
+            if let maxCount {
+                textCountView(maxCount: maxCount)
+            }
+        }
+        .padding(.horizontal, 8)
+    }
+
+    var visibleErrorMessage: String? {
+        guard isValid == false else {
+            return nil
+        }
+
+        return errorMessage
+    }
+
+    func textCountView(maxCount: Int) -> some View {
+        HStack(spacing: 0) {
+            MText(
+                "\(text.count)",
+                style: currentTextStyle,
+                color: currentTextCountColor
+            )
+
+            MText(
+                "/\(maxCount)",
+                style: .c1,
+                color: .gray7
+            )
+        }
+    }
+    
+    var currentTextStyle: ModyTypography {
+        return isValid == nil ? .c1 : .b7
+    }
+
+    var currentTextCountColor: Color {
+        switch isValid {
+        case .some(true): .sub
+        case .some(false): .systemError
+        case .none: .gray7
+        }
+    }
+
     @ViewBuilder
     var trailingButtons: some View {
         HStack(spacing: 4) {
@@ -129,7 +207,7 @@ private extension MTextField {
                 .buttonStyle(.plain)
             }
 
-            if hasErrorIcon {
+            if isValid == false {
                 Image.icError24
                     .resizable()
                     .frame(width: 24, height: 24)
