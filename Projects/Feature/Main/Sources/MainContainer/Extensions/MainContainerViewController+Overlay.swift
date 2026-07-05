@@ -1,14 +1,14 @@
 //
-//  Overlay+.swift
+//  MainContainerViewController+Overlay.swift
 //  Main
 //
-//  Created by 김동준 on 6/30/26
+//  Created by 김동준 on 7/5/26
 //
 
 import UIKit
 import SnapKit
 
-extension MainTabBarController {
+extension MainContainerViewController {
     func showOverlay(_ overlayView: UIView) {
         currentOverlayView?.removeFromSuperview()
 

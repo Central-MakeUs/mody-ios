@@ -9,7 +9,6 @@ import UIKit
 import SnapKit
 
 public final class MainTabBarController: UITabBarController {
-    weak var currentOverlayView: UIView?
     var customTabBarView: CustomTabBarView?
     var customTabBarHeightConstraint: Constraint?
 

@@ -78,6 +78,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.CommonDomain),
             .external(.SnapKit)
         ],
+        .DesignSystem: [
+            .external(.SnapKit)
+        ],
         .Base: [
             .module(.DesignSystem),
             .module(.ModyLogger)

@@ -16,6 +16,7 @@ public final class MainCoordinator {
     public let navigationController: UINavigationController
     public let tabBarController: MainTabBarController
     public weak var delegate: MainCoordinatorDelegate?
+    weak var mainContainerViewController: MainContainerViewController?
 
     private let feedBuilder: FeedBuildable
     private let challengeBuilder: ChallengeBuildable
@@ -64,6 +65,11 @@ public final class MainCoordinator {
             animated: false
         )
 
-        navigationController.setViewControllers([tabBarController], animated: false)
+        let mainContainerViewController = MainContainerViewController(
+            tabBarController: tabBarController
+        )
+        self.mainContainerViewController = mainContainerViewController
+
+        navigationController.setViewControllers([mainContainerViewController], animated: false)
     }
 }
