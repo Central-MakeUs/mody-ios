@@ -106,6 +106,7 @@ trap 'handle_unexpected_failure "$LINENO" "$BASH_COMMAND"' ERR
 export FASTLANE_SKIP_UPDATE_CHECK=1
 export FASTLANE_HIDE_CHANGELOG=1
 export FASTLANE_OPT_OUT_USAGE=1
+export CICD_RESOLVED_ENV_FILE="${RUNNER_TEMP:-/tmp}/mody-cicd-resolved-build-${BASHPID}.env"
 
 scheme_exists "$CICD_SCHEME" || fail "shared scheme does not exist: $CICD_SCHEME"
 
@@ -122,6 +123,13 @@ else
 
   echo "Fastlane CI/CD lane started"
   fastlane ios cicd
+fi
+
+if [[ -f "$CICD_RESOLVED_ENV_FILE" ]]; then
+  # Fastlane runs in a child process, so source the upload-confirmed build version
+  # before sending the success notification from this shell.
+  # shellcheck disable=SC1090
+  source "$CICD_RESOLVED_ENV_FILE"
 fi
 
 notify_success
