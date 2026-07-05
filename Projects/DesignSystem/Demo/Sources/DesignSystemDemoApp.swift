@@ -24,6 +24,10 @@ private struct DesignSystemDemoHomeView: View {
                 NavigationLink("TextField") {
                     TextFieldDemo()
                 }
+
+                NavigationLink("Button") {
+                    ButtonDemo()
+                }
             }
             .navigationTitle("DesignSystem")
         }
