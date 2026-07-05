@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import DesignSystem
 
 final class CustomTabBarView: UIView {
     var onSelect: ((Int) -> Void)?
@@ -28,7 +29,7 @@ final class CustomTabBarView: UIView {
     
     private let dividerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.red
+        view.backgroundColor = UIColor.gray2
         
         return view
     }()
