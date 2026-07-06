@@ -28,6 +28,10 @@ private struct DesignSystemDemoHomeView: View {
                 NavigationLink("Button") {
                     ButtonDemo()
                 }
+
+                NavigationLink("NavigationBar") {
+                    NavigationBarDemo()
+                }
             }
             .navigationTitle("DesignSystem")
         }
