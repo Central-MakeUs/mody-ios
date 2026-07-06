@@ -40,7 +40,9 @@ public struct ModyGroupRootFeature {
                 showSignUpDoneContents: showSignUpDoneContents,
                 showsBackButton: entryPoint == .main
             )
-            self.groupCreateState = .init(showsBackButton: entryPoint == .main)
+            self.groupCreateState = .init(
+                showsBackButton: entryPoint == .main && initialScreen != .create
+            )
         }
     }
     

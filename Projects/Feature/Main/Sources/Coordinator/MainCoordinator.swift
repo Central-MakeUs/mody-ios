@@ -74,8 +74,11 @@ public final class MainCoordinator {
             tabs: tabs
         )
         self.mainContainerViewController = mainContainerViewController
-        mainContainerViewController.onUsersTap = { [weak self] in
+        mainContainerViewController.onSheetGroupParticipateTap = { [weak self] in
             self?.showGroupParticipate()
+        }
+        mainContainerViewController.onSheetGroupCreateTap = { [weak self] in
+            self?.showGroupCreate()
         }
 
         navigationController.setViewControllers([mainContainerViewController], animated: false)

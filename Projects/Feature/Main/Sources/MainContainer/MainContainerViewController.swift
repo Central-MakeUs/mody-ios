@@ -6,11 +6,13 @@
 //
 
 import UIKit
+import SwiftUI
 import SnapKit
 import DesignSystem
 
 final class MainContainerViewController: UIViewController {
-    var onUsersTap: (() -> Void)?
+    var onSheetGroupParticipateTap: (() -> Void)?
+    var onSheetGroupCreateTap: (() -> Void)?
     var onAlarmTap: (() -> Void)?
     weak var currentOverlayView: UIView?
 
@@ -91,7 +93,7 @@ private extension MainContainerViewController {
 
     func bind() {
         navigationBar.onUsersTap = { [weak self] in
-            self?.onUsersTap?()
+            self?.presentGroupMenuSheet()
         }
 
         navigationBar.onAlarmTap = { [weak self] in
