@@ -6,7 +6,18 @@
 //
 
 public enum ModyGroupRoute: Equatable {
-    case routeToMain
+    case back
+    case finish
+}
+
+public enum ModyGroupEntryPoint: Equatable {
+    case root
+    case main
+}
+
+public enum ModyGroupInitialScreen: Equatable {
+    case participate
+    case create
 }
 
 @MainActor

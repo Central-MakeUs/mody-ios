@@ -9,7 +9,8 @@ import ComposableArchitecture
 
 @Reducer
 public enum ModyGroupPath {
-    case temp(TempFeature)
+    case create(GroupCreateFeature)
+    case invite(GroupInviteFeature)
 }
 
 extension ModyGroupPath.State: Equatable {}

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct GroupInviteView: View {
     private let store: StoreOf<GroupInviteFeature>
@@ -16,6 +17,17 @@ public struct GroupInviteView: View {
     }
     
     public var body: some View {
-        Text("Hello, GroupInviteView")
+        VStack(spacing: 16) {
+            Text("그룹 초대하기")
+            
+            Button("공유하기") {
+                store.send(.shareButtonTapped)
+            }
+            
+            Button("완료") {
+                store.send(.doneButtonTapped)
+            }
+        }
+        .navigationBarBackButtonHidden()
     }
 }

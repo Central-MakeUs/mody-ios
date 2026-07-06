@@ -10,6 +10,7 @@ import Main
 import FeedInterface
 import ChallengeInterface
 import MyPageInterface
+import ModyGroupInterface
 
 extension AppAssembly {
     func assembleMain(in container: Container) {
@@ -17,11 +18,13 @@ extension AppAssembly {
             let feedBuilder: FeedBuildable = resolver.resolve()
             let challengeBuilder: ChallengeBuildable = resolver.resolve()
             let myPageBuilder: MyPageBuildable = resolver.resolve()
+            let modyGroupBuilder: ModyGroupBuildable = resolver.resolve()
 
             return MainCoordinator(
                 feedBuilder: feedBuilder,
                 challengeBuilder: challengeBuilder,
                 myPageBuilder: myPageBuilder,
+                modyGroupBuilder: modyGroupBuilder,
                 delegate: delegate
             )
         }

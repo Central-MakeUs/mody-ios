@@ -17,7 +17,22 @@ public struct ModyGroupRootView: View {
     
     public var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
-            GroupParticipateView(store: store.scope(state: \.groupParticipateState, action: \.groupParticipateAction))
+            switch store.initialScreen {
+            case .participate:
+                GroupParticipateView(
+                    store: store.scope(
+                        state: \.groupParticipateState,
+                        action: \.groupParticipateAction
+                    )
+                )
+            case .create:
+                GroupCreateView(
+                    store: store.scope(
+                        state: \.groupCreateState,
+                        action: \.groupCreateAction
+                    )
+                )
+            }
         } destination: { store in
             ModyGroupPathView(store: store)
         }

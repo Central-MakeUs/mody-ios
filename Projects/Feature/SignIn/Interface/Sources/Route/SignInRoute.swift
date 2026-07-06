@@ -8,8 +8,7 @@
 public enum SignInRoute: Equatable {
     case routeToMain
     case routeToOnBoarding
-    case routeToModyGroup
-    case routeToParticipateGroup
+    case routeToModyGroup(showSignUpDoneContents: Bool)
 }
 
 @MainActor

@@ -11,10 +11,22 @@ import ComposableArchitecture
 public struct GroupParticipateFeature {
     @ObservableState
     public struct State: Equatable {
-        public init() {}
+        let showSignUpDoneContents: Bool
+        let showsBackButton: Bool
+
+        public init(
+            showSignUpDoneContents: Bool,
+            showsBackButton: Bool
+        ) {
+            self.showSignUpDoneContents = showSignUpDoneContents
+            self.showsBackButton = showsBackButton
+        }
     }
     
     public enum Action {
+        case backButtonTapped
+        case participateButtonTapped
+        case createButtonTapped
     }
     
     public init() {}

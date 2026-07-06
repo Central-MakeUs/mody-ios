@@ -34,12 +34,6 @@ private extension SignInView {
                 
                 Spacer()
                 
-                Button {
-                    store.send(.mainButtonTapped)
-                } label: {
-                    Text("임시 메인 진입 버튼")
-                }
-                
                 loginButtonSection
                     .hPadding(24)
                     .padding(.bottom, 62)

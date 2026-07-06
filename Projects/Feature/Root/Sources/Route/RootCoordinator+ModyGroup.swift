@@ -10,7 +10,9 @@ import ModyGroupInterface
 extension RootCoordinator: ModyGroupRouter {
     public func route(from route: ModyGroupRoute) {
         switch route {
-        case .routeToMain:
+        case .back:
+            break
+        case .finish:
             delegate?.didFinishAuthentication(self)
         }
     }

@@ -9,5 +9,10 @@ import UIKit
 
 public protocol ModyGroupBuildable {
     @MainActor
-    func makeModyGroupViewController(router: ModyGroupRouter) -> UIViewController
+    func makeModyGroupViewController(
+        entryPoint: ModyGroupEntryPoint,
+        showSignUpDoneContents: Bool,
+        initialScreen: ModyGroupInitialScreen,
+        router: ModyGroupRouter
+    ) -> UIViewController
 }

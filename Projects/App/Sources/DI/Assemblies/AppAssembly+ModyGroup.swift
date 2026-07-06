@@ -11,16 +11,12 @@ import ModyGroup
 
 extension AppAssembly {
     func assembleModyGroupFeature(in container: Container) {
-        container.register(ModyGroupRootFeature.self) { (resolver: Resolver, router: ModyGroupRouter) in
-            return ModyGroupRootFeature { [weak router] route in
-                router?.route(from: route)
-            }
-        }
-        
-        container.register(ModyGroupBuildable.self) { resolver in
+        container.register(ModyGroupBuildable.self) { _ in
             return ModyGroupBuilder(
                 makeModyGroupRootFeature: { router in
-                    resolver.resolve(argument: router)
+                    ModyGroupRootFeature { [weak router] route in
+                        router?.route(from: route)
+                    }
                 }
             )
         }

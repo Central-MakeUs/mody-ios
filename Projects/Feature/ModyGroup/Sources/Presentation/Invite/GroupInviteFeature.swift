@@ -15,6 +15,9 @@ public struct GroupInviteFeature {
     }
     
     public enum Action {
+        case backButtonTapped
+        case shareButtonTapped
+        case doneButtonTapped
     }
     
     public init() {}

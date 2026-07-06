@@ -11,7 +11,7 @@ extension RootCoordinator: OnBoardingRouter {
     public func route(from route: OnBoardingRoute) {
         switch route {
         case .routeToGroupParticipate:
-            showModyGroup()
+            showModyGroup(showSignUpDoneContents: true)
         }
     }
 }

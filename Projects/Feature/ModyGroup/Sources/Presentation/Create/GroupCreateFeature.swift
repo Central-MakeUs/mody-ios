@@ -11,10 +11,16 @@ import ComposableArchitecture
 public struct GroupCreateFeature {
     @ObservableState
     public struct State: Equatable {
-        public init() {}
+        let showsBackButton: Bool
+
+        public init(showsBackButton: Bool = true) {
+            self.showsBackButton = showsBackButton
+        }
     }
     
     public enum Action {
+        case backButtonTapped
+        case nextButtonTapped
     }
     
     public init() {}

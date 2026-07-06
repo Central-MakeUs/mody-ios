@@ -32,8 +32,13 @@ extension RootCoordinator {
         setRoot(viewController, animated: false)
     }
     
-    func showModyGroup() {
-        let viewController = modyGroupBuilder.makeModyGroupViewController(router: self)
+    func showModyGroup(showSignUpDoneContents: Bool) {
+        let viewController = modyGroupBuilder.makeModyGroupViewController(
+            entryPoint: .root,
+            showSignUpDoneContents: showSignUpDoneContents,
+            initialScreen: .participate,
+            router: self
+        )
         setRoot(viewController, animated: false)
     }
 }

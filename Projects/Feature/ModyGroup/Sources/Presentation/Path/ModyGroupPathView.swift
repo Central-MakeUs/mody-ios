@@ -17,7 +17,8 @@ public struct ModyGroupPathView: View {
     
     public var body: some View {
         switch store.case {
-        case .temp(let store): TempView(store: store)
+        case .create(let store): GroupCreateView(store: store)
+        case .invite(let store): GroupInviteView(store: store)
         }
     }
 }

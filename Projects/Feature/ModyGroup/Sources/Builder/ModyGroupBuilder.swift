@@ -7,6 +7,7 @@
 
 import UIKit
 import SwiftUI
+import Base
 import ModyGroupInterface
 import ComposableArchitecture
 
@@ -20,13 +21,26 @@ public struct ModyGroupBuilder: ModyGroupBuildable {
     }
 
     @MainActor
-    public func makeModyGroupViewController(router: ModyGroupRouter) -> UIViewController {
+    public func makeModyGroupViewController(
+        entryPoint: ModyGroupEntryPoint,
+        showSignUpDoneContents: Bool,
+        initialScreen: ModyGroupInitialScreen,
+        router: ModyGroupRouter
+    ) -> UIViewController {
         let view = ModyGroupRootView(
-            store: .init(initialState: .init()) {
+            store: .init(
+                initialState: .init(
+                    entryPoint: entryPoint,
+                    showSignUpDoneContents: showSignUpDoneContents,
+                    initialScreen: initialScreen
+                )
+            ) {
                 makeModyGroupRootFeature(router)
             }
         )
 
-        return UIHostingController(rootView: view)
+        let viewController = UIHostingController(rootView: view)
+        viewController.isSwipeBackEnabled = false
+        return viewController
     }
 }
