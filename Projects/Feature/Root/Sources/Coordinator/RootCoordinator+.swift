@@ -9,7 +9,7 @@ import UIKit
 import SplashInterface
 import SignInInterface
 import OnBoardingInterface
-import SignUpDoneInterface
+import ModyGroupInterface
 
 @MainActor
 extension RootCoordinator {
@@ -32,8 +32,8 @@ extension RootCoordinator {
         setRoot(viewController, animated: false)
     }
     
-    func showSignUpDone() {
-        let viewController = signUpDoneBuilder.makeSignUpDoneViewController(router: self)
+    func showModyGroup() {
+        let viewController = modyGroupBuilder.makeModyGroupViewController(router: self)
         setRoot(viewController, animated: false)
     }
 }

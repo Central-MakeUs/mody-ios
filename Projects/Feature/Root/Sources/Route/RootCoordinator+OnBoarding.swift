@@ -10,8 +10,8 @@ import OnBoardingInterface
 extension RootCoordinator: OnBoardingRouter {
     public func route(from route: OnBoardingRoute) {
         switch route {
-        case .routeToSignUpDone:
-            showSignUpDone()
+        case .routeToGroupParticipate:
+            showModyGroup()
         }
     }
 }

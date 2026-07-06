@@ -1,14 +1,14 @@
 //
-//  RootCoordinator+SignUpDone.swift
+//  RootCoordinator+ModyGroup.swift
 //  Root
 //
 //  Created by 김동준 on 6/26/26
 //
 
-import SignUpDoneInterface
+import ModyGroupInterface
 
-extension RootCoordinator: SignUpDoneRouter {
-    public func route(from route: SignUpDoneRoute) {
+extension RootCoordinator: ModyGroupRouter {
+    public func route(from route: ModyGroupRoute) {
         switch route {
         case .routeToMain:
             delegate?.didFinishAuthentication(self)

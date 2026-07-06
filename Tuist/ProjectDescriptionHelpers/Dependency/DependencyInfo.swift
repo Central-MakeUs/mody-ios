@@ -47,7 +47,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.Splash)),
             .module(.MicroFeature(.SignIn)),
             .module(.MicroFeature(.OnBoarding)),
-            .module(.MicroFeature(.SignUpDone)),
+            .module(.MicroFeature(.ModyGroup)),
             .module(.MicroFeature(.Feed)),
             .module(.MicroFeature(.Challenge)),
             .module(.MicroFeature(.MyPage)),
@@ -67,13 +67,14 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.Splash),
             .microFeature(.SignIn),
             .microFeature(.OnBoarding),
-            .microFeature(.SignUpDone),
+            .microFeature(.ModyGroup),
             .module(.Base)
         ],
         .Main: [
             .microFeature(.Feed),
             .microFeature(.Challenge),
             .microFeature(.MyPage),
+            .microFeature(.ModyGroup),
             .module(.Base),
             .module(.CommonDomain),
             .external(.SnapKit)
@@ -112,6 +113,12 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .SignUpDone: .init(
+            implementation: [
+                .external(.ComposableArchitecture),
+                .module(.Base)
+            ]
+        ),
+        .ModyGroup: .init(
             implementation: [
                 .external(.ComposableArchitecture),
                 .module(.Base)

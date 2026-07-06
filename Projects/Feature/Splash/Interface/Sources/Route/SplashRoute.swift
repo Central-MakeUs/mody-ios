@@ -8,7 +8,7 @@
 public enum SplashRoute: Equatable {
     case routeToMain
     case routeToSignIn
-    case routeToSignUpDone
+    case routeToModyGroup
 }
 
 @MainActor

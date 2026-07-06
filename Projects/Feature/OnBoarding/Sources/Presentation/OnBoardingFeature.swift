@@ -62,7 +62,7 @@ public struct OnBoardingFeature {
         case stepTwo(OnBoardingStepTwoFeature.Action)
         case stepThree(OnBoardingStepThreeFeature.Action)
         case stepFour(OnBoardingStepFourFeature.Action)
-        case routeToSignUpDone
+        case routeToGroupParticipate
     }
     
     public var body: some ReducerOf<Self> {
@@ -97,9 +97,9 @@ public struct OnBoardingFeature {
                 return .none
             case .stepFour:
                 return .none
-            case .routeToSignUpDone:
+            case .routeToGroupParticipate:
                 return .run { [router] _ in
-                    await router(.routeToSignUpDone)
+                    await router(.routeToGroupParticipate)
                 }
             }
         }
@@ -119,7 +119,7 @@ private extension OnBoardingFeature {
             state.currentStep = .four
             return .none
         case .four:
-            return .send(.routeToSignUpDone)
+            return .send(.routeToGroupParticipate)
         }
     }
 }

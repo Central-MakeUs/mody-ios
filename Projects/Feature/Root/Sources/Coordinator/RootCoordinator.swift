@@ -10,7 +10,7 @@ import Base
 import SplashInterface
 import SignInInterface
 import OnBoardingInterface
-import SignUpDoneInterface
+import ModyGroupInterface
 
 public final class RootCoordinator {
     public let navigationController: UINavigationController
@@ -19,14 +19,14 @@ public final class RootCoordinator {
     let splashBuilder: SplashBuildable
     let signInBuilder: SignInBuildable
     let onBoardingBuilder: OnBoardingBuildable
-    let signUpDoneBuilder: SignUpDoneBuildable
+    let modyGroupBuilder: ModyGroupBuildable
 
     public init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
         splashBuilder: SplashBuildable,
         signInBuilder: SignInBuildable,
         onBoardingBuilder: OnBoardingBuildable,
-        signUpDoneBuilder: SignUpDoneBuildable,
+        modyGroupBuilder: ModyGroupBuildable,
         delegate: RootCoordinatorDelegate? = nil
     ) {
         self.navigationController = navigationController
@@ -34,7 +34,7 @@ public final class RootCoordinator {
         self.splashBuilder = splashBuilder
         self.signInBuilder = signInBuilder
         self.onBoardingBuilder = onBoardingBuilder
-        self.signUpDoneBuilder = signUpDoneBuilder
+        self.modyGroupBuilder = modyGroupBuilder
         self.delegate = delegate
     }
     

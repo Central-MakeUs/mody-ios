@@ -15,11 +15,9 @@ extension RootCoordinator: SignInRouter {
         case .routeToOnBoarding:
             showOnBoarding()
         case .routeToParticipateGroup:
-            // TODO: Root를 참여하기로 바꾸기
-            break
-        case .routeToSignUpDone:
-            showSignUpDone()
-            break
+            showModyGroup()
+        case .routeToModyGroup:
+            showModyGroup()
         }
     }
 }

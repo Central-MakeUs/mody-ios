@@ -9,7 +9,7 @@ import Root
 import SplashInterface
 import SignInInterface
 import OnBoardingInterface
-import SignUpDoneInterface
+import ModyGroupInterface
 import Swinject
 
 extension AppAssembly {
@@ -18,13 +18,13 @@ extension AppAssembly {
             let splashBuilder: SplashBuildable = resolver.resolve()
             let signInBuilder: SignInBuildable = resolver.resolve()
             let onBoardingBuilder: OnBoardingBuildable = resolver.resolve()
-            let signUpDoneBuilder: SignUpDoneBuildable = resolver.resolve()
+            let modyGroupBuilder: ModyGroupBuildable = resolver.resolve()
 
             return RootCoordinator(
                 splashBuilder: splashBuilder,
                 signInBuilder: signInBuilder,
                 onBoardingBuilder: onBoardingBuilder,
-                signUpDoneBuilder: signUpDoneBuilder,
+                modyGroupBuilder: modyGroupBuilder,
                 delegate: delegate
             )
         }
