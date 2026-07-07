@@ -7,6 +7,7 @@
 
 import CoreAuth
 import CoreAuthInterface
+import CoreKakaoInterface
 import CoreKeyChainStorage
 import CoreNetworkInterface
 import Swinject
@@ -34,8 +35,10 @@ extension AppAssembly {
             return AuthUseCase(authRepository: authRepository)
         }
 
-        container.register(SocialLoginInterface.self) { _ in
-            SocialLoginService()
+        container.register(SocialLoginInterface.self) { resolver in
+            let kakaoAuthService: CoreKakaoAuthInterface = resolver.resolve()
+
+            return SocialLoginService(kakaoAuthService: kakaoAuthService)
         }
     }
 }

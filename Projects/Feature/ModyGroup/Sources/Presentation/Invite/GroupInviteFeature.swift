@@ -9,6 +9,12 @@ import ComposableArchitecture
 
 @Reducer
 public struct GroupInviteFeature {
+    private let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol
+
+    public init(shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol) {
+        self.shareGroupInviteUseCase = shareGroupInviteUseCase
+    }
+
     @ObservableState
     public struct State: Equatable {
         public init() {}
@@ -19,11 +25,21 @@ public struct GroupInviteFeature {
         case shareButtonTapped
         case doneButtonTapped
     }
-    
-    public init() {}
+
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
-            return .none
+            switch action {
+            case .shareButtonTapped:
+                return .run { _ in
+                    do {
+                        try await shareGroupInviteUseCase.shareCodeToKakao()
+                    } catch {
+                        debugPrint("ModyGroup invite share failed: \(error)")
+                    }
+                }
+            case .backButtonTapped, .doneButtonTapped:
+                return .none
+            }
         }
     }
 }

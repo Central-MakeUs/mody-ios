@@ -16,9 +16,15 @@ public struct ModyGroupPathView: View {
     }
     
     public var body: some View {
-        switch store.case {
-        case .create(let store): GroupCreateView(store: store)
-        case .invite(let store): GroupInviteView(store: store)
+        switch store.state {
+        case .create:
+            if let store = store.scope(state: \.create, action: \.create) {
+                GroupCreateView(store: store)
+            }
+        case .invite:
+            if let store = store.scope(state: \.invite, action: \.invite) {
+                GroupInviteView(store: store)
+            }
         }
     }
 }

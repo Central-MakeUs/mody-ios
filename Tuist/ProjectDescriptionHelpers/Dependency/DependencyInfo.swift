@@ -55,13 +55,14 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreKeyChainStorage)),
             .module(.MicroFeature(.CoreNetwork)),
             .module(.MicroFeature(.CoreAuth)),
+            .module(.MicroFeature(.CoreKakao)),
             
             .external(.FirebaseCore),
-            .external(.KakaoSDKUser),
             .external(.Swinject),
             
             .microFeature(.CoreNetwork),
-            .microFeature(.CoreAuth)
+            .microFeature(.CoreAuth),
+            .microFeature(.CoreKakao)
         ],
         .Root: [
             .microFeature(.Splash),
@@ -121,7 +122,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .ModyGroup: .init(
             implementation: [
                 .external(.ComposableArchitecture),
-                .module(.Base)
+                .module(.Base),
+                .microFeature(.CoreKakao)
             ]
         ),
         .Feed: .init(
@@ -155,6 +157,15 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.ModyLogger)
             ]
         ),
+        .CoreKakao: .init(
+            implementation: [
+                .external(.KakaoSDKAuth),
+                .external(.KakaoSDKCommon),
+                .external(.KakaoSDKShare),
+                .external(.KakaoSDKTemplate),
+                .external(.KakaoSDKUser)
+            ]
+        ),
         .CoreAuth: .init(
             interface: [
                 .module(.CommonDomain)
@@ -163,7 +174,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain),
                 .microFeature(.CoreKeyChainStorage),
                 .microFeature(.CoreNetwork),
-                .external(.KakaoSDKUser),
+                .microFeature(.CoreKakao),
                 .module(.ModyLogger)
             ]
         )

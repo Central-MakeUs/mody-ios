@@ -10,11 +10,14 @@ import ModyGroupInterface
 
 @Reducer
 public struct ModyGroupRootFeature {
+    private let groupInviteFeature: GroupInviteFeature
     private let router: @MainActor (ModyGroupRoute) -> Void
     
     public init(
+        groupInviteFeature: GroupInviteFeature,
         router: @escaping @MainActor (ModyGroupRoute) -> Void
     ) {
+        self.groupInviteFeature = groupInviteFeature
         self.router = router
     }
 
@@ -76,7 +79,9 @@ public struct ModyGroupRootFeature {
                 return .none
             }
         }
-        .forEach(\.path, action: \.path)
+        .forEach(\.path, action: \.path) {
+            ModyGroupPath(groupInviteFeature: groupInviteFeature)
+        }
     }
 }
 
@@ -138,7 +143,7 @@ private extension ModyGroupRootFeature {
             return .run { [router] _ in
                 await router(.finish)
             }
-        default:
+        case .shareButtonTapped:
             return .none
         }
     }

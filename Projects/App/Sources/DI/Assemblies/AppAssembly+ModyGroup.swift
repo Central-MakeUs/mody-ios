@@ -6,15 +6,28 @@
 //
 
 import Swinject
+import CoreKakaoInterface
 import ModyGroupInterface
 import ModyGroup
 
 extension AppAssembly {
     func assembleModyGroupFeature(in container: Container) {
-        container.register(ModyGroupBuildable.self) { _ in
+        container.register(ShareGroupInviteUseCaseProtocol.self) { resolver in
+            let kakaoShareService: CoreKakaoShareInterface = resolver.resolve()
+
+            return ShareGroupInviteUseCase(kakaoShareService: kakaoShareService)
+        }
+
+        container.register(ModyGroupBuildable.self) { resolver in
             return ModyGroupBuilder(
                 makeModyGroupRootFeature: { router in
-                    ModyGroupRootFeature { [weak router] route in
+                    let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol = resolver.resolve()
+
+                    return ModyGroupRootFeature(
+                        groupInviteFeature: GroupInviteFeature(
+                            shareGroupInviteUseCase: shareGroupInviteUseCase
+                        )
+                    ) { [weak router] route in
                         router?.route(from: route)
                     }
                 }

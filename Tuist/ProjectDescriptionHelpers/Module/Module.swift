@@ -22,6 +22,10 @@ public enum ExternalModule {
     case Swinject
     case Alamofire
     case SnapKit
+    case KakaoSDKAuth
+    case KakaoSDKCommon
+    case KakaoSDKShare
+    case KakaoSDKTemplate
     case KakaoSDKUser
     case FirebaseCore
     case FirebaseAnalytics
@@ -36,6 +40,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreKakao
     case ModyGroup
     case CoreAuth
     case FirebaseService
@@ -80,6 +85,7 @@ public enum MicroFeatureModule {
         case .FirebaseService: "Projects/Core/FirebaseService"
         case .CoreAuth: "Projects/Core/CoreAuth"
         case .ModyGroup: "Projects/Feature/ModyGroup"
+        case .CoreKakao: "Projects/Core/CoreKakao"
         }
     }
 }
