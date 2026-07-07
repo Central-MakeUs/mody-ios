@@ -11,7 +11,7 @@ import CoreKeyChainStorageInterface
 
 public struct AuthRepository: AuthRepositoryProtocol {
     private let authService: AuthService
-    private let keyChainStorage: CoreKeyChainStorageInterface
+    let keyChainStorage: CoreKeyChainStorageInterface
 
     public init(
         authService: AuthService,
@@ -35,33 +35,11 @@ public struct AuthRepository: AuthRepositoryProtocol {
 
         return session
     }
-}
 
-private extension AuthRepository {
-    func saveAuthSessionInfoToKeyChain(_ session: AuthSession) throws {
-        try? keyChainStorage.save(
-            key: KeyChainStorageKey.isSignUpDone.rawValue,
-            value: session.personalInfoCompleted
-        )
+    public func postLogout() async throws {
+        let refreshToken = try readRefreshTokenFromKeyChain()
 
-        try? keyChainStorage.save(
-            key: KeyChainStorageKey.mainAccessible.rawValue,
-            value: session.mainAccessible
-        )
-
-        try? keyChainStorage.save(
-            key: KeyChainStorageKey.groupOnboardingCompleted.rawValue,
-            value: session.groupOnboardingCompleted
-        )
-
-        try? keyChainStorage.save(
-            key: KeyChainStorageKey.accessToken.rawValue,
-            value: session.accessToken
-        )
-
-        try? keyChainStorage.save(
-            key: KeyChainStorageKey.refreshToken.rawValue,
-            value: session.refreshToken
-        )
+        try await authService.postLogout(refreshToken: refreshToken)
+        try deleteAuthSessionInfoFromKeyChain()
     }
 }

@@ -12,4 +12,6 @@ public protocol AuthRepositoryProtocol {
         loginType: SocialLoginType,
         accessToken: String
     ) async throws -> AuthSession
+
+    func postLogout() async throws
 }
