@@ -24,4 +24,8 @@ public struct AuthUseCase: AuthUseCaseProtocol {
             accessToken: accessToken
         )
     }
+
+    public func logout() async throws {
+        try await authRepository.postLogout()
+    }
 }

@@ -21,4 +21,12 @@ enum AuthEndpoint {
             requiresAuthorization: false
         )
     }
+
+    static func postLogout(refreshToken: String) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/auth/logout",
+            method: .POST,
+            bodyParameters: ["refreshToken": refreshToken]
+        )
+    }
 }

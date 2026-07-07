@@ -36,4 +36,12 @@ public struct AuthService {
 
         return result
     }
+
+    func postLogout(refreshToken: String) async throws {
+        let endpoint = AuthEndpoint.postLogout(refreshToken: refreshToken)
+
+        let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(
+            endpoint
+        )
+    }
 }

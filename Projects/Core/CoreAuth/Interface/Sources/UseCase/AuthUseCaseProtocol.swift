@@ -12,4 +12,6 @@ public protocol AuthUseCaseProtocol {
         loginType: SocialLoginType,
         accessToken: String
     ) async throws -> AuthSession
+
+    func logout() async throws
 }
