@@ -143,7 +143,7 @@ private extension ModyGroupRootFeature {
             return .run { [router] _ in
                 await router(.finish)
             }
-        case .shareButtonTapped:
+        default:
             return .none
         }
     }

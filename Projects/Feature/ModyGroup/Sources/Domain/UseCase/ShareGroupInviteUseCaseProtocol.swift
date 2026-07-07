@@ -7,5 +7,5 @@
 
 public protocol ShareGroupInviteUseCaseProtocol {
     @MainActor
-    func shareCodeToKakao() async throws
+    func shareCodeToKakao(code: String) async throws
 }

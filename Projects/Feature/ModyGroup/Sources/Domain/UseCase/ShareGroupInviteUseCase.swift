@@ -15,7 +15,7 @@ public struct ShareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol {
     }
 
     @MainActor
-    public func shareCodeToKakao() async throws {
-        try await kakaoShareService.shareCodeToKakao(code: "AABB1122")
+    public func shareCodeToKakao(code: String) async throws {
+        try await kakaoShareService.shareCodeToKakao(code: code)
     }
 }

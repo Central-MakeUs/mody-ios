@@ -29,5 +29,6 @@ public struct GroupInviteView: View {
             }
         }
         .navigationBarBackButtonHidden()
+        .mLoading(isPresent: store.isLoading)
     }
 }

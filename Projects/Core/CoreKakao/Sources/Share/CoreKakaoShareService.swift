@@ -15,7 +15,8 @@ public final class CoreKakaoShareService: CoreKakaoShareInterface {
 
     @MainActor
     public func shareCodeToKakao(code: String) async throws {
-        let template = makeTemplate(code: code)
+        guard let template = makeTemplate(code: code) else { return }
+
         let sharingURL = try await makeSharingURL(from: template)
         await UIApplication.shared.open(sharingURL)
     }
@@ -27,32 +28,51 @@ private enum CoreKakaoShareError: Error {
 }
 
 private extension CoreKakaoShareService {
-    var groupCodeWebURL: URL {
-        URL(string: "https://mody.app/invite")!
+    var inviteImageURL: URL {
+        URL(string: "https://search.pstatic.net/sunny/?src=https%3A%2F%2Fst.depositphotos.com%2F1000604%2F2576%2Fi%2F450%2Fdepositphotos_25763201-stock-photo-lonely-tree.jpg&type=sc960_832")!
     }
 
-    func makeTemplate(code: String) -> TextTemplate {
+    var groupCodeWebURL: URL? {
+        guard let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String,
+              !baseURLString.isEmpty,
+              let baseURL = URL(string: baseURLString) else { return nil }
+
+        return baseURL.appending(path: "invite")
+    }
+
+    func makeTemplate(code: String) -> FeedTemplate? {
+        guard let groupCodeWebURL else { return nil }
+
+        let inviteURL = groupCodeWebURL.appending(queryItems: [
+            .init(name: "inviteCode", value: code)
+        ])
         let link = Link(
-            webUrl: groupCodeWebURL,
-            mobileWebUrl: groupCodeWebURL,
+            webUrl: inviteURL,
+            mobileWebUrl: inviteURL,
             iosExecutionParams: [
                 "inviteCode": code
             ]
         )
 
-        return TextTemplate(
-            text: "모디 그룹에 초대합니다.\n초대 코드: \(code)",
-            link: link,
+        return FeedTemplate(
+            content: .init(
+                title: "모디 그룹에 초대합니다.",
+                imageUrl: inviteImageURL,
+                imageWidth: 960,
+                imageHeight: 832,
+                description: "초대 코드: \(code)\n나중에 문구 정하면 수정 필요",
+                link: link
+            ),
             buttons: [
                 .init(
-                    title: "모디 앱 실행",
+                    title: "바뀔 버튼 타이틀 아직안정함",
                     link: link
                 )
             ]
         )
     }
 
-    func makeSharingURL(from template: TextTemplate) async throws -> URL {
+    func makeSharingURL(from template: Templatable) async throws -> URL {
         if ShareApi.isKakaoTalkSharingAvailable() {
             return try await makeKakaoTalkSharingURL(from: template)
         }
@@ -64,7 +84,7 @@ private extension CoreKakaoShareService {
         return url
     }
 
-    func makeKakaoTalkSharingURL(from template: TextTemplate) async throws -> URL {
+    func makeKakaoTalkSharingURL(from template: Templatable) async throws -> URL {
         try await withCheckedThrowingContinuation { continuation in
             ShareApi.shared.shareDefault(templatable: template) { sharingResult, error in
                 if let sharingResult {
