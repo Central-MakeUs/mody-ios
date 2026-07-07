@@ -14,12 +14,8 @@ extension RootCoordinator: SignInRouter {
             delegate?.didFinishAuthentication(self)
         case .routeToOnBoarding:
             showOnBoarding()
-        case .routeToParticipateGroup:
-            // TODO: Root를 참여하기로 바꾸기
-            break
-        case .routeToSignUpDone:
-            showSignUpDone()
-            break
+        case .routeToModyGroup(let showSignUpDoneContents):
+            showModyGroup(showSignUpDoneContents: showSignUpDoneContents)
         }
     }
 }

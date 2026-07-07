@@ -6,7 +6,7 @@
 //
 
 public enum OnBoardingRoute: Equatable {
-    case routeToSignUpDone
+    case routeToGroupParticipate
 }
 
 @MainActor

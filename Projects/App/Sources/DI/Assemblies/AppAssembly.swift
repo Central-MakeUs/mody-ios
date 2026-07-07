@@ -22,7 +22,7 @@ struct AppAssembly: Assembly {
         assembleSplashFeature(in: container)
         assembleSignInFeature(in: container)
         assembleOnBoardingFeature(in: container)
-        assembleSignUpDoneFeature(in: container)
+        assembleModyGroupFeature(in: container)
         assembleFeedReactor(in: container)
         assembleChallengeFeature(in: container)
         assembleMyPageFeature(in: container)

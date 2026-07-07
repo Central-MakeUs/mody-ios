@@ -99,7 +99,7 @@ private extension SignInFeature {
             return .routeToMain
         }
         
-        return session.groupOnboardingCompleted ? .routeToParticipateGroup : .routeToSignUpDone
+        return .routeToModyGroup(showSignUpDoneContents: !session.groupOnboardingCompleted)
     }
     
     func signInWithKakao() async -> Action {

@@ -78,6 +78,10 @@ export PATH="$HOME/.local/bin:$PATH"
 
 echo "Ruby install started"
 command -v brew >/dev/null 2>&1 || fail "Homebrew is not installed"
+if brew tap | grep -qx "aws/tap"; then
+  brew trust aws/tap
+fi
+
 if ! brew list ruby >/dev/null 2>&1; then
   brew install ruby
 else

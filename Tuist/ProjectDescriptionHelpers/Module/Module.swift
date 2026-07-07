@@ -36,6 +36,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case ModyGroup
     case CoreAuth
     case FirebaseService
     case CoreNetwork
@@ -78,6 +79,7 @@ public enum MicroFeatureModule {
         case .CoreNetwork: "Projects/Core/CoreNetwork"
         case .FirebaseService: "Projects/Core/FirebaseService"
         case .CoreAuth: "Projects/Core/CoreAuth"
+        case .ModyGroup: "Projects/Feature/ModyGroup"
         }
     }
 }

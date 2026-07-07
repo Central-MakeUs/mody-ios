@@ -10,6 +10,7 @@ import UIKit
 import FeedInterface
 import ChallengeInterface
 import MyPageInterface
+import ModyGroupInterface
 import CommonDomain
 
 public final class MainCoordinator {
@@ -21,6 +22,7 @@ public final class MainCoordinator {
     private let feedBuilder: FeedBuildable
     private let challengeBuilder: ChallengeBuildable
     private let myPageBuilder: MyPageBuildable
+    let modyGroupBuilder: ModyGroupBuildable
 
     public init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
@@ -28,6 +30,7 @@ public final class MainCoordinator {
         feedBuilder: FeedBuildable,
         challengeBuilder: ChallengeBuildable,
         myPageBuilder: MyPageBuildable,
+        modyGroupBuilder: ModyGroupBuildable,
         delegate: MainCoordinatorDelegate? = nil
     ) {
         self.navigationController = navigationController
@@ -35,6 +38,7 @@ public final class MainCoordinator {
         self.feedBuilder = feedBuilder
         self.challengeBuilder = challengeBuilder
         self.myPageBuilder = myPageBuilder
+        self.modyGroupBuilder = modyGroupBuilder
         self.delegate = delegate
         navigationController.setNavigationBarHidden(true, animated: false)
         print("⭕ MainCoordinator init!")
@@ -70,6 +74,12 @@ public final class MainCoordinator {
             tabs: tabs
         )
         self.mainContainerViewController = mainContainerViewController
+        mainContainerViewController.onSheetGroupParticipateTap = { [weak self] in
+            self?.showGroupParticipate()
+        }
+        mainContainerViewController.onSheetGroupCreateTap = { [weak self] in
+            self?.showGroupCreate()
+        }
 
         navigationController.setViewControllers([mainContainerViewController], animated: false)
     }
