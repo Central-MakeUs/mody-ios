@@ -9,13 +9,18 @@ import Swinject
 import SplashInterface
 import Splash
 import FirebaseServiceInterface
+import CoreNetworkInterface
 
 extension AppAssembly {
     func assembleSplashFeature(in container: Container) {
         container.register(SplashRepositoryProtocol.self) { resolver in
+            let network: CoreNetworkProtocol = resolver.resolve()
             let firebaseService: FirebaseServiceInterface = resolver.resolve()
 
-            return SplashRepository(firebaseService: firebaseService)
+            return SplashRepository(
+                network: network,
+                firebaseService: firebaseService
+            )
         }
 
         container.register(SplashUseCase.self) { resolver in

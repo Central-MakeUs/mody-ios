@@ -13,7 +13,7 @@ public struct SplashUseCase {
     }
 
     public func getHealthCheck() async throws -> Bool {
-        await splashRepository.getHealthCheck()
+        try await splashRepository.getHealthCheck()
     }
 
     public func fetchAndActivate() async {

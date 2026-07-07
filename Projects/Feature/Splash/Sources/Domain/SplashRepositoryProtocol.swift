@@ -6,7 +6,7 @@
 //
 
 public protocol SplashRepositoryProtocol {
-    func getHealthCheck() async -> Bool
+    func getHealthCheck() async throws -> Bool
     func fetchAndActivate() async
     func getChallengeTabHideFlag(key: String) -> Bool
 }
