@@ -13,6 +13,7 @@ public struct MButton: View {
     private let isDisabled: Bool
     private let horizontalPadding: CGFloat
     private let verticalPadding: CGFloat
+    private let maxWidth: CGFloat?
     private let trailingIcon: Image?
     private let action: (() -> Void)?
 
@@ -22,6 +23,7 @@ public struct MButton: View {
         isDisabled: Bool = false,
         horizontalPadding: CGFloat = 10,
         verticalPadding: CGFloat = 10,
+        maxWidth: CGFloat? = nil,
         trailingIcon: Image? = nil,
         action: (() -> Void)? = nil
     ) {
@@ -30,6 +32,7 @@ public struct MButton: View {
         self.isDisabled = isDisabled
         self.horizontalPadding = horizontalPadding
         self.verticalPadding = verticalPadding
+        self.maxWidth = maxWidth
         self.trailingIcon = trailingIcon
         self.action = action
     }
@@ -54,6 +57,7 @@ public struct MButton: View {
             .foregroundStyle(currentTextColor)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
+            .frame(maxWidth: maxWidth)
             .background(currentBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }

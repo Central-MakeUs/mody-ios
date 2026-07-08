@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct OnBoardingView: View {
     private let store: StoreOf<OnBoardingFeature>
@@ -22,23 +23,19 @@ public struct OnBoardingView: View {
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Button {
+            MButton(
+                store.buttonTitle,
+                style: store.isNextButtonEnabled ? .primary : .gray,
+                isDisabled: !store.isNextButtonEnabled,
+                horizontalPadding: 0,
+                verticalPadding: 13,
+                maxWidth: .infinity
+            ) {
                 store.send(.nextButtonTapped)
-            } label: {
-                Text(store.buttonTitle)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(.black)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
             }
-            .disabled(!store.isNextButtonEnabled)
-            .opacity(store.isNextButtonEnabled ? 1 : 0.4)
             .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .padding(.bottom, 16)
         }
-        .padding(.top, 24)
     }
 }
 

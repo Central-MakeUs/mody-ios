@@ -16,6 +16,7 @@ public struct MTextField: View {
     private let cursorColor: Color
     private let underlineColor: Color
     private let focusedUnderlineColor: Color
+    private let errorUnderlineColor: Color
     private let hasStroke: Bool
     private let strokeColor: Color
     private let hasClearButton: Bool
@@ -35,9 +36,10 @@ public struct MTextField: View {
         placeholder: String,
         textColor: Color = .gray10,
         placeholderColor: Color = .gray4,
-        cursorColor: Color = .main,
+        cursorColor: Color = .gray10,
         underlineColor: Color = .gray2,
-        focusedUnderlineColor: Color = .main,
+        focusedUnderlineColor: Color = .gray2,
+        errorUnderlineColor: Color = .systemError,
         hasStroke: Bool = false,
         strokeColor: Color = .gray2,
         hasClearButton: Bool = false,
@@ -54,6 +56,7 @@ public struct MTextField: View {
         self.cursorColor = cursorColor
         self.underlineColor = underlineColor
         self.focusedUnderlineColor = focusedUnderlineColor
+        self.errorUnderlineColor = errorUnderlineColor
         self.hasStroke = hasStroke
         self.strokeColor = strokeColor
         self.hasClearButton = hasClearButton
@@ -96,10 +99,18 @@ private extension MTextField {
         .overlay(alignment: .bottom) {
             if !hasStroke {
                 Rectangle()
-                    .fill(isFocused ? focusedUnderlineColor : underlineColor)
+                    .fill(currentUnderlineColor)
                     .frame(height: 1)
             }
         }
+    }
+
+    var currentUnderlineColor: Color {
+        guard isValid != false else {
+            return errorUnderlineColor
+        }
+
+        return isFocused ? focusedUnderlineColor : underlineColor
     }
 }
 
