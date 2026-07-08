@@ -25,19 +25,25 @@ struct CoreNetworkRequest: URLRequestConvertible {
     }
 
     func asURLRequest() throws -> URLRequest {
-        let request = try URLRequest(
+        var request = try URLRequest(
             url: makeURL(),
             method: HTTPMethod(rawValue: endpoint.method.rawValue),
             headers: makeHeaders()
         )
 
-        guard !endpoint.bodyParameters.isEmpty else {
+        if let bodyParameters = endpoint.bodyParameters {
+            request.httpBody = try encode(bodyParameters)
             return request
         }
 
-        return try JSONEncoding.default.encode(
-            request,
-            with: endpoint.bodyParameters
-        )
+        return request
+    }
+
+    func encode(_ body: Encodable) throws -> Data {
+        do {
+            return try JSONEncoder().encode(body)
+        } catch {
+            throw CoreNetworkClientError.encodingFailed
+        }
     }
 }
