@@ -5,12 +5,12 @@
 //  Created by 김동준 on 6/30/26
 //
 
-public struct CoreNetworkEndpoint: Equatable {
+public struct CoreNetworkEndpoint {
     public let path: String
     public let method: HttpMethod
     public let headers: [String: String]
     public let queryParameters: [String: String]
-    public let bodyParameters: [String: String]
+    public let bodyParameters: Encodable?
     public let requiresAuthorization: Bool
 
     public init(
@@ -18,7 +18,7 @@ public struct CoreNetworkEndpoint: Equatable {
         method: HttpMethod = .GET,
         headers: [String: String] = [:],
         queryParameters: [String: String] = [:],
-        bodyParameters: [String: String] = [:],
+        bodyParameters: Encodable? = nil,
         requiresAuthorization: Bool = true
     ) {
         self.path = path

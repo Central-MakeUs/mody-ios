@@ -58,10 +58,8 @@ private extension CoreNetworkTokenRefresher {
         )
     }
 
-    func makeBodyParameters(refreshToken: String) -> [String: String] {
-        var bodyParameters = refreshTokenEndpoint.bodyParameters
-        bodyParameters["refreshToken"] = refreshToken
-        return bodyParameters
+    func makeBodyParameters(refreshToken: String) -> Encodable {
+        ["refreshToken": refreshToken]
     }
 
     func requestRefreshToken(endpoint: CoreNetworkEndpoint) async throws -> AuthRefreshTokenResponseDTO {

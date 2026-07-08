@@ -51,24 +51,19 @@ private extension CoreNetworkClient {
         return headers
     }
 
-    func jsonString(_ dictionary: [String: String]) -> String {
-        guard !dictionary.isEmpty else { return "{}" }
-
-        let sortedDictionary = dictionary
-            .sorted { $0.key < $1.key }
-            .reduce(into: [String: String]()) { result, element in
-                result[element.key] = element.value
-            }
-
+    func jsonString(_ body: Encodable?) -> String {
         guard
-            JSONSerialization.isValidJSONObject(sortedDictionary),
+            let body,
+            let encodedData = try? JSONEncoder().encode(body),
+            let jsonObject = try? JSONSerialization.jsonObject(with: encodedData),
+            JSONSerialization.isValidJSONObject(jsonObject),
             let data = try? JSONSerialization.data(
-                withJSONObject: sortedDictionary,
+                withJSONObject: jsonObject,
                 options: [.prettyPrinted, .sortedKeys]
             ),
             let jsonString = String(data: data, encoding: .utf8)
         else {
-            return String(describing: dictionary)
+            return "{}"
         }
 
         return jsonString
