@@ -51,7 +51,6 @@ public struct SignInFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return .send(.onBoardingButtonTapped)
                 return .none
             case .mainButtonTapped:
                 return .run { [router] _ in
