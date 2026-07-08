@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct OnBoardingStepTwoView: View {
     private let store: StoreOf<OnBoardingStepTwoFeature>
@@ -16,7 +17,32 @@ public struct OnBoardingStepTwoView: View {
     }
 
     public var body: some View {
-        Text("Step Two Body")
-            .font(.title2)
+        VStack(spacing: 0) {
+            titleText
+
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+private extension OnBoardingStepTwoView {
+    var titleText: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            MText(
+                "생년월일을 입력해주세요",
+                style: .h2,
+                color: .gray10,
+                alignment: .leading
+            )
+
+            MText(
+                "한국나이로 14세 이상부터 사용할 수 있어요!",
+                style: .b7,
+                color: .gray6,
+                alignment: .leading
+            )
+        }
+        .greedyWidth(.leading)
     }
 }

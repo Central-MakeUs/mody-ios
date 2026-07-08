@@ -17,6 +17,10 @@ public struct OnBoardingStepOneView: View {
     }
 
     public var body: some View {
+        stepOneBody
+    }
+    
+    private var stepOneBody: some View {
         VStack(spacing: 0) {
             titleText
 
