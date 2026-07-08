@@ -10,7 +10,7 @@ import ComposableArchitecture
 import DesignSystem
 
 public struct OnBoardingStepTwoView: View {
-    private let store: StoreOf<OnBoardingStepTwoFeature>
+    @Bindable private var store: StoreOf<OnBoardingStepTwoFeature>
 
     public init(store: StoreOf<OnBoardingStepTwoFeature>) {
         self.store = store
@@ -19,6 +19,9 @@ public struct OnBoardingStepTwoView: View {
     public var body: some View {
         VStack(spacing: 0) {
             titleText
+                .padding(.bottom, 60)
+
+            datePicker
 
             Spacer()
         }
@@ -44,5 +47,22 @@ private extension OnBoardingStepTwoView {
             )
         }
         .greedyWidth(.leading)
+    }
+}
+
+private extension OnBoardingStepTwoView {
+    var datePicker: some View {
+        DatePicker(
+            "",
+            selection: $store.birthDate,
+            in: store.selectableDateRange,
+            displayedComponents: [.date]
+        )
+        .datePickerStyle(.wheel)
+        .labelsHidden()
+        .environment(\.locale, store.locale)
+        .environment(\.calendar, store.calendar)
+        .environment(\.timeZone, store.timeZone)
+        .frame(height: 145)
     }
 }
