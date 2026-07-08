@@ -6,34 +6,19 @@
 //
 
 import CoreAuthInterface
-import KakaoSDKAuth
-import KakaoSDKCommon
-import KakaoSDKUser
+import CoreKakaoInterface
 
 public final class SocialLoginService: SocialLoginInterface {
+    private let kakaoAuthService: CoreKakaoAuthInterface
     var appleSignDelegate: AppleSignDelegate?
 
-    public init() {}
+    public init(kakaoAuthService: CoreKakaoAuthInterface) {
+        self.kakaoAuthService = kakaoAuthService
+    }
 
     @MainActor
     public func signInWithKakao() async throws -> String? {
-        do {
-            let token: OAuthToken
-
-            if UserApi.isKakaoTalkLoginAvailable() {
-                token = try await loginWithKakaoTalk()
-            } else {
-                token = try await loginWithKakaoAccount()
-            }
-
-            return token.accessToken
-        } catch let error as SdkError {
-            print("TODO: Handle Kakao SDK login error: \(error)")
-            throw error
-        } catch {
-            print("TODO: Handle unknown Kakao login error: \(error)")
-            throw error
-        }
+        try await kakaoAuthService.signInWithKakao()
     }
 
     @MainActor

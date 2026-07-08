@@ -11,6 +11,7 @@ struct AppAssembly: Assembly {
     func assemble(container: Container) {
         assembleFirebaseService(in: container)
         assembleCoreNetwork(in: container)
+        assembleCoreKakao(in: container)
         assembleCoreAuth(in: container)
         assembleFeature(in: container)
         assembleRoot(in: container)
