@@ -30,6 +30,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         appCoordinator.start()
         window.makeKeyAndVisible()
+        window.addKeyboardDismissTapGestureRecognizer()
     }
     
     func scene(
