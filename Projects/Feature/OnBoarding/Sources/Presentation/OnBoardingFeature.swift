@@ -10,9 +10,14 @@ import OnBoardingInterface
 
 @Reducer
 public struct OnBoardingFeature {
+    private let onBoardingUseCase: OnBoardingUseCase
     private let router: @MainActor (OnBoardingRoute) -> Void
 
-    public init(router: @escaping @MainActor (OnBoardingRoute) -> Void) {
+    public init(
+        onBoardingUseCase: OnBoardingUseCase,
+        router: @escaping @MainActor (OnBoardingRoute) -> Void
+    ) {
+        self.onBoardingUseCase = onBoardingUseCase
         self.router = router
     }
     

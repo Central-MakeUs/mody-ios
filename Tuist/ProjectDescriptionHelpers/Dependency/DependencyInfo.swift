@@ -110,7 +110,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .OnBoarding: .init(
             implementation: [
                 .external(.ComposableArchitecture),
-                .module(.Base)
+                .module(.Base),
+                .module(.CommonDomain),
+                .microFeature(.CoreNetwork)
             ]
         ),
         .SignUpDone: .init(
