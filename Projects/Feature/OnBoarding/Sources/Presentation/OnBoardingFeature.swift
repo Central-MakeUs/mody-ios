@@ -23,6 +23,10 @@ public struct OnBoardingFeature {
     
     @ObservableState
     public struct State: Equatable {
+        struct StepStoredRequest: Equatable {
+            var nickname: String?
+        }
+
         enum Step: Int, CaseIterable, Equatable {
             case one = 1
             case two = 2
@@ -31,6 +35,7 @@ public struct OnBoardingFeature {
         }
 
         var currentStep: Step = .one
+        var request: StepStoredRequest = .init()
         var stepOne: OnBoardingStepOneFeature.State = .init()
         var stepTwo: OnBoardingStepTwoFeature.State = .init()
         var stepThree: OnBoardingStepThreeFeature.State = .init()
@@ -39,7 +44,7 @@ public struct OnBoardingFeature {
         var buttonTitle: String {
             switch currentStep {
             case .one, .two, .three:
-                return "다음"
+                return "다음으로"
             case .four:
                 return "완료"
             }
@@ -93,6 +98,7 @@ public struct OnBoardingFeature {
                 guard state.isNextButtonEnabled else {
                     return .none
                 }
+                updateRequest(from: &state)
                 return moveNext(from: &state)
             case .stepOne:
                 return .none
@@ -112,6 +118,16 @@ public struct OnBoardingFeature {
 }
 
 private extension OnBoardingFeature {
+    func updateRequest(from state: inout State) {
+        switch state.currentStep {
+        case .one:
+            let nickname = state.stepOne.nickname
+            state.request.nickname = nickname
+        case .two, .three, .four:
+            break
+        }
+    }
+
     func moveNext(from state: inout State) -> Effect<Action> {
         switch state.currentStep {
         case .one:
