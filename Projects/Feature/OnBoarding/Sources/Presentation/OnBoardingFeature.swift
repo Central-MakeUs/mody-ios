@@ -27,6 +27,8 @@ public struct OnBoardingFeature {
         struct StepStoredRequest: Equatable {
             var nickname: String?
             var birthDate: String?
+            var currentWeightKg: Double?
+            var targetWeightKg: Double?
         }
 
         enum Step: Int, CaseIterable, Equatable {
@@ -127,7 +129,10 @@ private extension OnBoardingFeature {
             state.request.nickname = nickname
         case .two:
             state.request.birthDate = birthDateString(from: state.stepTwo)
-        case .three, .four:
+        case .three:
+            state.request.currentWeightKg = Double(state.stepThree.currentWeightKg)
+            state.request.targetWeightKg = Double(state.stepThree.targetWeightKg)
+        case .four:
             break
         }
     }
