@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 import OnBoardingInterface
 
 @Reducer
@@ -25,6 +26,7 @@ public struct OnBoardingFeature {
     public struct State: Equatable {
         struct StepStoredRequest: Equatable {
             var nickname: String?
+            var birthDate: String?
         }
 
         enum Step: Int, CaseIterable, Equatable {
@@ -123,9 +125,26 @@ private extension OnBoardingFeature {
         case .one:
             let nickname = state.stepOne.nickname
             state.request.nickname = nickname
-        case .two, .three, .four:
+        case .two:
+            state.request.birthDate = birthDateString(from: state.stepTwo)
+        case .three, .four:
             break
         }
+    }
+
+    func birthDateString(from state: OnBoardingStepTwoFeature.State) -> String {
+        let components = state.calendar.dateComponents(
+            [.year, .month, .day],
+            from: state.birthDate
+        )
+        guard
+            let year = components.year,
+            let month = components.month,
+            let day = components.day
+        else {
+            return ""
+        }
+        return String(format: "%04d-%02d-%02d", year, month, day)
     }
 
     func moveNext(from state: inout State) -> Effect<Action> {
