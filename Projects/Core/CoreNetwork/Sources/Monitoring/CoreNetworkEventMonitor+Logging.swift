@@ -9,7 +9,7 @@ import Alamofire
 import Foundation
 
 extension CoreNetworkEventMonitor {
-    func logRequest(_ request: URLRequest) {
+    func logRequest(_ request: URLRequest, bodyFallback: Data? = nil) {
         print(
             """
             
@@ -21,7 +21,7 @@ extension CoreNetworkEventMonitor {
             │ Headers:
             \(indented(prettyHeaders(request.allHTTPHeaderFields), prefix: "│   "))
             │ Body:
-            \(indented(prettyJSON(request.httpBody), prefix: "│   "))
+            \(indented(prettyJSON(request.httpBody ?? bodyFallback), prefix: "│   "))
             └────────────────────────────────────────
             """
         )

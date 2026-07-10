@@ -14,7 +14,7 @@ final class CoreNetworkEventMonitor: EventMonitor {
     func request(_ request: Request, didResumeTask task: URLSessionTask) {
         guard let urlRequest = task.currentRequest else { return }
 
-        logRequest(urlRequest)
+        logRequest(urlRequest, bodyFallback: request.request?.httpBody)
     }
 
     func request<Value>(
