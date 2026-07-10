@@ -1,0 +1,30 @@
+//
+//  MainCoordinator+.swift
+//  Main
+//
+//  Created by 김동준 on 7/6/26.
+//
+
+import ModyGroupInterface
+
+@MainActor
+extension MainCoordinator {
+    func showGroupParticipate() {
+        showModyGroup(initialScreen: .participate)
+    }
+
+    func showGroupCreate() {
+        showModyGroup(initialScreen: .create)
+    }
+
+    func showModyGroup(initialScreen: ModyGroupInitialScreen) {
+        let viewController = modyGroupBuilder.makeModyGroupViewController(
+            entryPoint: .main,
+            showSignUpDoneContents: false,
+            initialScreen: initialScreen,
+            router: self
+        )
+
+        navigationController.pushViewController(viewController, animated: true)
+    }
+}

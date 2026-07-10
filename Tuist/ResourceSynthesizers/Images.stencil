@@ -1,0 +1,52 @@
+import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+
+{% if catalogs %}
+// MARK: - SwiftUI Image Extension
+public extension Image {
+    private init(_ name: String) {
+        self.init(name, bundle: Bundle.module)
+    }
+
+    {% for catalog in catalogs %}
+    {% for asset in catalog.assets %}
+    {% if asset.type == "image" %}
+    static let {{asset.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = Self("{{asset.value}}")
+    {% endif %}
+    {% if asset.type == "group" %}
+    {% for item in asset.items %}
+    {% if item.type == "image" %}
+    static let {{item.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = Self("{{item.value}}")
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+}
+
+#if canImport(UIKit)
+// MARK: - UIKit UIImage Extension
+public extension UIImage {
+    private convenience init(_ name: String) {
+        self.init(named: name, in: Bundle.module, compatibleWith: nil)!
+    }
+
+    {% for catalog in catalogs %}
+    {% for asset in catalog.assets %}
+    {% if asset.type == "image" %}
+    static let {{asset.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = UIImage("{{asset.value}}")
+    {% endif %}
+    {% if asset.type == "group" %}
+    {% for item in asset.items %}
+    {% if item.type == "image" %}
+    static let {{item.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = UIImage("{{item.value}}")
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+}
+#endif
+{% endif %}
