@@ -36,8 +36,8 @@ extension CoreNetworkClientError {
              .decodingFailed,
              .emptyResponse:
             return .invalidResponse
-        case let .serverError(_, code, message):
-            return .serverError(code: code, message: message)
+        case let .serverError(_, code, message, fallback):
+            return .serverError(code: code, message: message, fallback: fallback.asNetworkError)
         default:
             return .unknown
         }

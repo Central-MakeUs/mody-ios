@@ -9,7 +9,7 @@ import Alamofire
 import Foundation
 
 extension AFError {
-    func asCoreNetworkError() -> CoreNetworkClientError {
+    func asCoreNetworkClientError() -> CoreNetworkClientError {
         switch self {
         case let .requestRetryFailed(retryError, originalError):
             if let coreNetworkError = retryError as? CoreNetworkClientError {
@@ -17,11 +17,11 @@ extension AFError {
             }
 
             if let afError = retryError as? AFError {
-                return afError.asCoreNetworkError()
+                return afError.asCoreNetworkClientError()
             }
 
             if let afError = originalError as? AFError {
-                return afError.asCoreNetworkError()
+                return afError.asCoreNetworkClientError()
             }
 
             return .unknown

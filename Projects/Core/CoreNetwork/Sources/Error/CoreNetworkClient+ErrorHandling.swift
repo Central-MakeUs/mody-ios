@@ -43,7 +43,7 @@ extension CoreNetworkClient {
         }
 
         if let afError = error as? AFError {
-            return afError.asCoreNetworkError()
+            return afError.asCoreNetworkClientError()
         }
         
         return .unknown

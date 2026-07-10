@@ -33,7 +33,8 @@ extension CoreNetworkClient {
             case .success(let value):
                 return value
             case .failure(let error):
-                throw decodeServerError(from: response) ?? error.asCoreNetworkError()
+                let fallback = error.asCoreNetworkClientError()
+                throw decodeServerError(from: response, fallback: fallback) ?? fallback
             }
         }
     }
@@ -41,7 +42,8 @@ extension CoreNetworkClient {
 
 private extension CoreNetworkClient {
     func decodeServerError<Response>(
-        from response: DataResponse<Response, AFError>
+        from response: DataResponse<Response, AFError>,
+        fallback: CoreNetworkClientError
     ) -> CoreNetworkClientError? {
         guard
             let data = response.data,
@@ -55,7 +57,8 @@ private extension CoreNetworkClient {
         return .serverError(
             statusCode: statusCode,
             code: errorResponse.code,
-            message: errorResponse.message
+            message: errorResponse.message,
+            fallback: fallback
         )
     }
 }
