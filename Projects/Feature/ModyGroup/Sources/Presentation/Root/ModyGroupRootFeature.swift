@@ -11,13 +11,16 @@ import ModyGroupInterface
 @Reducer
 public struct ModyGroupRootFeature {
     private let groupInviteFeature: GroupInviteFeature
+    private let groupParticipateFeature: GroupParticipateFeature
     private let router: @MainActor (ModyGroupRoute) -> Void
     
     public init(
         groupInviteFeature: GroupInviteFeature,
+        groupParticipateFeature: GroupParticipateFeature,
         router: @escaping @MainActor (ModyGroupRoute) -> Void
     ) {
         self.groupInviteFeature = groupInviteFeature
+        self.groupParticipateFeature = groupParticipateFeature
         self.router = router
     }
 
@@ -59,7 +62,7 @@ public struct ModyGroupRootFeature {
     public var body: some ReducerOf<Self> {
         BindingReducer()
         Scope(state: \.groupParticipateState, action: \.groupParticipateAction) {
-            GroupParticipateFeature()
+            groupParticipateFeature
         }
         Scope(state: \.groupCreateState, action: \.groupCreateAction) {
             GroupCreateFeature()
@@ -107,12 +110,14 @@ private extension ModyGroupRootFeature {
             return .run { [router] _ in
                 await router(.back)
             }
-        case .participateButtonTapped:
+        case .createButtonTapped:
+            state.path.append(.create(.init()))
+            return .none
+        case .joinGroupSuccessfully:
             return .run { [router] _ in
                 await router(.finish)
             }
-        case .createButtonTapped:
-            state.path.append(.create(.init()))
+        default:
             return .none
         }
     }
