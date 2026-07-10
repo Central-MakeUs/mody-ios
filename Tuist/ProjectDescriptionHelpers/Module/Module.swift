@@ -6,6 +6,7 @@
 //
 
 public enum Module: Hashable {
+    case Util
     case ModyLogger
     case CommonDomain
     case Base
