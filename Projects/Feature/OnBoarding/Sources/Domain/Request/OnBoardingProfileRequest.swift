@@ -32,12 +32,12 @@ public struct OnBoardingProfileRequest: Equatable, Encodable {
 
 public struct MealScheduleRequest: Equatable, Encodable {
     public let mealType: MealType
-    public let time: String
+    public let time: String?
     public let skipped: Bool
 
     public init(
         mealType: MealType,
-        time: String,
+        time: String?,
         skipped: Bool
     ) {
         self.mealType = mealType
