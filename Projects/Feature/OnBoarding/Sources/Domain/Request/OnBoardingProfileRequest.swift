@@ -58,19 +58,3 @@ public struct ExerciseScheduleRequest: Equatable, Encodable {
         self.time = time
     }
 }
-
-public enum MealType: String, Equatable, Encodable {
-    case breakfast = "BREAKFAST"
-    case lunch = "LUNCH"
-    case dinner = "DINNER"
-}
-
-public enum DayOfWeek: String, Equatable, Encodable {
-    case monday = "MONDAY"
-    case tuesday = "TUESDAY"
-    case wednesday = "WEDNESDAY"
-    case thursday = "THURSDAY"
-    case friday = "FRIDAY"
-    case saturday = "SATURDAY"
-    case sunday = "SUNDAY"
-}
