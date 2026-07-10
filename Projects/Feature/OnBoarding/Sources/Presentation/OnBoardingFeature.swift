@@ -6,8 +6,8 @@
 //
 
 import ComposableArchitecture
-import Foundation
 import OnBoardingInterface
+import CommonDomain
 
 @Reducer
 public struct OnBoardingFeature {
@@ -29,6 +29,8 @@ public struct OnBoardingFeature {
             var birthDate: String?
             var currentWeightKg: Double?
             var targetWeightKg: Double?
+            var mealSchedules: [MealScheduleRequest] = []
+            var exerciseSchedules: [ExerciseScheduleRequest] = []
         }
 
         enum Step: Int, CaseIterable, Equatable {
@@ -38,6 +40,7 @@ public struct OnBoardingFeature {
             case four = 4
         }
 
+        var isLoading: Bool = false
         var currentStep: Step = .one
         var request: StepStoredRequest = .init()
         var stepOne: OnBoardingStepOneFeature.State = .init()
@@ -45,14 +48,7 @@ public struct OnBoardingFeature {
         var stepThree: OnBoardingStepThreeFeature.State = .init()
         var stepFour: OnBoardingStepFourFeature.State = .init()
 
-        var buttonTitle: String {
-            switch currentStep {
-            case .one, .two, .three:
-                return "다음으로"
-            case .four:
-                return "완료"
-            }
-        }
+        let buttonTitle: String = "다음으로"
 
         var isNextButtonEnabled: Bool {
             switch currentStep {
@@ -76,6 +72,9 @@ public struct OnBoardingFeature {
         case stepTwo(OnBoardingStepTwoFeature.Action)
         case stepThree(OnBoardingStepThreeFeature.Action)
         case stepFour(OnBoardingStepFourFeature.Action)
+        case setUpProfile
+        case setupProfileSuccessfully
+        case setupProfileFailure(NetworkError)
         case routeToGroupParticipate
     }
     
@@ -112,6 +111,28 @@ public struct OnBoardingFeature {
                 return .none
             case .stepFour:
                 return .none
+            case .setUpProfile:
+                guard let request = makeRequest(from: state.request) else { return .none }
+                
+                state.isLoading = true
+                
+                return .run { send in
+                    do {
+                        try await onBoardingUseCase.setupOnBoardingProfileInfo(request: request)
+                        await send(.setupProfileSuccessfully)
+                    } catch let error as NetworkError {
+                        await send(.setupProfileFailure(error))
+                    } catch {
+                        await send(.setupProfileFailure(.unknown))
+                    }
+                }
+            case .setupProfileSuccessfully:
+                state.isLoading = false
+                return .send(.routeToGroupParticipate)
+            case .setupProfileFailure:
+                state.isLoading = false
+                // TODO: Alert
+                return .none
             case .routeToGroupParticipate:
                 return .run { [router] _ in
                     await router(.routeToGroupParticipate)
@@ -133,7 +154,8 @@ private extension OnBoardingFeature {
             state.request.currentWeightKg = Double(state.stepThree.currentWeightKg)
             state.request.targetWeightKg = Double(state.stepThree.targetWeightKg)
         case .four:
-            break
+            state.request.mealSchedules = state.stepFour.request.mealSchedules
+            state.request.exerciseSchedules = state.stepFour.request.exerciseSchedules
         }
     }
 
@@ -164,7 +186,29 @@ private extension OnBoardingFeature {
             state.currentStep = .four
             return .none
         case .four:
-            return .send(.routeToGroupParticipate)
+            return .send(.setUpProfile)
         }
+    }
+
+    func makeRequest(from request: State.StepStoredRequest) -> OnBoardingProfileRequest? {
+        guard
+            let nickname = request.nickname,
+            let birthDate = request.birthDate,
+            let currentWeightKg = request.currentWeightKg,
+            let targetWeightKg = request.targetWeightKg,
+            !request.mealSchedules.isEmpty,
+            !request.exerciseSchedules.isEmpty
+        else {
+            return nil
+        }
+
+        return OnBoardingProfileRequest(
+            nickname: nickname,
+            birthDate: birthDate,
+            currentWeightKg: currentWeightKg,
+            targetWeightKg: targetWeightKg,
+            mealSchedules: request.mealSchedules,
+            exerciseSchedules: request.exerciseSchedules
+        )
     }
 }

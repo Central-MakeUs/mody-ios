@@ -39,7 +39,7 @@ public struct OnBoardingStepTwoFeature {
                 from: DateComponents(year: maximumBirthYear, month: 12, day: 31)
             ) ?? Date()
             let defaultBirthDate = calendar.date(
-                from: DateComponents(year: 2003, month: 3, day: 19)
+                from: DateComponents(year: 2000, month: 1, day: 1)
             ) ?? Date()
             self.birthDate = min(defaultBirthDate, maximumBirthDate)
         }

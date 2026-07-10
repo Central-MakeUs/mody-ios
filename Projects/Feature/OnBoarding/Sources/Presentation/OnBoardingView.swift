@@ -17,6 +17,11 @@ public struct OnBoardingView: View {
     }
     
     public var body: some View {
+        onBoardingBody
+            .mLoading(isPresent: store.isLoading)
+    }
+    
+    private var onBoardingBody: some View {
         VStack(spacing: 0) {
             stepIndicator
 

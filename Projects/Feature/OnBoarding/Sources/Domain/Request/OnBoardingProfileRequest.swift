@@ -32,12 +32,12 @@ public struct OnBoardingProfileRequest: Equatable, Encodable {
 
 public struct MealScheduleRequest: Equatable, Encodable {
     public let mealType: MealType
-    public let time: String
+    public let time: String?
     public let skipped: Bool
 
     public init(
         mealType: MealType,
-        time: String,
+        time: String?,
         skipped: Bool
     ) {
         self.mealType = mealType
@@ -57,20 +57,4 @@ public struct ExerciseScheduleRequest: Equatable, Encodable {
         self.dayOfWeek = dayOfWeek
         self.time = time
     }
-}
-
-public enum MealType: String, Equatable, Encodable {
-    case breakfast = "BREAKFAST"
-    case lunch = "LUNCH"
-    case dinner = "DINNER"
-}
-
-public enum DayOfWeek: String, Equatable, Encodable {
-    case monday = "MONDAY"
-    case tuesday = "TUESDAY"
-    case wednesday = "WEDNESDAY"
-    case thursday = "THURSDAY"
-    case friday = "FRIDAY"
-    case saturday = "SATURDAY"
-    case sunday = "SUNDAY"
 }
