@@ -176,10 +176,15 @@ private extension OnBoardingStepFourFeature {
 
     func makeMealScheduleRequests(from state: State) -> [MealScheduleRequest] {
         state.meals.map { meal in
-            MealScheduleRequest(
+            let skipped = state.skippedMeals.contains(meal)
+
+            return MealScheduleRequest(
                 mealType: meal,
-                time: String.toHourMinString(hour: mealHour(from: state, for: meal), minute: 0),
-                skipped: state.skippedMeals.contains(meal)
+                time: skipped ? nil : String.toHourMinString(
+                    hour: mealHour(from: state, for: meal),
+                    minute: 0
+                ),
+                skipped: skipped
             )
         }
     }
