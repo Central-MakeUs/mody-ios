@@ -34,20 +34,24 @@ public struct OnBoardingStepFourView: View {
     }
 
     private var stepFourBody: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                titleText
-                    .padding(.bottom, 48)
+        GeometryReader { proxy in
+            let contentWidth = proxy.size.width - 48
 
-                mealSection
-                    .padding(.bottom, 36)
+            ScrollView {
+                VStack(spacing: 0) {
+                    titleText
+                        .padding(.bottom, 48)
 
-                exerciseSection
-                    .padding(.bottom, 24)
+                    mealSection
+                        .padding(.bottom, 36)
 
-                Spacer()
+                    exerciseSection(width: contentWidth)
+                        .padding(.bottom, 24)
+
+                    Spacer()
+                }
+                .padding(.horizontal, 24)
             }
-            .padding(.horizontal, 24)
         }
     }
 }
@@ -86,8 +90,9 @@ private extension OnBoardingStepFourView {
 }
 
 private extension OnBoardingStepFourView {
-    var exerciseSection: some View {
+    func exerciseSection(width: CGFloat) -> some View {
         OnBoardingExerciseSection(
+            width: width,
             weekdays: store.weekdays,
             selectedWeekdays: store.selectedWeekdays,
             schedules: store.sortedExerciseSchedules,
