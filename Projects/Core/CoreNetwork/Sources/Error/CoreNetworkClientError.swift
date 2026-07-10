@@ -27,7 +27,7 @@ enum CoreNetworkClientError: Error, Equatable {
     case sslPinningFailed
     case sessionInvalidated
     case unknown
-    case serverError(statusCode: Int, code: String?, message: String?)
+    indirect case serverError(statusCode: Int, code: String?, message: String?, fallback: CoreNetworkClientError)
 }
 
 extension CoreNetworkClientError {

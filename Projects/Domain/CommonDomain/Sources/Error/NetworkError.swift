@@ -15,7 +15,7 @@ public enum NetworkError: Error, Equatable {
     case networkUnavailable
     case timeout
     case invalidResponse
-    case serverError(code: String?, message: String?)
+    indirect case serverError(code: String?, message: String?, fallback: NetworkError)
     case unknown
 }
 
@@ -57,7 +57,7 @@ public extension NetworkError {
             return "응답 시간이 초과됐어요. 다시 시도해 주세요."
         case .invalidResponse:
             return "응답을 처리하지 못했어요. 다시 시도해 주세요."
-        case let .serverError(code, message):
+        case let .serverError(code, message, fallback):
             return "[\(String(describing: code))]: \(String(describing: message))"
         case .unknown:
             return "알 수 없는 오류가 발생했어요. 다시 시도해 주세요."
