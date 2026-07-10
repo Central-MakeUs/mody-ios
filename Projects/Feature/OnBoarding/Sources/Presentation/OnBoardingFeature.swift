@@ -8,6 +8,8 @@
 import ComposableArchitecture
 import OnBoardingInterface
 import CommonDomain
+import Foundation
+import Util
 
 @Reducer
 public struct OnBoardingFeature {
@@ -149,7 +151,7 @@ private extension OnBoardingFeature {
             let nickname = state.stepOne.nickname
             state.request.nickname = nickname
         case .two:
-            state.request.birthDate = birthDateString(from: state.stepTwo)
+            state.request.birthDate = birthDateString(from: state.stepTwo.birthDate)
         case .three:
             state.request.currentWeightKg = Double(state.stepThree.currentWeightKg)
             state.request.targetWeightKg = Double(state.stepThree.targetWeightKg)
@@ -159,19 +161,8 @@ private extension OnBoardingFeature {
         }
     }
 
-    func birthDateString(from state: OnBoardingStepTwoFeature.State) -> String {
-        let components = state.calendar.dateComponents(
-            [.year, .month, .day],
-            from: state.birthDate
-        )
-        guard
-            let year = components.year,
-            let month = components.month,
-            let day = components.day
-        else {
-            return ""
-        }
-        return String(format: "%04d-%02d-%02d", year, month, day)
+    func birthDateString(from birthDate: Date) -> String {
+        birthDate.toString(format: .yyyyMMdd)
     }
 
     func moveNext(from state: inout State) -> Effect<Action> {
