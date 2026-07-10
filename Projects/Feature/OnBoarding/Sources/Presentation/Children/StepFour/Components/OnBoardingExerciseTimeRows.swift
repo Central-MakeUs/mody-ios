@@ -1,0 +1,54 @@
+//
+//  OnBoardingExerciseTimeRows.swift
+//  OnBoarding
+//
+//  Created by 김동준 on 7/10/26
+//
+
+import SwiftUI
+import DesignSystem
+
+struct OnBoardingExerciseTimeRows: View {
+    private let schedules: [ExerciseSchedule]
+    private let calendar: Calendar
+    private let onScheduleTapped: (DayOfWeek) -> Void
+    
+    init(
+        schedules: [ExerciseSchedule],
+        calendar: Calendar,
+        onScheduleTapped: @escaping (DayOfWeek) -> Void
+    ) {
+        self.schedules = schedules
+        self.calendar = calendar
+        self.onScheduleTapped = onScheduleTapped
+    }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ForEach(schedules) { schedule in
+                Button {
+                    onScheduleTapped(schedule.dayOfWeek)
+                } label: {
+                    HStack(spacing: 0) {
+                        MText(
+                            schedule.dayOfWeek.title,
+                            style: .b7,
+                            color: .gray10
+                        )
+
+                        Spacer()
+
+                        MText(
+                            schedule.date.toKoreanTimeString(calendar: calendar),
+                            style: .b7,
+                            color: .gray10
+                        )
+                    }
+                    .padding(12)
+                    .background(Color.gray1)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+            }
+        }
+    }
+}
