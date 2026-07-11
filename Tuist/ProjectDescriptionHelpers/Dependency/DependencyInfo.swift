@@ -134,7 +134,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ),
         .Feed: .init(
             implementation: [
-                .module(.Base)
+                .module(.Base),
+                .external(.ReactorKit),
+                .external(.RxSwift),
+                .external(.RxCocoa),
+                .external(.RxRelay)
             ]
         ),
         .Challenge: .init(
