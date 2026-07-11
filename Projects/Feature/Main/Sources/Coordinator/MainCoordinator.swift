@@ -78,7 +78,7 @@ public final class MainCoordinator {
             self?.showGroupParticipate()
         }
         mainContainerViewController.onSheetGroupCreateTap = { [weak self] in
-            self?.showGroupCreate()
+            self?.showGroupCreate(needBackButton: true)
         }
 
         navigationController.setViewControllers([mainContainerViewController], animated: false)

@@ -10,7 +10,7 @@ import CommonDomain
 
 @Reducer
 public struct GroupParticipateFeature {
-    private let groupJoinUseCase: GroupJoinUseCase
+    private let groupUseCase: GroupUseCase
     
     @ObservableState
     public struct State: Equatable {
@@ -64,8 +64,8 @@ public struct GroupParticipateFeature {
         case joinGroupFailure(NetworkError, code: String)
     }
     
-    public init(groupJoinUseCase: GroupJoinUseCase) {
-        self.groupJoinUseCase = groupJoinUseCase
+    public init(groupUseCase: GroupUseCase) {
+        self.groupUseCase = groupUseCase
     }
     
     public var body: some ReducerOf<Self> {
@@ -90,7 +90,7 @@ public struct GroupParticipateFeature {
                 
                 return .run { send in
                     do {
-                        try await groupJoinUseCase.joinGroup(request: request)
+                        try await groupUseCase.joinGroup(request: request)
                         await send(.joinGroupSuccessfully)
                     } catch let error as NetworkError {
                         await send(.joinGroupFailure(error, code: inviteCode))

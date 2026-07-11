@@ -10,9 +10,14 @@ import ComposableArchitecture
 @Reducer
 public struct ModyGroupPath {
     private let groupInviteFeature: GroupInviteFeature
+    private let groupCreateFeature: GroupCreateFeature
 
-    public init(groupInviteFeature: GroupInviteFeature) {
+    public init(
+        groupInviteFeature: GroupInviteFeature,
+        groupCreateFeature: GroupCreateFeature
+    ) {
         self.groupInviteFeature = groupInviteFeature
+        self.groupCreateFeature = groupCreateFeature
     }
 
     @ObservableState
@@ -28,7 +33,7 @@ public struct ModyGroupPath {
 
     public var body: some ReducerOf<Self> {
         Scope(state: \.create, action: \.create) {
-            GroupCreateFeature()
+            groupCreateFeature
         }
         Scope(state: \.invite, action: \.invite) {
             groupInviteFeature

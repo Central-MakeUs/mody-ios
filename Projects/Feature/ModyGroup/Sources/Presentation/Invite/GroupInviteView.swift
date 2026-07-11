@@ -19,6 +19,8 @@ public struct GroupInviteView: View {
     public var body: some View {
         VStack(spacing: 16) {
             Text("그룹 초대하기")
+
+            Text(store.inviteCode)
             
             Button("공유하기") {
                 store.send(.shareButtonTapped)

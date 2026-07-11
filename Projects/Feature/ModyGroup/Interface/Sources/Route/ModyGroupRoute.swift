@@ -17,7 +17,7 @@ public enum ModyGroupEntryPoint: Equatable {
 
 public enum ModyGroupInitialScreen: Equatable {
     case participate
-    case create
+    case create(needBackButton: Bool)
 }
 
 @MainActor
