@@ -17,24 +17,48 @@ public struct GroupInviteFeature {
 
     @ObservableState
     public struct State: Equatable {
-        let inviteCode: String
+        enum CancelID: Hashable {
+            case copyMessage
+        }
+
+        var inviteCode: String
         var isLoading: Bool = false
+        var isCodeCopied: Bool = false
 
         public init(inviteCode: String = "") {
             self.inviteCode = inviteCode
         }
     }
     
-    public enum Action {
+    public enum Action: BindableAction {
+        case binding(BindingAction<State>)
         case backButtonTapped
+        case copyButtonTapped
+        case copyMessageExpired
         case shareButtonTapped
         case shareFinished
         case doneButtonTapped
     }
 
     public var body: some ReducerOf<Self> {
+        BindingReducer()
+
         Reduce { state, action in
             switch action {
+            case .binding:
+                return .none
+            case .copyButtonTapped:
+                guard !state.inviteCode.isEmpty else { return .none }
+                state.isCodeCopied = true
+
+                return .run { send in
+                    try await Task.sleep(for: .seconds(2))
+                    await send(.copyMessageExpired)
+                }
+                .cancellable(id: State.CancelID.copyMessage, cancelInFlight: true)
+            case .copyMessageExpired:
+                state.isCodeCopied = false
+                return .none
             case .shareButtonTapped:
                 guard !state.isLoading else { return .none }
                 let inviteCode = state.inviteCode
