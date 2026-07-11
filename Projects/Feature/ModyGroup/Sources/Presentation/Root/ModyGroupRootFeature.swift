@@ -49,9 +49,14 @@ public struct ModyGroupRootFeature {
                 showSignUpDoneContents: showSignUpDoneContents,
                 showsBackButton: entryPoint == .main
             )
-            self.groupCreateState = .init(
-                showsBackButton: entryPoint == .main && initialScreen != .create
-            )
+            let createNeedsBackButton: Bool
+            switch initialScreen {
+            case .participate:
+                createNeedsBackButton = entryPoint == .main
+            case let .create(needBackButton):
+                createNeedsBackButton = needBackButton
+            }
+            self.groupCreateState = .init(showsBackButton: createNeedsBackButton)
         }
     }
     

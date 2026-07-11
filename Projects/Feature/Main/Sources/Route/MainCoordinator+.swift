@@ -13,8 +13,8 @@ extension MainCoordinator {
         showModyGroup(initialScreen: .participate)
     }
 
-    func showGroupCreate() {
-        showModyGroup(initialScreen: .create)
+    func showGroupCreate(needBackButton: Bool) {
+        showModyGroup(initialScreen: .create(needBackButton: needBackButton))
     }
 
     func showModyGroup(initialScreen: ModyGroupInitialScreen) {
