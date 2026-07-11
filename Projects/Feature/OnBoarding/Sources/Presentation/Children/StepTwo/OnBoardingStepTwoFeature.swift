@@ -7,14 +7,15 @@
 
 import ComposableArchitecture
 import Foundation
+import Util
 
 @Reducer
 public struct OnBoardingStepTwoFeature {
     @ObservableState
     public struct State: Equatable {
-        let locale = Locale(identifier: "ko_KR")
-        let timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
-        let calendar: Calendar
+        let locale = Date.koreanLocale
+        let timeZone = Date.koreanTimeZone
+        let calendar = Date.koreanCalendar
         let minimumAvailableAge = 14
         let minimumBirthDate: Date
         let maximumBirthDate: Date
@@ -26,11 +27,6 @@ public struct OnBoardingStepTwoFeature {
         }
 
         public init() {
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.locale = locale
-            calendar.timeZone = timeZone
-
-            self.calendar = calendar
             self.minimumBirthDate = calendar.date(
                 from: DateComponents(year: 1960, month: 1, day: 1)
             ) ?? Date()

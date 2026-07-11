@@ -44,6 +44,25 @@ public struct MealScheduleRequest: Equatable, Encodable {
         self.time = time
         self.skipped = skipped
     }
+    
+    enum CodingKeys: String, CodingKey {
+        case mealType
+        case time
+        case skipped
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(mealType, forKey: .mealType)
+        try container.encode(skipped, forKey: .skipped)
+
+        if let time {
+            try container.encode(time, forKey: .time)
+        } else {
+            try container.encodeNil(forKey: .time)
+        }
+    }
 }
 
 public struct ExerciseScheduleRequest: Equatable, Encodable {
