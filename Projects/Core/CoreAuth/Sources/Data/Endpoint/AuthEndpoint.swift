@@ -22,6 +22,13 @@ enum AuthEndpoint {
         )
     }
 
+    static func getUserInfo() -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/mypage/me",
+            method: .GET
+        )
+    }
+
     static func postLogout(refreshToken: String) -> CoreNetworkEndpoint {
         CoreNetworkEndpoint(
             path: "api/v1/auth/logout",
