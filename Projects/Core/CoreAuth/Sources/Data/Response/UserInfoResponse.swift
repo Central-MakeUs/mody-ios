@@ -12,6 +12,9 @@ struct UserInfoResponse: Decodable {
     let nickname: String?
     let profileImageUrl: String?
     let daysTogether: Int?
+    let personalInfoCompleted: Bool?
+    let groupOnboardingCompleted: Bool?
+    let mainAccessible: Bool?
 }
 
 extension UserInfoResponse {
@@ -20,7 +23,10 @@ extension UserInfoResponse {
             memberId: memberId ?? -1,
             nickname: nickname ?? "",
             profileImageUrl: profileImageUrl,
-            daysTogether: daysTogether ?? 0
+            daysTogether: daysTogether ?? 0,
+            personalInfoCompleted: personalInfoCompleted ?? false,
+            groupOnboardingCompleted: groupOnboardingCompleted ?? false,
+            mainAccessible: mainAccessible ?? false
         )
     }
 }

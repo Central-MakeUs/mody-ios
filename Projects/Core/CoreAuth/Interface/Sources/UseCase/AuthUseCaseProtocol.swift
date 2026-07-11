@@ -13,7 +13,7 @@ public protocol AuthUseCaseProtocol {
         accessToken: String
     ) async throws -> AuthSession
 
-    func getUserInfo() async throws -> UserInfo
+    func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo
 
     func logout() async throws
 }

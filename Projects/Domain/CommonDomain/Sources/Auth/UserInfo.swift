@@ -10,16 +10,25 @@ public struct UserInfo: Equatable {
     public let nickname: String
     public let profileImageUrl: String?
     public let daysTogether: Int
+    public let personalInfoCompleted: Bool
+    public let groupOnboardingCompleted: Bool
+    public let mainAccessible: Bool
 
     public init(
         memberId: Int,
         nickname: String,
         profileImageUrl: String?,
-        daysTogether: Int
+        daysTogether: Int,
+        personalInfoCompleted: Bool,
+        groupOnboardingCompleted: Bool,
+        mainAccessible: Bool
     ) {
         self.memberId = memberId
         self.nickname = nickname
         self.profileImageUrl = profileImageUrl
         self.daysTogether = daysTogether
+        self.personalInfoCompleted = personalInfoCompleted
+        self.groupOnboardingCompleted = groupOnboardingCompleted
+        self.mainAccessible = mainAccessible
     }
 }
