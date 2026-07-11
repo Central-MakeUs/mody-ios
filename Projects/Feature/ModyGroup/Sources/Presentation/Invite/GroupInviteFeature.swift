@@ -9,7 +9,6 @@ import ComposableArchitecture
 
 @Reducer
 public struct GroupInviteFeature {
-    private let inviteCode = "AABB1122"
     private let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol
 
     public init(shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol) {
@@ -18,9 +17,12 @@ public struct GroupInviteFeature {
 
     @ObservableState
     public struct State: Equatable {
+        let inviteCode: String
         var isLoading: Bool = false
 
-        public init() {}
+        public init(inviteCode: String = "") {
+            self.inviteCode = inviteCode
+        }
     }
     
     public enum Action {
@@ -35,6 +37,7 @@ public struct GroupInviteFeature {
             switch action {
             case .shareButtonTapped:
                 guard !state.isLoading else { return .none }
+                let inviteCode = state.inviteCode
 
                 state.isLoading = true
                 return .run { send in

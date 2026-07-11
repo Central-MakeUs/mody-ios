@@ -12,15 +12,18 @@ import ModyGroupInterface
 public struct ModyGroupRootFeature {
     private let groupInviteFeature: GroupInviteFeature
     private let groupParticipateFeature: GroupParticipateFeature
+    private let groupCreateFeature: GroupCreateFeature
     private let router: @MainActor (ModyGroupRoute) -> Void
     
     public init(
         groupInviteFeature: GroupInviteFeature,
         groupParticipateFeature: GroupParticipateFeature,
+        groupCreateFeature: GroupCreateFeature,
         router: @escaping @MainActor (ModyGroupRoute) -> Void
     ) {
         self.groupInviteFeature = groupInviteFeature
         self.groupParticipateFeature = groupParticipateFeature
+        self.groupCreateFeature = groupCreateFeature
         self.router = router
     }
 
@@ -65,7 +68,7 @@ public struct ModyGroupRootFeature {
             groupParticipateFeature
         }
         Scope(state: \.groupCreateState, action: \.groupCreateAction) {
-            GroupCreateFeature()
+            groupCreateFeature
         }
                 
         Reduce { state, action in
@@ -83,7 +86,10 @@ public struct ModyGroupRootFeature {
             }
         }
         .forEach(\.path, action: \.path) {
-            ModyGroupPath(groupInviteFeature: groupInviteFeature)
+            ModyGroupPath(
+                groupInviteFeature: groupInviteFeature,
+                groupCreateFeature: groupCreateFeature
+            )
         }
     }
 }
@@ -131,7 +137,11 @@ private extension ModyGroupRootFeature {
             state.path.removeLast()
             return .none
         case .nextButtonTapped:
-            state.path.append(.invite(.init()))
+            return .none
+        case .createGroupSuccessfully(let code):
+            state.path.append(.invite(.init(inviteCode: code)))
+            return .none
+        default:
             return .none
         }
     }
@@ -163,7 +173,11 @@ private extension ModyGroupRootFeature {
                 await router(.back)
             }
         case .nextButtonTapped:
-            state.path.append(.invite(.init()))
+            return .none
+        case .createGroupSuccessfully(let code):
+            state.path.append(.invite(.init(inviteCode: code)))
+            return .none
+        default:
             return .none
         }
     }
