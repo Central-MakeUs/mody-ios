@@ -24,6 +24,7 @@ public struct MTextField: View {
     private let maxCount: Int?
     private let isValid: Bool?
     private let keyboardType: UIKeyboardType
+    private let focus: FocusState<Bool>.Binding?
     private let onSubmit: (() -> Void)?
 
     @FocusState private var isFocused: Bool
@@ -47,6 +48,7 @@ public struct MTextField: View {
         maxCount: Int? = nil,
         isValid: Bool? = nil,
         keyboardType: UIKeyboardType = .default,
+        focus: FocusState<Bool>.Binding? = nil,
         onSubmit: (() -> Void)? = nil
     ) {
         self.placeholder = placeholder
@@ -64,6 +66,7 @@ public struct MTextField: View {
         self.maxCount = maxCount
         self.isValid = isValid
         self.keyboardType = keyboardType
+        self.focus = focus
         self.onSubmit = onSubmit
     }
 
@@ -110,7 +113,11 @@ private extension MTextField {
             return errorUnderlineColor
         }
 
-        return isFocused ? focusedUnderlineColor : underlineColor
+        return currentIsFocused ? focusedUnderlineColor : underlineColor
+    }
+    
+    var currentIsFocused: Bool {
+        focus?.wrappedValue ?? isFocused
     }
 }
 
@@ -127,7 +134,18 @@ private extension MTextField {
         .allowsHitTesting(false)
     }
     
+    @ViewBuilder
     var textFieldView: some View {
+        if let focus {
+            baseTextField
+                .focused(focus)
+        } else {
+            baseTextField
+                .focused($isFocused)
+        }
+    }
+    
+    var baseTextField: some View {
         TextField("", text: $text)
             .font(token.swiftUIFont)
             .foregroundStyle(textColor)
@@ -138,7 +156,6 @@ private extension MTextField {
             .lineLimit(1)
             .tint(cursorColor)
             .keyboardType(keyboardType)
-            .focused($isFocused)
             .onSubmit { onSubmit?() }
     }
 }

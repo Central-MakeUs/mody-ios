@@ -126,6 +126,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             implementation: [
                 .external(.ComposableArchitecture),
                 .module(.Base),
+                .module(.CommonDomain),
+                .microFeature(.CoreNetwork),
                 .microFeature(.CoreKakao)
             ]
         ),
