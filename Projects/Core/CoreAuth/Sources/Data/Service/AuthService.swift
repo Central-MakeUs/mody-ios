@@ -37,6 +37,21 @@ public struct AuthService {
         return result
     }
 
+    func getUserInfo() async throws -> UserInfoResponse {
+        let endpoint = AuthEndpoint.getUserInfo()
+
+        let response: CoreNetworkResponse<UserInfoResponse> = try await network.request(
+            endpoint
+        )
+
+        guard let result = response.result else {
+            // TODO: EmptyResponseError
+            throw AuthError.unknown
+        }
+
+        return result
+    }
+
     func postLogout(refreshToken: String) async throws {
         let endpoint = AuthEndpoint.postLogout(refreshToken: refreshToken)
 

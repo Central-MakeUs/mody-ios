@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct SplashView: View {
     private let store: StoreOf<SplashFeature>
@@ -16,7 +17,14 @@ public struct SplashView: View {
     }
     
     public var body: some View {
-        Text("Hello, Splash~")
+        splashBody
             .onAppear { store.send(.onAppear) }
+            .mLoading(isPresent: store.isLoading)
+    }
+    
+    private var splashBody: some View {
+        VStack(spacing: 0) {
+            Text("Hello, Splash~")
+        }
     }
 }

@@ -11,4 +11,5 @@ public enum KeyChainStorageKey: String {
     case groupOnboardingCompleted = "groupOnboardingCompleted"
     case accessToken = "accessToken"
     case refreshToken = "refreshToken"
+    case socialLoginType = "socialLoginType"
 }

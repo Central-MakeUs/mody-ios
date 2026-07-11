@@ -5,6 +5,8 @@
 //  Created by 김동준 on 7/1/26
 //
 
+import CommonDomain
+
 public struct SplashUseCase {
     private let splashRepository: SplashRepositoryProtocol
 
@@ -22,5 +24,9 @@ public struct SplashUseCase {
 
     public func getChallengeTabHideFlag(key: String) -> Bool {
         splashRepository.getChallengeTabHideFlag(key: key)
+    }
+
+    public func getAuthSession() -> AuthSession? {
+        splashRepository.getStoredAuthSession()
     }
 }

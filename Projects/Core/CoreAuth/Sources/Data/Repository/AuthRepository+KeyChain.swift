@@ -15,7 +15,8 @@ extension AuthRepository {
             .refreshToken,
             .isSignUpDone,
             .mainAccessible,
-            .groupOnboardingCompleted
+            .groupOnboardingCompleted,
+            .socialLoginType
         ]
     }
 
@@ -25,7 +26,10 @@ extension AuthRepository {
         )
     }
 
-    func saveAuthSessionInfoToKeyChain(_ session: AuthSession) throws {
+    func saveAuthSessionInfoToKeyChain(
+        _ session: AuthSession,
+        _ loginType: SocialLoginType
+    ) throws {
         try? keyChainStorage.save(
             key: KeyChainStorageKey.isSignUpDone.rawValue,
             value: session.personalInfoCompleted
@@ -49,6 +53,11 @@ extension AuthRepository {
         try? keyChainStorage.save(
             key: KeyChainStorageKey.refreshToken.rawValue,
             value: session.refreshToken
+        )
+
+        try? keyChainStorage.save(
+            key: KeyChainStorageKey.socialLoginType.rawValue,
+            value: loginType
         )
     }
 

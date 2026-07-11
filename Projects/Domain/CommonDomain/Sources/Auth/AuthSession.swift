@@ -12,6 +12,7 @@ public struct AuthSession: Equatable {
     public let personalInfoCompleted: Bool
     public let mainAccessible: Bool
     public let groupOnboardingCompleted: Bool
+    public let socialLoginType: SocialLoginType?
 
     public init(
         id: Int,
@@ -19,7 +20,8 @@ public struct AuthSession: Equatable {
         refreshToken: String,
         personalInfoCompleted: Bool,
         mainAccessible: Bool,
-        groupOnboardingCompleted: Bool
+        groupOnboardingCompleted: Bool,
+        socialLoginType: SocialLoginType? = nil
     ) {
         self.id = id
         self.accessToken = accessToken
@@ -27,5 +29,6 @@ public struct AuthSession: Equatable {
         self.personalInfoCompleted = personalInfoCompleted
         self.mainAccessible = mainAccessible
         self.groupOnboardingCompleted = groupOnboardingCompleted
+        self.socialLoginType = socialLoginType
     }
 }
