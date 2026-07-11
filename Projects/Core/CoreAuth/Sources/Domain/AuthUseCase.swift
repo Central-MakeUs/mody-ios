@@ -25,8 +25,8 @@ public struct AuthUseCase: AuthUseCaseProtocol {
         )
     }
 
-    public func getUserInfo() async throws -> UserInfo {
-        try await authRepository.getUserInfo()
+    public func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo {
+        try await authRepository.getUserInfo(needUpdateKeyChain: needUpdateKeyChain)
     }
 
     public func logout() async throws {

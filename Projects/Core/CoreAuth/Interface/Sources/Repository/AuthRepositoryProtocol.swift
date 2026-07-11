@@ -13,7 +13,7 @@ public protocol AuthRepositoryProtocol {
         accessToken: String
     ) async throws -> AuthSession
 
-    func getUserInfo() async throws -> UserInfo
+    func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo
 
     func postLogout() async throws
 }

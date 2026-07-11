@@ -36,8 +36,11 @@ public struct AuthRepository: AuthRepositoryProtocol {
         return session
     }
 
-    public func getUserInfo() async throws -> UserInfo {
+    public func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo {
         let response = try await authService.getUserInfo()
+        if needUpdateKeyChain {
+            try updateAuthSessionStatusToKeyChain(response)
+        }
 
         return response.toDomain()
     }

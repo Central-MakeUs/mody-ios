@@ -36,12 +36,11 @@ public struct SplashFeature {
     public enum Action {
         case onAppear
         case serverHealthChecked(Bool)
-        case userInfoFetched(AuthSession)
+        case userInfoFetched(UserInfo)
         case userInfoFetchFailed
         case setUpRemoteConfig
         case cachingRemoteConfig
         case healthCheck
-        case checkAuthSession
     }
     
     public var body: some ReducerOf<Self> {
@@ -73,21 +72,12 @@ public struct SplashFeature {
                     return .none
                 }
                 
-                return .send(.checkAuthSession)
-            case .checkAuthSession:
-                guard let session = splashUseCase.getAuthSession() else {
-                    state.isLoading = false
-                    return .run { [router] _ in
-                        await router(.routeToSignIn)
-                    }
-                }
-
                 return .run { send in
-                    await send(getUserInfo(session))
+                    await send(getUserInfo())
                 }
-            case .userInfoFetched(let session):
+            case .userInfoFetched(let userInfo):
                 state.isLoading = false
-                let destination = makeNavigationDestination(from: session)
+                let destination = makeNavigationDestination(from: userInfo)
 
                 return .run { [router] _ in
                     await router(destination)
@@ -103,16 +93,16 @@ public struct SplashFeature {
 }
 
 private extension SplashFeature {
-    func makeNavigationDestination(from session: AuthSession) -> SplashRoute {
-        guard session.personalInfoCompleted else {
+    func makeNavigationDestination(from userInfo: UserInfo) -> SplashRoute {
+        guard userInfo.personalInfoCompleted else {
             return .routeToOnBoarding
         }
 
-        guard !session.mainAccessible else {
+        guard !userInfo.mainAccessible else {
             return .routeToMain
         }
 
-        return .routeToModyGroup(showSignUpDoneContents: !session.groupOnboardingCompleted)
+        return .routeToModyGroup(showSignUpDoneContents: !userInfo.groupOnboardingCompleted)
     }
 
     func getHealthCheck() async -> Action {
@@ -124,10 +114,10 @@ private extension SplashFeature {
         }
     }
 
-    func getUserInfo(_ session: AuthSession) async -> Action {
+    func getUserInfo() async -> Action {
         do {
-            _ = try await authUseCase.getUserInfo()
-            return .userInfoFetched(session)
+            let userInfo = try await authUseCase.getUserInfo(needUpdateKeyChain: true)
+            return .userInfoFetched(userInfo)
         } catch {
             return .userInfoFetchFailed
         }

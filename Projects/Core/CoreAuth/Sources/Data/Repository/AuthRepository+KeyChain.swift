@@ -61,6 +61,26 @@ extension AuthRepository {
         )
     }
 
+    func updateAuthSessionStatusToKeyChain(_ response: UserInfoResponse) throws {
+        guard let personalInfoCompleted = response.personalInfoCompleted,
+              let mainAccessible = response.mainAccessible,
+              let groupOnboardingCompleted = response.groupOnboardingCompleted else { return }
+        try keyChainStorage.save(
+            key: KeyChainStorageKey.isSignUpDone.rawValue,
+            value: personalInfoCompleted
+        )
+
+        try keyChainStorage.save(
+            key: KeyChainStorageKey.mainAccessible.rawValue,
+            value: mainAccessible
+        )
+
+        try keyChainStorage.save(
+            key: KeyChainStorageKey.groupOnboardingCompleted.rawValue,
+            value: groupOnboardingCompleted
+        )
+    }
+
     func deleteAuthSessionInfoFromKeyChain() throws {
         authSessionStorageKeys.forEach {
             try? keyChainStorage.delete(key: $0.rawValue)
