@@ -14,6 +14,8 @@ extension RootCoordinator: SplashRouter {
             delegate?.didFinishAuthentication(self)
         case .routeToSignIn:
             showSignIn()
+        case .routeToOnBoarding:
+            showOnBoarding()
         case .routeToModyGroup(let showSignUpDoneContents):
             showModyGroup(showSignUpDoneContents: showSignUpDoneContents)
         }

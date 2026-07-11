@@ -8,6 +8,7 @@
 public enum SplashRoute: Equatable {
     case routeToMain
     case routeToSignIn
+    case routeToOnBoarding
     case routeToModyGroup(showSignUpDoneContents: Bool)
 }
 

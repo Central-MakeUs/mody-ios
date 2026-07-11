@@ -95,6 +95,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .microFeature(.CoreNetwork),
                 .microFeature(.FirebaseService),
+                .microFeature(.CoreKeyChainStorage),
                 .module(.CommonDomain),
                 .microFeature(.CoreAuth)
             ]
