@@ -13,16 +13,16 @@ import ModyGroup
 
 extension AppAssembly {
     func assembleModyGroupFeature(in container: Container) {
-        container.register(GroupJoinRepositoryProtocol.self) { resolver in
+        container.register(GroupRepositoryProtocol.self) { resolver in
             let network: CoreNetworkProtocol = resolver.resolve()
 
-            return GroupJoinRepository(network: network)
+            return GroupRepository(network: network)
         }
 
-        container.register(GroupJoinUseCase.self) { resolver in
-            let repository: GroupJoinRepositoryProtocol = resolver.resolve()
+        container.register(GroupUseCase.self) { resolver in
+            let repository: GroupRepositoryProtocol = resolver.resolve()
 
-            return GroupJoinUseCase(groupJoinRepository: repository)
+            return GroupUseCase(groupRepository: repository)
         }
 
         container.register(ShareGroupInviteUseCaseProtocol.self) { resolver in
@@ -35,14 +35,17 @@ extension AppAssembly {
             return ModyGroupBuilder(
                 makeModyGroupRootFeature: { router in
                     let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol = resolver.resolve()
-                    let groupJoinUseCase: GroupJoinUseCase = resolver.resolve()
+                    let groupUseCase: GroupUseCase = resolver.resolve()
 
                     return ModyGroupRootFeature(
                         groupInviteFeature: GroupInviteFeature(
                             shareGroupInviteUseCase: shareGroupInviteUseCase
                         ),
                         groupParticipateFeature: GroupParticipateFeature(
-                            groupJoinUseCase: groupJoinUseCase
+                            groupUseCase: groupUseCase
+                        ),
+                        groupCreateFeature: GroupCreateFeature(
+                            groupUseCase: groupUseCase
                         )
                     ) { [weak router] route in
                         router?.route(from: route)
