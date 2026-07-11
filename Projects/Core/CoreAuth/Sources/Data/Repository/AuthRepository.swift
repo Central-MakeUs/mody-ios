@@ -31,7 +31,7 @@ public struct AuthRepository: AuthRepositoryProtocol {
         )
 
         let session = response.toDomain()
-        try saveAuthSessionInfoToKeyChain(session)
+        try saveAuthSessionInfoToKeyChain(session, loginType)
 
         return session
     }
