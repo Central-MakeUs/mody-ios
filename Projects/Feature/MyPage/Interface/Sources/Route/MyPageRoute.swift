@@ -13,3 +13,12 @@ public enum MyPageRoute: Equatable {
 public protocol MyPageRouter: AnyObject {
     func route(from route: MyPageRoute)
 }
+
+public enum MyPageProfileRoute: Equatable {
+    case back
+}
+
+@MainActor
+public protocol MyPageProfileRouter: AnyObject {
+    func route(from route: MyPageProfileRoute)
+}

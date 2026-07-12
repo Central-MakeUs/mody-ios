@@ -7,12 +7,13 @@
 
 import MyPageInterface
 
+@MainActor
 extension MainCoordinator: MyPageRouter {
     public func route(from route: MyPageRoute) {
         switch route {
         case .routeToProfile:
-            // TODO: 추후 구현
-            break
+            let viewController = myPageBuilder.makeProfileViewController(router: self)
+            navigationController.pushViewController(viewController, animated: true)
         }
     }
 }
