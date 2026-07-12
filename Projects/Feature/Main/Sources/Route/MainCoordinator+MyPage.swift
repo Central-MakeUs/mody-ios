@@ -10,7 +10,7 @@ import MyPageInterface
 extension MainCoordinator: MyPageRouter {
     public func route(from route: MyPageRoute) {
         switch route {
-        case .temp:
+        case .routeToProfile:
             // TODO: 추후 구현
             break
         }

@@ -6,7 +6,7 @@
 //
 
 public enum MyPageRoute: Equatable {
-    case temp
+    case routeToProfile
 }
 
 @MainActor

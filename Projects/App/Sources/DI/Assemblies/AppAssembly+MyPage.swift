@@ -11,8 +11,18 @@ import MyPage
 
 extension AppAssembly {
     func assembleMyPageFeature(in container: Container) {
-        container.register(MyPageBuildable.self) { _ in
-            return MyPageBuilder()
+        container.register(MyPageFeature.self) { (resolver: Resolver, router: MyPageRouter) in
+            return MyPageFeature { [weak router] route in
+                router?.route(from: route)
+            }
+        }
+
+        container.register(MyPageBuildable.self) { resolver in
+            return MyPageBuilder(
+                makeMyPageFeature: { router in
+                    resolver.resolve(argument: router)
+                }
+            )
         }
     }
 }
