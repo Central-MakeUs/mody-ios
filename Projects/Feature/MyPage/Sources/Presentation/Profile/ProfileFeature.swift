@@ -6,23 +6,36 @@
 //
 
 import ComposableArchitecture
+import CoreAuthInterface
 import MyPageInterface
+import ModyLogger
 
 @Reducer
 public struct ProfileFeature {
+    private let authUseCase: AuthUseCaseProtocol
     private let router: @MainActor (MyPageProfileRoute) -> Void
 
-    public init(router: @escaping @MainActor (MyPageProfileRoute) -> Void) {
+    public init(
+        authUseCase: AuthUseCaseProtocol,
+        router: @escaping @MainActor (MyPageProfileRoute) -> Void
+    ) {
+        self.authUseCase = authUseCase
         self.router = router
     }
 
     @ObservableState
     public struct State: Equatable {
+        var isLoading: Bool = false
+
         public init() {}
     }
 
     public enum Action {
         case backButtonTapped
+        case logoutButtonTapped
+        case logoutSuccessfully
+        case logoutFailure
+        case routeToSignIn
     }
 
     public var body: some ReducerOf<Self> {
@@ -32,7 +45,34 @@ public struct ProfileFeature {
                 return .run { [router] _ in
                     await router(.back)
                 }
+            case .logoutButtonTapped:
+                state.isLoading = true
+                return .run { send in
+                    await send(logout())
+                }
+            case .logoutSuccessfully:
+                state.isLoading = false
+                return .send(.routeToSignIn)
+            case .logoutFailure:
+                state.isLoading = false
+                return .none
+            case .routeToSignIn:
+                return .run { [router] _ in
+                    await router(.routeToSignIn)
+                }
             }
+        }
+    }
+}
+
+private extension ProfileFeature {
+    func logout() async -> Action {
+        do {
+            try await authUseCase.logout()
+            return .logoutSuccessfully
+        } catch {
+            ModyLogger.debug("Logout failed: \(error)")
+            return .logoutFailure
         }
     }
 }

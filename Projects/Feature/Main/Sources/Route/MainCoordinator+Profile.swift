@@ -13,6 +13,8 @@ extension MainCoordinator: MyPageProfileRouter {
         switch route {
         case .back:
             navigationController.popViewController(animated: true)
+        case .routeToSignIn:
+            delegate?.didRequestLogout(self)
         }
     }
 }

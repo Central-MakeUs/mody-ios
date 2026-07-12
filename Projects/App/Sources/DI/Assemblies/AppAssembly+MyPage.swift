@@ -17,12 +17,6 @@ extension AppAssembly {
             }
         }
 
-        container.register(ProfileFeature.self) { (resolver: Resolver, router: MyPageProfileRouter) in
-            return ProfileFeature { [weak router] route in
-                router?.route(from: route)
-            }
-        }
-
         container.register(MyPageBuildable.self) { resolver in
             return MyPageBuilder(
                 makeMyPageFeature: { router in

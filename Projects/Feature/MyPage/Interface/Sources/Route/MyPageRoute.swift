@@ -16,6 +16,7 @@ public protocol MyPageRouter: AnyObject {
 
 public enum MyPageProfileRoute: Equatable {
     case back
+    case routeToSignIn
 }
 
 @MainActor

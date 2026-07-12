@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct ProfileView: View {
     private let store: StoreOf<ProfileFeature>
@@ -17,6 +18,7 @@ public struct ProfileView: View {
 
     public var body: some View {
         profileBody
+            .mLoading(isPresent: store.isLoading)
     }
     
     private var profileBody: some View {
@@ -27,6 +29,12 @@ public struct ProfileView: View {
                 store.send(.backButtonTapped)
             } label: {
                 Text("뒤로가기")
+            }
+
+            Button {
+                store.send(.logoutButtonTapped)
+            } label: {
+                Text("로그아웃")
             }
         }
     }

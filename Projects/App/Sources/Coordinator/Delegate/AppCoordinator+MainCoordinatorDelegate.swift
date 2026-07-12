@@ -10,6 +10,6 @@ import Main
 extension AppCoordinator: MainCoordinatorDelegate {
     @MainActor
     func didRequestLogout(_ coordinator: MainCoordinator) {
-        showRoot(animated: true)
+        showSignIn(animated: true)
     }
 }
