@@ -7,12 +7,61 @@
 
 import UIKit
 import FeedInterface
+import ReactorKit
+import DesignSystem
+import SnapKit
+import RxCocoa
 
-public final class FeedViewController: UIViewController {
-    private weak var router: FeedRouter?
+public final class FeedViewController: UIViewController, View {
+    public var disposeBag = DisposeBag()
+    weak var router: FeedRouter?
+    
+    let dimmedControl = UIControl()
+    let floatingActionButtonOverlayView = UIView()
+    let expandedButtonStackView = UIStackView()
+    
+    let exerciseRecordLabel = MUILabel(
+        text: "운동 기록",
+        style: .b3,
+        color: .systemWhite
+    )
+    
+    let mealRecordLabel = MUILabel(
+        text: "식사 기록",
+        style: .b3,
+        color: .systemWhite
+    )
+    
+    let exerciseRecordButton = CircleImageButton(
+        backgroundColor: .systemWhite,
+        icon: .icExercise,
+        iconTintColor: .gray10
+    )
+    
+    let mealRecordButton = CircleImageButton(
+        backgroundColor: .systemWhite,
+        icon: .icCook,
+        iconTintColor: .gray10
+    )
+    
+    let expandedFloatingActionButton = CircleImageButton(
+        backgroundColor: .gray10,
+        icon: .icEdit,
+        iconTintColor: .systemWhite
+    )
 
-    public init(router: FeedRouter) {
+    let floatingActionButton = CircleImageButton(
+        backgroundColor: .gray10,
+        icon: .icEdit,
+        iconTintColor: .systemWhite
+    )
+
+    public init(
+        router: FeedRouter,
+        reactor: FeedReactor
+    ) {
         self.router = router
+        defer { self.reactor = reactor }
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -20,17 +69,80 @@ public final class FeedViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .systemBackground
-        configureLayout()
+        setupUI()
+        setupLayout()
+        reactor?.action.onNext(.viewDidLoad)
+    }
+    
+    public func bind(reactor: FeedReactor) {
+        floatingActionButton.rx.tap
+            .map { FeedReactor.Action.didTapFloatingActionButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+                
+        expandedFloatingActionButton.rx.tap
+            .map { FeedReactor.Action.didTapFloatingActionButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        exerciseRecordButton.rx.tap
+            .map { FeedReactor.Action.didTapExerciseRecordButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        mealRecordButton.rx.tap
+            .map { FeedReactor.Action.didTapMealRecordButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        dimmedControl.rx.controlEvent(.touchUpInside)
+            .map { FeedReactor.Action.didTapDimmedOverlay }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map(\.isFloatingActionButtonExpanded)
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, isExpanded in
+                owner.setFloatingActionButtonOverlayVisible(isExpanded)
+            }
+            .disposed(by: disposeBag)
     }
 }
 
 private extension FeedViewController {
-    func configureLayout() {
+    func setupUI() {
+        view.backgroundColor = .systemBackground
+        dimmedControl.backgroundColor = .systemBlack.withAlphaComponent(0.6)
+        
+        expandedButtonStackView.axis = .vertical
+        expandedButtonStackView.alignment = .trailing
+        expandedButtonStackView.spacing = 10
+    }
+    
+    func setupLayout() {
+        configureTempLayout()
+        configureFloatingActionButtonLayout()
+    }    
+    
+    func configureFloatingActionButtonLayout() {
+        view.addSubview(floatingActionButton)
+        
+        floatingActionButton.snp.makeConstraints {
+            $0.trailing.equalToSuperview().offset(-24)
+            $0.bottom.equalToSuperview().offset(-12)
+            $0.size.equalTo(56)
+        }
+    }
+}
+
+private extension FeedViewController {
+    func configureTempLayout() {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.alignment = .center
@@ -49,12 +161,11 @@ private extension FeedViewController {
         stackView.addArrangedSubview(button)
         view.addSubview(stackView)
 
-        NSLayoutConstraint.activate([
-            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
+        stackView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+        }
     }
-
+    
     @objc
     func tempButtonTapped() {
         router?.route(from: .temp)

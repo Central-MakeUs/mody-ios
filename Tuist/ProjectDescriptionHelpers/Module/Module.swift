@@ -32,6 +32,10 @@ public enum ExternalModule {
     case FirebaseAnalytics
     case FirebaseCrashlytics
     case FirebaseRemoteConfig
+    case ReactorKit
+    case RxSwift
+    case RxCocoa
+    case RxRelay
 
     var name: String {
         switch self {
