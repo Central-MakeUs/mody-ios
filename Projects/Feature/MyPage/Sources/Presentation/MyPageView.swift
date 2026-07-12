@@ -6,22 +6,26 @@
 //
 
 import SwiftUI
-import MyPageInterface
+import ComposableArchitecture
 
 public struct MyPageView: View {
-    private let route: @MainActor (MyPageRoute) -> Void
+    private let store: StoreOf<MyPageFeature>
 
-    public init(route: @escaping @MainActor (MyPageRoute) -> Void) {
-        self.route = route
+    public init(store: StoreOf<MyPageFeature>) {
+        self.store = store
     }
 
     public var body: some View {
+        myPageBody
+    }
+    
+    private var myPageBody: some View {
         VStack(spacing: 0) {
             Text("Hello, MyPageView~")
             Button {
-                route(.temp)
+                store.send(.profileButtonTapped)
             } label: {
-                Text("Temp 으로 가기")
+                Text("(임시) 프로필로 이동")
                     .padding()
                     .background(.brown)
             }
