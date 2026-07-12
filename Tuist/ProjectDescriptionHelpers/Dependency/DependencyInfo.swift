@@ -145,7 +145,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .MyPage: .init(
             implementation: [
                 .external(.ComposableArchitecture),
-                .module(.Base)
+                .module(.Base),
+                .microFeature(.CoreAuth)
             ]
         ),
         .CoreNetwork: .init(

@@ -18,6 +18,16 @@ extension AppCoordinator {
         setRoot(coordinator.navigationController, animated: animated)
         coordinator.start()
     }
+
+    @MainActor
+    func showSignIn(animated: Bool) {
+        mainCoordinator = nil
+
+        let coordinator = makeRootCoordinator(self)
+        rootCoordinator = coordinator
+        setRoot(coordinator.navigationController, animated: animated)
+        coordinator.startSignIn()
+    }
     
     @MainActor
     func showMain(animated: Bool) {

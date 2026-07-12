@@ -26,6 +26,7 @@ struct AppAssembly: Assembly {
         assembleModyGroupFeature(in: container)
         assembleFeedReactor(in: container)
         assembleChallengeFeature(in: container)
+        assembleMyPageProfileFeature(in: container)
         assembleMyPageFeature(in: container)
     }
 }

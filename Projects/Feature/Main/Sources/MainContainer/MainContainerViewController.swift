@@ -9,6 +9,7 @@ import UIKit
 import SwiftUI
 import SnapKit
 import DesignSystem
+import ModyLogger
 
 final class MainContainerViewController: UIViewController {
     var onSheetGroupParticipateTap: (() -> Void)?
@@ -29,11 +30,16 @@ final class MainContainerViewController: UIViewController {
         self.mainTabBarController = tabBarController
         self.customTabBarView = CustomTabBarView(tabs: tabs)
         super.init(nibName: nil, bundle: nil)
+        ModyLogger.debug("⭕ MainContainerViewController init!")
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        ModyLogger.debug("❎ MainContainerViewController deinit!")
     }
 
     override func viewDidLoad() {

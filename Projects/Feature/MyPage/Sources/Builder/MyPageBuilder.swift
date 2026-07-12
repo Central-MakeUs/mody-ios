@@ -12,11 +12,14 @@ import ComposableArchitecture
 
 public struct MyPageBuilder: MyPageBuildable {
     private let makeMyPageFeature: (MyPageRouter) -> MyPageFeature
+    private let makeProfileFeature: (MyPageProfileRouter) -> ProfileFeature
 
     public init(
-        makeMyPageFeature: @escaping (MyPageRouter) -> MyPageFeature
+        makeMyPageFeature: @escaping (MyPageRouter) -> MyPageFeature,
+        makeProfileFeature: @escaping (MyPageProfileRouter) -> ProfileFeature
     ) {
         self.makeMyPageFeature = makeMyPageFeature
+        self.makeProfileFeature = makeProfileFeature
     }
 
     @MainActor
@@ -25,6 +28,16 @@ public struct MyPageBuilder: MyPageBuildable {
             makeMyPageFeature(router)
         }
         let view = MyPageView(store: store)
+
+        return UIHostingController(rootView: view)
+    }
+
+    @MainActor
+    public func makeProfileViewController(router: MyPageProfileRouter) -> UIViewController {
+        let store: StoreOf<ProfileFeature> = .init(initialState: ProfileFeature.State()) {
+            makeProfileFeature(router)
+        }
+        let view = ProfileView(store: store)
 
         return UIHostingController(rootView: view)
     }

@@ -21,7 +21,7 @@ public final class MainCoordinator {
 
     private let feedBuilder: FeedBuildable
     private let challengeBuilder: ChallengeBuildable
-    private let myPageBuilder: MyPageBuildable
+    let myPageBuilder: MyPageBuildable
     let modyGroupBuilder: ModyGroupBuildable
 
     public init(

@@ -21,6 +21,9 @@ extension AppAssembly {
             return MyPageBuilder(
                 makeMyPageFeature: { router in
                     resolver.resolve(argument: router)
+                },
+                makeProfileFeature: { router in
+                    resolver.resolve(argument: router)
                 }
             )
         }
