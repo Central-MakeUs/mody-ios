@@ -14,7 +14,47 @@ import RxCocoa
 
 public final class FeedViewController: UIViewController, View {
     public var disposeBag = DisposeBag()
-    private weak var router: FeedRouter?
+    weak var router: FeedRouter?
+    
+    let dimmedControl = UIControl()
+    let floatingActionButtonOverlayView = UIView()
+    let expandedButtonStackView = UIStackView()
+    
+    let exerciseRecordLabel = MUILabel(
+        text: "운동 기록",
+        style: .b3,
+        color: .systemWhite
+    )
+    
+    let mealRecordLabel = MUILabel(
+        text: "식사 기록",
+        style: .b3,
+        color: .systemWhite
+    )
+    
+    let exerciseRecordButton = CircleImageButton(
+        backgroundColor: .systemWhite,
+        icon: .icExercise,
+        iconTintColor: .gray10
+    )
+    
+    let mealRecordButton = CircleImageButton(
+        backgroundColor: .systemWhite,
+        icon: .icCook,
+        iconTintColor: .gray10
+    )
+    
+    let expandedFloatingActionButton = CircleImageButton(
+        backgroundColor: .gray10,
+        icon: .icEdit,
+        iconTintColor: .systemWhite
+    )
+
+    let floatingActionButton = CircleImageButton(
+        backgroundColor: .gray10,
+        icon: .icEdit,
+        iconTintColor: .systemWhite
+    )
 
     public init(
         router: FeedRouter,
@@ -30,12 +70,6 @@ public final class FeedViewController: UIViewController, View {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private let floatingActionButton = CircleImageButton(
-        backgroundColor: .gray10,
-        icon: .icEdit,
-        iconTintColor: .systemWhite
-    )
-
     public override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -46,8 +80,37 @@ public final class FeedViewController: UIViewController, View {
     
     public func bind(reactor: FeedReactor) {
         floatingActionButton.rx.tap
-            .map { FeedReactor.Action.floatingActionButtonTapped }
+            .map { FeedReactor.Action.didTapFloatingActionButton }
             .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+                
+        expandedFloatingActionButton.rx.tap
+            .map { FeedReactor.Action.didTapFloatingActionButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        exerciseRecordButton.rx.tap
+            .map { FeedReactor.Action.didTapExerciseRecordButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        mealRecordButton.rx.tap
+            .map { FeedReactor.Action.didTapMealRecordButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        dimmedControl.rx.controlEvent(.touchUpInside)
+            .map { FeedReactor.Action.didTapDimmedOverlay }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map(\.isFloatingActionButtonExpanded)
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, isExpanded in
+                owner.setFloatingActionButtonOverlayVisible(isExpanded)
+            }
             .disposed(by: disposeBag)
     }
 }
@@ -55,6 +118,11 @@ public final class FeedViewController: UIViewController, View {
 private extension FeedViewController {
     func setupUI() {
         view.backgroundColor = .systemBackground
+        dimmedControl.backgroundColor = .systemBlack.withAlphaComponent(0.6)
+        
+        expandedButtonStackView.axis = .vertical
+        expandedButtonStackView.alignment = .trailing
+        expandedButtonStackView.spacing = 10
     }
     
     func setupLayout() {
