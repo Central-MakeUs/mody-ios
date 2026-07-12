@@ -6,9 +6,11 @@
 //
 
 import ReactorKit
+import FeedInterface
 
 public final class FeedReactor: Reactor {
     public let initialState: State = .init()
+    private weak var router: FeedRouter?
     
     public struct State {
         var isFloatingActionButtonExpanded = false
@@ -22,11 +24,12 @@ public final class FeedReactor: Reactor {
         case viewDidLoad
         case didTapDimmedOverlay
         case didTapFloatingActionButton
-        case didTapExerciseRecordButton
-        case didTapMealRecordButton
+        case didTapRecordButton(FeedRecordType)
     }
     
-    public init() {}
+    public init(router: FeedRouter) {
+        self.router = router
+    }
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
@@ -36,10 +39,11 @@ public final class FeedReactor: Reactor {
             return .just(.setFloatingActionButtonExpanded(false))
         case .didTapFloatingActionButton:
             return .just(.setFloatingActionButtonExpanded(!currentState.isFloatingActionButtonExpanded))
-        case .didTapExerciseRecordButton:
-            return .just(.setFloatingActionButtonExpanded(false))
-        case .didTapMealRecordButton:
-            return .just(.setFloatingActionButtonExpanded(false))
+        case .didTapRecordButton(let recordType):
+            return .concat([
+                .just(.setFloatingActionButtonExpanded(false)),
+                routeToRecord(recordType)
+            ])
         }
     }
     
@@ -52,5 +56,16 @@ public final class FeedReactor: Reactor {
         }
         
         return newState
+    }
+}
+
+private extension FeedReactor {
+    func routeToRecord(_ recordType: FeedRecordType) -> Observable<Mutation> {
+        return .deferred { [weak router] in
+            Task { @MainActor in
+                router?.route(from: .routeToRecord(recordType))
+            }
+            return .empty()
+        }
     }
 }

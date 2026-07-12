@@ -10,4 +10,10 @@ import UIKit
 public protocol FeedBuildable {
     @MainActor
     func makeFeedViewController(router: FeedRouter) -> UIViewController
+
+    @MainActor
+    func makeFeedRecordViewController(
+        router: FeedRecordRouter,
+        recordType: FeedRecordType
+    ) -> UIViewController
 }
