@@ -10,9 +10,6 @@ import FeedInterface
 extension MainCoordinator: FeedRouter {
     public func route(from route: FeedRoute) {
         switch route {
-        case .temp:
-            // TODO: 추후 구현
-            break
         case .groupMenu:
             mainContainerViewController?.presentGroupMenuSheet()
         }

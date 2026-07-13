@@ -6,7 +6,6 @@
 //
 
 public enum FeedRoute: Equatable {
-    case temp
     case groupMenu
 }
 
