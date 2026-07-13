@@ -20,6 +20,7 @@ final class MainContainerViewController: UIViewController {
     private let contentContainerView = UIView()
     private let customTabBarView: CustomTabBarView
     private let mainTabBarController: MainTabBarController
+    private let tabs: [MainTab]
     private var customTabBarHeightConstraint: Constraint?
 
     init(
@@ -28,6 +29,7 @@ final class MainContainerViewController: UIViewController {
     ) {
         self.mainTabBarController = tabBarController
         self.customTabBarView = CustomTabBarView(tabs: tabs)
+        self.tabs = tabs
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -92,6 +94,8 @@ private extension MainContainerViewController {
     }
 
     func bind() {
+        updateNavigationBar(for: tabs.first ?? .feed)
+
         navigationBar.onUsersTap = { [weak self] in
             self?.presentGroupMenuSheet()
         }
@@ -101,8 +105,15 @@ private extension MainContainerViewController {
         }
 
         customTabBarView.onSelect = { [weak self] index in
-            self?.mainTabBarController.selectTab(index)
-            self?.customTabBarView.updateSelection(index: index)
+            guard let self, tabs.indices.contains(index) else { return }
+
+            mainTabBarController.selectTab(index)
+            customTabBarView.updateSelection(index: index)
+            updateNavigationBar(for: tabs[index])
         }
+    }
+
+    func updateNavigationBar(for tab: MainTab) {
+        navigationBar.setUsersButtonVisible(tab != .feed)
     }
 }

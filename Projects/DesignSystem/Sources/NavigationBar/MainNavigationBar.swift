@@ -28,6 +28,10 @@ public final class MainNavigationBar: UIView {
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    public func setUsersButtonVisible(_ isVisible: Bool) {
+        usersButton.isHidden = !isVisible
+    }
 }
 
 private extension MainNavigationBar {

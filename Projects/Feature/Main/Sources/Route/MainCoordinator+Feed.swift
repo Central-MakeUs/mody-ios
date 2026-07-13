@@ -13,6 +13,8 @@ extension MainCoordinator: FeedRouter {
         case .temp:
             // TODO: 추후 구현
             break
+        case .groupMenu:
+            mainContainerViewController?.presentGroupMenuSheet()
         }
     }
 }
