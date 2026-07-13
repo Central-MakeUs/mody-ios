@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import FeedInterface
 import ReactorKit
 import DesignSystem
 import SnapKit
@@ -14,7 +13,9 @@ import RxCocoa
 
 public final class FeedViewController: UIViewController, View {
     public var disposeBag = DisposeBag()
-    weak var router: FeedRouter?
+
+    private let groupHeaderView = UIView()
+    private let groupButton = FeedGroupButton()
     
     let dimmedControl = UIControl()
     let floatingActionButtonOverlayView = UIView()
@@ -56,11 +57,7 @@ public final class FeedViewController: UIViewController, View {
         iconTintColor: .systemWhite
     )
 
-    public init(
-        router: FeedRouter,
-        reactor: FeedReactor
-    ) {
-        self.router = router
+    public init(reactor: FeedReactor) {
         defer { self.reactor = reactor }
         super.init(nibName: nil, bundle: nil)
     }
@@ -103,6 +100,11 @@ public final class FeedViewController: UIViewController, View {
             .map { FeedReactor.Action.didTapDimmedOverlay }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
+
+        groupButton.rx.tap
+            .map { FeedReactor.Action.didGroupButtonTapped }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
         
         reactor.state
             .map(\.isFloatingActionButtonExpanded)
@@ -112,12 +114,30 @@ public final class FeedViewController: UIViewController, View {
                 owner.setFloatingActionButtonOverlayVisible(isExpanded)
             }
             .disposed(by: disposeBag)
+
+        reactor.state
+            .map { state in
+                FeedGroupHeaderViewState(
+                    isLoading: state.isFetchGroupLoading,
+                    groupName: state.groups.first?.name
+                )
+            }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, viewState in
+                owner.groupButton.configure(
+                    title: viewState.groupName,
+                    isLoading: viewState.isLoading
+                )
+            }
+            .disposed(by: disposeBag)
     }
 }
 
 private extension FeedViewController {
     func setupUI() {
         view.backgroundColor = .systemBackground
+        groupHeaderView.backgroundColor = .systemWhite
         dimmedControl.backgroundColor = .systemBlack.withAlphaComponent(0.6)
         
         expandedButtonStackView.axis = .vertical
@@ -126,9 +146,22 @@ private extension FeedViewController {
     }
     
     func setupLayout() {
-        configureTempLayout()
+        configureGroupHeaderLayout()
         configureFloatingActionButtonLayout()
-    }    
+    }
+
+    func configureGroupHeaderLayout() {
+        view.addSubview(groupHeaderView)
+        groupHeaderView.addSubview(groupButton)
+
+        groupHeaderView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+        }
+
+        groupButton.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+    }
     
     func configureFloatingActionButtonLayout() {
         view.addSubview(floatingActionButton)
@@ -138,36 +171,5 @@ private extension FeedViewController {
             $0.bottom.equalToSuperview().offset(-12)
             $0.size.equalTo(56)
         }
-    }
-}
-
-private extension FeedViewController {
-    func configureTempLayout() {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.spacing = 12
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-
-        let label = UILabel()
-        label.text = "Hello, FeedViewController~"
-        label.textAlignment = .center
-
-        let button = UIButton(type: .system)
-        button.setTitle("Temp 으로 가기", for: .normal)
-        button.addTarget(self, action: #selector(tempButtonTapped), for: .touchUpInside)
-
-        stackView.addArrangedSubview(label)
-        stackView.addArrangedSubview(button)
-        view.addSubview(stackView)
-
-        stackView.snp.makeConstraints {
-            $0.center.equalToSuperview()
-        }
-    }
-    
-    @objc
-    func tempButtonTapped() {
-        router?.route(from: .temp)
     }
 }
