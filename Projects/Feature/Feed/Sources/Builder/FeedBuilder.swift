@@ -9,19 +9,16 @@ import UIKit
 import FeedInterface
 
 public struct FeedBuilder: FeedBuildable {
-    private let makeFeedReactor: () -> FeedReactor
+    private let makeFeedReactor: (FeedRouter) -> FeedReactor
     
     public init(
-        makeFeedReactor: @escaping () -> FeedReactor
+        makeFeedReactor: @escaping (FeedRouter) -> FeedReactor
     ) {
         self.makeFeedReactor = makeFeedReactor
     }
 
     @MainActor
     public func makeFeedViewController(router: FeedRouter) -> UIViewController {
-        return FeedViewController(
-            router: router,
-            reactor: makeFeedReactor()
-        )
+        return FeedViewController(reactor: makeFeedReactor(router))
     }
 }

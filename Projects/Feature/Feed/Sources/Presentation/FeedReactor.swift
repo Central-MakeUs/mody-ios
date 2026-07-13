@@ -7,10 +7,12 @@
 
 import ReactorKit
 import CommonDomain
+import FeedInterface
 import ModyGroupInterface
 
 public final class FeedReactor: Reactor {
     private let groupUseCase: GroupUseCaseProtocol
+    private weak var router: FeedRouter?
     public let initialState: State = .init()
     
     public struct State {
@@ -31,10 +33,15 @@ public final class FeedReactor: Reactor {
         case didTapFloatingActionButton
         case didTapExerciseRecordButton
         case didTapMealRecordButton
+        case didGroupButtonTapped
     }
     
-    public init(groupUseCase: GroupUseCaseProtocol) {
+    public init(
+        groupUseCase: GroupUseCaseProtocol,
+        router: FeedRouter
+    ) {
         self.groupUseCase = groupUseCase
+        self.router = router
     }
     
     public func mutate(action: Action) -> Observable<Mutation> {
@@ -53,6 +60,16 @@ public final class FeedReactor: Reactor {
             return .just(.setFloatingActionButtonExpanded(false))
         case .didTapMealRecordButton:
             return .just(.setFloatingActionButtonExpanded(false))
+        case .didGroupButtonTapped:
+            guard !currentState.isFetchGroupLoading,
+                  !currentState.groups.isEmpty else {
+                return .empty()
+            }
+
+            Task { @MainActor [weak router] in
+                router?.route(from: .groupMenu)
+            }
+            return .empty()
         }
     }
 

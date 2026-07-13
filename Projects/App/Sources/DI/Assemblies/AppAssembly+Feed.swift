@@ -12,16 +12,19 @@ import ModyGroupInterface
 
 extension AppAssembly {
     func assembleFeedReactor(in container: Container) {
-        container.register(FeedReactor.self) { resolver in
+        container.register(FeedReactor.self) { (resolver: Resolver, router: FeedRouter) in
             let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
 
-            return FeedReactor(groupUseCase: groupUseCase)
+            return FeedReactor(
+                groupUseCase: groupUseCase,
+                router: router
+            )
         }
         
         container.register(FeedBuildable.self) { resolver in
             return FeedBuilder(
-                makeFeedReactor: {
-                    resolver.resolve()
+                makeFeedReactor: { router in
+                    resolver.resolve(argument: router)
                 }
             )
         }
