@@ -6,16 +6,23 @@
 //
 
 import ReactorKit
+import CommonDomain
+import ModyGroupInterface
 
 public final class FeedReactor: Reactor {
+    private let groupUseCase: GroupUseCaseProtocol
     public let initialState: State = .init()
     
     public struct State {
         var isFloatingActionButtonExpanded = false
+        var groups: [GroupModel] = []
+        var isFetchGroupLoading = false
     }
     
     public enum Mutation {
         case setFloatingActionButtonExpanded(Bool)
+        case setGroups([GroupModel])
+        case setFetchGroupLoading(Bool)
     }
     
     public enum Action {
@@ -26,12 +33,18 @@ public final class FeedReactor: Reactor {
         case didTapMealRecordButton
     }
     
-    public init() {}
+    public init(groupUseCase: GroupUseCaseProtocol) {
+        self.groupUseCase = groupUseCase
+    }
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
-            return .empty()
+            return .concat([
+                .just(.setFetchGroupLoading(true)),
+                fetchGroups(),
+                .just(.setFetchGroupLoading(false))
+            ])
         case .didTapDimmedOverlay:
             return .just(.setFloatingActionButtonExpanded(false))
         case .didTapFloatingActionButton:
@@ -42,15 +55,41 @@ public final class FeedReactor: Reactor {
             return .just(.setFloatingActionButtonExpanded(false))
         }
     }
-    
+
     public func reduce(state: State, mutation: Mutation) -> State {
         var newState = state
         
         switch mutation {
         case .setFloatingActionButtonExpanded(let isExpanded):
             newState.isFloatingActionButtonExpanded = isExpanded
+        case .setGroups(let groups):
+            newState.groups = groups
+        case .setFetchGroupLoading(let isLoading):
+            newState.isFetchGroupLoading = isLoading
         }
         
         return newState
+    }
+}
+
+private extension FeedReactor {
+    func fetchGroups() -> Observable<Mutation> {
+        Observable.create { [weak self] observer in
+            let task = Task {
+                guard let self else { return }
+                do {
+                    try await Task.sleep(for: .seconds(1)) // MARK: 현재 응답이 너무 빨라 테스트 용으로 넣었음. (스켈레톤 볼려고)
+                    let groups = try await self.groupUseCase.getGroups()
+                    observer.onNext(.setGroups(groups))
+                } catch {
+                    observer.onError(error)
+                }
+
+                observer.onCompleted()
+            }
+
+            return Disposables.create { task.cancel() }
+        }
+        .observe(on: MainScheduler.instance)
     }
 }

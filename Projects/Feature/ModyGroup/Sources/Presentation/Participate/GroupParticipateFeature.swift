@@ -7,10 +7,11 @@
 
 import ComposableArchitecture
 import CommonDomain
+import ModyGroupInterface
 
 @Reducer
 public struct GroupParticipateFeature {
-    private let groupUseCase: GroupUseCase
+    private let groupUseCase: GroupUseCaseProtocol
     
     @ObservableState
     public struct State: Equatable {
@@ -64,7 +65,7 @@ public struct GroupParticipateFeature {
         case joinGroupFailure(NetworkError, code: String)
     }
     
-    public init(groupUseCase: GroupUseCase) {
+    public init(groupUseCase: GroupUseCaseProtocol) {
         self.groupUseCase = groupUseCase
     }
     
@@ -85,12 +86,11 @@ public struct GroupParticipateFeature {
             case .participateButtonTapped:
                 guard state.isParticipateButtonEnabled else { return .none }
                 let inviteCode = state.inviteCode
-                let request = GroupJoinRequest(code: inviteCode)
                 state.isLoading = true
                 
                 return .run { send in
                     do {
-                        try await groupUseCase.joinGroup(request: request)
+                        try await groupUseCase.joinGroup(code: inviteCode)
                         await send(.joinGroupSuccessfully)
                     } catch let error as NetworkError {
                         await send(.joinGroupFailure(error, code: inviteCode))
