@@ -94,12 +94,6 @@ private extension MainContainerViewController {
     }
 
     func bind() {
-        updateNavigationBar(for: tabs.first ?? .feed)
-
-        navigationBar.onUsersTap = { [weak self] in
-            self?.presentGroupMenuSheet()
-        }
-
         navigationBar.onAlarmTap = { [weak self] in
             self?.onAlarmTap?()
         }
@@ -109,11 +103,6 @@ private extension MainContainerViewController {
 
             mainTabBarController.selectTab(index)
             customTabBarView.updateSelection(index: index)
-            updateNavigationBar(for: tabs[index])
         }
-    }
-
-    func updateNavigationBar(for tab: MainTab) {
-        navigationBar.setUsersButtonVisible(tab != .feed)
     }
 }

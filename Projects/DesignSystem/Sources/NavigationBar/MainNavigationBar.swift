@@ -9,13 +9,11 @@ import UIKit
 import SnapKit
 
 public final class MainNavigationBar: UIView {
-    public var onUsersTap: (() -> Void)?
     public var onAlarmTap: (() -> Void)?
 
     private let contentView = UIView()
     private let logoImageView = UIImageView()
     private let buttonStackView = UIStackView()
-    private let usersButton = UIButton(type: .system)
     private let alarmButton = UIButton(type: .system)
 
     public override init(frame: CGRect) {
@@ -27,10 +25,6 @@ public final class MainNavigationBar: UIView {
     @available(*, unavailable)
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    public func setUsersButtonVisible(_ isVisible: Bool) {
-        usersButton.isHidden = !isVisible
     }
 }
 
@@ -46,7 +40,6 @@ private extension MainNavigationBar {
         buttonStackView.distribution = .fill
         buttonStackView.spacing = 12
 
-        configureIconButton(usersButton, image: .icUsers, action: #selector(didTapUsersButton))
         configureIconButton(alarmButton, image: .icAlarm, action: #selector(didTapAlarmButton))
     }
 
@@ -54,7 +47,6 @@ private extension MainNavigationBar {
         addSubview(contentView)
         contentView.addSubview(logoImageView)
         contentView.addSubview(buttonStackView)
-        buttonStackView.addArrangedSubview(usersButton)
         buttonStackView.addArrangedSubview(alarmButton)
 
         contentView.snp.makeConstraints {
@@ -72,10 +64,8 @@ private extension MainNavigationBar {
             $0.top.trailing.bottom.equalToSuperview()
         }
 
-        [usersButton, alarmButton].forEach {
-            $0.snp.makeConstraints {
-                $0.size.equalTo(24)
-            }
+        alarmButton.snp.makeConstraints {
+            $0.size.equalTo(24)
         }
     }
 
@@ -88,10 +78,6 @@ private extension MainNavigationBar {
         button.tintColor = .gray10
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: action, for: .touchUpInside)
-    }
-
-    @objc func didTapUsersButton() {
-        onUsersTap?()
     }
 
     @objc func didTapAlarmButton() {
