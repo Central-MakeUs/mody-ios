@@ -1,6 +1,6 @@
 //
 //  DayOfWeek.swift
-//  OnBoarding
+//  CommonDomain
 //
 //  Created by 김동준 on 7/9/26
 //

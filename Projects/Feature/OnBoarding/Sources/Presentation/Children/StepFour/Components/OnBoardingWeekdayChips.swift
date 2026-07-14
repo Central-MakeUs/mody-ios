@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CommonDomain
 import DesignSystem
 
 struct OnBoardingWeekdayChips: View {
