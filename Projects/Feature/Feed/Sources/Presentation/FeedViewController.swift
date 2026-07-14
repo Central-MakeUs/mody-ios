@@ -16,7 +16,8 @@ public final class FeedViewController: UIViewController, View {
 
     private let groupHeaderView = UIView()
     private let groupButton = FeedGroupButton()
-    
+    private let weekCalendarView = FeedWeekCalendarView()
+
     let dimmedControl = UIControl()
     let floatingActionButtonOverlayView = UIView()
     let expandedButtonStackView = UIStackView()
@@ -144,12 +145,46 @@ public final class FeedViewController: UIViewController, View {
                 )
             }
             .disposed(by: disposeBag)
+
+        bindWeekCalendar(reactor)
+    }
+}
+
+private extension FeedViewController {
+    func bindWeekCalendar(_ reactor: FeedReactor) {
+        weekCalendarView.onPreviousWeekTap = { [weak reactor] in
+            reactor?.action.onNext(.didTapPreviousWeek)
+        }
+
+        weekCalendarView.onNextWeekTap = { [weak reactor] in
+            reactor?.action.onNext(.didTapNextWeek)
+        }
+
+        weekCalendarView.onDateTap = { [weak reactor] model in
+            reactor?.action.onNext(.didTapCalendarDate(model))
+        }
+
+        reactor.state
+            .map(\.weekCalendarViewState)
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, viewState in
+                owner.weekCalendarView.configure(
+                    title: viewState.calendarTitle,
+                    dates: viewState.calendarDates,
+                    canMovePrevious: viewState.canMovePreviousWeek,
+                    canMoveNext: viewState.canMoveNextWeek,
+                    todayDate: viewState.todayDate,
+                    selectedDate: viewState.selectedDate
+                )
+            }
+            .disposed(by: disposeBag)
     }
 }
 
 private extension FeedViewController {
     func setupUI() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .systemWhite
         groupHeaderView.backgroundColor = .systemWhite
         dimmedControl.backgroundColor = .systemBlack.withAlphaComponent(0.6)
         
@@ -161,6 +196,7 @@ private extension FeedViewController {
     func setupLayout() {
         configureGroupHeaderLayout()
         configureFloatingActionButtonLayout()
+        configureWeekCalendarLayout()
     }
 
     func configureGroupHeaderLayout() {
@@ -183,6 +219,15 @@ private extension FeedViewController {
             $0.trailing.equalToSuperview().offset(-24)
             $0.bottom.equalToSuperview().offset(-12)
             $0.size.equalTo(56)
+        }
+    }
+
+    func configureWeekCalendarLayout() {
+        view.addSubview(weekCalendarView)
+
+        weekCalendarView.snp.makeConstraints {
+            $0.top.equalTo(groupHeaderView.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
         }
     }
 }
