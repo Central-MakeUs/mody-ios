@@ -76,17 +76,17 @@ struct FeedWeekCalendarCalculator {
 
     static func isSelectable(
         date: String,
-        referenceDate: String,
+        latestSelectableDate: String,
         calendar: Calendar = Date.koreanCalendar
     ) -> Bool {
         guard let date = parseDate(date),
-              let referenceDate = parseDate(referenceDate) else {
+              let latestSelectableDate = parseDate(latestSelectableDate) else {
             return false
         }
 
         return calendar.compare(
             date,
-            to: referenceDate,
+            to: latestSelectableDate,
             toGranularity: .day
         ) != .orderedDescending
     }
