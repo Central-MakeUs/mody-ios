@@ -10,8 +10,8 @@ import FeedInterface
 extension MainCoordinator: FeedRouter {
     public func route(from route: FeedRoute) {
         switch route {
-        case .groupMenu:
-            mainContainerViewController?.presentGroupMenuSheet()
+        case .addGroup:
+            mainContainerViewController?.presentAddGroupAlert()
         }
     }
 }

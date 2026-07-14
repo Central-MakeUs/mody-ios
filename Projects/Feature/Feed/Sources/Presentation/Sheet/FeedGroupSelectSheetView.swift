@@ -1,15 +1,15 @@
 //
-//  MainGroupSelectSheetView.swift
-//  Main
+//  FeedGroupSelectSheetView.swift
+//  Feed
 //
-//  Created by 김동준 on 7/6/26.
+//  Created by 김동준 on 7/14/26.
 //
 
 import SwiftUI
 import CommonDomain
 import DesignSystem
 
-struct MainGroupSelectSheetView: View {
+struct FeedGroupSelectSheetView: View {
     private let groupList: [GroupModel]
     private let selectedGroup: GroupModel
     private let onGroupSelect: (GroupModel) -> Void
@@ -48,17 +48,17 @@ struct MainGroupSelectSheetView: View {
     }
 }
 
-private extension MainGroupSelectSheetView {
+private extension FeedGroupSelectSheetView {
     func groupRow(_ group: GroupModel) -> some View {
         let isSelected = group.groupId == selectedGroup.groupId
-        
+
         return Button {
             onGroupSelect(group)
         } label: {
             HStack(spacing: 0) {
                 groupInfo(group)
                 Spacer()
-                
+
                 if isSelected {
                     MText(
                         "현재 보는 중",
@@ -84,11 +84,11 @@ private extension MainGroupSelectSheetView {
             }
         }
     }
-    
+
     func groupInfo(_ group: GroupModel) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             groupTitle(group)
-            
+
             MText(
                 "그룹코드 \(group.code)",
                 style: .c2,
@@ -97,7 +97,7 @@ private extension MainGroupSelectSheetView {
             )
         }
     }
-    
+
     func groupTitle(_ group: GroupModel) -> some View {
         HStack(spacing: 4) {
             MText(
@@ -106,7 +106,7 @@ private extension MainGroupSelectSheetView {
                 color: .gray10,
                 alignment: .leading
             )
-            
+
             MText(
                 "그룹",
                 style: .c2,
@@ -116,7 +116,7 @@ private extension MainGroupSelectSheetView {
     }
 }
 
-private extension MainGroupSelectSheetView {
+private extension FeedGroupSelectSheetView {
     var addGroupButton: some View {
         MButton(
             "그룹 추가하기",

@@ -6,7 +6,7 @@
 //
 
 public enum FeedRoute: Equatable {
-    case groupMenu
+    case addGroup
 }
 
 @MainActor

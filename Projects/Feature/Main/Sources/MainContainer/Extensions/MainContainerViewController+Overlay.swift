@@ -6,9 +6,32 @@
 //
 
 import UIKit
+import SwiftUI
 import SnapKit
 
 extension MainContainerViewController {
+    func presentAddGroupAlert() {
+        let viewController = UIHostingController(
+            rootView: MainAddGroupAlertView(
+                onDismiss: { [weak self] in
+                    self?.dismissOverlay()
+                },
+                onParticipateTap: { [weak self] in
+                    self?.dismissOverlay {
+                        self?.onGroupParticipateTap?()
+                    }
+                },
+                onCreateTap: { [weak self] in
+                    self?.dismissOverlay {
+                        self?.onGroupCreateTap?()
+                    }
+                }
+            )
+        )
+
+        showOverlay(viewController)
+    }
+
     func showOverlay(_ overlayViewController: UIViewController) {
         removeCurrentOverlay()
 

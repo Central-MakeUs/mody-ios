@@ -18,12 +18,14 @@ public final class FeedReactor: Reactor {
     public struct State {
         var isFloatingActionButtonExpanded = false
         var groups: [GroupModel] = []
+        var selectedGroup: GroupModel?
         var isFetchGroupLoading = false
     }
     
     public enum Mutation {
         case setFloatingActionButtonExpanded(Bool)
         case setGroups([GroupModel])
+        case setSelectedGroup(GroupModel)
         case setFetchGroupLoading(Bool)
     }
     
@@ -33,7 +35,8 @@ public final class FeedReactor: Reactor {
         case didTapFloatingActionButton
         case didTapExerciseRecordButton
         case didTapMealRecordButton
-        case didGroupButtonTapped
+        case didTapAddGroup
+        case didSelectGroup(GroupModel)
     }
     
     public init(
@@ -60,16 +63,16 @@ public final class FeedReactor: Reactor {
             return .just(.setFloatingActionButtonExpanded(false))
         case .didTapMealRecordButton:
             return .just(.setFloatingActionButtonExpanded(false))
-        case .didGroupButtonTapped:
-            guard !currentState.isFetchGroupLoading,
-                  !currentState.groups.isEmpty else {
-                return .empty()
-            }
-
+        case .didTapAddGroup:
             Task { @MainActor [weak router] in
-                router?.route(from: .groupMenu)
+                router?.route(from: .addGroup)
             }
             return .empty()
+        case let .didSelectGroup(group):
+            guard currentState.groups.contains(where: { $0.groupId == group.groupId }) else {
+                return .empty()
+            }
+            return .just(.setSelectedGroup(group))
         }
     }
 
@@ -81,6 +84,11 @@ public final class FeedReactor: Reactor {
             newState.isFloatingActionButtonExpanded = isExpanded
         case .setGroups(let groups):
             newState.groups = groups
+            if newState.selectedGroup == nil, groups.count > 0 {
+                newState.selectedGroup = groups.first
+            }
+        case .setSelectedGroup(let group):
+            newState.selectedGroup = group
         case .setFetchGroupLoading(let isLoading):
             newState.isFetchGroupLoading = isLoading
         }

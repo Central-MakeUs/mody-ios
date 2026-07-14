@@ -11,8 +11,8 @@ import SnapKit
 import DesignSystem
 
 final class MainContainerViewController: UIViewController {
-    var onSheetGroupParticipateTap: (() -> Void)?
-    var onSheetGroupCreateTap: (() -> Void)?
+    var onGroupParticipateTap: (() -> Void)?
+    var onGroupCreateTap: (() -> Void)?
     var onAlarmTap: (() -> Void)?
     var currentOverlayViewController: UIViewController?
 

@@ -102,8 +102,21 @@ public final class FeedViewController: UIViewController, View {
             .disposed(by: disposeBag)
 
         groupButton.rx.tap
-            .map { FeedReactor.Action.didGroupButtonTapped }
-            .bind(to: reactor.action)
+            .withLatestFrom(reactor.state)
+            .compactMap { FeedGroupMenuSheetViewState(state: $0) }
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, viewState in
+                owner.presentGroupMenuSheet(
+                    groupList: viewState.groupList,
+                    selectedGroup: viewState.selectedGroup,
+                    onGroupSelect: { group in
+                        reactor.action.onNext(.didSelectGroup(group))
+                    },
+                    onAddGroupTap: {
+                        reactor.action.onNext(.didTapAddGroup)
+                    }
+                )
+            }
             .disposed(by: disposeBag)
         
         reactor.state
@@ -119,7 +132,7 @@ public final class FeedViewController: UIViewController, View {
             .map { state in
                 FeedGroupHeaderViewState(
                     isLoading: state.isFetchGroupLoading,
-                    groupName: state.groups.first?.name
+                    groupName: state.selectedGroup?.name
                 )
             }
             .distinctUntilChanged()
