@@ -5,21 +5,27 @@
 //  Created by 김동준 on 7/11/26
 //
 
-import ReactorKit
+import Foundation
 import CommonDomain
 import FeedInterface
 import ModyGroupInterface
+import ReactorKit
 
 public final class FeedReactor: Reactor {
     private let groupUseCase: GroupUseCaseProtocol
     private weak var router: FeedRouter?
-    public let initialState: State = .init()
-    
+    public let initialState: State
+    private let baseDate: Date
+    private let calendar: Calendar
+
     public struct State {
         var isFloatingActionButtonExpanded = false
         var groups: [GroupModel] = []
         var selectedGroup: GroupModel?
         var isFetchGroupLoading = false
+
+        var weekCalendarViewState: FeedWeekCalendarViewState
+        var weekOffset = 0
     }
     
     public enum Mutation {
@@ -27,6 +33,13 @@ public final class FeedReactor: Reactor {
         case setGroups([GroupModel])
         case setSelectedGroup(GroupModel)
         case setFetchGroupLoading(Bool)
+
+        case setWeekCalendar(
+            offset: Int,
+            title: String,
+            dates: [FeedWeekCalendarModel]
+        )
+        case setSelectedCalendarDate(String)
     }
     
     public enum Action {
@@ -37,6 +50,10 @@ public final class FeedReactor: Reactor {
         case didTapMealRecordButton
         case didTapAddGroup
         case didSelectGroup(GroupModel)
+
+        case didTapPreviousWeek
+        case didTapNextWeek
+        case didTapCalendarDate(FeedWeekCalendarModel)
     }
     
     public init(
@@ -45,6 +62,29 @@ public final class FeedReactor: Reactor {
     ) {
         self.groupUseCase = groupUseCase
         self.router = router
+        let calendar = Date.koreanCalendar
+        let baseDate = Date().startOfDay(calendar: calendar)
+        let weekInfo = FeedWeekCalendarCalculator.calculateWeekInfoFromBaseDate(
+            baseDate,
+            calendar: calendar
+        )
+        let todayDate = baseDate.toString()
+
+        self.calendar = calendar
+        self.baseDate = baseDate
+        self.initialState = State(
+            weekCalendarViewState: FeedWeekCalendarViewState(
+                calendarTitle: weekInfo.title,
+                calendarDates: FeedWeekCalendarCalculator.makeModels(
+                    containing: baseDate,
+                    calendar: calendar
+                ),
+                canMovePreviousWeek: true,
+                canMoveNextWeek: false,
+                todayDate: todayDate,
+                selectedDate: todayDate
+            )
+        )
     }
     
     public func mutate(action: Action) -> Observable<Mutation> {
@@ -73,6 +113,21 @@ public final class FeedReactor: Reactor {
                 return .empty()
             }
             return .just(.setSelectedGroup(group))
+        case .didTapPreviousWeek:
+            return makeCalendarMutation(offset: currentState.weekOffset - 1)
+        case .didTapNextWeek:
+            guard currentState.weekCalendarViewState.canMoveNextWeek else { return .empty() }
+            return makeCalendarMutation(offset: currentState.weekOffset + 1)
+        case let .didTapCalendarDate(model):
+            guard FeedWeekCalendarCalculator.isSelectable(
+                date: model.date,
+                latestSelectableDate: currentState.weekCalendarViewState.todayDate,
+                calendar: calendar
+            ) else {
+                return .empty()
+            }
+
+            return .just(.setSelectedCalendarDate(model.date))
         }
     }
 
@@ -91,6 +146,14 @@ public final class FeedReactor: Reactor {
             newState.selectedGroup = group
         case .setFetchGroupLoading(let isLoading):
             newState.isFetchGroupLoading = isLoading
+        case let .setWeekCalendar(offset, title, dates):
+            newState.weekOffset = offset
+            newState.weekCalendarViewState.calendarTitle = title
+            newState.weekCalendarViewState.calendarDates = dates
+            newState.weekCalendarViewState.canMovePreviousWeek = true
+            newState.weekCalendarViewState.canMoveNextWeek = offset < 0
+        case let .setSelectedCalendarDate(date):
+            newState.weekCalendarViewState.selectedDate = date
         }
         
         return newState
@@ -116,5 +179,33 @@ private extension FeedReactor {
             return Disposables.create { task.cancel() }
         }
         .observe(on: MainScheduler.instance)
+    }
+}
+
+private extension FeedReactor {
+    func makeCalendarMutation(offset: Int) -> Observable<Mutation> {
+        guard offset <= 0,
+              let targetDate = calendar.date(
+                byAdding: .weekOfYear,
+                value: offset,
+                to: baseDate
+              ) else {
+            return .empty()
+        }
+
+        let weekInfo = FeedWeekCalendarCalculator.calculateWeekInfoFromBaseDate(
+            targetDate,
+            calendar: calendar
+        )
+        let models = FeedWeekCalendarCalculator.makeModels(
+            containing: targetDate,
+            calendar: calendar
+        )
+
+        return .just(.setWeekCalendar(
+            offset: offset,
+            title: weekInfo.title,
+            dates: models
+        ))
     }
 }
