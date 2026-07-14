@@ -139,6 +139,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             implementation: [
                 .module(.Base),
                 .module(.CommonDomain),
+                .module(.Util),
                 .microFeature(.ModyGroup),
                 .external(.ReactorKit),
                 .external(.RxSwift),

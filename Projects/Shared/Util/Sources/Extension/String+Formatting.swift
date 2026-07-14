@@ -14,4 +14,18 @@ public extension String {
     ) -> String {
         String(format: "%02d:%02d", hour, minute)
     }
+
+    func toDate(
+        format: DateFormat = .yyyyMMdd,
+        locale: Locale = Date.koreanLocale,
+        timeZone: TimeZone = Date.koreanTimeZone
+    ) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.timeZone = timeZone
+        formatter.dateFormat = format.value
+        formatter.isLenient = false
+
+        return formatter.date(from: self)
+    }
 }
