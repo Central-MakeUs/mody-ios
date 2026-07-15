@@ -14,7 +14,6 @@ import Util
 final class FeedWeekCalendarDayView: UIControl {
     var onTap: ((FeedWeekCalendarModel) -> Void)?
 
-    private let disabledAlpha: CGFloat = 0.4
     private let contentStackView = UIStackView()
     private let dayOfWeekLabel: MUILabel
     private let dateContainerView = UIView()
@@ -61,10 +60,11 @@ final class FeedWeekCalendarDayView: UIControl {
         dateLabel.text = date.map {
             String(calendar.component(.day, from: $0))
         }
+        dayOfWeekLabel.textColor = isSelectable ? .gray6 : .gray3
+        dateLabel.textColor = isSelectable ? .gray10 : .gray3
         dateContainerView.backgroundColor = isSelected ? .main : .clear
-        recordDotView.backgroundColor = model.hasRecord ? .main : .gray2
+        recordDotView.backgroundColor = isSelectable ? (model.hasRecord ? .sub : .gray2) : .clear
         isEnabled = isSelectable
-        alpha = isSelectable ? 1 : disabledAlpha
     }
 }
 

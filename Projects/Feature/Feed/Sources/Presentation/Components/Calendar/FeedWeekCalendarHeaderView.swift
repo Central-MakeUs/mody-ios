@@ -59,7 +59,7 @@ final class FeedWeekCalendarHeaderView: UIView {
         button.configuration = configuration
         button.configurationUpdateHandler = { button in
             var configuration = button.configuration
-            configuration?.baseForegroundColor = button.isEnabled ? .gray4 : .gray2
+            configuration?.baseForegroundColor = button.isEnabled ? .gray6 : .gray3
             button.configuration = configuration
         }
     }
