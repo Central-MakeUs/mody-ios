@@ -124,6 +124,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .ModyGroup: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
                 .external(.ComposableArchitecture),
                 .module(.Base),
@@ -135,6 +138,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .Feed: .init(
             implementation: [
                 .module(.Base),
+                .module(.CommonDomain),
+                .module(.Util),
+                .microFeature(.ModyGroup),
                 .external(.ReactorKit),
                 .external(.RxSwift),
                 .external(.RxCocoa),

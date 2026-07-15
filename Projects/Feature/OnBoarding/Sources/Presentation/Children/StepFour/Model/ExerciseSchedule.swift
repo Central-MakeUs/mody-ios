@@ -5,6 +5,7 @@
 //  Created by 김동준 on 7/10/26
 //
 
+import CommonDomain
 import Foundation
 
 public struct ExerciseSchedule: Equatable, Identifiable {

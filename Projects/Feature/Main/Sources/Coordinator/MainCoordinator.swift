@@ -74,10 +74,10 @@ public final class MainCoordinator {
             tabs: tabs
         )
         self.mainContainerViewController = mainContainerViewController
-        mainContainerViewController.onSheetGroupParticipateTap = { [weak self] in
+        mainContainerViewController.onGroupParticipateTap = { [weak self] in
             self?.showGroupParticipate()
         }
-        mainContainerViewController.onSheetGroupCreateTap = { [weak self] in
+        mainContainerViewController.onGroupCreateTap = { [weak self] in
             self?.showGroupCreate(needBackButton: true)
         }
 

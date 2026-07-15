@@ -6,15 +6,19 @@
 //
 
 import UIKit
-import FeedInterface
 import ReactorKit
 import DesignSystem
 import SnapKit
 import RxCocoa
+import FeedInterface
 
 public final class FeedViewController: UIViewController, View {
     public var disposeBag = DisposeBag()
-    
+
+    private let groupHeaderView = UIView()
+    private let groupButton = FeedGroupButton()
+    private let weekCalendarView = FeedWeekCalendarView()
+
     let dimmedControl = UIControl()
     let floatingActionButtonOverlayView = UIView()
     let expandedButtonStackView = UIStackView()
@@ -98,6 +102,24 @@ public final class FeedViewController: UIViewController, View {
             .map { FeedReactor.Action.didTapDimmedOverlay }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
+
+        groupButton.rx.tap
+            .withLatestFrom(reactor.state)
+            .compactMap { FeedGroupMenuSheetViewState(state: $0) }
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, viewState in
+                owner.presentGroupMenuSheet(
+                    groupList: viewState.groupList,
+                    selectedGroup: viewState.selectedGroup,
+                    onGroupSelect: { group in
+                        reactor.action.onNext(.didSelectGroup(group))
+                    },
+                    onAddGroupTap: {
+                        reactor.action.onNext(.didTapAddGroup)
+                    }
+                )
+            }
+            .disposed(by: disposeBag)
         
         reactor.state
             .map(\.isFloatingActionButtonExpanded)
@@ -107,12 +129,64 @@ public final class FeedViewController: UIViewController, View {
                 owner.setFloatingActionButtonOverlayVisible(isExpanded)
             }
             .disposed(by: disposeBag)
+
+        reactor.state
+            .map { state in
+                FeedGroupHeaderViewState(
+                    isLoading: state.isFetchGroupLoading,
+                    groupName: state.selectedGroup?.name
+                )
+            }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, viewState in
+                owner.groupButton.configure(
+                    title: viewState.groupName,
+                    isLoading: viewState.isLoading
+                )
+            }
+            .disposed(by: disposeBag)
+
+        bindWeekCalendar(reactor)
+    }
+}
+
+private extension FeedViewController {
+    func bindWeekCalendar(_ reactor: FeedReactor) {
+        weekCalendarView.onPreviousWeekTap = { [weak reactor] in
+            reactor?.action.onNext(.didTapPreviousWeek)
+        }
+
+        weekCalendarView.onNextWeekTap = { [weak reactor] in
+            reactor?.action.onNext(.didTapNextWeek)
+        }
+
+        weekCalendarView.onDateTap = { [weak reactor] model in
+            reactor?.action.onNext(.didTapCalendarDate(model))
+        }
+
+        reactor.state
+            .map(\.weekCalendarViewState)
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, viewState in
+                owner.weekCalendarView.configure(
+                    title: viewState.calendarTitle,
+                    dates: viewState.calendarDates,
+                    canMovePrevious: viewState.canMovePreviousWeek,
+                    canMoveNext: viewState.canMoveNextWeek,
+                    todayDate: viewState.todayDate,
+                    selectedDate: viewState.selectedDate
+                )
+            }
+            .disposed(by: disposeBag)
     }
 }
 
 private extension FeedViewController {
     func setupUI() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .systemWhite
+        groupHeaderView.backgroundColor = .systemWhite
         dimmedControl.backgroundColor = .systemBlack.withAlphaComponent(0.6)
         
         expandedButtonStackView.axis = .vertical
@@ -121,9 +195,23 @@ private extension FeedViewController {
     }
     
     func setupLayout() {
-        configureTempLayout()
+        configureGroupHeaderLayout()
         configureFloatingActionButtonLayout()
-    }    
+        configureWeekCalendarLayout()
+    }
+
+    func configureGroupHeaderLayout() {
+        view.addSubview(groupHeaderView)
+        groupHeaderView.addSubview(groupButton)
+
+        groupHeaderView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+        }
+
+        groupButton.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+    }
     
     func configureFloatingActionButtonLayout() {
         view.addSubview(floatingActionButton)
@@ -134,34 +222,13 @@ private extension FeedViewController {
             $0.size.equalTo(56)
         }
     }
-}
 
-private extension FeedViewController {
-    func configureTempLayout() {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.spacing = 12
-        stackView.translatesAutoresizingMaskIntoConstraints = false
+    func configureWeekCalendarLayout() {
+        view.addSubview(weekCalendarView)
 
-        let label = UILabel()
-        label.text = "Hello, FeedViewController~"
-        label.textAlignment = .center
-
-        let button = UIButton(type: .system)
-        button.setTitle("Temp 으로 가기", for: .normal)
-        button.addTarget(self, action: #selector(tempButtonTapped), for: .touchUpInside)
-
-        stackView.addArrangedSubview(label)
-        stackView.addArrangedSubview(button)
-        view.addSubview(stackView)
-
-        stackView.snp.makeConstraints {
-            $0.center.equalToSuperview()
+        weekCalendarView.snp.makeConstraints {
+            $0.top.equalTo(groupHeaderView.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
         }
-    }
-    
-    @objc
-    func tempButtonTapped() {
     }
 }

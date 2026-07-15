@@ -19,7 +19,7 @@ extension AppAssembly {
             return GroupRepository(network: network)
         }
 
-        container.register(GroupUseCase.self) { resolver in
+        container.register(GroupUseCaseProtocol.self) { resolver in
             let repository: GroupRepositoryProtocol = resolver.resolve()
 
             return GroupUseCase(groupRepository: repository)
@@ -35,7 +35,7 @@ extension AppAssembly {
             return ModyGroupBuilder(
                 makeModyGroupRootFeature: { router in
                     let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol = resolver.resolve()
-                    let groupUseCase: GroupUseCase = resolver.resolve()
+                    let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
 
                     return ModyGroupRootFeature(
                         groupInviteFeature: GroupInviteFeature(

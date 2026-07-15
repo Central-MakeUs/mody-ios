@@ -8,6 +8,10 @@
 import CoreNetworkInterface
 
 enum GroupEndpoint {
+    static func getGroups() -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(path: "api/v1/groups")
+    }
+
     static func postCreate(request: GroupCreateRequest) -> CoreNetworkEndpoint {
         CoreNetworkEndpoint(
             path: "api/v1/groups",

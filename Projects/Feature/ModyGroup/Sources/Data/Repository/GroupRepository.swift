@@ -7,6 +7,7 @@
 
 import CommonDomain
 import CoreNetworkInterface
+import ModyGroupInterface
 
 public struct GroupRepository: GroupRepositoryProtocol {
     private let network: CoreNetworkProtocol
@@ -15,7 +16,8 @@ public struct GroupRepository: GroupRepositoryProtocol {
         self.network = network
     }
 
-    public func postCreateGroup(request: GroupCreateRequest) async throws -> String {
+    public func createGroup(name: String) async throws -> String {
+        let request = GroupCreateRequest(name: name)
         let endpoint = GroupEndpoint.postCreate(request: request)
         let response: CoreNetworkResponse<GroupCreateResponse> = try await network.request(endpoint)
 
@@ -26,12 +28,24 @@ public struct GroupRepository: GroupRepositoryProtocol {
         return code
     }
 
-    public func postJoinGroup(request: GroupJoinRequest) async throws {
+    public func joinGroup(code: String) async throws {
+        let request = GroupJoinRequest(code: code)
         let endpoint = GroupEndpoint.postJoin(request: request)
         let response: CoreNetworkResponse<GroupJoinResponse> = try await network.request(endpoint)
 
         guard response.result != nil else {
             throw NetworkError.invalidResponse
         }
+    }
+
+    public func getGroups() async throws -> [GroupModel] {
+        let endpoint = GroupEndpoint.getGroups()
+        let response: CoreNetworkResponse<GroupListResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
     }
 }

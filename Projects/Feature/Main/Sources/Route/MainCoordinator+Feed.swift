@@ -10,6 +10,8 @@ import FeedInterface
 extension MainCoordinator: FeedRouter {
     public func route(from route: FeedRoute) {
         switch route {
+        case .addGroup:
+            mainContainerViewController?.presentAddGroupAlert()
         case .routeToRecord(let recordType):
             let viewController = feedBuilder.makeFeedRecordViewController(
                 router: self,

@@ -15,6 +15,8 @@ public struct MButton: View {
     private let verticalPadding: CGFloat
     private let maxWidth: CGFloat?
     private let trailingIcon: Image?
+    private let trailingIconSize: CGSize
+    private let trailingIconColor: Color?
     private let action: (() -> Void)?
 
     public init(
@@ -25,6 +27,8 @@ public struct MButton: View {
         verticalPadding: CGFloat = 10,
         maxWidth: CGFloat? = nil,
         trailingIcon: Image? = nil,
+        trailingIconSize: CGSize = .init(width: 20, height: 20),
+        trailingIconColor: Color? = nil,
         action: (() -> Void)? = nil
     ) {
         self.title = title
@@ -34,6 +38,8 @@ public struct MButton: View {
         self.verticalPadding = verticalPadding
         self.maxWidth = maxWidth
         self.trailingIcon = trailingIcon
+        self.trailingIconSize = trailingIconSize
+        self.trailingIconColor = trailingIconColor
         self.action = action
     }
 
@@ -51,7 +57,9 @@ public struct MButton: View {
                 if let trailingIcon {
                     trailingIcon
                         .resizable()
-                        .frame(width: 20, height: 20)
+                        .renderingMode(.template)
+                        .frame(width: trailingIconSize.width, height: trailingIconSize.height)
+                        .optionalForegroundStyle(trailingIconColor)
                 }
             }
             .foregroundStyle(currentTextColor)
@@ -85,6 +93,25 @@ private extension MButton {
             return .gray5
         case .black:
             return .systemWhite
+        }
+    }
+}
+
+private extension View {
+    func optionalForegroundStyle(_ color: Color?) -> some View {
+        modifier(OptionalForegroundStyleModifier(color: color))
+    }
+}
+
+private struct OptionalForegroundStyleModifier: ViewModifier {
+    let color: Color?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let color {
+            content.foregroundStyle(color)
+        } else {
+            content
         }
     }
 }

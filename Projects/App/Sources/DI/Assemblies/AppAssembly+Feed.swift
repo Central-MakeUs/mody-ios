@@ -8,11 +8,17 @@
 import Swinject
 import FeedInterface
 import Feed
+import ModyGroupInterface
 
 extension AppAssembly {
     func assembleFeedReactor(in container: Container) {
-        container.register(FeedReactor.self) { _, router in
-            return FeedReactor(router: router)
+        container.register(FeedReactor.self) { (resolver: Resolver, router: FeedRouter) in
+            let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
+
+            return FeedReactor(
+                groupUseCase: groupUseCase,
+                router: router
+            )
         }
         
         container.register(FeedBuildable.self) { resolver in
