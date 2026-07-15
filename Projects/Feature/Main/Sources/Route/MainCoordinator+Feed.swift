@@ -12,6 +12,12 @@ extension MainCoordinator: FeedRouter {
         switch route {
         case .addGroup:
             mainContainerViewController?.presentAddGroupAlert()
+        case .routeToRecord(let recordType):
+            let viewController = feedBuilder.makeFeedRecordViewController(
+                router: self,
+                recordType: recordType
+            )
+            navigationController.pushViewController(viewController, animated: true)
         }
     }
 }

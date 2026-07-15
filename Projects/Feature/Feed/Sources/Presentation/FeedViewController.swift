@@ -10,6 +10,7 @@ import ReactorKit
 import DesignSystem
 import SnapKit
 import RxCocoa
+import FeedInterface
 
 public final class FeedViewController: UIViewController, View {
     public var disposeBag = DisposeBag()
@@ -23,13 +24,13 @@ public final class FeedViewController: UIViewController, View {
     let expandedButtonStackView = UIStackView()
     
     let exerciseRecordLabel = MUILabel(
-        text: "운동 기록",
+        text: FeedRecordType.exercise.title,
         style: .b3,
         color: .systemWhite
     )
     
     let mealRecordLabel = MUILabel(
-        text: "식사 기록",
+        text: FeedRecordType.meal.title,
         style: .b3,
         color: .systemWhite
     )
@@ -88,12 +89,12 @@ public final class FeedViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         exerciseRecordButton.rx.tap
-            .map { FeedReactor.Action.didTapExerciseRecordButton }
+            .map { FeedReactor.Action.didTapRecordButton(.exercise) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         mealRecordButton.rx.tap
-            .map { FeedReactor.Action.didTapMealRecordButton }
+            .map { FeedReactor.Action.didTapRecordButton(.meal) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         

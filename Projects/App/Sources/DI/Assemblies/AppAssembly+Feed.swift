@@ -22,10 +22,13 @@ extension AppAssembly {
         }
         
         container.register(FeedBuildable.self) { resolver in
+            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor = resolver.resolve()
+
             return FeedBuilder(
                 makeFeedReactor: { router in
                     resolver.resolve(argument: router)
-                }
+                },
+                makeFeedRecordReactor: makeFeedRecordReactor
             )
         }
     }

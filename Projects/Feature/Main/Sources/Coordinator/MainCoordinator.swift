@@ -19,7 +19,7 @@ public final class MainCoordinator {
     public weak var delegate: MainCoordinatorDelegate?
     weak var mainContainerViewController: MainContainerViewController?
 
-    private let feedBuilder: FeedBuildable
+    let feedBuilder: FeedBuildable
     private let challengeBuilder: ChallengeBuildable
     private let myPageBuilder: MyPageBuildable
     let modyGroupBuilder: ModyGroupBuildable

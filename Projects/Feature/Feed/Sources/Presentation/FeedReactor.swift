@@ -10,6 +10,7 @@ import CommonDomain
 import FeedInterface
 import ModyGroupInterface
 import ReactorKit
+import FeedInterface
 
 public final class FeedReactor: Reactor {
     private let groupUseCase: GroupUseCaseProtocol
@@ -54,6 +55,8 @@ public final class FeedReactor: Reactor {
         case didTapPreviousWeek
         case didTapNextWeek
         case didTapCalendarDate(FeedWeekCalendarModel)
+        
+        case didTapRecordButton(FeedRecordType)
     }
     
     public init(
@@ -128,6 +131,11 @@ public final class FeedReactor: Reactor {
             }
 
             return .just(.setSelectedCalendarDate(model.date))
+        case .didTapRecordButton(let recordType):
+            return .concat([
+                .just(.setFloatingActionButtonExpanded(false)),
+                routeToRecord(recordType)
+            ])
         }
     }
 
@@ -207,5 +215,14 @@ private extension FeedReactor {
             title: weekInfo.title,
             dates: models
         ))
+    }
+    
+    func routeToRecord(_ recordType: FeedRecordType) -> Observable<Mutation> {
+        return .deferred { [weak router] in
+            Task { @MainActor in
+                router?.route(from: .routeToRecord(recordType))
+            }
+            return .empty()
+        }
     }
 }
