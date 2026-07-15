@@ -11,15 +11,18 @@ import Feed
 
 extension AppAssembly {
     func assembleFeedReactor(in container: Container) {
-        container.register(FeedReactor.self) { _ in
-            return FeedReactor()
+        container.register(FeedReactor.self) { _, router in
+            return FeedReactor(router: router)
         }
         
         container.register(FeedBuildable.self) { resolver in
+            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor = resolver.resolve()
+
             return FeedBuilder(
-                makeFeedReactor: {
-                    resolver.resolve()
-                }
+                makeFeedReactor: { router in
+                    resolver.resolve(argument: router)
+                },
+                makeFeedRecordReactor: makeFeedRecordReactor
             )
         }
     }
