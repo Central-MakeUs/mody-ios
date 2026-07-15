@@ -42,9 +42,10 @@ struct FeedGroupSelectSheetView: View {
                 .padding(.bottom, 40)
         }
         .padding(.horizontal, 24)
-        .padding(.top, 38)
-        .frame(height: 407)
+        .padding(.top, 36)
+        .frame(maxHeight: .infinity)
         .background(Color.systemWhite)
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 }
 

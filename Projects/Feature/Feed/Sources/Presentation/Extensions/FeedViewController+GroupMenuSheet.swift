@@ -38,9 +38,12 @@ extension FeedViewController {
 
         if let sheetPresentationController = viewController.sheetPresentationController {
             let identifier = UISheetPresentationController.Detent.Identifier("groupSelect")
+            let totalHeight: CGFloat = 407
+            let bottomInset = view.window?.safeAreaInsets.bottom ?? view.safeAreaInsets.bottom
+
             sheetPresentationController.detents = [
                 .custom(identifier: identifier) { _ in
-                    407
+                    max(0, totalHeight - bottomInset)
                 }
             ]
             sheetPresentationController.prefersGrabberVisible = true
