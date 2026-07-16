@@ -6,7 +6,9 @@
 //
 
 import ComposableArchitecture
+import CommonDomain
 import CoreAuthInterface
+import Foundation
 import MyPageInterface
 import ModyLogger
 
@@ -26,8 +28,16 @@ public struct ProfileFeature {
     @ObservableState
     public struct State: Equatable {
         var isLoading: Bool = false
+        var profileImageURL: URL?
+        var defaultAvatar: DefaultAvatar
 
-        public init() {}
+        public init(
+            profileImageURL: URL?,
+            defaultAvatar: DefaultAvatar
+        ) {
+            self.profileImageURL = profileImageURL
+            self.defaultAvatar = defaultAvatar
+        }
     }
 
     public enum Action {
