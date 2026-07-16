@@ -7,21 +7,25 @@
 
 import UIKit
 import SwiftUI
+import Base
 import FeedInterface
 import ReactorKit
 import DesignSystem
-import SnapKit
+import RxCocoa
 
 public final class FeedRecordViewController: UIViewController, ReactorKit.View {
     public var disposeBag = DisposeBag()
 
-    private let navigationBarContainerView = UIView()
-    private let contentLabel = MUILabel(
-        style: .b3,
-        color: .gray10
-    )
+    private let recordType: FeedRecordType
+    private let recordView: FeedRecordView
+
+    private var finishButtonHostingController: UIHostingController<FeedRecordFinishButtonView>?
+    var photoSourceSheetViewController: UIViewController?
 
     public init(reactor: FeedRecordReactor) {
+        let recordType = reactor.initialState.recordType
+        self.recordType = recordType
+        self.recordView = FeedRecordView(recordType: recordType)
         defer { self.reactor = reactor }
         super.init(nibName: nil, bundle: nil)
     }
@@ -31,67 +35,171 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
         fatalError("init(coder:) has not been implemented")
     }
 
+    public override func loadView() {
+        view = recordView
+    }
+
     public override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupUI()
-        setupLayout()
         configureNavigationBar()
+        configureRecordTypeContent()
     }
 
     public func bind(reactor: FeedRecordReactor) {
+        recordView.uploadView.rx.controlEvent(.touchUpInside)
+            .map { FeedRecordReactor.Action.didTapPhotoUpload }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+
+        recordView.exerciseSelectionField.rx.controlEvent(.touchUpInside)
+            .map { FeedRecordReactor.Action.didTapExerciseMenu }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+
+        recordView.exerciseMenuView.onSelect = { [weak reactor] type in
+            reactor?.action.onNext(.didSelectExerciseType(type))
+        }
+
+        recordView.exerciseSelectionField.onCustomTextChanged = { [weak reactor] text in
+            reactor?.action.onNext(.didChangeCustomExerciseName(text))
+        }
+
         reactor.state
-            .map(\.recordType.title)
+            .map(\.isPhotoSourceSheetPresented)
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
-            .bind(with: self) { owner, title in
-                owner.contentLabel.text = "\(title) 화면"
+            .bind(with: self) { owner, isPresented in
+                owner.setPhotoSourceSheetPresented(isPresented)
+            }
+            .disposed(by: disposeBag)
+
+        reactor.state
+            .map(\.isFinishButtonEnabled)
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, isEnabled in
+                owner.configureFinishButton(isEnabled: isEnabled)
+            }
+            .disposed(by: disposeBag)
+
+        guard recordType == .exercise else { return }
+
+        reactor.state
+            .map { state in
+                FeedRecordExerciseInputViewState(
+                    selectedType: state.selectedExerciseType,
+                    customExerciseName: state.customExerciseName,
+                    isExpanded: state.isExerciseMenuExpanded
+                )
+            }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, viewState in
+                owner.recordView.configureExerciseInput(viewState)
             }
             .disposed(by: disposeBag)
     }
 }
 
 private extension FeedRecordViewController {
-    func setupUI() {
-        view.backgroundColor = .systemWhite
-        contentLabel.textAlignment = .center
-    }
-
-    func setupLayout() {
-        view.addSubview(navigationBarContainerView)
-        view.addSubview(contentLabel)
-
-        navigationBarContainerView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide)
-            $0.leading.trailing.equalToSuperview()
-        }
-
-        contentLabel.snp.makeConstraints {
-            $0.center.equalToSuperview()
-        }
-    }
-
     func configureNavigationBar() {
-        guard let recordType = reactor?.currentState.recordType else { return }
-
         let navigationBar = MNavigationBar(
             title: recordType.title,
             onBackTap: { [weak self] in
                 self?.reactor?.action.onNext(.didTapBackButton)
             }
         )
-        let hostingController = UIHostingController(rootView: navigationBar)
-
-        setupNavigationBarLayout(hostingController)
-        hostingController.didMove(toParent: self)
+        addHostedView(
+            navigationBar,
+            to: recordView.navigationBarContainerView,
+            sizesToContent: true
+        )
     }
-
-    func setupNavigationBarLayout(_ hostingController: UIHostingController<MNavigationBar>) {
-        addChild(hostingController)
-        navigationBarContainerView.addSubview(hostingController.view)
-
-        hostingController.view.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+    
+    func configureRecordTypeContent() {
+        switch recordType {
+        case .meal:
+            configureMealTextField()
+            configureMealTimePicker()
+        case .exercise:
+            configureExerciseDurationPicker()
         }
+        
+        configureFinishButton(isEnabled: false)
+    }
+}
+
+private extension FeedRecordViewController {
+    func configureMealTextField() {
+        let textField = FeedRecordMealTextFieldView(
+            text: reactor?.currentState.mealMenu ?? "",
+            placeholder: "메뉴를 간단하게 입력해주세요",
+            onTextChanged: { [weak self] text in
+                self?.reactor?.action.onNext(.didChangeMealMenu(text))
+            }
+        )
+        addHostedView(
+            textField,
+            to: recordView.inputFieldContainerView,
+            sizesToContent: true
+        )
+    }
+    
+    func configureMealTimePicker() {
+        let timePicker = FeedRecordMealTimePickerView(
+            date: reactor?.currentState.mealTime ?? Date(),
+            onDateChanged: { [weak self] date in
+                self?.reactor?.action.onNext(.didChangeMealTime(date))
+            }
+        )
+        addHostedView(
+            timePicker,
+            to: recordView.timePickerContainerView,
+            sizesToContent: true
+        )
+    }
+}
+
+private extension FeedRecordViewController {
+    func configureExerciseDurationPicker() {
+        let state = reactor?.currentState
+        let durationPicker = FeedRecordExerciseDurationPickerView(
+            hours: state?.exerciseHours ?? 0,
+            minutes: state?.exerciseMinutes ?? 0,
+            onDurationChanged: { [weak self] hours, minutes in
+                self?.reactor?.action.onNext(
+                    .didChangeExerciseDuration(hours: hours, minutes: minutes)
+                )
+            }
+        )
+        addHostedView(
+            durationPicker,
+            to: recordView.timePickerContainerView,
+            sizesToContent: true
+        )
+    }
+}
+
+private extension FeedRecordViewController {
+    func configureFinishButton(isEnabled: Bool) {
+        let rootView = FeedRecordFinishButtonView(
+            isEnabled: isEnabled,
+            onTap: { [weak self] in
+                self?.reactor?.action.onNext(.didTapFinishButton)
+            }
+        )
+
+        if let finishButtonHostingController {
+            finishButtonHostingController.rootView = rootView
+            return
+        }
+
+        let hostingController = addHostedView(
+            rootView,
+            to: recordView.finishButtonContainerView,
+            sizesToContent: true
+        )
+        finishButtonHostingController = hostingController
     }
 }
