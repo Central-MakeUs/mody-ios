@@ -7,25 +7,38 @@
 
 import UIKit
 import SwiftUI
+import CommonDomain
 import MyPageInterface
 import ComposableArchitecture
 
 public struct MyPageBuilder: MyPageBuildable {
-    private let makeMyPageFeature: (MyPageRouter) -> MyPageFeature
+    private let makeMyPageFeature: (MyPageRouter, MyPageOutputHandler) -> MyPageFeature
     private let makeProfileFeature: (MyPageProfileRouter) -> ProfileFeature
-
+    private let makeNotificationSettingsFeature: (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature
+    private let makeGroupSettingsFeature: (MyPageGroupSettingsRouter) -> GroupSettingsFeature
+    private let makeHealthDataSettingsFeature: (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
+    
     public init(
-        makeMyPageFeature: @escaping (MyPageRouter) -> MyPageFeature,
-        makeProfileFeature: @escaping (MyPageProfileRouter) -> ProfileFeature
+        makeMyPageFeature: @escaping (MyPageRouter, MyPageOutputHandler) -> MyPageFeature,
+        makeProfileFeature: @escaping (MyPageProfileRouter) -> ProfileFeature,
+        makeNotificationSettingsFeature: @escaping (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature,
+        makeGroupSettingsFeature: @escaping (MyPageGroupSettingsRouter) -> GroupSettingsFeature,
+        makeHealthDataSettingsFeature: @escaping (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
     ) {
         self.makeMyPageFeature = makeMyPageFeature
         self.makeProfileFeature = makeProfileFeature
+        self.makeNotificationSettingsFeature = makeNotificationSettingsFeature
+        self.makeGroupSettingsFeature = makeGroupSettingsFeature
+        self.makeHealthDataSettingsFeature = makeHealthDataSettingsFeature
     }
 
     @MainActor
-    public func makeMyPageViewController(router: MyPageRouter) -> UIViewController {
+    public func makeMyPageViewController(
+        router: MyPageRouter,
+        outputHandler: MyPageOutputHandler
+    ) -> UIViewController {
         let store: StoreOf<MyPageFeature> = .init(initialState: MyPageFeature.State()) {
-            makeMyPageFeature(router)
+            makeMyPageFeature(router, outputHandler)
         }
         let view = MyPageView(store: store)
 
@@ -33,11 +46,62 @@ public struct MyPageBuilder: MyPageBuildable {
     }
 
     @MainActor
-    public func makeProfileViewController(router: MyPageProfileRouter) -> UIViewController {
-        let store: StoreOf<ProfileFeature> = .init(initialState: ProfileFeature.State()) {
+    public func makeProfileViewController(
+        profileImageURL: URL?,
+        defaultAvatar: DefaultAvatar,
+        router: MyPageProfileRouter
+    ) -> UIViewController {
+        let store: StoreOf<ProfileFeature> = .init(
+            initialState: ProfileFeature.State(
+                profileImageURL: profileImageURL,
+                defaultAvatar: defaultAvatar
+            )
+        ) {
             makeProfileFeature(router)
         }
         let view = ProfileView(store: store)
+
+        return UIHostingController(rootView: view)
+    }
+
+    @MainActor
+    public func makeNotificationSettingsViewController(
+        router: MyPageNotificationSettingsRouter
+    ) -> UIViewController {
+        let store: StoreOf<NotificationSettingsFeature> = .init(
+            initialState: NotificationSettingsFeature.State()
+        ) {
+            makeNotificationSettingsFeature(router)
+        }
+        let view = NotificationSettingsView(store: store)
+
+        return UIHostingController(rootView: view)
+    }
+
+    @MainActor
+    public func makeGroupSettingsViewController(
+        router: MyPageGroupSettingsRouter
+    ) -> UIViewController {
+        let store: StoreOf<GroupSettingsFeature> = .init(
+            initialState: GroupSettingsFeature.State()
+        ) {
+            makeGroupSettingsFeature(router)
+        }
+        let view = GroupSettingsView(store: store)
+
+        return UIHostingController(rootView: view)
+    }
+
+    @MainActor
+    public func makeHealthDataSettingsViewController(
+        router: MyPageHealthDataSettingsRouter
+    ) -> UIViewController {
+        let store: StoreOf<HealthDataSettingsFeature> = .init(
+            initialState: HealthDataSettingsFeature.State()
+        ) {
+            makeHealthDataSettingsFeature(router)
+        }
+        let view = HealthDataSettingsView(store: store)
 
         return UIHostingController(rootView: view)
     }
