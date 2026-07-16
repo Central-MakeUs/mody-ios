@@ -50,8 +50,11 @@ public struct MyPageRepository: MyPageRepositoryProtocol {
         return weightRecord
     }
 
-    public func postRecordWeight(weightKg: Double) async throws {
-        let request = WeightRecordRequest(weightKg: weightKg)
+    public func postRecordWeight(recordedOn: String, weightKg: Double) async throws {
+        let request = WeightRecordRequest(
+            recordedOn: recordedOn,
+            weightKg: weightKg
+        )
         let endpoint = MyPageEndpoint.postWeight(request: request)
         let _ : CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(
             endpoint

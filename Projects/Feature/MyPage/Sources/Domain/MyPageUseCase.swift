@@ -26,7 +26,10 @@ public struct MyPageUseCase {
         try await myPageRepository.getWeightRecord()
     }
 
-    public func recordWeight(weightKg: Double) async throws {
-        try await myPageRepository.postRecordWeight(weightKg: weightKg)
+    public func recordWeight(recordedOn: String, weightKg: Double) async throws {
+        try await myPageRepository.postRecordWeight(
+            recordedOn: recordedOn,
+            weightKg: weightKg
+        )
     }
 }

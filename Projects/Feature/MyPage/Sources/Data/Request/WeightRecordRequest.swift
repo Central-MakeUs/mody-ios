@@ -6,5 +6,6 @@
 //
 
 struct WeightRecordRequest: Encodable, Equatable {
+    let recordedOn: String
     let weightKg: Double
 }

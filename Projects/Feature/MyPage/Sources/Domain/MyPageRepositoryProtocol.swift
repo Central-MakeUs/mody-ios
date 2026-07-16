@@ -11,5 +11,5 @@ public protocol MyPageRepositoryProtocol {
     func getMyPageProfile() async throws -> MyPageProfile
     func updateMyPageProfile(_ request: MyPageProfileUpdateRequest) async throws
     func getWeightRecord() async throws -> WeightRecord
-    func postRecordWeight(weightKg: Double) async throws
+    func postRecordWeight(recordedOn: String, weightKg: Double) async throws
 }

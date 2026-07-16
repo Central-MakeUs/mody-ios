@@ -30,6 +30,12 @@ public struct WeightRecordFeature {
             Double(currentWeightText)
         }
 
+        var recordedOn: String? {
+            guard isDateFormatValid else { return nil }
+
+            return dateText.replacingOccurrences(of: ".", with: "-")
+        }
+
         var isRecordButtonDisabled: Bool {
             !isDateFormatValid || currentWeight == nil
         }
