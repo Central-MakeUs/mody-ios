@@ -14,6 +14,6 @@ public protocol AuthRepositoryProtocol {
     ) async throws -> AuthSession
 
     func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo
-
     func postLogout() async throws
+    func deleteAccount() async throws
 }
