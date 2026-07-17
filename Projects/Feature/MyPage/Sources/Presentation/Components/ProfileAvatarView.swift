@@ -35,9 +35,10 @@ struct ProfileAvatarView: View {
                 image
                     .resizable()
                     .scaledToFill()
-            case .empty, .failure:
-                defaultAvatarImage
-            @unknown default:
+            case .empty:
+                SkeletonView(width: 50, height: 50)
+                    .clipShape(Circle())
+            default:
                 defaultAvatarImage
             }
         }

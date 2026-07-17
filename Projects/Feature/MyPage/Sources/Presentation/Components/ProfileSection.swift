@@ -18,10 +18,7 @@ struct ProfileSection: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            ProfileAvatarView(
-                imageURL: imageURL,
-                defaultAvatar: defaultAvatar
-            )
+            profileAvatar
 
             profileInfo
                 .padding(.leading, 14)
@@ -34,6 +31,19 @@ struct ProfileSection: View {
 }
 
 private extension ProfileSection {
+    @ViewBuilder
+    var profileAvatar: some View {
+        if userInfo == nil {
+            SkeletonView(width: 50, height: 50)
+                .clipShape(Circle())
+        } else {
+            ProfileAvatarView(
+                imageURL: imageURL,
+                defaultAvatar: defaultAvatar
+            )
+        }
+    }
+
     @ViewBuilder
     var profileInfo: some View {
         if let userInfo {
