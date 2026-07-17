@@ -10,9 +10,14 @@ import FeedInterface
 extension MainCoordinator: FeedRouter {
     public func route(from route: FeedRoute) {
         switch route {
-        case .temp:
-            // TODO: 추후 구현
-            break
+        case .addGroup:
+            mainContainerViewController?.presentAddGroupAlert()
+        case .routeToRecord(let recordType):
+            let viewController = feedBuilder.makeFeedRecordViewController(
+                router: self,
+                recordType: recordType
+            )
+            navigationController.pushViewController(viewController, animated: true)
         }
     }
 }

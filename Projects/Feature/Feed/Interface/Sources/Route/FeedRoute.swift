@@ -6,7 +6,8 @@
 //
 
 public enum FeedRoute: Equatable {
-    case temp
+    case addGroup
+    case routeToRecord(FeedRecordType)
 }
 
 @MainActor

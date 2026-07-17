@@ -11,15 +11,16 @@ import SnapKit
 import DesignSystem
 
 final class MainContainerViewController: UIViewController {
-    var onSheetGroupParticipateTap: (() -> Void)?
-    var onSheetGroupCreateTap: (() -> Void)?
+    var onGroupParticipateTap: (() -> Void)?
+    var onGroupCreateTap: (() -> Void)?
     var onAlarmTap: (() -> Void)?
-    weak var currentOverlayView: UIView?
+    var currentOverlayViewController: UIViewController?
 
     private let navigationBar = MainNavigationBar()
     private let contentContainerView = UIView()
     private let customTabBarView: CustomTabBarView
     private let mainTabBarController: MainTabBarController
+    private let tabs: [MainTab]
     private var customTabBarHeightConstraint: Constraint?
 
     init(
@@ -28,6 +29,7 @@ final class MainContainerViewController: UIViewController {
     ) {
         self.mainTabBarController = tabBarController
         self.customTabBarView = CustomTabBarView(tabs: tabs)
+        self.tabs = tabs
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -92,17 +94,15 @@ private extension MainContainerViewController {
     }
 
     func bind() {
-        navigationBar.onUsersTap = { [weak self] in
-            self?.presentGroupMenuSheet()
-        }
-
         navigationBar.onAlarmTap = { [weak self] in
             self?.onAlarmTap?()
         }
 
         customTabBarView.onSelect = { [weak self] index in
-            self?.mainTabBarController.selectTab(index)
-            self?.customTabBarView.updateSelection(index: index)
+            guard let self, tabs.indices.contains(index) else { return }
+
+            mainTabBarController.selectTab(index)
+            customTabBarView.updateSelection(index: index)
         }
     }
 }

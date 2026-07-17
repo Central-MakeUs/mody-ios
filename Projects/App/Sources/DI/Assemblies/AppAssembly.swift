@@ -24,6 +24,7 @@ struct AppAssembly: Assembly {
         assembleSignInFeature(in: container)
         assembleOnBoardingFeature(in: container)
         assembleModyGroupFeature(in: container)
+        assembleFeedRecordReactor(in: container)
         assembleFeedReactor(in: container)
         assembleChallengeFeature(in: container)
         assembleMyPageFeature(in: container)

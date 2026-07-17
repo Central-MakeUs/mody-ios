@@ -5,6 +5,8 @@
 //  Created by 김동준 on 7/8/26
 //
 
+import CommonDomain
+
 public struct OnBoardingProfileRequest: Equatable, Encodable {
     public let nickname: String
     public let birthDate: String

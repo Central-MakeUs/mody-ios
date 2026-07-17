@@ -7,10 +7,11 @@
 
 import ComposableArchitecture
 import CommonDomain
+import ModyGroupInterface
 
 @Reducer
 public struct GroupCreateFeature {
-    private let groupUseCase: GroupUseCase
+    private let groupUseCase: GroupUseCaseProtocol
 
     @ObservableState
     public struct State: Equatable {
@@ -51,7 +52,7 @@ public struct GroupCreateFeature {
         case createGroupFailure(NetworkError)
     }
 
-    public init(groupUseCase: GroupUseCase) {
+    public init(groupUseCase: GroupUseCaseProtocol) {
         self.groupUseCase = groupUseCase
     }
     
@@ -65,12 +66,11 @@ public struct GroupCreateFeature {
             case .nextButtonTapped:
                 guard state.isNextButtonEnabled else { return .none }
                 let groupName = state.groupName
-                let request = GroupCreateRequest(name: groupName)
                 state.isLoading = true
 
                 return .run { send in
                     do {
-                        let code = try await groupUseCase.createGroup(request: request)
+                        let code = try await groupUseCase.createGroup(name: groupName)
                         await send(.createGroupSuccessfully(code: code))
                     } catch let error as NetworkError {
                         await send(.createGroupFailure(error))
