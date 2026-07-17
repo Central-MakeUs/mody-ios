@@ -42,14 +42,14 @@ extension MainCoordinator: MyPageOutputHandler {
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(
                     title: "기록 완료",
-                    message: "체중 기록이 완료되었어요."
+                    contents: "체중 기록이 완료되었어요."
                 )
             )
         case let .weightRecordFailed(error):
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(
                     title: error.title,
-                    message: error.message
+                    contents: error.message
                 )
             )
         }

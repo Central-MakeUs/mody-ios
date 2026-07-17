@@ -15,7 +15,8 @@ final class MainContainerViewController: UIViewController {
     var onSheetGroupParticipateTap: (() -> Void)?
     var onSheetGroupCreateTap: (() -> Void)?
     var onAlarmTap: (() -> Void)?
-    weak var currentOverlayView: UIView?
+    var currentOverlayView: UIView?
+    var currentOverlayViewController: UIViewController?
 
     private let navigationBar = MainNavigationBar()
     private let contentContainerView = UIView()

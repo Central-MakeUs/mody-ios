@@ -45,7 +45,7 @@ public struct MButton: View {
                 MText(
                     title,
                     style: .b6,
-                    color: currentTextColor
+                    color: style.textColor
                 )
 
                 if let trailingIcon {
@@ -54,37 +54,13 @@ public struct MButton: View {
                         .frame(width: 20, height: 20)
                 }
             }
-            .foregroundStyle(currentTextColor)
+            .foregroundStyle(style.textColor)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
             .frame(maxWidth: maxWidth)
-            .background(currentBackgroundColor)
+            .background(style.backgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .disabled(isDisabled)
-    }
-}
-
-private extension MButton {
-    var currentBackgroundColor: Color {
-        switch style {
-        case .primary:
-            return .main
-        case .gray:
-            return .gray2
-        case .black:
-            return .gray10
-        }
-    }
-
-    var currentTextColor: Color {
-        switch style {
-        case .primary:
-            return .gray10
-        case .gray:
-            return .gray5
-        case .black:
-            return .systemWhite
-        }
     }
 }
