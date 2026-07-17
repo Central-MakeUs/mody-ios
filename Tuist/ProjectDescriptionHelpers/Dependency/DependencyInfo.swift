@@ -143,9 +143,19 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .MyPage: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
                 .external(.ComposableArchitecture),
                 .module(.Base),
+                .module(.CommonDomain),
+                .module(.Util),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreNetwork)
+            ],
+            demo: [
+                .module(.CommonDomain),
                 .microFeature(.CoreAuth)
             ]
         ),
