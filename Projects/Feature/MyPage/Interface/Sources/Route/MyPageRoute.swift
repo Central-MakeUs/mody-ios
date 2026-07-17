@@ -5,21 +5,17 @@
 //  Created by 김동준 on 6/30/26
 //
 
+import CommonDomain
+import Foundation
+
 public enum MyPageRoute: Equatable {
-    case routeToProfile
+    case routeToProfile(profileImageURL: URL?, defaultAvatar: DefaultAvatar)
+    case routeToNotificationSettings
+    case routeToGroupSettings
+    case routeToHealthDataSettings
 }
 
 @MainActor
 public protocol MyPageRouter: AnyObject {
     func route(from route: MyPageRoute)
-}
-
-public enum MyPageProfileRoute: Equatable {
-    case back
-    case routeToSignIn
-}
-
-@MainActor
-public protocol MyPageProfileRouter: AnyObject {
-    func route(from route: MyPageProfileRoute)
 }

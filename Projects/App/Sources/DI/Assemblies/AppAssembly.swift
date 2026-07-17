@@ -26,7 +26,18 @@ struct AppAssembly: Assembly {
         assembleModyGroupFeature(in: container)
         assembleFeedReactor(in: container)
         assembleChallengeFeature(in: container)
+        assembleMyPageFeatures(in: container)
+    }
+    
+    private func assembleMyPageFeatures(in container: Container) {
         assembleMyPageProfileFeature(in: container)
+        assembleMyPageSettingsFeatures(in: container)
         assembleMyPageFeature(in: container)
+    }
+    
+    private func assembleMyPageSettingsFeatures(in container: Container) {
+        assembleMyPageNotificationSettingsFeatures(in: container)
+        assembleMyPageGroupSettingsFeatures(in: container)
+        assembleMyPageHealthDataSettingsFeatures(in: container)
     }
 }

@@ -23,6 +23,13 @@ public struct ProfileView: View {
     
     private var profileBody: some View {
         VStack(spacing: 0) {
+            ProfileAvatarView(
+                imageURL: store.profileImageURL,
+                defaultAvatar: store.defaultAvatar,
+                size: .init(width: 100, height: 100),
+                hasStroke: true
+            )
+
             Text("ProfileView")
             
             Button {

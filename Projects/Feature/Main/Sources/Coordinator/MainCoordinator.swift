@@ -52,7 +52,10 @@ public final class MainCoordinator {
     public func start() {
         let feedViewController = feedBuilder.makeFeedViewController(router: self)
         let challengeViewController = challengeBuilder.makeChallengeViewController(router: self)
-        let myPageViewController = myPageBuilder.makeMyPageViewController(router: self)
+        let myPageViewController = myPageBuilder.makeMyPageViewController(
+            router: self,
+            outputHandler: self
+        )
 
         let isChallengeHideFlag = TabBarManager.shared.isChallengeTabHidden
         let viewControllers = isChallengeHideFlag
