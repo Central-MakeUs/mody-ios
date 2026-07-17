@@ -5,8 +5,14 @@
 //  Created by 김동준 on 6/30/26
 //
 
+import CommonDomain
+import Foundation
+
 public enum MyPageRoute: Equatable {
-    case temp
+    case routeToProfile(profileImageURL: URL?, defaultAvatar: DefaultAvatar)
+    case routeToNotificationSettings
+    case routeToGroupSettings
+    case routeToHealthDataSettings
 }
 
 @MainActor

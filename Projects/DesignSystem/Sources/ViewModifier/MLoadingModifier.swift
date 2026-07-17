@@ -23,15 +23,17 @@ struct MLoadingModifier: ViewModifier {
                     MLoadingIndicatorView()
                 }
                 .greedyFrame()
-                .background(Color.black.opacity(0.45))
+                .background(Color.black.opacity(0.6))
             }
         }
     }
 }
 
 // TODO: Lottie 나오면 수정
-private struct MLoadingIndicatorView: View {
-    var body: some View {
+public struct MLoadingIndicatorView: View {
+    public init() {}
+
+    public var body: some View {
         ProgressView()
             .progressViewStyle(.circular)
             .tint(.white)

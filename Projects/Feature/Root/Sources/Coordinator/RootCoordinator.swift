@@ -42,4 +42,9 @@ public final class RootCoordinator {
     public func start() {
         showSplash()
     }
+
+    @MainActor
+    public func startSignIn() {
+        showSignIn()
+    }
 }

@@ -59,4 +59,12 @@ public struct AuthService {
             endpoint
         )
     }
+
+    func deleteAccount() async throws {
+        let endpoint = AuthEndpoint.deleteAccount()
+
+        let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(
+            endpoint
+        )
+    }
 }

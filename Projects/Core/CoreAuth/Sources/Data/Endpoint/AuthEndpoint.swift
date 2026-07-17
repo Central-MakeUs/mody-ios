@@ -36,4 +36,11 @@ enum AuthEndpoint {
             bodyParameters: ["refreshToken": refreshToken]
         )
     }
+
+    static func deleteAccount() -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/mypage/me",
+            method: .DELETE
+        )
+    }
 }

@@ -5,9 +5,35 @@
 //  Created by 김동준 on 6/30/26
 //
 
+import CommonDomain
 import UIKit
 
 public protocol MyPageBuildable {
     @MainActor
-    func makeMyPageViewController(router: MyPageRouter) -> UIViewController
+    func makeMyPageViewController(
+        router: MyPageRouter,
+        outputHandler: MyPageOutputHandler
+    ) -> UIViewController
+
+    @MainActor
+    func makeProfileViewController(
+        profileImageURL: URL?,
+        defaultAvatar: DefaultAvatar,
+        router: MyPageProfileRouter
+    ) -> UIViewController
+
+    @MainActor
+    func makeNotificationSettingsViewController(
+        router: MyPageNotificationSettingsRouter
+    ) -> UIViewController
+
+    @MainActor
+    func makeGroupSettingsViewController(
+        router: MyPageGroupSettingsRouter
+    ) -> UIViewController
+
+    @MainActor
+    func makeHealthDataSettingsViewController(
+        router: MyPageHealthDataSettingsRouter
+    ) -> UIViewController
 }
