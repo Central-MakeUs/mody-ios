@@ -1,0 +1,55 @@
+//
+//  NotificationRepository.swift
+//  CoreNotification
+//
+//  Created by 김동준 on 7/18/26.
+//
+
+import CoreKeyChainStorageInterface
+import CoreNotificationInterface
+
+public struct NotificationRepository: NotificationRepositoryProtocol {
+    private let notificationService: NotificationService
+    let keyChainStorage: CoreKeyChainStorageInterface
+
+    public init(
+        notificationService: NotificationService,
+        keyChainStorage: CoreKeyChainStorageInterface
+    ) {
+        self.notificationService = notificationService
+        self.keyChainStorage = keyChainStorage
+    }
+
+    public func postPushFCMToken(
+        _ token: String,
+        deviceID: String
+    ) async throws -> Bool? {
+        do {
+            if try currentFCMToken() == token { return nil }
+            
+            let request = PushTokenRegisterRequest(
+                deviceId: deviceID,
+                fcmToken: token
+            )
+
+            try await notificationService.postPushFCMToken(request)
+            try keyChainStorage.save(
+                key: KeyChainStorageKey.fcmToken.rawValue,
+                value: token
+            )
+
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    public func deleteFCMToken(deviceID: String) async throws {
+        let request = PushTokenDisableRequest(
+            deviceId: deviceID
+        )
+
+        try await notificationService.deleteFCMToken(request)
+        try keyChainStorage.delete(key: KeyChainStorageKey.fcmToken.rawValue)
+    }
+}

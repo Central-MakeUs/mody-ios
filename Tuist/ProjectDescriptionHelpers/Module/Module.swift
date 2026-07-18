@@ -31,6 +31,7 @@ public enum ExternalModule {
     case FirebaseCore
     case FirebaseAnalytics
     case FirebaseCrashlytics
+    case FirebaseMessaging
     case FirebaseRemoteConfig
     case ReactorKit
     case RxSwift
@@ -45,6 +46,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreNotification
     case CoreKakao
     case ModyGroup
     case CoreAuth
@@ -91,6 +93,7 @@ public enum MicroFeatureModule {
         case .CoreAuth: "Projects/Core/CoreAuth"
         case .ModyGroup: "Projects/Feature/ModyGroup"
         case .CoreKakao: "Projects/Core/CoreKakao"
+        case .CoreNotification: "Projects/Core/CoreNotification"
         }
     }
 }
