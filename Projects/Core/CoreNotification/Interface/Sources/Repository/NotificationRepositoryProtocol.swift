@@ -6,6 +6,5 @@
 //
 
 public protocol NotificationRepositoryProtocol {
-    func postPushFCMToken(_ token: String, deviceID: String) async throws -> Bool?
-    func deleteFCMToken(deviceID: String) async throws
+    func postPushFCMToken(_ token: String, deviceID: String?) async throws -> Bool?
 }

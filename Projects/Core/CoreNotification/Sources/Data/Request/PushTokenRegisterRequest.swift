@@ -6,12 +6,12 @@
 //
 
 struct PushTokenRegisterRequest: Encodable {
-    let deviceId: String
+    let deviceId: String?
     let platform: String
     let fcmToken: String
 
     init(
-        deviceId: String,
+        deviceId: String?,
         fcmToken: String
     ) {
         self.deviceId = deviceId

@@ -17,14 +17,4 @@ enum NotificationEndpoint {
             bodyParameters: request
         )
     }
-
-    static func deleteFCMToken(
-        _ request: PushTokenDisableRequest
-    ) -> CoreNetworkEndpoint {
-        CoreNetworkEndpoint(
-            path: "api/v1/notifications/push-token",
-            method: .DELETE,
-            bodyParameters: request
-        )
-    }
 }

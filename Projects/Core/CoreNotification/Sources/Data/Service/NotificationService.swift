@@ -18,9 +18,4 @@ public struct NotificationService {
         let endpoint = NotificationEndpoint.postPushFCMToken(request)
         let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
     }
-
-    func deleteFCMToken(_ request: PushTokenDisableRequest) async throws {
-        let endpoint = NotificationEndpoint.deleteFCMToken(request)
-        let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
-    }
 }

@@ -22,7 +22,7 @@ public struct NotificationRepository: NotificationRepositoryProtocol {
 
     public func postPushFCMToken(
         _ token: String,
-        deviceID: String
+        deviceID: String?
     ) async throws -> Bool? {
         do {
             if try currentFCMToken() == token { return nil }
@@ -42,14 +42,5 @@ public struct NotificationRepository: NotificationRepositoryProtocol {
         } catch {
             return false
         }
-    }
-
-    public func deleteFCMToken(deviceID: String) async throws {
-        let request = PushTokenDisableRequest(
-            deviceId: deviceID
-        )
-
-        try await notificationService.deleteFCMToken(request)
-        try keyChainStorage.delete(key: KeyChainStorageKey.fcmToken.rawValue)
     }
 }
