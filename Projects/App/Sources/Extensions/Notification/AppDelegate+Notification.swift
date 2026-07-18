@@ -8,7 +8,6 @@
 import FirebaseMessaging
 import ModyLogger
 import UIKit
-import CoreNotificationInterface
 
 extension AppDelegate {
     func application(
@@ -30,7 +29,6 @@ extension AppDelegate {
 
 extension AppDelegate {
     func registerFCMToken(_ fcmToken: String) {
-        let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
         let deviceID = UIDevice.current.identifierForVendor?.uuidString
 
         Task { [notificationUseCase, deviceID] in
