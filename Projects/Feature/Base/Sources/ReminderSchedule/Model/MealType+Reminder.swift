@@ -1,8 +1,8 @@
 //
-//  MealType.swift
-//  OnBoarding
+//  MealType+Reminder.swift
+//  Base
 //
-//  Created by 김동준 on 7/9/26
+//  Created by 김동준 on 7/19/26.
 //
 
 import CommonDomain

@@ -1,15 +1,15 @@
 //
-//  OnBoardingMealSection.swift
-//  OnBoarding
+//  ReminderMealSection.swift
+//  Base
 //
-//  Created by 김동준 on 7/10/26
+//  Created by 김동준 on 7/19/26.
 //
 
 import SwiftUI
 import CommonDomain
 import DesignSystem
 
-struct OnBoardingMealSection: View {
+public struct ReminderMealSection: View {
     private let meals: [MealType]
     private let mealHours: [MealHour]
     private let skippedMeals: [MealType]
@@ -17,8 +17,8 @@ struct OnBoardingMealSection: View {
     private let onSkipTapped: (MealType) -> Void
     private let onDropdownTapped: (MealType) -> Void
     private let onHourTapped: (MealType, Int) -> Void
-    
-    init(
+
+    public init(
         meals: [MealType],
         mealHours: [MealHour],
         skippedMeals: [MealType],
@@ -36,7 +36,7 @@ struct OnBoardingMealSection: View {
         self.onHourTapped = onHourTapped
     }
 
-    var body: some View {
+    public var body: some View {
         HStack(alignment: .top, spacing: 12) {
             ForEach(meals) { meal in
                 mealSelector(for: meal)
@@ -47,7 +47,7 @@ struct OnBoardingMealSection: View {
     }
 }
 
-private extension OnBoardingMealSection {
+private extension ReminderMealSection {
     func mealSelector(for meal: MealType) -> some View {
         let hour = mealHour(for: meal)
         let isSkipped = skippedMeals.contains(meal)
@@ -82,7 +82,7 @@ private extension OnBoardingMealSection {
     }
 }
 
-private extension OnBoardingMealSection {
+private extension ReminderMealSection {
     func skipButton(for meal: MealType, isSkipped: Bool) -> some View {
         Button {
             onSkipTapped(meal)
@@ -108,7 +108,7 @@ private extension OnBoardingMealSection {
     }
 }
 
-private extension OnBoardingMealSection {
+private extension ReminderMealSection {
     func timeButton(
         meal: MealType,
         hour: Int,
@@ -150,7 +150,7 @@ private extension OnBoardingMealSection {
     }
 }
 
-private extension OnBoardingMealSection {
+private extension ReminderMealSection {
     func dropdownList(
         meal: MealType,
         hour: Int,
@@ -183,7 +183,7 @@ private extension OnBoardingMealSection {
     }
 }
 
-private extension OnBoardingMealSection {
+private extension ReminderMealSection {
     func mealHour(for meal: MealType) -> Int {
         mealHours.first { $0.mealType == meal }?.hour ?? meal.defaultHour
     }

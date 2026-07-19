@@ -1,15 +1,15 @@
 //
-//  OnBoardingExerciseSection.swift
-//  OnBoarding
+//  ReminderExerciseSection.swift
+//  Base
 //
-//  Created by 김동준 on 7/10/26
+//  Created by 김동준 on 7/19/26.
 //
 
 import SwiftUI
 import CommonDomain
 import DesignSystem
 
-struct OnBoardingExerciseSection: View {
+public struct ReminderExerciseSection: View {
     private let width: CGFloat
     private let weekdays: [DayOfWeek]
     private let selectedWeekdays: [DayOfWeek]
@@ -19,7 +19,7 @@ struct OnBoardingExerciseSection: View {
     private let onScheduleTapped: (DayOfWeek) -> Void
     private let onSameTimeTapped: () -> Void
 
-    init(
+    public init(
         width: CGFloat,
         weekdays: [DayOfWeek],
         selectedWeekdays: [DayOfWeek],
@@ -39,7 +39,7 @@ struct OnBoardingExerciseSection: View {
         self.onSameTimeTapped = onSameTimeTapped
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             MText(
                 "운동 일정",
@@ -49,7 +49,7 @@ struct OnBoardingExerciseSection: View {
 
             exerciseDescription
 
-            OnBoardingWeekdayChips(
+            ReminderWeekdayChips(
                 width: width,
                 weekdays: weekdays,
                 selectedWeekdays: selectedWeekdays,
@@ -57,7 +57,7 @@ struct OnBoardingExerciseSection: View {
             )
 
             if !schedules.isEmpty {
-                OnBoardingExerciseTimeRows(
+                ReminderExerciseTimeRows(
                     schedules: schedules,
                     calendar: calendar,
                     onScheduleTapped: onScheduleTapped
@@ -74,13 +74,13 @@ struct OnBoardingExerciseSection: View {
     }
 }
 
-private extension OnBoardingExerciseSection {
+private extension ReminderExerciseSection {
     var exerciseDescription: some View {
         (
             Text("운동은 일주일에 ")
                 .font(ModyTypography.c2.token.swiftUIFont)
                 .foregroundStyle(Color.gray6)
-            + Text("최소 세 번")
+            + Text("최소 한 번")
                 .font(ModyTypography.b6.token.swiftUIFont)
                 .foregroundStyle(Color.sub)
             + Text("은 해야해요!")

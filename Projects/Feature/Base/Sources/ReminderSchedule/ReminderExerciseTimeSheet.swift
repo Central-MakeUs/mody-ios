@@ -1,14 +1,14 @@
 //
-//  OnBoardingExerciseTimeSheet.swift
-//  OnBoarding
+//  ReminderExerciseTimeSheet.swift
+//  Base
 //
-//  Created by 김동준 on 7/9/26
+//  Created by 김동준 on 7/19/26.
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
-struct OnBoardingExerciseTimeSheet: View {
+public struct ReminderExerciseTimeSheet: View {
     @Binding private var date: Date
 
     private let locale: Locale
@@ -16,7 +16,7 @@ struct OnBoardingExerciseTimeSheet: View {
     private let timeZone: TimeZone
     private let onConfirmTapped: () -> Void
 
-    init(
+    public init(
         date: Binding<Date>,
         locale: Locale,
         calendar: Calendar,
@@ -29,8 +29,8 @@ struct OnBoardingExerciseTimeSheet: View {
         self.timeZone = timeZone
         self.onConfirmTapped = onConfirmTapped
     }
-    
-    var body: some View {
+
+    public var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
