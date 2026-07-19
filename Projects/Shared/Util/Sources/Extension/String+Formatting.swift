@@ -15,6 +15,26 @@ public extension String {
         String(format: "%02d:%02d", hour, minute)
     }
 
+    func toHourMinDate(calendar: Calendar = Date.koreanCalendar) -> Date? {
+        let timeComponents = split(separator: ":", omittingEmptySubsequences: false)
+
+        guard
+            timeComponents.count >= 2,
+            let hour = Int(timeComponents[0]),
+            let minute = Int(timeComponents[1]),
+            (0...23).contains(hour),
+            (0...59).contains(minute)
+        else {
+            return nil
+        }
+
+        return Date.fixedDateForHourMinTime(
+            hour: hour,
+            minute: minute,
+            calendar: calendar
+        )
+    }
+
     func toDate(
         format: DateFormat = .yyyyMMdd,
         locale: Locale = Date.koreanLocale,

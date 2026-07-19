@@ -88,7 +88,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ],
         .Base: [
             .module(.DesignSystem),
-            .module(.ModyLogger)
+            .module(.ModyLogger),
+            .module(.CommonDomain),
+            .module(.Util)
         ]
     ],
     microFeatureDependencies: [
