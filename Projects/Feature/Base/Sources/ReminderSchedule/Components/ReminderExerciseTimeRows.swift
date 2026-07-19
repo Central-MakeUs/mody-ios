@@ -1,20 +1,21 @@
 //
-//  OnBoardingExerciseTimeRows.swift
-//  OnBoarding
+//  ReminderExerciseTimeRows.swift
+//  Base
 //
-//  Created by 김동준 on 7/10/26
+//  Created by 김동준 on 7/19/26.
 //
 
-import SwiftUI
 import CommonDomain
 import DesignSystem
+import SwiftUI
+import Util
 
-struct OnBoardingExerciseTimeRows: View {
+public struct ReminderExerciseTimeRows: View {
     private let schedules: [ExerciseSchedule]
     private let calendar: Calendar
     private let onScheduleTapped: (DayOfWeek) -> Void
-    
-    init(
+
+    public init(
         schedules: [ExerciseSchedule],
         calendar: Calendar,
         onScheduleTapped: @escaping (DayOfWeek) -> Void
@@ -24,7 +25,7 @@ struct OnBoardingExerciseTimeRows: View {
         self.onScheduleTapped = onScheduleTapped
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 8) {
             ForEach(schedules) { schedule in
                 Button {

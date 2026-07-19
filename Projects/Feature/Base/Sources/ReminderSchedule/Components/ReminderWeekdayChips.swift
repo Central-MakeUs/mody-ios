@@ -1,21 +1,21 @@
 //
-//  OnBoardingWeekdayChips.swift
-//  OnBoarding
+//  ReminderWeekdayChips.swift
+//  Base
 //
-//  Created by 김동준 on 7/9/26
+//  Created by 김동준 on 7/19/26.
 //
 
-import SwiftUI
 import CommonDomain
 import DesignSystem
+import SwiftUI
 
-struct OnBoardingWeekdayChips: View {
+public struct ReminderWeekdayChips: View {
     private let width: CGFloat
     private let weekdays: [DayOfWeek]
     private let selectedWeekdays: [DayOfWeek]
     private let onWeekdayTapped: (DayOfWeek) -> Void
-    
-    init(
+
+    public init(
         width: CGFloat,
         weekdays: [DayOfWeek],
         selectedWeekdays: [DayOfWeek],
@@ -27,7 +27,7 @@ struct OnBoardingWeekdayChips: View {
         self.onWeekdayTapped = onWeekdayTapped
     }
 
-    var body: some View {
+    public var body: some View {
         let chipCount = CGFloat(max(weekdays.count, 1))
         let spacingCount = CGFloat(max(weekdays.count - 1, 0))
         let spacing: CGFloat = 12
