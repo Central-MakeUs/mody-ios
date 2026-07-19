@@ -7,5 +7,6 @@
 
 public protocol NotificationPermissionInterface {
     func isNotificationPermissionNotDetermined() async -> Bool
+    func isNotificationPermissionGranted() async -> Bool
     func requestNotificationPermission() async -> Bool
 }

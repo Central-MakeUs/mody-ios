@@ -16,13 +16,17 @@ public struct NotificationPermissionService: NotificationPermissionInterface {
         return settings.authorizationStatus == .notDetermined
     }
 
+    public func isNotificationPermissionGranted() async -> Bool {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        return settings.authorizationStatus == .authorized
+    }
+
     public func requestNotificationPermission() async -> Bool {
         do {
             _ = try await UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .sound]
             )
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            return settings.authorizationStatus == .authorized
+            return await isNotificationPermissionGranted()
         } catch {
             return false
         }
