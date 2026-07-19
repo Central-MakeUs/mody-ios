@@ -32,7 +32,6 @@ public struct NotificationSettingsFeature {
     @ObservableState
     public struct State: Equatable {
         public enum AlertCase: Equatable {
-            case success
             case error(NetworkError)
         }
 
@@ -327,7 +326,7 @@ public struct NotificationSettingsFeature {
             case .notificationSettingsUpdated(let notificationSetting):
                 state.isLoading = false
                 state.notificationSetting = notificationSetting
-                return .send(.showAlert(.success))
+                return .none
             case let .notificationSettingsUpdateFailed(error):
                 return .send(.showAlert(.error(error)))
             case .setNotificationPermissionGranted(let isGranted):
