@@ -39,4 +39,21 @@ enum MyPageEndpoint {
             bodyParameters: request
         )
     }
+
+    static func getNotificationSettings() -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/mypage/notification-settings",
+            method: .GET
+        )
+    }
+
+    static func patchNotificationSettings(
+        request: NotificationSettingRequest
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/mypage/notification-settings",
+            method: .PATCH,
+            bodyParameters: request
+        )
+    }
 }

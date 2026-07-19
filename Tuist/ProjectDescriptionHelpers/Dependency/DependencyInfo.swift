@@ -56,13 +56,16 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreNetwork)),
             .module(.MicroFeature(.CoreAuth)),
             .module(.MicroFeature(.CoreKakao)),
+            .module(.MicroFeature(.CoreNotification)),
             
             .external(.FirebaseCore),
+            .external(.FirebaseMessaging),
             .external(.Swinject),
             
             .microFeature(.CoreNetwork),
             .microFeature(.CoreAuth),
-            .microFeature(.CoreKakao)
+            .microFeature(.CoreKakao),
+            .microFeature(.CoreNotification)
         ],
         .Root: [
             .microFeature(.Splash),
@@ -162,7 +165,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain),
                 .module(.Util),
                 .microFeature(.CoreAuth),
-                .microFeature(.CoreNetwork)
+                .microFeature(.CoreNetwork),
+                .microFeature(.CoreNotification)
             ],
             demo: [
                 .module(.CommonDomain),
@@ -204,6 +208,12 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreKakao),
                 .module(.ModyLogger)
+            ]
+        ),
+        .CoreNotification: .init(
+            implementation: [
+                .microFeature(.CoreKeyChainStorage),
+                .microFeature(.CoreNetwork)
             ]
         )
     ]

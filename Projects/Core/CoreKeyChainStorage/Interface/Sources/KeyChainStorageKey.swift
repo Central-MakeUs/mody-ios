@@ -12,4 +12,5 @@ public enum KeyChainStorageKey: String {
     case accessToken = "accessToken"
     case refreshToken = "refreshToken"
     case socialLoginType = "socialLoginType"
+    case fcmToken = "fcmToken"
 }

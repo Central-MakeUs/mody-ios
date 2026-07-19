@@ -20,8 +20,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: windowScene)
-        
-        let appDependencyContainer = AppDependencyContainer()
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+
+        let appDependencyContainer = appDelegate.appDependencyContainer
         let appCoordinator = appDependencyContainer.makeAppCoordinator(window: window)
 
         self.window = window

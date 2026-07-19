@@ -5,14 +5,10 @@
 //  Created by 김동준 on 7/9/26
 //
 
-public enum MealType: String, CaseIterable, Identifiable, Equatable, Encodable {
-    case breakfast = "BREAKFAST"
-    case lunch = "LUNCH"
-    case dinner = "DINNER"
+import CommonDomain
 
-    public var id: String { rawValue }
-
-    public var title: String {
+public extension MealType {
+    var title: String {
         switch self {
         case .breakfast: "아침 식사"
         case .lunch: "점심 식사"
@@ -20,7 +16,7 @@ public enum MealType: String, CaseIterable, Identifiable, Equatable, Encodable {
         }
     }
 
-    public var defaultHour: Int {
+    var defaultHour: Int {
         switch self {
         case .breakfast: 8
         case .lunch: 12
@@ -28,7 +24,7 @@ public enum MealType: String, CaseIterable, Identifiable, Equatable, Encodable {
         }
     }
 
-    public var selectableHours: [Int] {
+    var selectableHours: [Int] {
         switch self {
         case .breakfast: Array(7...11)
         case .lunch: Array(12...16)

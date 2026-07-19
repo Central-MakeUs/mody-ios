@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreNotificationInterface
 import Swinject
 
 final class AppDependencyContainer {
@@ -19,5 +20,9 @@ final class AppDependencyContainer {
 
     func makeAppCoordinator(window: UIWindow) -> AppCoordinator {
         assembler.resolver.resolve(argument: window)
+    }
+
+    func makeNotificationUseCase() -> NotificationUseCaseProtocol {
+        assembler.resolver.resolve()
     }
 }

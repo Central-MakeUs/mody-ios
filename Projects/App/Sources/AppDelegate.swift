@@ -5,12 +5,18 @@
 //  Created by 김동준 on 6/23/26.
 
 import UIKit
+import CoreNotificationInterface
 import DesignSystem
 import FirebaseCore
+import FirebaseMessaging
 import KakaoSDKCommon
+import ModyLogger
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
+    let appDependencyContainer = AppDependencyContainer()
+    lazy var notificationUseCase = appDependencyContainer.makeNotificationUseCase()
+
     func application(
         _ application: UIApplication,
         configurationForConnecting connectingSceneSession: UISceneSession,
@@ -25,6 +31,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         DesignSystemFontFamily.registerAllCustomFonts()
         FirebaseApp.configure()
+        configureNotifications(application)
         configureKakaoSDK()
         return true
     }
@@ -37,5 +44,16 @@ private extension AppDelegate {
         }
 
         KakaoSDK.initSDK(appKey: appKey)
+    }
+
+    func configureNotifications(_ application: UIApplication) {
+        UNUserNotificationCenter.current().delegate = self
+
+        let messaging = Messaging.messaging()
+        messaging.delegate = self
+        messaging.isAutoInitEnabled = true
+
+        ModyLogger.debug("[FCM] auto init:, \(messaging.isAutoInitEnabled)")
+        application.registerForRemoteNotifications()
     }
 }
