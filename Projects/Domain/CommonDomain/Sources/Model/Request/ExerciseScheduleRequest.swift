@@ -5,7 +5,7 @@
 //  Created by 김동준 on 7/19/26.
 //
 
-public struct ExerciseScheduleRequest: Equatable, Encodable {
+public struct ExerciseScheduleRequest: Equatable, Codable {
     public let dayOfWeek: DayOfWeek
     public let time: String
 

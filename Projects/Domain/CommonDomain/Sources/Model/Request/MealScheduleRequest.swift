@@ -5,7 +5,7 @@
 //  Created by 김동준 on 7/19/26.
 //
 
-public struct MealScheduleRequest: Equatable, Encodable {
+public struct MealScheduleRequest: Equatable, Codable {
     public let mealType: MealType
     public let time: String?
     public let skipped: Bool

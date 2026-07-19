@@ -5,7 +5,7 @@
 //  Created by 김동준 on 7/9/26
 //
 
-public enum DayOfWeek: String, CaseIterable, Identifiable, Equatable, Comparable, Encodable {
+public enum DayOfWeek: String, CaseIterable, Identifiable, Equatable, Comparable, Codable {
     case monday = "MONDAY"
     case tuesday = "TUESDAY"
     case wednesday = "WEDNESDAY"
