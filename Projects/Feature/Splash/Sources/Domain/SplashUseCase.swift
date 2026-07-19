@@ -22,8 +22,8 @@ public struct SplashUseCase {
         await splashRepository.fetchAndActivate()
     }
 
-    public func getChallengeTabHideFlag(key: String) -> Bool {
-        splashRepository.getChallengeTabHideFlag(key: key)
+    public func getIsPhaseOneFlag(key: String) -> Bool {
+        splashRepository.getIsPhaseOneFlag(key: key)
     }
 
     public func getAuthSession() -> AuthSession? {

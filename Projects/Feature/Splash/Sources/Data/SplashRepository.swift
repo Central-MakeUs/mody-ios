@@ -36,7 +36,7 @@ public struct SplashRepository: SplashRepositoryProtocol {
         try? await firebaseService.fetchAndActivate()
     }
 
-    public func getChallengeTabHideFlag(key: String) -> Bool {
+    public func getIsPhaseOneFlag(key: String) -> Bool {
         firebaseService.getBool(forKey: key)
     }
 
