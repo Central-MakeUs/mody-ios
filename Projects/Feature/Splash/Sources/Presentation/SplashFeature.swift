@@ -58,8 +58,8 @@ public struct SplashFeature {
                     await send(.cachingRemoteConfig)
                 }
             case .cachingRemoteConfig:
-                let value = splashUseCase.getChallengeTabHideFlag(key: RemoteConfigKeys.challengeTabHideFlag.rawValue)
-                TabBarManager.shared.isChallengeTabHidden = value
+                let isPhaseOne = splashUseCase.getIsPhaseOneFlag(key: RemoteConfigKeys.isPhaseOneFlag.rawValue)
+                PhaseManager.shared.isPhaseOne = isPhaseOne
                 return .send(.healthCheck)
             case .healthCheck:
                 return .run { send in

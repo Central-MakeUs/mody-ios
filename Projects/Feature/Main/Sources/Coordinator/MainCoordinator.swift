@@ -57,12 +57,12 @@ public final class MainCoordinator {
             outputHandler: self
         )
 
-        let isChallengeHideFlag = TabBarManager.shared.isChallengeTabHidden
-        let viewControllers = isChallengeHideFlag
+        let isPhaseOne = PhaseManager.shared.isPhaseOne
+        let viewControllers = isPhaseOne
             ? [feedViewController, myPageViewController]
             : [feedViewController, challengeViewController, myPageViewController]
         
-        let tabs: [MainTab] = isChallengeHideFlag
+        let tabs: [MainTab] = isPhaseOne
             ? [.feed, .myPage]
             : [.feed, .challenge, .myPage]
         

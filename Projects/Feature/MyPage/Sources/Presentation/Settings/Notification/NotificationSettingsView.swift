@@ -97,21 +97,23 @@ public struct NotificationSettingsView: View {
 private extension NotificationSettingsView {
     var notificationRows: some View {
         VStack(spacing: 0) {
-            notificationPermissionRow(
-                title: "코멘트 알림",
-                contents: "친구들이 내 기록에 남긴 댓글 알림을 받아요.",
-                toggleValue: store.notificationSetting.commentNotificationEnabled,
-                needDivider: true,
-                onTap: { store.send(.notificationToggleChanged(.comment, isOn: $0)) }
-            )
+            if !store.isPhaseOne {
+                notificationPermissionRow(
+                    title: "코멘트 알림",
+                    contents: "친구들이 내 기록에 남긴 댓글 알림을 받아요.",
+                    toggleValue: store.notificationSetting.commentNotificationEnabled,
+                    needDivider: true,
+                    onTap: { store.send(.notificationToggleChanged(.comment, isOn: $0)) }
+                )
 
-            notificationPermissionRow(
-                title: "챌린지 알림",
-                contents: "챌린지와 관련된 모든 알림을 받아요.",
-                toggleValue: store.notificationSetting.challengeNotificationEnabled,
-                needDivider: true,
-                onTap: { store.send(.notificationToggleChanged(.challenge, isOn: $0)) }
-            )
+                notificationPermissionRow(
+                    title: "챌린지 알림",
+                    contents: "챌린지와 관련된 모든 알림을 받아요.",
+                    toggleValue: store.notificationSetting.challengeNotificationEnabled,
+                    needDivider: true,
+                    onTap: { store.send(.notificationToggleChanged(.challenge, isOn: $0)) }
+                )
+            }
 
             notificationPermissionRow(
                 title: "식사 및 운동 알림",

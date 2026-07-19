@@ -6,5 +6,5 @@
 //
 
 public enum RemoteConfigKeys: String {
-    case challengeTabHideFlag = "challenge_tab_hide_flag"
+    case isPhaseOneFlag = "is_phase_one_flag"
 }
