@@ -56,4 +56,14 @@ enum MyPageEndpoint {
             bodyParameters: request
         )
     }
+
+    static func putSchedules(
+        request: MealAndExerciseScheduleRequest
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/mypage/schedules",
+            method: .PUT,
+            bodyParameters: request
+        )
+    }
 }

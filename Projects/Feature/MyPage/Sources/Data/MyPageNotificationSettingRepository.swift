@@ -37,4 +37,10 @@ public struct MyPageNotificationSettingRepository: MyPageNotificationSettingRepo
 
         return updatedNotificationSetting
     }
+
+    public func putSchedules(mealSchedules: [MealScheduleRequest], exerciseSchedules: [ExerciseScheduleRequest]) async throws {
+        let request = MealAndExerciseScheduleRequest(mealSchedules: mealSchedules, exerciseSchedules: exerciseSchedules)
+        let endpoint = MyPageEndpoint.putSchedules(request: request)
+        let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
+    }
 }

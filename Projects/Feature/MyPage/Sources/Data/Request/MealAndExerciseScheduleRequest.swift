@@ -10,4 +10,12 @@ import CommonDomain
 struct MealAndExerciseScheduleRequest: Encodable, Equatable {
     let mealSchedules: [MealScheduleRequest]
     let exerciseSchedules: [ExerciseScheduleRequest]
+
+    init(
+        mealSchedules: [MealScheduleRequest],
+        exerciseSchedules: [ExerciseScheduleRequest]
+    ) {
+        self.mealSchedules = mealSchedules
+        self.exerciseSchedules = exerciseSchedules
+    }
 }

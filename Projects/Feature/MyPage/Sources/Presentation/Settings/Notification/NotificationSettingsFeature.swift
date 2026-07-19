@@ -32,6 +32,7 @@ public struct NotificationSettingsFeature {
     @ObservableState
     public struct State: Equatable {
         public enum AlertCase: Equatable {
+            case success
             case error(NetworkError)
         }
 
@@ -103,6 +104,7 @@ public struct NotificationSettingsFeature {
             notificationSetting.mealAndExerciseEnabled
                 && !selectedWeekdays.isEmpty
                 && skippedMeals.count < meals.count
+                && !isLoading
         }
 
         var sortedExerciseSchedules: [ExerciseSchedule] {
@@ -156,6 +158,8 @@ public struct NotificationSettingsFeature {
         case notificationSettingsFetchFailed(NetworkError)
         case notificationSettingsUpdated(NotificationSettingState)
         case notificationSettingsUpdateFailed(NetworkError)
+        case schedulesUpdated
+        case schedulesUpdateFailed(NetworkError)
         case setNotificationPermissionGranted(Bool)
     }
 
@@ -310,13 +314,12 @@ public struct NotificationSettingsFeature {
                 return .none
             case .saveButtonTapped:
                 guard state.isSaveButtonEnabled else { return .none }
-                let request = MealAndExerciseScheduleRequest(
-                    mealSchedules: state.notificationSetting.mealSchedules,
-                    exerciseSchedules: state.notificationSetting.exerciseSchedules
-                )
-                print(request)
-                // TODO: API 호출 필요, 서버 작업 기다리는 중
-                return .none
+                let mealSchedules = state.notificationSetting.mealSchedules
+                let exerciseSchedules = state.notificationSetting.exerciseSchedules
+                state.isLoading = true
+                return .run { [mealSchedules, exerciseSchedules] send in
+                    await send(updateSchedules(mealSchedules: mealSchedules, exerciseSchedules: exerciseSchedules))
+                }
             case .notificationSettingsFetched(let notificationSetting):
                 state.isLoading = false
                 state.notificationSetting = notificationSetting
@@ -328,6 +331,10 @@ public struct NotificationSettingsFeature {
                 state.notificationSetting = notificationSetting
                 return .none
             case let .notificationSettingsUpdateFailed(error):
+                return .send(.showAlert(.error(error)))
+            case .schedulesUpdated:
+                return .send(.showAlert(.success))
+            case let .schedulesUpdateFailed(error):
                 return .send(.showAlert(.error(error)))
             case .setNotificationPermissionGranted(let isGranted):
                 state.isNotificationPermissionGranted = isGranted
@@ -364,6 +371,21 @@ private extension NotificationSettingsFeature {
             return .notificationSettingsUpdated(updatedNotificationSetting)
         } catch {
             return .notificationSettingsUpdateFailed(error as? NetworkError ?? .unknown)
+        }
+    }
+
+    func updateSchedules(
+        mealSchedules: [MealScheduleRequest],
+        exerciseSchedules: [ExerciseScheduleRequest]
+    ) async -> Action {
+        do {
+            try await notificationSettingUseCase.updateSchedules(
+                mealSchedules: mealSchedules,
+                exerciseSchedules: exerciseSchedules
+            )
+            return .schedulesUpdated
+        } catch {
+            return .schedulesUpdateFailed(error as? NetworkError ?? .unknown)
         }
     }
 }

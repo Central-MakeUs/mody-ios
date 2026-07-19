@@ -247,6 +247,14 @@ private extension NotificationSettingsView {
     var alertView: some View {
         if let alertCase = store.alertCase {
             switch alertCase {
+            case .success:
+                MAlertContentView(
+                    title: "저장 완료",
+                    contents: "식사 시간 및 운동 일정을 저장했어요.",
+                    trailingButton: MAlertButton("확인") {
+                        store.send(.alertAction(.dismiss))
+                    }
+                )
             case let .error(networkError):
                 CommonErrorAlertView(networkError) {
                     store.send(.alertAction(.dismiss))
