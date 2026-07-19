@@ -27,4 +27,11 @@ enum GroupEndpoint {
             bodyParameters: request
         )
     }
+
+    static func deleteGroup(groupId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/members/me",
+            method: .DELETE
+        )
+    }
 }
