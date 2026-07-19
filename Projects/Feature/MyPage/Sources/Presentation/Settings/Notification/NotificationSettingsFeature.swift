@@ -12,20 +12,24 @@ import MyPageInterface
 @Reducer
 public struct NotificationSettingsFeature {
     private let notificationPermission: NotificationPermissionInterface
+    private let notificationSettingUseCase: MyPageNotificationSettingUseCase
     private let router: @MainActor (MyPageNotificationSettingsRoute) -> Void
 
     public init(
         notificationPermission: NotificationPermissionInterface,
+        notificationSettingUseCase: MyPageNotificationSettingUseCase,
         router: @escaping @MainActor (MyPageNotificationSettingsRoute) -> Void
     ) {
         self.notificationPermission = notificationPermission
+        self.notificationSettingUseCase = notificationSettingUseCase
         self.router = router
     }
 
     @ObservableState
     public struct State: Equatable {
+        var isLoading = false
         var isNotificationPermissionGranted = false
-        var isMealAndExerciseNotificationEnabled: Bool = false
+        var notificationSetting = NotificationSettingState()
 
         public init() {}
     }
@@ -34,7 +38,11 @@ public struct NotificationSettingsFeature {
         case onAppear
         case checkNotificationPermission
         case backButtonTapped
-        case notificationToggleChanged(Bool)
+        case mealAndExerciseToggleChanged(Bool)
+        case notificationSettingsFetched(NotificationSettingState)
+        case notificationSettingsFetchFailed
+        case notificationSettingsUpdated(NotificationSettingState)
+        case notificationSettingsUpdateFailed
         case setNotificationPermissionGranted(Bool)
     }
 
@@ -42,8 +50,13 @@ public struct NotificationSettingsFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return .none
-                return .send(.checkNotificationPermission)
+                state.isLoading = true
+                return .merge(
+                    .send(.checkNotificationPermission),
+                    .run { send in
+                        await send(fetchNotificationSettings())
+                    }
+                )
             case .checkNotificationPermission:
                 return .run { send in
                     let isGranted = await currentNotificationPermissionIsGranted()
@@ -53,9 +66,27 @@ public struct NotificationSettingsFeature {
                 return .run { [router] _ in
                     await router(.back)
                 }
-            case .notificationToggleChanged(let isOn):
-                state.isMealAndExerciseNotificationEnabled = isOn
-                // TODO: API 호출, UserDefaults 호출
+            case .mealAndExerciseToggleChanged(let isOn):
+                state.isLoading = true
+                var settingState = state.notificationSetting
+                settingState.mealAndExerciseEnabled = isOn
+
+                return .run { [settingState] send in
+                    await send(updateNotificationSettings(settingState))
+                }
+            case .notificationSettingsFetched(let notificationSetting):
+                state.isLoading = false
+                state.notificationSetting = notificationSetting
+                return .none
+            case .notificationSettingsFetchFailed:
+                state.isLoading = false
+                return .none
+            case .notificationSettingsUpdated(let notificationSetting):
+                state.isLoading = false
+                state.notificationSetting = notificationSetting
+                return .none
+            case .notificationSettingsUpdateFailed:
+                state.isLoading = false
                 return .none
             case .setNotificationPermissionGranted(let isGranted):
                 state.isNotificationPermissionGranted = isGranted
@@ -73,5 +104,25 @@ private extension NotificationSettingsFeature {
         }
 
         return await notificationPermission.isNotificationPermissionGranted()
+    }
+
+    func fetchNotificationSettings() async -> Action {
+        do {
+            let notificationSetting = try await notificationSettingUseCase.fetchNotificationSettings()
+            return .notificationSettingsFetched(notificationSetting)
+        } catch {
+            return .notificationSettingsFetchFailed
+        }
+    }
+
+    func updateNotificationSettings(_ notificationSetting: NotificationSettingState) async -> Action {
+        do {
+            let updatedNotificationSetting = try await notificationSettingUseCase.updateNotificationSettings(
+                notificationSetting
+            )
+            return .notificationSettingsUpdated(updatedNotificationSetting)
+        } catch {
+            return .notificationSettingsUpdateFailed
+        }
     }
 }

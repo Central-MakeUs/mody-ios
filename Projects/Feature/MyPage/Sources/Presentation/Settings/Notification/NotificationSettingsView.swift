@@ -27,6 +27,7 @@ public struct NotificationSettingsView: View {
                 guard newValue == .active else { return }
                 store.send(.checkNotificationPermission)
             }
+            .mLoading(isPresent: store.isLoading)
     }
 
     private var notificationSettingBody: some View {
@@ -68,8 +69,8 @@ private extension NotificationSettingsView {
             Toggle(
                 "",
                 isOn: Binding(
-                    get: { store.isMealAndExerciseNotificationEnabled },
-                    set: { store.send(.notificationToggleChanged($0)) }
+                    get: { store.notificationSetting.mealAndExerciseEnabled },
+                    set: { store.send(.mealAndExerciseToggleChanged($0)) }
                 )
             )
             .labelsHidden()
