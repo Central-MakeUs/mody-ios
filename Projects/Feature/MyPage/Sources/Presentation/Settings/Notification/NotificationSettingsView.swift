@@ -38,7 +38,27 @@ public struct NotificationSettingsView: View {
             )
             ScrollView {
                 VStack(spacing: 0) {
-                    notificationPermissionRow
+                    notificationPermissionRow(
+                        title: "코멘트 알림",
+                        contents: "친구들이 내 기록에 남긴 댓글 알림을 받아요.",
+                        toggleValue: store.notificationSetting.commentNotificationEnabled,
+                        needDivider: true,
+                        onTap: { store.send(.notificationToggleChanged(.comment, isOn: $0)) }
+                    )
+
+                    notificationPermissionRow(
+                        title: "챌린지 알림",
+                        contents: "챌린지와 관련된 모든 알림을 받아요.",
+                        toggleValue: store.notificationSetting.challengeNotificationEnabled,
+                        needDivider: true,
+                        onTap: { store.send(.notificationToggleChanged(.challenge, isOn: $0)) }
+                    )
+
+                    notificationPermissionRow(
+                        title: "식사 및 운동 알림",
+                        toggleValue: store.notificationSetting.mealAndExerciseEnabled,
+                        onTap: { store.send(.notificationToggleChanged(.mealAndExercise, isOn: $0)) }
+                    )
 
                     if !store.isNotificationPermissionGranted {
                         Button {
@@ -54,29 +74,54 @@ public struct NotificationSettingsView: View {
 }
 
 private extension NotificationSettingsView {
-    var notificationPermissionRow: some View {
+    func notificationPermissionRow(
+        title: String,
+        contents: String? = nil,
+        toggleValue: Bool,
+        needDivider: Bool = false,
+        onTap: @escaping (Bool) -> Void
+    ) -> some View {
         HStack(spacing: 0) {
-            MText(
-                "식사 및 운동 알림",
-                style: .b3,
-                color: .gray9,
-                alignment: .leading
-            )
-            .vPadding(22)
+            VStack(alignment: .leading, spacing: 0) {
+                MText(
+                    title,
+                    style: .b3,
+                    color: .gray9,
+                    alignment: .leading
+                )
+
+                if let contents = contents {
+                    MText(
+                        contents,
+                        style: .c2,
+                        color: .gray6,
+                        alignment: .leading
+                    )
+                    .padding(.top, 4)
+                }
+            }
 
             Spacer()
 
             Toggle(
                 "",
                 isOn: Binding(
-                    get: { store.notificationSetting.mealAndExerciseEnabled },
-                    set: { store.send(.mealAndExerciseToggleChanged($0)) }
+                    get: { toggleValue },
+                    set: { onTap($0) }
                 )
             )
             .labelsHidden()
             .disabled(!store.isNotificationPermissionGranted)
         }
+        .height(contents == nil ? 68 : 89)
         .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity)
+        .overlay(alignment: .bottom) {
+            if needDivider {
+                Color.gray1
+                    .height(1)
+            }
+        }
     }
 
     func openAppSettings() {

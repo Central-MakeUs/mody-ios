@@ -27,6 +27,12 @@ public struct NotificationSettingsFeature {
 
     @ObservableState
     public struct State: Equatable {
+        public enum NotificationSettingType: Equatable {
+            case comment
+            case challenge
+            case mealAndExercise
+        }
+
         var isLoading = false
         var isNotificationPermissionGranted = false
         var notificationSetting = NotificationSettingState()
@@ -38,7 +44,7 @@ public struct NotificationSettingsFeature {
         case onAppear
         case checkNotificationPermission
         case backButtonTapped
-        case mealAndExerciseToggleChanged(Bool)
+        case notificationToggleChanged(State.NotificationSettingType, isOn: Bool)
         case notificationSettingsFetched(NotificationSettingState)
         case notificationSettingsFetchFailed
         case notificationSettingsUpdated(NotificationSettingState)
@@ -66,10 +72,18 @@ public struct NotificationSettingsFeature {
                 return .run { [router] _ in
                     await router(.back)
                 }
-            case .mealAndExerciseToggleChanged(let isOn):
+            case let .notificationToggleChanged(type, isOn):
                 state.isLoading = true
                 var settingState = state.notificationSetting
-                settingState.mealAndExerciseEnabled = isOn
+
+                switch type {
+                case .comment:
+                    settingState.commentNotificationEnabled = isOn
+                case .challenge:
+                    settingState.challengeNotificationEnabled = isOn
+                case .mealAndExercise:
+                    settingState.mealAndExerciseEnabled = isOn
+                }
 
                 return .run { [settingState] send in
                     await send(updateNotificationSettings(settingState))
