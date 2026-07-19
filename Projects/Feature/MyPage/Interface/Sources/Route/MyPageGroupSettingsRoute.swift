@@ -7,6 +7,7 @@
 
 public enum MyPageGroupSettingsRoute: Equatable {
     case back
+    case routeToGroupParticipate
 }
 
 @MainActor

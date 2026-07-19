@@ -43,6 +43,7 @@ public struct GroupSettingsFeature {
         case alertAction(AlertFeature.Action)
         case onAppear
         case backButtonTapped
+        case routeToGroupParticipate
         case exitButtonTapped(groupID: Int)
         case exitConfirmationTapped
         case groupsFetched([GroupModel])
@@ -72,6 +73,10 @@ public struct GroupSettingsFeature {
                 return .run { [router] _ in
                     await router(.back)
                 }
+            case .routeToGroupParticipate:
+                return .run { [router] _ in
+                    await router(.routeToGroupParticipate)
+                }
             case let .exitButtonTapped(groupID):
                 state.alertCase = .exitConfirmation(groupID: groupID)
                 return .send(.alertAction(.present))
@@ -99,7 +104,7 @@ public struct GroupSettingsFeature {
                 state.isLoading = false
 
                 if state.groups.isEmpty {
-                    // TODO: 그룹 생성하기 플로우로 이동
+                    return .send(.routeToGroupParticipate)
                 }
 
                 return .none

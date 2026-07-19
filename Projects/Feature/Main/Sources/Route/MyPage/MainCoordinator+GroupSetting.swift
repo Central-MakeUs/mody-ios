@@ -13,6 +13,11 @@ extension MainCoordinator: MyPageGroupSettingsRouter {
         switch route {
         case .back:
             navigationController.popViewController(animated: true)
+        case .routeToGroupParticipate:
+            showModyGroup(
+                entryPoint: .groupSettings,
+                initialScreen: .participate
+            )
         }
     }
 }
