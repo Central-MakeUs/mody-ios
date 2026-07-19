@@ -45,6 +45,9 @@ public struct NotificationSettingsView: View {
             }
         }
         .mLoading(isPresent: store.isLoading)
+        .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
+            alertView
+        }
     }
 
     private func notificationSettingBody(contentWidth: CGFloat) -> some View {
@@ -236,5 +239,27 @@ private extension NotificationSettingsView {
     func openAppSettings() {
         guard let appSettingsURL = URL(string: UIApplication.openNotificationSettingsURLString) else { return }
         openURL(appSettingsURL)
+    }
+}
+
+private extension NotificationSettingsView {
+    @ViewBuilder
+    var alertView: some View {
+        if let alertCase = store.alertCase {
+            switch alertCase {
+            case .success:
+                MAlertContentView(
+                    title: "성공",
+                    contents: "알림 설정이 변경되었습니다.",
+                    trailingButton: MAlertButton("확인") {
+                        store.send(.alertAction(.dismiss))
+                    }
+                )
+            case let .error(networkError):
+                CommonErrorAlertView(networkError) {
+                    store.send(.alertAction(.dismiss))
+                }
+            }
+        }
     }
 }

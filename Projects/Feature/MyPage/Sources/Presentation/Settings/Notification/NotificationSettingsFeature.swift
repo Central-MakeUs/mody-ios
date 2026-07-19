@@ -31,6 +31,11 @@ public struct NotificationSettingsFeature {
 
     @ObservableState
     public struct State: Equatable {
+        public enum AlertCase: Equatable {
+            case success
+            case error(NetworkError)
+        }
+
         public enum NotificationSettingType: Equatable {
             case comment
             case challenge
@@ -45,6 +50,8 @@ public struct NotificationSettingsFeature {
         let locale = Date.koreanLocale
         let timeZone = Date.koreanTimeZone
         let calendar: Calendar
+        var alertCase: AlertCase?
+        var alertState = AlertFeature.State()
         var isLoading = false
         var isNotificationPermissionGranted = false
         var notificationSetting = NotificationSettingState()
@@ -131,6 +138,8 @@ public struct NotificationSettingsFeature {
 
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
+        case alertAction(AlertFeature.Action)
+        case showAlert(State.AlertCase)
         case onAppear
         case checkNotificationPermission
         case backButtonTapped
@@ -145,19 +154,29 @@ public struct NotificationSettingsFeature {
         case timeSheetDismissed
         case saveButtonTapped
         case notificationSettingsFetched(NotificationSettingState)
-        case notificationSettingsFetchFailed
+        case notificationSettingsFetchFailed(NetworkError)
         case notificationSettingsUpdated(NotificationSettingState)
-        case notificationSettingsUpdateFailed
+        case notificationSettingsUpdateFailed(NetworkError)
         case setNotificationPermissionGranted(Bool)
     }
 
     public var body: some ReducerOf<Self> {
         BindingReducer()
 
+        Scope(state: \.alertState, action: \.alertAction) {
+            AlertFeature()
+        }
+
         Reduce { state, action in
             switch action {
             case .binding:
                 return .none
+            case .alertAction:
+                return .none
+            case let .showAlert(alertCase):
+                state.isLoading = false
+                state.alertCase = alertCase
+                return .send(.alertAction(.present))
             case .onAppear:
                 state.isLoading = true
                 return .merge(
@@ -303,16 +322,14 @@ public struct NotificationSettingsFeature {
                 state.isLoading = false
                 state.notificationSetting = notificationSetting
                 return .none
-            case .notificationSettingsFetchFailed:
-                state.isLoading = false
-                return .none
+            case let .notificationSettingsFetchFailed(error):
+                return .send(.showAlert(.error(error)))
             case .notificationSettingsUpdated(let notificationSetting):
                 state.isLoading = false
                 state.notificationSetting = notificationSetting
-                return .none
-            case .notificationSettingsUpdateFailed:
-                state.isLoading = false
-                return .none
+                return .send(.showAlert(.success))
+            case let .notificationSettingsUpdateFailed(error):
+                return .send(.showAlert(.error(error)))
             case .setNotificationPermissionGranted(let isGranted):
                 state.isNotificationPermissionGranted = isGranted
                 return .none
@@ -336,7 +353,7 @@ private extension NotificationSettingsFeature {
             let notificationSetting = try await notificationSettingUseCase.fetchNotificationSettings()
             return .notificationSettingsFetched(notificationSetting)
         } catch {
-            return .notificationSettingsFetchFailed
+            return .notificationSettingsFetchFailed(error as? NetworkError ?? .unknown)
         }
     }
 
@@ -347,7 +364,7 @@ private extension NotificationSettingsFeature {
             )
             return .notificationSettingsUpdated(updatedNotificationSetting)
         } catch {
-            return .notificationSettingsUpdateFailed
+            return .notificationSettingsUpdateFailed(error as? NetworkError ?? .unknown)
         }
     }
 }
