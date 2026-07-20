@@ -46,6 +46,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreCamera
     case CoreNotification
     case CoreKakao
     case ModyGroup
@@ -94,6 +95,7 @@ public enum MicroFeatureModule {
         case .ModyGroup: "Projects/Feature/ModyGroup"
         case .CoreKakao: "Projects/Core/CoreKakao"
         case .CoreNotification: "Projects/Core/CoreNotification"
+        case .CoreCamera: "Projects/Core/CoreCamera"
         }
     }
 }
