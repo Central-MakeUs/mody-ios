@@ -62,7 +62,10 @@ private extension SignInView {
             style: .h1,
             color: .gray10,
             lineLimit: 2
-        )
+        ).background(alignment: .bottom) {
+            Image.imgSignUnderline
+                .offset(x: 0, y: -5)
+        }
     }
 }
 
