@@ -8,7 +8,9 @@
 import Swinject
 import OnBoardingInterface
 import OnBoarding
+import CoreCameraInterface
 import CoreNetworkInterface
+import CoreNotificationInterface
 
 extension AppAssembly {
     func assembleOnBoardingFeature(in container: Container) {
@@ -26,8 +28,14 @@ extension AppAssembly {
 
         container.register(OnBoardingFeature.self) { (resolver: Resolver, router: OnBoardingRouter) in
             let onBoardingUseCase: OnBoardingUseCase = resolver.resolve()
+            let cameraPermission: CameraPermissionInterface = resolver.resolve()
+            let notificationPermission: NotificationPermissionInterface = resolver.resolve()
 
-            return OnBoardingFeature(onBoardingUseCase: onBoardingUseCase) { [weak router] route in
+            return OnBoardingFeature(
+                onBoardingUseCase: onBoardingUseCase,
+                cameraPermission: cameraPermission,
+                notificationPermission: notificationPermission
+            ) { [weak router] route in
                 router?.route(from: route)
             }
         }
