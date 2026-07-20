@@ -50,10 +50,12 @@ public struct AuthRepository: AuthRepositoryProtocol {
 
         try await authService.postLogout(refreshToken: refreshToken)
         try deleteAuthSessionInfoFromKeyChain()
+        try deleteFCMTokenFromKeyChain()
     }
 
     public func deleteAccount() async throws {
         try await authService.deleteAccount()
         try deleteAuthSessionInfoFromKeyChain()
+        try deleteFCMTokenFromKeyChain()
     }
 }
