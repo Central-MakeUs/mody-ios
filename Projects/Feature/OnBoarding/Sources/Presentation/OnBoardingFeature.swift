@@ -10,22 +10,35 @@ import OnBoardingInterface
 import CommonDomain
 import Foundation
 import Util
+import CoreCameraInterface
+import CoreNotificationInterface
+import Base
 
 @Reducer
 public struct OnBoardingFeature {
     private let onBoardingUseCase: OnBoardingUseCase
+    private let cameraPermission: CameraPermissionInterface
+    private let notificationPermission: NotificationPermissionInterface
     private let router: @MainActor (OnBoardingRoute) -> Void
 
     public init(
         onBoardingUseCase: OnBoardingUseCase,
+        cameraPermission: CameraPermissionInterface,
+        notificationPermission: NotificationPermissionInterface,
         router: @escaping @MainActor (OnBoardingRoute) -> Void
     ) {
         self.onBoardingUseCase = onBoardingUseCase
+        self.cameraPermission = cameraPermission
+        self.notificationPermission = notificationPermission
         self.router = router
     }
     
     @ObservableState
     public struct State: Equatable {
+        public enum AlertCase: Equatable {
+            case error(NetworkError)
+        }
+
         struct StepStoredRequest: Equatable {
             var nickname: String?
             var birthDate: String?
@@ -40,17 +53,28 @@ public struct OnBoardingFeature {
             case two = 2
             case three = 3
             case four = 4
+            case permission = 5
         }
 
         var isLoading: Bool = false
+        var isPermissionRequesting = false
         var currentStep: Step = .one
         var request: StepStoredRequest = .init()
         var stepOne: OnBoardingStepOneFeature.State = .init()
         var stepTwo: OnBoardingStepTwoFeature.State = .init()
         var stepThree: OnBoardingStepThreeFeature.State = .init()
         var stepFour: OnBoardingStepFourFeature.State = .init()
+        var alertCase: AlertCase?
+        var alertState = AlertFeature.State()
+        let isHealthPermissionVisible: Bool
 
-        let buttonTitle: String = "다음으로"
+        var buttonTitle: String {
+            currentStep == .permission ? "확인" : "다음으로"
+        }
+
+        var showsStepIndicator: Bool {
+            currentStep != .permission
+        }
 
         var isNextButtonEnabled: Bool {
             switch currentStep {
@@ -62,13 +86,19 @@ public struct OnBoardingFeature {
                 return stepThree.isNextButtonEnabled
             case .four:
                 return stepFour.isNextButtonEnabled
+            case .permission:
+                return !isPermissionRequesting
             }
         }
 
-        public init() {}
+        public init(isPhaseOne: Bool = PhaseManager.shared.isPhaseOne) {
+            self.isHealthPermissionVisible = !isPhaseOne
+        }
     }
     
     public enum Action {
+        case alertAction(AlertFeature.Action)
+        case showAlert(State.AlertCase)
         case nextButtonTapped
         case stepOne(OnBoardingStepOneFeature.Action)
         case stepTwo(OnBoardingStepTwoFeature.Action)
@@ -77,10 +107,16 @@ public struct OnBoardingFeature {
         case setUpProfile
         case setupProfileSuccessfully
         case setupProfileFailure(NetworkError)
+        case requestPermissions
+        case permissionsRequestCompleted
         case routeToGroupParticipate
     }
     
     public var body: some ReducerOf<Self> {
+        Scope(state: \.alertState, action: \.alertAction) {
+            AlertFeature()
+        }
+
         Scope(state: \.stepOne, action: \.stepOne) {
             OnBoardingStepOneFeature()
         }
@@ -99,9 +135,17 @@ public struct OnBoardingFeature {
 
         Reduce { state, action in
             switch action {
+            case .alertAction:
+                return .none
+            case let .showAlert(alertCase):
+                state.isLoading = false
+                state.alertCase = alertCase
+                return .send(.alertAction(.present))
             case .nextButtonTapped:
-                guard state.isNextButtonEnabled else {
-                    return .none
+                guard state.isNextButtonEnabled else { return .none }
+
+                if state.currentStep == .permission {
+                    return .send(.requestPermissions)
                 }
                 updateRequest(from: &state)
                 return moveNext(from: &state)
@@ -122,19 +166,28 @@ public struct OnBoardingFeature {
                     do {
                         try await onBoardingUseCase.setupOnBoardingProfileInfo(request: request)
                         await send(.setupProfileSuccessfully)
-                    } catch let error as NetworkError {
-                        await send(.setupProfileFailure(error))
                     } catch {
-                        await send(.setupProfileFailure(.unknown))
+                        await send(.setupProfileFailure(error as? NetworkError ?? .unknown))
                     }
                 }
             case .setupProfileSuccessfully:
                 state.isLoading = false
-                return .send(.routeToGroupParticipate)
-            case .setupProfileFailure:
-                state.isLoading = false
-                // TODO: Alert
+                state.currentStep = .permission
                 return .none
+            case let .setupProfileFailure(error):
+                return .send(.showAlert(.error(error)))
+            case .requestPermissions:
+                guard !state.isPermissionRequesting else { return .none }
+                state.isPermissionRequesting = true
+
+                return .run { send in
+                    _ = await notificationPermission.requestNotificationPermission()
+                    _ = await cameraPermission.requestCameraPermission()
+                    await send(.permissionsRequestCompleted)
+                }
+            case .permissionsRequestCompleted:
+                state.isPermissionRequesting = false
+                return .send(.routeToGroupParticipate)
             case .routeToGroupParticipate:
                 return .run { [router] _ in
                     await router(.routeToGroupParticipate)
@@ -158,6 +211,8 @@ private extension OnBoardingFeature {
         case .four:
             state.request.mealSchedules = state.stepFour.request.mealSchedules
             state.request.exerciseSchedules = state.stepFour.request.exerciseSchedules
+        case .permission:
+            break
         }
     }
 
@@ -178,6 +233,8 @@ private extension OnBoardingFeature {
             return .none
         case .four:
             return .send(.setUpProfile)
+        case .permission:
+            return .none
         }
     }
 

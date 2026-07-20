@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import DesignSystem
+import Base
 
 public struct OnBoardingView: View {
     private let store: StoreOf<OnBoardingFeature>
@@ -19,11 +20,16 @@ public struct OnBoardingView: View {
     public var body: some View {
         onBoardingBody
             .mLoading(isPresent: store.isLoading)
+            .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
+                alertView
+            }
     }
     
     private var onBoardingBody: some View {
         VStack(spacing: 0) {
-            stepIndicator
+            if store.showsStepIndicator {
+                stepIndicator
+            }
 
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -62,6 +68,22 @@ private extension OnBoardingView {
             OnBoardingStepThreeView(store: store.scope(state: \.stepThree, action: \.stepThree))
         case .four:
             OnBoardingStepFourView(store: store.scope(state: \.stepFour, action: \.stepFour))
+        case .permission:
+            OnBoardingPermissionView(isHealthPermissionVisible: store.isHealthPermissionVisible)
+        }
+    }
+}
+
+private extension OnBoardingView {
+    @ViewBuilder
+    var alertView: some View {
+        if let alertCase = store.alertCase {
+            switch alertCase {
+            case let .error(networkError):
+                CommonErrorAlertView(networkError) {
+                    store.send(.alertAction(.dismiss))
+                }
+            }
         }
     }
 }

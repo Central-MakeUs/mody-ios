@@ -56,6 +56,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreNetwork)),
             .module(.MicroFeature(.CoreAuth)),
             .module(.MicroFeature(.CoreKakao)),
+            .module(.MicroFeature(.CoreCamera)),
             .module(.MicroFeature(.CoreNotification)),
             
             .external(.FirebaseCore),
@@ -65,6 +66,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreNetwork),
             .microFeature(.CoreAuth),
             .microFeature(.CoreKakao),
+            .microFeature(.CoreCamera),
             .microFeature(.CoreNotification)
         ],
         .Root: [
@@ -120,6 +122,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
+                .microFeature(.CoreCamera),
+                .microFeature(.CoreNotification),
                 .module(.Util)
             ]
         ),
@@ -219,6 +223,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreKeyChainStorage),
                 .microFeature(.CoreNetwork)
             ]
+        ),
+        .CoreCamera: .init(
+            implementation: []
         )
     ]
 )
