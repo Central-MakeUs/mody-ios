@@ -38,6 +38,7 @@ extension SwipeBackNavigationController: UIGestureRecognizerDelegate {
         guard gestureRecognizer === interactivePopGestureRecognizer else { return true }
         guard viewControllers.count > 1 else { return false }
         guard transitionCoordinator == nil else { return false }
+        guard !SwiftUIAlertSwipeBackPolicy.shared.isAlertPresented else { return false }
         guard topViewController?.isSwipeBackEnabled == true else { return false }
 
         swipingViewController = topViewController

@@ -55,5 +55,14 @@ public struct AlertFeature: Reducer {
                 return .none
             }
         }
+        .onChange(of: \.isPresented) { oldValue, newValue in
+            Reduce { _, _ in
+                guard oldValue != newValue else { return .none }
+
+                return .run { _ in
+                    await SwiftUIAlertSwipeBackPolicy.shared.setAlertPresented(newValue)
+                }
+            }
+        }
     }
 }
