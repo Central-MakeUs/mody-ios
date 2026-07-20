@@ -18,6 +18,7 @@ public final class MainCoordinator {
     public let tabBarController: MainTabBarController
     public weak var delegate: MainCoordinatorDelegate?
     weak var mainContainerViewController: MainContainerViewController?
+    weak var myPageInputHandler: MyPageInputHandler?
 
     let feedBuilder: FeedBuildable
     private let challengeBuilder: ChallengeBuildable
@@ -56,6 +57,7 @@ public final class MainCoordinator {
             router: self,
             outputHandler: self
         )
+        myPageInputHandler = myPageViewController
 
         let isPhaseOne = PhaseManager.shared.isPhaseOne
         let viewControllers = isPhaseOne

@@ -12,12 +12,24 @@ import MyPage
 
 extension AppAssembly {
     func assembleMyPageProfileFeature(in container: Container) {
-        container.register(ProfileFeature.self) { (resolver: Resolver, router: MyPageProfileRouter) in
+        container.register(ProfileFeature.self) { (
+            resolver: Resolver,
+            arguments: (MyPageProfileRouter, MyPageOutputHandler)
+        ) in
+            let (router, outputHandler) = arguments
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
+            let myPageUseCase: MyPageUseCase = resolver.resolve()
 
-            return ProfileFeature(authUseCase: authUseCase) { [weak router] route in
-                router?.route(from: route)
-            }
+            return ProfileFeature(
+                authUseCase: authUseCase,
+                myPageUseCase: myPageUseCase,
+                router: { [weak router] route in
+                    router?.route(from: route)
+                },
+                output: { [weak outputHandler] output in
+                    outputHandler?.handle(output: output)
+                }
+            )
         }
     }
 }

@@ -36,6 +36,8 @@ public struct MyPageFeature {
         var weightRecord: WeightRecord? = nil
         var defaultAvatar: DefaultAvatar
         var isLoading = false
+        var isProfileRefreshing = false
+        var isAllFetched = false
         @Presents var weightRecordSheet: WeightRecordFeature.State?
 
         public init(defaultAvatar: DefaultAvatar = .random()) {
@@ -61,6 +63,7 @@ public struct MyPageFeature {
     }
 
     public enum Action {
+        case input(MyPageInput)
         case onAppear
         case userInfoFetched(UserInfo)
         case userInfoFetchFailed
@@ -79,7 +82,15 @@ public struct MyPageFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .input(.profileUpdated):
+                state.isProfileRefreshing = true
+                return .run { send in
+                    await send(getUserInfo())
+                }
             case .onAppear:
+                guard !state.isAllFetched else { return .none }
+                state.isAllFetched = true
+
                 return .merge(
                     .run { send in
                         await send(getUserInfo())
@@ -90,8 +101,10 @@ public struct MyPageFeature {
                 )
             case let .userInfoFetched(userInfo):
                 state.userInfo = userInfo
+                state.isProfileRefreshing = false
                 return .none
             case .userInfoFetchFailed:
+                state.isProfileRefreshing = false
                 return .none
             case let .weightRecordFetched(weightRecord):
                 state.weightRecord = weightRecord
@@ -99,6 +112,10 @@ public struct MyPageFeature {
             case .weightRecordFetchFailed:
                 return .none
             case .profileEditButtonTapped:
+                guard state.userInfo != nil else {
+                    return .none
+                }
+
                 let profileImageURL = state.profileImageURL
                 let defaultAvatar = state.defaultAvatar
 
@@ -133,7 +150,7 @@ public struct MyPageFeature {
                 state.weightRecordSheet = nil
 
                 return .run { [output] send in
-                    await output(.loading(true))
+                    await output(.weightRecordStarted)
 
                     do {
                         try await myPageUseCase.recordWeight(
@@ -159,14 +176,12 @@ public struct MyPageFeature {
                 }
 
                 return .run { [output] _ in
-                    await output(.loading(false))
                     await output(.weightRecordSucceeded)
                 }
             case let .weightRecordFailed(error):
                 state.isLoading = false
 
                 return .run { [output] _ in
-                    await output(.loading(false))
                     await output(.weightRecordFailed(error))
                 }
             case .weightRecordSheet:

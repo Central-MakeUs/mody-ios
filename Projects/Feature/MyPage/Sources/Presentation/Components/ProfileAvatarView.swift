@@ -29,16 +29,22 @@ struct ProfileAvatarView: View {
     }
 
     var body: some View {
-        AsyncImage(url: imageURL) { phase in
-            switch phase {
-            case let .success(image):
-                image
-                    .resizable()
-                    .scaledToFill()
-            case .empty:
-                SkeletonView(width: 50, height: 50)
-                    .clipShape(Circle())
-            default:
+        Group {
+            if let imageURL {
+                AsyncImage(url: imageURL) { phase in
+                    switch phase {
+                    case let .success(image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .empty:
+                        SkeletonView(width: 50, height: 50)
+                            .clipShape(Circle())
+                    default:
+                        defaultAvatarImage
+                    }
+                }
+            } else {
                 defaultAvatarImage
             }
         }

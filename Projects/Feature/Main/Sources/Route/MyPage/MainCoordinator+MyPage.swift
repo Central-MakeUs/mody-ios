@@ -16,7 +16,8 @@ extension MainCoordinator: MyPageRouter {
             let viewController = myPageBuilder.makeProfileViewController(
                 profileImageURL: profileImageURL,
                 defaultAvatar: defaultAvatar,
-                router: self
+                router: self,
+                outputHandler: self
             )
             navigationController.pushViewController(viewController, animated: true)
         case .routeToNotificationSettings:
@@ -36,8 +37,8 @@ extension MainCoordinator: MyPageRouter {
 extension MainCoordinator: MyPageOutputHandler {
     public func handle(output: MyPageOutput) {
         switch output {
-        case let .loading(isLoading):
-            mainContainerViewController?.setLoading(isLoading)
+        case .weightRecordStarted:
+            mainContainerViewController?.setLoading(true)
         case .weightRecordSucceeded:
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(
@@ -52,6 +53,8 @@ extension MainCoordinator: MyPageOutputHandler {
                     contents: error.message
                 )
             )
+        case .profileUpdated:
+            myPageInputHandler?.handle(input: .profileUpdated)
         }
     }
 }

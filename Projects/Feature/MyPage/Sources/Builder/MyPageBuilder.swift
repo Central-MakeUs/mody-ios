@@ -13,14 +13,14 @@ import ComposableArchitecture
 
 public struct MyPageBuilder: MyPageBuildable {
     private let makeMyPageFeature: (MyPageRouter, MyPageOutputHandler) -> MyPageFeature
-    private let makeProfileFeature: (MyPageProfileRouter) -> ProfileFeature
+    private let makeProfileFeature: (MyPageProfileRouter, MyPageOutputHandler) -> ProfileFeature
     private let makeNotificationSettingsFeature: (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature
     private let makeGroupSettingsFeature: (MyPageGroupSettingsRouter) -> GroupSettingsFeature
     private let makeHealthDataSettingsFeature: (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
     
     public init(
         makeMyPageFeature: @escaping (MyPageRouter, MyPageOutputHandler) -> MyPageFeature,
-        makeProfileFeature: @escaping (MyPageProfileRouter) -> ProfileFeature,
+        makeProfileFeature: @escaping (MyPageProfileRouter, MyPageOutputHandler) -> ProfileFeature,
         makeNotificationSettingsFeature: @escaping (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature,
         makeGroupSettingsFeature: @escaping (MyPageGroupSettingsRouter) -> GroupSettingsFeature,
         makeHealthDataSettingsFeature: @escaping (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
@@ -36,20 +36,20 @@ public struct MyPageBuilder: MyPageBuildable {
     public func makeMyPageViewController(
         router: MyPageRouter,
         outputHandler: MyPageOutputHandler
-    ) -> UIViewController {
+    ) -> UIViewController & MyPageInputHandler {
         let store: StoreOf<MyPageFeature> = .init(initialState: MyPageFeature.State()) {
             makeMyPageFeature(router, outputHandler)
         }
-        let view = MyPageView(store: store)
 
-        return UIHostingController(rootView: view)
+        return MyPageHostingController(store: store)
     }
 
     @MainActor
     public func makeProfileViewController(
         profileImageURL: URL?,
         defaultAvatar: DefaultAvatar,
-        router: MyPageProfileRouter
+        router: MyPageProfileRouter,
+        outputHandler: MyPageOutputHandler
     ) -> UIViewController {
         let store: StoreOf<ProfileFeature> = .init(
             initialState: ProfileFeature.State(
@@ -57,7 +57,7 @@ public struct MyPageBuilder: MyPageBuildable {
                 defaultAvatar: defaultAvatar
             )
         ) {
-            makeProfileFeature(router)
+            makeProfileFeature(router, outputHandler)
         }
         let view = ProfileView(store: store)
 

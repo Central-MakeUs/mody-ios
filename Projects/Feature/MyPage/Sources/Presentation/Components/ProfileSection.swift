@@ -104,5 +104,6 @@ private extension ProfileSection {
             .background(Color.gray3)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
+        .disabled(userInfo == nil)
     }
 }
