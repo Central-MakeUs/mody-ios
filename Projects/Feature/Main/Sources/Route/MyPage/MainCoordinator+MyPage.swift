@@ -16,7 +16,8 @@ extension MainCoordinator: MyPageRouter {
             let viewController = myPageBuilder.makeProfileViewController(
                 profileImageURL: profileImageURL,
                 defaultAvatar: defaultAvatar,
-                router: self
+                router: self,
+                outputHandler: self
             )
             navigationController.pushViewController(viewController, animated: true)
         case .routeToNotificationSettings:
@@ -52,6 +53,8 @@ extension MainCoordinator: MyPageOutputHandler {
                     contents: error.message
                 )
             )
+        case .profileUpdated:
+            myPageInputHandler?.handle(input: .profileUpdated)
         }
     }
 }

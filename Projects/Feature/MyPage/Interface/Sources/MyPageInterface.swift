@@ -13,13 +13,14 @@ public protocol MyPageBuildable {
     func makeMyPageViewController(
         router: MyPageRouter,
         outputHandler: MyPageOutputHandler
-    ) -> UIViewController
+    ) -> UIViewController & MyPageInputHandler
 
     @MainActor
     func makeProfileViewController(
         profileImageURL: URL?,
         defaultAvatar: DefaultAvatar,
-        router: MyPageProfileRouter
+        router: MyPageProfileRouter,
+        outputHandler: MyPageOutputHandler
     ) -> UIViewController
 
     @MainActor

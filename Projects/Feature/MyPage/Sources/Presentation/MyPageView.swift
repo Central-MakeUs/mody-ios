@@ -35,7 +35,7 @@ private extension MyPageView {
                 ProfileSection(
                     imageURL: store.profileImageURL,
                     defaultAvatar: store.defaultAvatar,
-                    userInfo: store.userInfo
+                    userInfo: store.isProfileRefreshing ? nil : store.userInfo
                 ) {
                     store.send(.profileEditButtonTapped)
                 }

@@ -36,6 +36,7 @@ public struct MyPageFeature {
         var weightRecord: WeightRecord? = nil
         var defaultAvatar: DefaultAvatar
         var isLoading = false
+        var isProfileRefreshing = false
         @Presents var weightRecordSheet: WeightRecordFeature.State?
 
         public init(defaultAvatar: DefaultAvatar = .random()) {
@@ -61,6 +62,7 @@ public struct MyPageFeature {
     }
 
     public enum Action {
+        case input(MyPageInput)
         case onAppear
         case userInfoFetched(UserInfo)
         case userInfoFetchFailed
@@ -79,6 +81,9 @@ public struct MyPageFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .input(.profileUpdated):
+                state.isProfileRefreshing = true
+                return .none
             case .onAppear:
                 return .merge(
                     .run { send in
@@ -90,8 +95,10 @@ public struct MyPageFeature {
                 )
             case let .userInfoFetched(userInfo):
                 state.userInfo = userInfo
+                state.isProfileRefreshing = false
                 return .none
             case .userInfoFetchFailed:
+                state.isProfileRefreshing = false
                 return .none
             case let .weightRecordFetched(weightRecord):
                 state.weightRecord = weightRecord

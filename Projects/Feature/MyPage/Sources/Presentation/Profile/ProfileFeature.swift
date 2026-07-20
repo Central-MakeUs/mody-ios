@@ -18,15 +18,18 @@ public struct ProfileFeature {
     private let authUseCase: AuthUseCaseProtocol
     private let myPageUseCase: MyPageUseCase
     private let router: @MainActor (MyPageProfileRoute) -> Void
+    private let output: @MainActor (MyPageOutput) -> Void
 
     public init(
         authUseCase: AuthUseCaseProtocol,
         myPageUseCase: MyPageUseCase,
-        router: @escaping @MainActor (MyPageProfileRoute) -> Void
+        router: @escaping @MainActor (MyPageProfileRoute) -> Void,
+        output: @escaping @MainActor (MyPageOutput) -> Void
     ) {
         self.authUseCase = authUseCase
         self.myPageUseCase = myPageUseCase
         self.router = router
+        self.output = output
     }
 
     @ObservableState
@@ -145,7 +148,10 @@ public struct ProfileFeature {
                 }
             case .profileUpdated:
                 state.isLoading = false
-                return .send(.backButtonTapped)
+                return .run { [output] send in
+                    await output(.profileUpdated)
+                    await send(.backButtonTapped)
+                }
             case let .profileUpdateFailed(error):
                 return .send(.showAlert(.error(error)))
             case .logoutButtonTapped:

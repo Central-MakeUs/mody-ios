@@ -11,6 +11,7 @@ public enum MyPageOutput: Equatable {
     case loading(Bool)
     case weightRecordSucceeded
     case weightRecordFailed(NetworkError)
+    case profileUpdated
 }
 
 @MainActor

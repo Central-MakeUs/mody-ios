@@ -50,8 +50,8 @@ extension AppAssembly {
                 makeMyPageFeature: { router, outputHandler in
                     resolver.resolve(argument: (router, outputHandler))
                 },
-                makeProfileFeature: { router in
-                    resolver.resolve(argument: router)
+                makeProfileFeature: { router, outputHandler in
+                    resolver.resolve(argument: (router, outputHandler))
                 },
                 makeNotificationSettingsFeature: { router in
                     resolver.resolve(argument: router)
