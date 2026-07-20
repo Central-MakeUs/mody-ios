@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "img_sign_underline.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
