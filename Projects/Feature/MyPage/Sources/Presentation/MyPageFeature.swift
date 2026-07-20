@@ -99,6 +99,10 @@ public struct MyPageFeature {
             case .weightRecordFetchFailed:
                 return .none
             case .profileEditButtonTapped:
+                guard state.userInfo != nil else {
+                    return .none
+                }
+
                 let profileImageURL = state.profileImageURL
                 let defaultAvatar = state.defaultAvatar
 

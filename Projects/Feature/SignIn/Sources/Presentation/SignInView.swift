@@ -125,7 +125,7 @@ private enum SocialLoginButtonType {
     
     var backgroundColor: Color {
         switch self {
-        case .kakao: .main0
+        case .kakao: .kakaoBackground
         case .apple: .systemBlack
         }
     }
