@@ -86,4 +86,8 @@ extension AuthRepository {
             try? keyChainStorage.delete(key: $0.rawValue)
         }
     }
+    
+    func deleteFCMTokenFromKeyChain() throws {
+        try? keyChainStorage.delete(key: KeyChainStorageKey.fcmToken.rawValue)
+    }
 }
