@@ -169,7 +169,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Util),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
-                .microFeature(.CoreNotification)
+                .microFeature(.CoreNotification),
+                .microFeature(.ModyGroup)
             ],
             demo: [
                 .module(.CommonDomain),

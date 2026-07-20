@@ -7,15 +7,21 @@
 
 import MyPage
 import MyPageInterface
+import ModyGroupInterface
 import Swinject
 
 extension AppAssembly {
     func assembleMyPageGroupSettingsFeatures(in container: Container) {
         container.register(GroupSettingsFeature.self) {
-            (_: Resolver, router: MyPageGroupSettingsRouter) in
-            GroupSettingsFeature { [weak router] route in
-                router?.route(from: route)
-            }
+            (resolver: Resolver, router: MyPageGroupSettingsRouter) in
+            let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
+
+            return GroupSettingsFeature(
+                groupUseCase: groupUseCase,
+                router: { [weak router] route in
+                    router?.route(from: route)
+                }
+            )
         }
     }
 }

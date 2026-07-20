@@ -48,4 +48,9 @@ public struct GroupRepository: GroupRepositoryProtocol {
 
         return result.toDomain()
     }
+
+    public func deleteGroup(groupId: Int) async throws {
+        let endpoint = GroupEndpoint.deleteGroup(groupId: groupId)
+        let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
+    }
 }

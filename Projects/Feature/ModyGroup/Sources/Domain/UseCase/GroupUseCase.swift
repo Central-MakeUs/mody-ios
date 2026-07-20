@@ -26,4 +26,8 @@ public struct GroupUseCase: GroupUseCaseProtocol {
     public func getGroups() async throws -> [GroupModel] {
         try await groupRepository.getGroups()
     }
+
+    public func exitGroup(groupId: Int) async throws {
+        try await groupRepository.deleteGroup(groupId: groupId)
+    }
 }

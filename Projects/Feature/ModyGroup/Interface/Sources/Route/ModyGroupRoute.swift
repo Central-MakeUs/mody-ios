@@ -13,6 +13,7 @@ public enum ModyGroupRoute: Equatable {
 public enum ModyGroupEntryPoint: Equatable {
     case root
     case main
+    case groupSettings
 }
 
 public enum ModyGroupInitialScreen: Equatable {

@@ -11,4 +11,5 @@ public protocol GroupUseCaseProtocol {
     func createGroup(name: String) async throws -> String
     func joinGroup(code: String) async throws
     func getGroups() async throws -> [GroupModel]
+    func exitGroup(groupId: Int) async throws
 }
