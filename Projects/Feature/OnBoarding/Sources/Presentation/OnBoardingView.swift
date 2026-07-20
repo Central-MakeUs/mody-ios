@@ -23,7 +23,9 @@ public struct OnBoardingView: View {
     
     private var onBoardingBody: some View {
         VStack(spacing: 0) {
-            stepIndicator
+            if store.showsStepIndicator {
+                stepIndicator
+            }
 
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -62,6 +64,8 @@ private extension OnBoardingView {
             OnBoardingStepThreeView(store: store.scope(state: \.stepThree, action: \.stepThree))
         case .four:
             OnBoardingStepFourView(store: store.scope(state: \.stepFour, action: \.stepFour))
+        case .permission:
+            OnBoardingPermissionView(isHealthPermissionVisible: store.isHealthPermissionVisible)
         }
     }
 }
