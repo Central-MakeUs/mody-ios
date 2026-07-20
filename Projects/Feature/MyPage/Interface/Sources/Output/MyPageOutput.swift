@@ -8,7 +8,7 @@
 import CommonDomain
 
 public enum MyPageOutput: Equatable {
-    case loading(Bool)
+    case weightRecordStarted
     case weightRecordSucceeded
     case weightRecordFailed(NetworkError)
     case profileUpdated

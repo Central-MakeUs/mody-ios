@@ -37,8 +37,8 @@ extension MainCoordinator: MyPageRouter {
 extension MainCoordinator: MyPageOutputHandler {
     public func handle(output: MyPageOutput) {
         switch output {
-        case let .loading(isLoading):
-            mainContainerViewController?.setLoading(isLoading)
+        case .weightRecordStarted:
+            mainContainerViewController?.setLoading(true)
         case .weightRecordSucceeded:
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(

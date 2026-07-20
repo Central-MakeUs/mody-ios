@@ -150,7 +150,7 @@ public struct MyPageFeature {
                 state.weightRecordSheet = nil
 
                 return .run { [output] send in
-                    await output(.loading(true))
+                    await output(.weightRecordStarted)
 
                     do {
                         try await myPageUseCase.recordWeight(
@@ -176,14 +176,12 @@ public struct MyPageFeature {
                 }
 
                 return .run { [output] _ in
-                    await output(.loading(false))
                     await output(.weightRecordSucceeded)
                 }
             case let .weightRecordFailed(error):
                 state.isLoading = false
 
                 return .run { [output] _ in
-                    await output(.loading(false))
                     await output(.weightRecordFailed(error))
                 }
             case .weightRecordSheet:

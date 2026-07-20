@@ -61,7 +61,7 @@ extension MainContainerViewController {
         _ overlayViewController: UIViewController,
         animated: Bool
     ) {
-        removeCurrentOverlay()
+        let previousOverlayViewController = currentOverlayViewController
 
         addChild(overlayViewController)
         overlayViewController.view.alpha = animated ? 0 : 1
@@ -73,11 +73,20 @@ extension MainContainerViewController {
         overlayViewController.didMove(toParent: self)
         currentOverlayViewController = overlayViewController
 
-        guard animated else { return }
-
-        UIView.animate(withDuration: 0.2) {
-            overlayViewController.view.alpha = 1
+        guard animated else {
+            removeOverlay(previousOverlayViewController)
+            return
         }
+
+        UIView.animate(
+            withDuration: 0.2,
+            animations: {
+                overlayViewController.view.alpha = 1
+            },
+            completion: { [weak self] _ in
+                self?.removeOverlay(previousOverlayViewController)
+            }
+        )
     }
 
     func dismissOverlay(
@@ -135,10 +144,9 @@ private extension MainContainerViewController {
         }
     }
 
-    func removeCurrentOverlay() {
-        guard let overlayViewController = currentOverlayViewController else { return }
+    func removeOverlay(_ overlayViewController: UIViewController?) {
+        guard let overlayViewController else { return }
 
-        currentOverlayViewController = nil
         overlayViewController.willMove(toParent: nil)
         overlayViewController.view.removeFromSuperview()
         overlayViewController.removeFromParent()
