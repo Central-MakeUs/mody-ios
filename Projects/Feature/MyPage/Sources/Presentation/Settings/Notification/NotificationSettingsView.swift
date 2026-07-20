@@ -6,6 +6,7 @@
 //
 
 import Base
+import Combine
 import ComposableArchitecture
 import DesignSystem
 import SwiftUI
@@ -13,7 +14,6 @@ import UIKit
 
 public struct NotificationSettingsView: View {
     @Environment(\.openURL) private var openURL
-    @Environment(\.scenePhase) private var scenePhase
     @Bindable private var store: StoreOf<NotificationSettingsFeature>
 
     public init(store: StoreOf<NotificationSettingsFeature>) {
@@ -26,9 +26,11 @@ public struct NotificationSettingsView: View {
         }
         .background(Color.systemWhite)
         .onAppear { store.send(.onAppear) }
-        .onChange(of: scenePhase) { _, newValue in
-            print(newValue)
-            guard newValue == .active else { return }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: UIApplication.didBecomeActiveNotification
+            )
+        ) { _ in
             store.send(.checkNotificationPermission)
         }
         .sheet(
