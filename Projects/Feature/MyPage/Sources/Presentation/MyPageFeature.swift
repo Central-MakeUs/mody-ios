@@ -37,6 +37,7 @@ public struct MyPageFeature {
         var defaultAvatar: DefaultAvatar
         var isLoading = false
         var isProfileRefreshing = false
+        var isAllFetched = false
         @Presents var weightRecordSheet: WeightRecordFeature.State?
 
         public init(defaultAvatar: DefaultAvatar = .random()) {
@@ -83,8 +84,13 @@ public struct MyPageFeature {
             switch action {
             case .input(.profileUpdated):
                 state.isProfileRefreshing = true
-                return .none
+                return .run { send in
+                    await send(getUserInfo())
+                }
             case .onAppear:
+                guard !state.isAllFetched else { return .none }
+                state.isAllFetched = true
+
                 return .merge(
                     .run { send in
                         await send(getUserInfo())
