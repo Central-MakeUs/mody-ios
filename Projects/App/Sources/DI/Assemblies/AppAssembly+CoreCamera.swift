@@ -14,5 +14,8 @@ extension AppAssembly {
         container.register(CameraPermissionInterface.self) { _ in
             CameraPermissionService()
         }
+        container.register(CameraCaptureBuildable.self) { _ in
+            CameraCaptureBuilder()
+        }
     }
 }

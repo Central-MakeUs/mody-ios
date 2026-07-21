@@ -6,6 +6,7 @@
 //
 
 import Swinject
+import CoreCameraInterface
 import FeedInterface
 import Feed
 import ModyGroupInterface
@@ -23,12 +24,14 @@ extension AppAssembly {
         
         container.register(FeedBuildable.self) { resolver in
             let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor = resolver.resolve()
+            let cameraCaptureBuilder: CameraCaptureBuildable = resolver.resolve()
 
             return FeedBuilder(
                 makeFeedReactor: { router in
                     resolver.resolve(argument: router)
                 },
-                makeFeedRecordReactor: makeFeedRecordReactor
+                makeFeedRecordReactor: makeFeedRecordReactor,
+                cameraCaptureBuilder: cameraCaptureBuilder
             )
         }
     }

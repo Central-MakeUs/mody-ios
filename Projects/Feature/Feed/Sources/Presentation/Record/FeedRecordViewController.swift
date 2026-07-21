@@ -8,6 +8,7 @@
 import UIKit
 import SwiftUI
 import Base
+import CoreCameraInterface
 import FeedInterface
 import ReactorKit
 import DesignSystem
@@ -18,14 +19,20 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
 
     private let recordType: FeedRecordType
     private let recordView: FeedRecordView
+    let cameraCaptureBuilder: CameraCaptureBuildable
 
     private var finishButtonHostingController: UIHostingController<FeedRecordFinishButtonView>?
     var photoSourceSheetViewController: UIViewController?
+    var cameraCaptureViewController: UIViewController?
 
-    public init(reactor: FeedRecordReactor) {
+    public init(
+        reactor: FeedRecordReactor,
+        cameraCaptureBuilder: CameraCaptureBuildable
+    ) {
         let recordType = reactor.initialState.recordType
         self.recordType = recordType
         self.recordView = FeedRecordView(recordType: recordType)
+        self.cameraCaptureBuilder = cameraCaptureBuilder
         defer { self.reactor = reactor }
         super.init(nibName: nil, bundle: nil)
     }
@@ -66,11 +73,21 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
         }
 
         reactor.state
-            .map(\.isPhotoSourceSheetPresented)
+            .map(\.photoPresentation)
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
-            .bind(with: self) { owner, isPresented in
-                owner.setPhotoSourceSheetPresented(isPresented)
+            .bind(with: self) { owner, presentation in
+                owner.setPhotoPresentation(presentation)
+            }
+            .disposed(by: disposeBag)
+
+        reactor.state
+            .map(\.selectedPhoto)
+            .compactMap { $0?.croppedImage }
+            .distinctUntilChanged { $0 === $1 }
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, image in
+                owner.recordView.configurePhoto(image)
             }
             .disposed(by: disposeBag)
 

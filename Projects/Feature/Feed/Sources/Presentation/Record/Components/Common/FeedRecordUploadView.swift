@@ -11,6 +11,7 @@ import SnapKit
 
 final class FeedRecordUploadView: UIControl {
     private let borderLayer = CAShapeLayer()
+    private let photoImageView = UIImageView()
     private let contentStackView = UIStackView()
     private let iconImageView = UIImageView()
     private let titleLabel = MUILabel(
@@ -39,6 +40,13 @@ final class FeedRecordUploadView: UIControl {
             cornerRadius: 16
         ).cgPath
     }
+
+    func configure(image: UIImage) {
+        photoImageView.image = image
+        photoImageView.isHidden = false
+        contentStackView.isHidden = true
+        borderLayer.isHidden = true
+    }
 }
 
 private extension FeedRecordUploadView {
@@ -46,6 +54,11 @@ private extension FeedRecordUploadView {
         backgroundColor = .main4
         layer.cornerRadius = 16
         layer.masksToBounds = true
+
+        photoImageView.contentMode = .scaleAspectFill
+        photoImageView.clipsToBounds = true
+        photoImageView.isHidden = true
+        photoImageView.isUserInteractionEnabled = false
 
         borderLayer.fillColor = UIColor.clear.cgColor
         borderLayer.strokeColor = UIColor.main.cgColor
@@ -64,9 +77,14 @@ private extension FeedRecordUploadView {
     }
 
     func setupLayout() {
+        addSubview(photoImageView)
         addSubview(contentStackView)
         contentStackView.addArrangedSubview(iconImageView)
         contentStackView.addArrangedSubview(titleLabel)
+
+        photoImageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
 
         contentStackView.snp.makeConstraints {
             $0.center.equalToSuperview()
