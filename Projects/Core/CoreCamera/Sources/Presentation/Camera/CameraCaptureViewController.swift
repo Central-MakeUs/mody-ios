@@ -7,11 +7,17 @@
 
 import CoreCameraInterface
 import DesignSystem
+import Photos
 import PhotosUI
 import SnapKit
 import UIKit
 
 final class CameraCaptureViewController: UIViewController {
+    private struct CapturedPhoto {
+        let image: UIImage
+        let originalFileName: String
+    }
+
     private let initialSource: CameraCaptureSource
     private let onComplete: (CameraCaptureResult) -> Void
     private let onCancel: () -> Void
@@ -24,7 +30,7 @@ final class CameraCaptureViewController: UIViewController {
     private let photoConfirmationControlsView = CameraPhotoConfirmationControlsView()
     private let selectionOverlayView = CameraSelectionOverlayView()
 
-    private var selectedImage: UIImage?
+    private var capturedPhoto: CapturedPhoto?
     private var didPresentInitialPhotoLibrary = false
 
     init(
@@ -155,7 +161,10 @@ private extension CameraCaptureViewController {
     func capturePhoto() {
         sessionController.capture { [weak self] image in
             guard let image else { return }
-            self?.setCapturedPhoto(image)
+            self?.setCapturedPhoto(
+                image,
+                originalFileName: Self.makeCameraFileName()
+            )
         }
     }
 
@@ -171,8 +180,14 @@ private extension CameraCaptureViewController {
         present(picker, animated: true)
     }
 
-    func setCapturedPhoto(_ image: UIImage) {
-        selectedImage = image
+    func setCapturedPhoto(
+        _ image: UIImage,
+        originalFileName: String
+    ) {
+        capturedPhoto = CapturedPhoto(
+            image: image,
+            originalFileName: originalFileName
+        )
         selectedImageView.image = image
         selectedImageView.isHidden = false
         shutterControlsView.isHidden = true
@@ -183,7 +198,7 @@ private extension CameraCaptureViewController {
     }
 
     func resetCapturedPhoto() {
-        selectedImage = nil
+        capturedPhoto = nil
         selectedImageView.image = nil
         selectedImageView.isHidden = true
         shutterControlsView.isHidden = false
@@ -194,12 +209,12 @@ private extension CameraCaptureViewController {
     }
 
     func completeCapture() {
-        guard let selectedImage else { return }
+        guard let capturedPhoto else { return }
 
         let selectionFrame = selectionOverlayView.selectionFrame
         let selectionContainerSize = selectionOverlayView.bounds.size
         let cropOutput = CameraImageCropper().crop(
-            image: selectedImage,
+            image: capturedPhoto.image,
             selectionFrame: selectionFrame,
             containerSize: selectionContainerSize
         )
@@ -212,9 +227,10 @@ private extension CameraCaptureViewController {
 
         onComplete(
             CameraCaptureResult(
-                image: selectedImage,
+                image: capturedPhoto.image,
                 croppedImage: cropOutput.croppedImage,
-                normalizedSelectionFrame: cropOutput.normalizedSelectionFrame
+                normalizedSelectionFrame: cropOutput.normalizedSelectionFrame,
+                originalFileName: capturedPhoto.originalFileName
             )
         )
     }
@@ -237,24 +253,66 @@ private extension CameraCaptureViewController {
     @objc func closeTapped() {
         onCancel()
     }
+
+    static func makeCameraFileName() -> String {
+        makeGeneratedFileName(prefix: "MODY_PHOTO")
+    }
+
+    static func makeGeneratedFileName(prefix: String) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyyMMdd_HHmmss"
+
+        let timestamp = formatter.string(from: Date())
+        let suffix = UUID().uuidString.prefix(6).uppercased()
+        return "\(prefix)_\(timestamp)_\(suffix).jpg"
+    }
+
+    func makePhotoLibraryFileName(from result: PHPickerResult) -> String {
+        if let originalFileName = fetchOriginalFileName(from: result) {
+            return originalFileName
+        }
+
+        return Self.makeGeneratedFileName(prefix: "MODY_PHOTO_LIBRARY")
+    }
+
+    func fetchOriginalFileName(from result: PHPickerResult) -> String? {
+        guard let assetIdentifier = result.assetIdentifier else { return nil }
+
+        let fetchResult = PHAsset.fetchAssets(
+            withLocalIdentifiers: [assetIdentifier],
+            options: nil
+        )
+        guard let asset = fetchResult.firstObject else { return nil }
+
+        let resources = PHAssetResource.assetResources(for: asset)
+        return resources.first {
+            $0.type == .photo || $0.type == .fullSizePhoto
+        }?.originalFilename ?? resources.first?.originalFilename
+    }
 }
 
 extension CameraCaptureViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
 
-        guard !results.isEmpty else {
+        guard let result = results.first else {
             sessionController.start()
             return
         }
 
-        guard let provider = results.first?.itemProvider,
-              provider.canLoadObject(ofClass: UIImage.self) else { return }
+        let originalFileName = makePhotoLibraryFileName(from: result)
+        let provider = result.itemProvider
+
+        guard provider.canLoadObject(ofClass: UIImage.self) else { return }
 
         provider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
             guard let image = object as? UIImage else { return }
             DispatchQueue.main.async {
-                self?.setCapturedPhoto(image)
+                self?.setCapturedPhoto(
+                    image,
+                    originalFileName: originalFileName
+                )
             }
         }
     }

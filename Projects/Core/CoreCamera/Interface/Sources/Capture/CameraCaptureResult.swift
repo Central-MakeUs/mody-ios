@@ -11,14 +11,17 @@ public struct CameraCaptureResult {
     public let image: UIImage
     public let croppedImage: UIImage
     public let normalizedSelectionFrame: CGRect
+    public let originalFileName: String
 
     public init(
         image: UIImage,
         croppedImage: UIImage,
-        normalizedSelectionFrame: CGRect
+        normalizedSelectionFrame: CGRect,
+        originalFileName: String
     ) {
         self.image = image
         self.croppedImage = croppedImage
         self.normalizedSelectionFrame = normalizedSelectionFrame
+        self.originalFileName = originalFileName
     }
 }
