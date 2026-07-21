@@ -112,7 +112,6 @@ public final class FeedRecordReactor: Reactor {
             return .just(.setExerciseDuration(hours: hours, minutes: minutes))
         case .didTapFinishButton:
             guard currentState.isFinishButtonEnabled else { return .empty() }
-            print("[FeedRecordReactor] 작성 완료")
             return .empty()
         }
     }
