@@ -36,7 +36,7 @@ public struct MLoadingIndicatorView: View {
     public var body: some View {
         ProgressView()
             .progressViewStyle(.circular)
-            .tint(.white)
+            .tint(.gray)
             .scaleEffect(1.2)
     }
 }
