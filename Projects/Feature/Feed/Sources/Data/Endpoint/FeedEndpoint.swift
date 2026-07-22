@@ -1,0 +1,32 @@
+//
+//  FeedEndpoint.swift
+//  Feed
+//
+//  Created by 김동준 on 7/21/26
+//
+
+import CoreNetworkInterface
+
+enum FeedEndpoint {
+    static func getRecords(
+        groupId: Int,
+        date: String,
+        cursor: Int?,
+        size: Int
+    ) -> CoreNetworkEndpoint {
+        var queryParameters = [
+            "date": date,
+            "size": String(size)
+        ]
+
+        if let cursor {
+            queryParameters["cursor"] = String(cursor)
+        }
+
+        return CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/records",
+            method: .GET,
+            queryParameters: queryParameters
+        )
+    }
+}
