@@ -150,6 +150,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .module(.Util),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.ModyGroup),
                 .external(.ReactorKit),

@@ -6,24 +6,34 @@
 //
 
 import Foundation
+import CoreAuthInterface
 import CommonDomain
 import FeedInterface
 import ModyGroupInterface
 import ReactorKit
-import FeedInterface
 
 public final class FeedReactor: Reactor {
+    private let authUseCase: AuthUseCaseProtocol
     private let groupUseCase: GroupUseCaseProtocol
+    private let feedUseCase: FeedUseCase
     private weak var router: FeedRouter?
     public let initialState: State
     private let baseDate: Date
     private let calendar: Calendar
+    private let feedPageSize = 5
 
     public struct State {
         var isFloatingActionButtonExpanded = false
         var groups: [GroupModel] = []
         var selectedGroup: GroupModel?
         var isFetchGroupLoading = false
+        var myMemberId: Int?
+
+        var feedRecords: [FeedRecord] = []
+        var isInitialFeedLoading = false
+        var isNextPageLoading = false
+        var nextFeedCursor: Int?
+        var hasNextFeedPage = false
 
         var weekCalendarViewState: FeedWeekCalendarViewState
         var weekOffset = 0
@@ -34,6 +44,12 @@ public final class FeedReactor: Reactor {
         case setGroups([GroupModel])
         case setSelectedGroup(GroupModel)
         case setFetchGroupLoading(Bool)
+        case setMyMemberId(Int?)
+        case setInitialFeedLoading(Bool)
+        case setNextPageLoading(Bool)
+        case setFeedPage(FeedRecordPage)
+        case appendFeedPage(FeedRecordPage)
+        case resetFeedRecords
 
         case setWeekCalendar(
             offset: Int,
@@ -55,15 +71,20 @@ public final class FeedReactor: Reactor {
         case didTapPreviousWeek
         case didTapNextWeek
         case didTapCalendarDate(FeedWeekCalendarModel)
+        case didReachFeedListBottom
         
         case didTapRecordButton(FeedRecordType)
     }
     
     public init(
+        authUseCase: AuthUseCaseProtocol,
         groupUseCase: GroupUseCaseProtocol,
+        feedUseCase: FeedUseCase,
         router: FeedRouter
     ) {
+        self.authUseCase = authUseCase
         self.groupUseCase = groupUseCase
+        self.feedUseCase = feedUseCase
         self.router = router
         let calendar = Date.koreanCalendar
         let baseDate = Date().startOfDay(calendar: calendar)
@@ -93,11 +114,7 @@ public final class FeedReactor: Reactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
-            return .concat([
-                .just(.setFetchGroupLoading(true)),
-                fetchGroups(),
-                .just(.setFetchGroupLoading(false))
-            ])
+            return fetchInitialFeed()
         case .didTapDimmedOverlay:
             return .just(.setFloatingActionButtonExpanded(false))
         case .didTapFloatingActionButton:
@@ -115,7 +132,13 @@ public final class FeedReactor: Reactor {
             guard currentState.groups.contains(where: { $0.groupId == group.groupId }) else {
                 return .empty()
             }
-            return .just(.setSelectedGroup(group))
+            return .concat([
+                .just(.setSelectedGroup(group)),
+                fetchFirstFeedPage(
+                    groupId: group.groupId,
+                    date: currentState.weekCalendarViewState.selectedDate
+                )
+            ])
         case .didTapPreviousWeek:
             return makeCalendarMutation(offset: currentState.weekOffset - 1)
         case .didTapNextWeek:
@@ -130,7 +153,27 @@ public final class FeedReactor: Reactor {
                 return .empty()
             }
 
-            return .just(.setSelectedCalendarDate(model.date))
+            return .concat([
+                .just(.setSelectedCalendarDate(model.date)),
+                fetchFirstFeedPage(
+                    groupId: currentState.selectedGroup?.groupId,
+                    date: model.date
+                )
+            ])
+        case .didReachFeedListBottom:
+            guard !currentState.isInitialFeedLoading,
+                  !currentState.isNextPageLoading,
+                  currentState.hasNextFeedPage,
+                  let selectedGroup = currentState.selectedGroup,
+                  let nextCursor = currentState.nextFeedCursor else {
+                return .empty()
+            }
+
+            return fetchNextFeedPage(
+                groupId: selectedGroup.groupId,
+                date: currentState.weekCalendarViewState.selectedDate,
+                cursor: nextCursor
+            )
         case .didTapRecordButton(let recordType):
             return .concat([
                 .just(.setFloatingActionButtonExpanded(false)),
@@ -154,6 +197,24 @@ public final class FeedReactor: Reactor {
             newState.selectedGroup = group
         case .setFetchGroupLoading(let isLoading):
             newState.isFetchGroupLoading = isLoading
+        case .setMyMemberId(let memberId):
+            newState.myMemberId = memberId
+        case .setInitialFeedLoading(let isLoading):
+            newState.isInitialFeedLoading = isLoading
+        case .setNextPageLoading(let isLoading):
+            newState.isNextPageLoading = isLoading
+        case .setFeedPage(let page):
+            newState.feedRecords = page.records
+            newState.nextFeedCursor = page.nextCursor
+            newState.hasNextFeedPage = page.hasNext
+        case .appendFeedPage(let page):
+            newState.feedRecords.append(contentsOf: page.records)
+            newState.nextFeedCursor = page.nextCursor
+            newState.hasNextFeedPage = page.hasNext
+        case .resetFeedRecords:
+            newState.feedRecords = []
+            newState.nextFeedCursor = nil
+            newState.hasNextFeedPage = false
         case let .setWeekCalendar(offset, title, dates):
             newState.weekOffset = offset
             newState.weekCalendarViewState.calendarTitle = title
@@ -169,24 +230,106 @@ public final class FeedReactor: Reactor {
 }
 
 private extension FeedReactor {
-    func fetchGroups() -> Observable<Mutation> {
-        Observable.create { [weak self] observer in
+    func fetchInitialFeed() -> Observable<Mutation> {
+        let selectedDate = currentState.weekCalendarViewState.selectedDate
+
+        return Observable<Mutation>.create { [weak self] observer in
             let task = Task {
                 guard let self else { return }
+                observer.onNext(.setFetchGroupLoading(true))
+                observer.onNext(.setInitialFeedLoading(true))
+
+                try await Task.sleep(for: .seconds(5))
                 do {
-                    try await Task.sleep(for: .seconds(1)) // MARK: 현재 응답이 너무 빨라 테스트 용으로 넣었음. (스켈레톤 볼려고)
-                    let groups = try await self.groupUseCase.getGroups()
+                    async let groupsResponse = self.groupUseCase.getGroups()
+                    async let userInfoResponse = self.authUseCase.getUserInfo(needUpdateKeyChain: false)
+                    let (groups, userInfo) = try await (groupsResponse, userInfoResponse)
                     observer.onNext(.setGroups(groups))
+                    observer.onNext(.setMyMemberId(userInfo.memberId))
+
+                    if let selectedGroup = groups.first {
+                        let page = try await self.feedUseCase.fetchFeedRecords(
+                            groupId: selectedGroup.groupId,
+                            date: selectedDate,
+                            cursor: nil,
+                            size: self.feedPageSize
+                        )
+                        observer.onNext(.setFeedPage(page))
+                    } else {
+                        observer.onNext(.resetFeedRecords)
+                    }
                 } catch {
-                    observer.onError(error)
+                    observer.onNext(.resetFeedRecords)
                 }
 
+                observer.onNext(.setInitialFeedLoading(false))
+                observer.onNext(.setFetchGroupLoading(false))
                 observer.onCompleted()
             }
 
             return Disposables.create { task.cancel() }
         }
-        .observe(on: MainScheduler.instance)
+    }
+
+    func fetchFirstFeedPage(
+        groupId: Int?,
+        date: String
+    ) -> Observable<Mutation> {
+        guard let groupId else {
+            return .just(.resetFeedRecords)
+        }
+
+        return Observable<Mutation>.create { [weak self] observer in
+            let task = Task {
+                guard let self else { return }
+                observer.onNext(.setInitialFeedLoading(true))
+
+                do {
+                    let page = try await self.feedUseCase.fetchFeedRecords(
+                        groupId: groupId,
+                        date: date,
+                        cursor: nil,
+                        size: self.feedPageSize
+                    )
+                    observer.onNext(.setFeedPage(page))
+                } catch {
+                    observer.onNext(.resetFeedRecords)
+                }
+
+                observer.onNext(.setInitialFeedLoading(false))
+                observer.onCompleted()
+            }
+
+            return Disposables.create { task.cancel() }
+        }
+    }
+
+    func fetchNextFeedPage(
+        groupId: Int,
+        date: String,
+        cursor: Int
+    ) -> Observable<Mutation> {
+        Observable<Mutation>.create { [weak self] observer in
+            let task = Task {
+                guard let self else { return }
+                observer.onNext(.setNextPageLoading(true))
+
+                do {
+                    let page = try await self.feedUseCase.fetchFeedRecords(
+                        groupId: groupId,
+                        date: date,
+                        cursor: cursor,
+                        size: self.feedPageSize
+                    )
+                    observer.onNext(.appendFeedPage(page))
+                } catch { }
+
+                observer.onNext(.setNextPageLoading(false))
+                observer.onCompleted()
+            }
+
+            return Disposables.create { task.cancel() }
+        }
     }
 }
 
