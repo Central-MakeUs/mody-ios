@@ -36,8 +36,19 @@ public struct SplashRepository: SplashRepositoryProtocol {
         try? await firebaseService.fetchAndActivate()
     }
 
-    public func getIsPhaseOneFlag(key: String) -> Bool {
-        firebaseService.getBool(forKey: key)
+    public func getRemoteConfigBool(for key: RemoteConfigKeys) -> Bool {
+        firebaseService.getBool(forKey: key.rawValue)
+    }
+
+    public func getRemoteConfigString(for key: RemoteConfigKeys) -> String {
+        firebaseService.getString(forKey: key.rawValue)
+    }
+
+    public func getNoticePopupInfo() -> NoticePopupInfo? {
+        firebaseService.getJson(
+            forKey: RemoteConfigKeys.notice.rawValue,
+            as: NoticePopupInfo.self
+        )
     }
 
     public func getStoredAuthSession() -> AuthSession? {
