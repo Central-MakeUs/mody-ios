@@ -8,6 +8,28 @@
 import CoreNetworkInterface
 
 enum FeedEndpoint {
+    static func postPresignedUrl(
+        domain: String,
+        fileName: String
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/uploads/presigned-url",
+            method: .POST,
+            queryParameters: [
+                "domain": domain,
+                "fileName": fileName
+            ]
+        )
+    }
+
+    static func postRecord(_ body: FeedRecordCreateBody) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/records",
+            method: .POST,
+            bodyParameters: body
+        )
+    }
+
     static func getRecords(
         groupId: Int,
         date: String,

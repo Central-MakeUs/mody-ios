@@ -74,6 +74,7 @@ public final class FeedReactor: Reactor {
         case didReachFeedListBottom
         
         case didTapRecordButton(FeedRecordType)
+        case input(FeedInput)
     }
     
     public init(
@@ -179,6 +180,11 @@ public final class FeedReactor: Reactor {
                 .just(.setFloatingActionButtonExpanded(false)),
                 routeToRecord(recordType)
             ])
+        case .input(.recordCreated):
+            return fetchFirstFeedPage(
+                groupId: currentState.selectedGroup?.groupId,
+                date: currentState.weekCalendarViewState.selectedDate
+            )
         }
     }
 
@@ -239,7 +245,6 @@ private extension FeedReactor {
                 observer.onNext(.setFetchGroupLoading(true))
                 observer.onNext(.setInitialFeedLoading(true))
 
-                try await Task.sleep(for: .seconds(5))
                 do {
                     async let groupsResponse = self.groupUseCase.getGroups()
                     async let userInfoResponse = self.authUseCase.getUserInfo(needUpdateKeyChain: false)

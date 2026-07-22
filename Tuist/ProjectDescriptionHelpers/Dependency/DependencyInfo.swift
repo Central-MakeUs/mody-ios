@@ -160,6 +160,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.RxRelay)
             ],
             demo: [
+                .module(.DesignSystem),
                 .module(.MicroFeature(.CoreCamera))
             ]
         ),

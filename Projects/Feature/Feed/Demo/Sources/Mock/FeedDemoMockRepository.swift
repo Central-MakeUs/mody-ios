@@ -1,6 +1,6 @@
 //
-//  FeedMockRepository.swift
-//  FeedTesting
+//  FeedDemoMockRepository.swift
+//  FeedDemo
 //
 //  Created by 김동준 on 7/22/26.
 //
@@ -8,14 +8,14 @@
 import Feed
 import Foundation
 
-public actor FeedMockRepository: FeedRepositoryProtocol {
+actor FeedDemoMockRepository: FeedRepositoryProtocol {
     private var records: [FeedRecord]
 
-    public init() {
+    init() {
         records = Self.defaultRecords
     }
 
-    public func getRecords(
+    func getRecords(
         groupId: Int,
         date: String,
         cursor: Int?,
@@ -34,7 +34,7 @@ public actor FeedMockRepository: FeedRepositoryProtocol {
         )
     }
 
-    public func postRecord(_ request: FeedRecordCreateRequest) async throws {
+    func postRecord(_ request: FeedRecordCreateRequest) async throws {
         try await Task.sleep(nanoseconds: 2_000_000_000)
         let imageURL =
             Self.defaultRecords.randomElement()?.imageUrl
@@ -65,9 +65,8 @@ public actor FeedMockRepository: FeedRepositoryProtocol {
     }
 }
 
-private extension FeedMockRepository {
-    static let profileImageURL =
-        "https://storage.googleapis.com/mody-images/http://k.kakaocdn.net/dn/mWjnL/btsI9aEAjZF/j4E1KubpKOEibHorQIGyjK/img_640x640.jpg"
+private extension FeedDemoMockRepository {
+    static let profileImageURL = ""
 
     static let defaultRecords: [FeedRecord] = [
         FeedRecord(

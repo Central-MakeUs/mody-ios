@@ -41,7 +41,7 @@ extension AppAssembly {
         }
         
         container.register(FeedBuildable.self) { resolver in
-            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor = resolver.resolve()
+            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor = resolver.resolve()
             let cameraCaptureBuilder: CameraCaptureBuildable = resolver.resolve()
 
             return FeedBuilder(

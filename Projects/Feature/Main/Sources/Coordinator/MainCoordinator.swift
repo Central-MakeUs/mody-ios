@@ -18,6 +18,7 @@ public final class MainCoordinator {
     public let tabBarController: MainTabBarController
     public weak var delegate: MainCoordinatorDelegate?
     weak var mainContainerViewController: MainContainerViewController?
+    weak var feedInputHandler: FeedInputHandler?
     weak var myPageInputHandler: MyPageInputHandler?
 
     let feedBuilder: FeedBuildable
@@ -52,6 +53,7 @@ public final class MainCoordinator {
     @MainActor
     public func start() {
         let feedViewController = feedBuilder.makeFeedViewController(router: self)
+        feedInputHandler = feedViewController as? FeedInputHandler
         let challengeViewController = challengeBuilder.makeChallengeViewController(router: self)
         let myPageViewController = myPageBuilder.makeMyPageViewController(
             router: self,

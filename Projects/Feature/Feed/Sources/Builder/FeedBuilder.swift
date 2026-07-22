@@ -11,12 +11,12 @@ import FeedInterface
 
 public struct FeedBuilder: FeedBuildable {
     private let makeFeedReactor: (FeedRouter) -> FeedReactor
-    private let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor
+    private let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor
     private let cameraCaptureBuilder: CameraCaptureBuildable
     
     public init(
         makeFeedReactor: @escaping (FeedRouter) -> FeedReactor,
-        makeFeedRecordReactor: @escaping (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor,
+        makeFeedRecordReactor: @escaping (FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor,
         cameraCaptureBuilder: CameraCaptureBuildable
     ) {
         self.makeFeedReactor = makeFeedReactor
@@ -32,10 +32,11 @@ public struct FeedBuilder: FeedBuildable {
     @MainActor
     public func makeFeedRecordViewController(
         router: FeedRecordRouter,
-        recordType: FeedRecordType
+        recordType: FeedRecordType,
+        outputHandler: FeedRecordOutputHandler
     ) -> UIViewController {
         return FeedRecordViewController(
-            reactor: makeFeedRecordReactor(router, recordType),
+            reactor: makeFeedRecordReactor(router, recordType, outputHandler),
             cameraCaptureBuilder: cameraCaptureBuilder
         )
     }

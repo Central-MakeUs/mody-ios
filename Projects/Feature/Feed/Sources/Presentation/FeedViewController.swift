@@ -12,7 +12,7 @@ import SnapKit
 import RxCocoa
 import FeedInterface
 
-public final class FeedViewController: UIViewController, View {
+public final class FeedViewController: UIViewController, View, FeedInputHandler {
     public var disposeBag = DisposeBag()
 
     private let groupHeaderView = UIView()
@@ -140,15 +140,16 @@ public final class FeedViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.isFloatingActionButtonExpanded)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, isExpanded in
                 owner.setFloatingActionButtonOverlayVisible(isExpanded)
             }
             .disposed(by: disposeBag)
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map { state in
                 FeedGroupHeaderViewState(
                     isLoading: state.isFetchGroupLoading,
@@ -156,7 +157,6 @@ public final class FeedViewController: UIViewController, View {
                 )
             }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, viewState in
                 owner.groupButton.configure(
                     title: viewState.groupName,
@@ -167,6 +167,10 @@ public final class FeedViewController: UIViewController, View {
 
         bindWeekCalendar(reactor)
         bindFeedList(reactor)
+    }
+
+    public func handle(input: FeedInput) {
+        reactor?.action.onNext(.input(input))
     }
 }
 
@@ -185,9 +189,9 @@ private extension FeedViewController {
         }
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.weekCalendarViewState)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, viewState in
                 owner.weekCalendarView.configure(
                     title: viewState.calendarTitle,
@@ -205,6 +209,7 @@ private extension FeedViewController {
 private extension FeedViewController {
     func bindFeedList(_ reactor: FeedReactor) {
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map { state in
                 FeedListViewState(
                     records: state.feedRecords.map {
@@ -219,7 +224,6 @@ private extension FeedViewController {
                 )
             }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, viewState in
                 owner.feedListViewState = viewState
                 owner.feedCollectionView.isHidden = viewState.isEmpty

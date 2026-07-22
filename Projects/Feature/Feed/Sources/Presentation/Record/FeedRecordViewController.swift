@@ -8,6 +8,7 @@
 import UIKit
 import SwiftUI
 import Base
+import CommonDomain
 import CoreCameraInterface
 import FeedInterface
 import ReactorKit
@@ -22,6 +23,8 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
     let cameraCaptureBuilder: CameraCaptureBuildable
 
     private var finishButtonHostingController: UIHostingController<FeedRecordFinishButtonView>?
+    private var recordFailureAlertHostingController: UIHostingController<MAlertView>?
+    private var recordLoadingHostingController: UIHostingController<AnyView>?
     var photoSourceSheetViewController: UIViewController?
     var cameraCaptureViewController: UIViewController?
 
@@ -51,6 +54,7 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
 
         configureNavigationBar()
         configureRecordTypeContent()
+        configureRecordLoadingView()
     }
 
     public func bind(reactor: FeedRecordReactor) {
@@ -73,36 +77,55 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
         }
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.photoPresentation)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, presentation in
                 owner.setPhotoPresentation(presentation)
             }
             .disposed(by: disposeBag)
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.selectedPhoto)
             .compactMap { $0?.croppedImage }
             .distinctUntilChanged { $0 === $1 }
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, image in
                 owner.recordView.configurePhoto(image)
             }
             .disposed(by: disposeBag)
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.isFinishButtonEnabled)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, isEnabled in
                 owner.configureFinishButton(isEnabled: isEnabled)
+            }
+            .disposed(by: disposeBag)
+
+        reactor.state
+            .observe(on: MainScheduler.instance)
+            .map(\.isSubmittingRecord)
+            .distinctUntilChanged()
+            .bind(with: self) { owner, isSubmitting in
+                owner.setRecordLoadingVisible(isSubmitting)
+            }
+            .disposed(by: disposeBag)
+
+        reactor.state
+            .observe(on: MainScheduler.instance)
+            .map(\.recordFailureAlert)
+            .distinctUntilChanged()
+            .bind(with: self) { owner, error in
+                owner.setRecordFailureAlert(error)
             }
             .disposed(by: disposeBag)
 
         guard recordType == .exercise else { return }
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map { state in
                 FeedRecordExerciseInputViewState(
                     selectedType: state.selectedExerciseType,
@@ -111,7 +134,6 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
                 )
             }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, viewState in
                 owner.recordView.configureExerciseInput(viewState)
             }
@@ -199,6 +221,33 @@ private extension FeedRecordViewController {
 }
 
 private extension FeedRecordViewController {
+    func configureRecordLoadingView() {
+        let loadingView = MLoadingIndicatorView()
+            .greedyFrame()
+            .background(Color.systemBlack.opacity(0.6))
+        let hostingController = UIHostingController(rootView: AnyView(loadingView))
+
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.isHidden = true
+        recordLoadingHostingController = hostingController
+
+        addChild(hostingController)
+        view.addSubview(hostingController.view)
+        hostingController.view.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        hostingController.didMove(toParent: self)
+    }
+
+    func setRecordLoadingVisible(_ isVisible: Bool) {
+        recordLoadingHostingController?.view.isHidden = !isVisible
+
+        if isVisible,
+           let loadingView = recordLoadingHostingController?.view {
+            view.bringSubviewToFront(loadingView)
+        }
+    }
+
     func configureFinishButton(isEnabled: Bool) {
         let rootView = FeedRecordFinishButtonView(
             isEnabled: isEnabled,
@@ -218,5 +267,35 @@ private extension FeedRecordViewController {
             sizesToContent: true
         )
         finishButtonHostingController = hostingController
+    }
+
+    func setRecordFailureAlert(_ error: NetworkError?) {
+        guard let error else {
+            dismissRecordFailureAlert()
+            return
+        }
+
+        guard recordFailureAlertHostingController == nil else { return }
+
+        let alertView = MAlertView(
+            title: error.title,
+            contents: error.message,
+            trailingButton: MAlertButton("확인") { [weak self] in
+                self?.reactor?.action.onNext(.didDismissRecordFailureAlert)
+            },
+            onDismiss: { [weak self] in
+                self?.reactor?.action.onNext(.didDismissRecordFailureAlert)
+            }
+        )
+        recordFailureAlertHostingController = addHostedView(alertView, to: view)
+    }
+
+    func dismissRecordFailureAlert() {
+        guard let recordFailureAlertHostingController else { return }
+
+        recordFailureAlertHostingController.willMove(toParent: nil)
+        recordFailureAlertHostingController.view.removeFromSuperview()
+        recordFailureAlertHostingController.removeFromParent()
+        self.recordFailureAlertHostingController = nil
     }
 }

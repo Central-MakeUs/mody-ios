@@ -25,4 +25,8 @@ public struct FeedUseCase {
             size: size
         )
     }
+
+    public func createRecord(_ request: FeedRecordCreateRequest) async throws {
+        try await feedRepository.postRecord(request)
+    }
 }

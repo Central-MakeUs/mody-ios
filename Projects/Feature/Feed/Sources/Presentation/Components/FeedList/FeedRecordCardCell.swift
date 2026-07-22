@@ -48,7 +48,11 @@ final class FeedRecordCardCell: UICollectionViewCell {
     }
 
     func configure(_ viewState: FeedRecordCardViewState) {
-        profileImageView.configure(urlString: viewState.profileImageUrl, cornerRadius: 16)
+        profileImageView.configure(
+            urlString: viewState.profileImageUrl,
+            cornerRadius: 16,
+            fallbackImage: .icModyAvatarSmileLight
+        )
         nicknameLabel.text = viewState.nickname
         streakLabel.text = viewState.streakText
         streakChipView.isHidden = viewState.isStreakChipHidden

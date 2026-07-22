@@ -6,13 +6,17 @@
 //
 
 import Foundation
+import CommonDomain
 import CoreCameraInterface
 import FeedInterface
 import ReactorKit
+import UIKit
 
 public final class FeedRecordReactor: Reactor {
     public let initialState: State
     private weak var router: FeedRecordRouter?
+    private let feedUseCase: FeedUseCase
+    private let output: @MainActor (FeedRecordOutput) -> Void
 
     public enum PhotoPresentation: Equatable {
         case none
@@ -31,8 +35,15 @@ public final class FeedRecordReactor: Reactor {
         var isExerciseMenuExpanded = false
         var photoPresentation = PhotoPresentation.none
         var selectedPhoto: CameraCaptureResult?
+        var isSubmittingRecord = false
+        var recordFailureAlert: NetworkError?
 
         var isFinishButtonEnabled: Bool {
+            guard selectedPhoto != nil,
+                  !isSubmittingRecord else {
+                return false
+            }
+
             switch recordType {
             case .meal:
                 return !mealMenu.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -60,6 +71,7 @@ public final class FeedRecordReactor: Reactor {
         case didChangeCustomExerciseName(String)
         case didChangeExerciseDuration(hours: Int, minutes: Int)
         case didTapFinishButton
+        case didDismissRecordFailureAlert
     }
 
     public enum Mutation {
@@ -71,13 +83,21 @@ public final class FeedRecordReactor: Reactor {
         case setExerciseType(FeedExerciseType)
         case setCustomExerciseName(String)
         case setExerciseDuration(hours: Int, minutes: Int)
+        case setSubmittingRecord(Bool)
+        case setRecordFailureAlert(NetworkError?)
     }
 
     public init(
         router: FeedRecordRouter,
-        recordType: FeedRecordType
+        recordType: FeedRecordType,
+        feedUseCase: FeedUseCase,
+        outputHandler: FeedRecordOutputHandler
     ) {
         self.router = router
+        self.feedUseCase = feedUseCase
+        self.output = { [weak outputHandler] output in
+            outputHandler?.handle(output: output)
+        }
         self.initialState = State(
             recordType: recordType,
             mealTime: Self.makeInitialMealTime()
@@ -112,7 +132,9 @@ public final class FeedRecordReactor: Reactor {
             return .just(.setExerciseDuration(hours: hours, minutes: minutes))
         case .didTapFinishButton:
             guard currentState.isFinishButtonEnabled else { return .empty() }
-            return .empty()
+            return submitRecord(currentState)
+        case .didDismissRecordFailureAlert:
+            return .just(.setRecordFailureAlert(nil))
         }
     }
 
@@ -139,6 +161,10 @@ public final class FeedRecordReactor: Reactor {
         case let .setExerciseDuration(hours, minutes):
             newState.exerciseHours = hours
             newState.exerciseMinutes = minutes
+        case let .setSubmittingRecord(isSubmitting):
+            newState.isSubmittingRecord = isSubmitting
+        case let .setRecordFailureAlert(error):
+            newState.recordFailureAlert = error
         }
 
         return newState
@@ -164,5 +190,141 @@ private extension FeedRecordReactor {
             }
             return .empty()
         }
+    }
+
+    func submitRecord(_ state: State) -> Observable<Mutation> {
+        guard let request = Self.makeRecordCreateRequest(from: state) else {
+            return .just(.setRecordFailureAlert(.invalidResponse))
+        }
+
+        return Observable<Mutation>.create { [weak self] observer in
+            let task = Task {
+                guard let self else { return }
+                await MainActor.run {
+                    observer.onNext(.setSubmittingRecord(true))
+                }
+
+                do {
+                    try await self.feedUseCase.createRecord(request)
+                    await self.output(.recordCreated)
+                    await MainActor.run {
+                        observer.onCompleted()
+                    }
+                } catch let networkError as NetworkError {
+                    await MainActor.run {
+                        observer.onNext(.setSubmittingRecord(false))
+                        observer.onNext(.setRecordFailureAlert(networkError))
+                        observer.onCompleted()
+                    }
+                } catch {
+                    await MainActor.run {
+                        observer.onNext(.setSubmittingRecord(false))
+                        observer.onNext(.setRecordFailureAlert(.unknown))
+                        observer.onCompleted()
+                    }
+                }
+            }
+
+            return Disposables.create { task.cancel() }
+        }
+    }
+}
+
+private extension FeedRecordReactor {
+    static func makeRecordCreateRequest(from state: State) -> FeedRecordCreateRequest? {
+        guard let selectedPhoto = state.selectedPhoto,
+              let uploadImage = makeUploadImage(from: selectedPhoto) else {
+            return nil
+        }
+
+        let normalizedFrame = selectedPhoto.normalizedSelectionFrame
+        guard normalizedFrame.width > 0,
+              normalizedFrame.height > 0 else {
+            return nil
+        }
+
+        let cropRegion = FeedRecordImageCropRegionRequest(
+            x: Double(normalizedFrame.origin.x).clamped(to: 0...1),
+            y: Double(normalizedFrame.origin.y).clamped(to: 0...1),
+            width: Double(normalizedFrame.width).clamped(to: 0...1),
+            height: Double(normalizedFrame.height).clamped(to: 0...1)
+        )
+
+        switch state.recordType {
+        case .meal:
+            let calendar = koreanCalendar()
+            let hour = calendar.component(.hour, from: state.mealTime)
+            let minute = calendar.component(.minute, from: state.mealTime)
+            return FeedRecordCreateRequest(
+                recordType: .meal,
+                imageData: uploadImage.data,
+                imageFileName: uploadImage.fileName,
+                mealTime: String(format: "%02d:%02d", hour, minute),
+                menu: state.mealMenu.trimmingCharacters(in: .whitespacesAndNewlines),
+                imageCropRegion: cropRegion
+            )
+        case .exercise:
+            guard let selectedExerciseType = state.selectedExerciseType else {
+                return nil
+            }
+
+            let exerciseName = selectedExerciseType == .custom
+                ? state.customExerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+                : selectedExerciseType.name
+
+            return FeedRecordCreateRequest(
+                recordType: .exercise,
+                imageData: uploadImage.data,
+                imageFileName: uploadImage.fileName,
+                exerciseDurationHours: state.exerciseHours,
+                exerciseDurationMinutes: state.exerciseMinutes,
+                exerciseName: exerciseName,
+                imageCropRegion: cropRegion
+            )
+        }
+    }
+
+    static func makeUploadImage(from result: CameraCaptureResult) -> (data: Data, fileName: String)? {
+        let fileName = result.originalFileName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if fileName.lowercased().hasSuffix(".png"),
+           let data = result.image.pngData() {
+            return (data, fileName)
+        }
+
+        guard let data = result.image.jpegData(compressionQuality: 0.9) else {
+            return nil
+        }
+
+        return (data, normalizedJPEGFileName(fileName))
+    }
+
+    static func normalizedJPEGFileName(_ fileName: String) -> String {
+        guard !fileName.isEmpty else {
+            return "record.jpg"
+        }
+
+        let lowercasedFileName = fileName.lowercased()
+        if lowercasedFileName.hasSuffix(".jpg") || lowercasedFileName.hasSuffix(".jpeg") {
+            return fileName
+        }
+
+        let url = URL(fileURLWithPath: fileName)
+        let baseName = url.deletingPathExtension().lastPathComponent
+
+        return "\(baseName.isEmpty ? "record" : baseName).jpg"
+    }
+
+    static func koreanCalendar() -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: "ko_KR")
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
+        return calendar
+    }
+}
+
+private extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self {
+        min(max(self, range.lowerBound), range.upperBound)
     }
 }
