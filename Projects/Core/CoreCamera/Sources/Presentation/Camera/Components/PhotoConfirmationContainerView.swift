@@ -1,5 +1,5 @@
 //
-//  CameraPhotoConfirmationControlsView.swift
+//  PhotoConfirmationContainerView.swift
 //  CoreCamera
 //
 //  Created by 김동준 on 7/20/26.
@@ -9,17 +9,17 @@ import DesignSystem
 import SnapKit
 import UIKit
 
-final class CameraPhotoConfirmationControlsView: UIView {
+final class PhotoConfirmationContainerView: UIView {
     var onRetakeTap: (() -> Void)?
     var onUploadTap: (() -> Void)?
 
-    private let retakeButton = CameraTextButton(
+    private let retakeButton = ConfirmationTextUIControl(
         title: "다시 찍기",
         backgroundColor: .gray10,
         textColor: .systemWhite
     )
     
-    private let uploadButton = CameraTextButton(
+    private let uploadButton = ConfirmationTextUIControl(
         title: "업로드",
         backgroundColor: .main,
         textColor: .gray10,
@@ -40,7 +40,7 @@ final class CameraPhotoConfirmationControlsView: UIView {
     }
 }
 
-private extension CameraPhotoConfirmationControlsView {
+private extension PhotoConfirmationContainerView {
     func setupUI() {
         retakeButton.addTarget(self, action: #selector(retakeTapped), for: .touchUpInside)
         uploadButton.addTarget(self, action: #selector(uploadTapped), for: .touchUpInside)

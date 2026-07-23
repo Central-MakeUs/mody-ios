@@ -23,7 +23,7 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
 
     private var finishButtonHostingController: UIHostingController<FeedRecordFinishButtonView>?
     var photoSourceSheetViewController: UIViewController?
-    var cameraCaptureViewController: UIViewController?
+    var cameraContainerViewController: UIViewController?
 
     public init(
         reactor: FeedRecordReactor,
