@@ -39,6 +39,15 @@ public extension FirebaseService {
     func getBool(forKey key: String) -> Bool {
         remoteConfig[key].boolValue
     }
+
+    func getJson<Value: Decodable>(
+        forKey key: String,
+        as type: Value.Type
+    ) -> Value? {
+        try? remoteConfig
+            .configValue(forKey: key)
+            .decoded(asType: type)
+    }
 }
 
 public extension FirebaseService {
