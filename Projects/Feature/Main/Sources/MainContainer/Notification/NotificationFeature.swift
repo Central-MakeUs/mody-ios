@@ -38,16 +38,20 @@ struct NotificationFeature {
         var isLoading = false
         var isLoadingNextPage = false
         var didLoad = false
+        let isPhaseOne: Bool = PhaseManager.shared.isPhaseOne
 
         var isNotificationEmpty: Bool {
             didLoad && !isLoading && notifications.isEmpty
         }
+
+        init() {}
     }
 
     enum Action {
         case alertAction(AlertFeature.Action)
         case onAppear
         case backButtonTapped
+        case notificationTapped(NotificationItem)
         case loadNextPage
         case notificationsFetched(NotificationPage)
         case showAlert(State.AlertCase)
@@ -69,6 +73,8 @@ struct NotificationFeature {
                 return .run { [router] _ in
                     await router(.back)
                 }
+            case .notificationTapped(let item):
+                return .none
             case .onAppear:
                 guard !state.didLoad else { return .none }
                 state.didLoad = true
@@ -83,10 +89,16 @@ struct NotificationFeature {
                 state.nextCursor = page.nextCursor
                 state.hasNext = page.hasNext
 
+                let notifications = state.isPhaseOne
+                    ? page.notifications.filter {
+                        $0.type == .exerciseReminder || $0.type == .mealReminder
+                    }
+                    : page.notifications
+
                 if state.notifications.isEmpty {
-                    state.notifications = page.notifications
+                    state.notifications = notifications
                 } else {
-                    state.notifications.append(contentsOf: page.notifications)
+                    state.notifications.append(contentsOf: notifications)
                 }
 
                 return .none

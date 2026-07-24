@@ -46,6 +46,7 @@ struct NotificationView: View {
             NotificationListView(
                 notifications: store.notifications,
                 hasNext: store.hasNext,
+                onNotificationTap: { store.send(.notificationTapped($0)) },
                 onLoadNextPage: { store.send(.loadNextPage) }
             )
         }

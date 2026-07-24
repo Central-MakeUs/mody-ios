@@ -84,6 +84,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreNotification),
             .module(.Base),
             .module(.CommonDomain),
+            .module(.Util),
             .external(.ComposableArchitecture),
             .external(.SnapKit)
         ],

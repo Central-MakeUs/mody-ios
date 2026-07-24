@@ -12,15 +12,18 @@ import DesignSystem
 struct NotificationListView: View {
     let notifications: [NotificationItem]
     let hasNext: Bool
+    let onNotificationTap: (NotificationItem) -> Void
     let onLoadNextPage: () -> Void
     
     init(
         notifications: [NotificationItem],
         hasNext: Bool,
+        onNotificationTap: @escaping (NotificationItem) -> Void,
         onLoadNextPage: @escaping () -> Void
     ) {
         self.notifications = notifications
         self.hasNext = hasNext
+        self.onNotificationTap = onNotificationTap
         self.onLoadNextPage = onLoadNextPage
     }
 
@@ -28,7 +31,10 @@ struct NotificationListView: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(notifications, id: \.notificationId) { notification in
-                    NotificationRow(notification: notification)
+                    NotificationRow(
+                        notification: notification,
+                        onTap: { onNotificationTap(notification) }
+                    )
                 }
 
                 if hasNext {
