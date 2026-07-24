@@ -1,4 +1,7 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
-let project = Project.module(moduleType: .Main)
+let project = Project.module(
+    moduleType: .MicroFeature(.Main),
+    hasDemo: true
+)
