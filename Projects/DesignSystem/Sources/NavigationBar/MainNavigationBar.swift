@@ -15,6 +15,7 @@ public final class MainNavigationBar: UIView {
     private let logoImageView = UIImageView()
     private let buttonStackView = UIStackView()
     private let alarmButton = UIButton(type: .system)
+    private let notificationBadgeView = UIView()
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -41,6 +42,11 @@ private extension MainNavigationBar {
         buttonStackView.spacing = 12
 
         configureIconButton(alarmButton, image: .icAlarm, action: #selector(didTapAlarmButton))
+
+        notificationBadgeView.backgroundColor = .systemError
+        notificationBadgeView.isHidden = true
+        notificationBadgeView.isUserInteractionEnabled = false
+        notificationBadgeView.layer.cornerRadius = 4
     }
 
     func setupLayout() {
@@ -48,6 +54,7 @@ private extension MainNavigationBar {
         contentView.addSubview(logoImageView)
         contentView.addSubview(buttonStackView)
         buttonStackView.addArrangedSubview(alarmButton)
+        alarmButton.addSubview(notificationBadgeView)
 
         contentView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(
@@ -67,6 +74,12 @@ private extension MainNavigationBar {
         alarmButton.snp.makeConstraints {
             $0.size.equalTo(24)
         }
+
+        notificationBadgeView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(-4)
+            $0.trailing.equalToSuperview().offset(4)
+            $0.size.equalTo(8)
+        }
     }
 
     func configureIconButton(
@@ -82,5 +95,11 @@ private extension MainNavigationBar {
 
     @objc func didTapAlarmButton() {
         onAlarmTap?()
+    }
+}
+
+public extension MainNavigationBar {
+    func setNotificationBadgeVisible(_ isVisible: Bool) {
+        notificationBadgeView.isHidden = !isVisible
     }
 }

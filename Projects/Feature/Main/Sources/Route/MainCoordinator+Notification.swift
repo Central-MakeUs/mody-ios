@@ -5,14 +5,14 @@
 //  Created by 김동준 on 7/24/26.
 //
 
-import ComposableArchitecture
 import FeedInterface
-import SwiftUI
 
 @MainActor
 extension MainCoordinator {
     func showNotification() {
-        let viewController = makeNotificationViewController()
+        let viewController = notificationBuilder.makeNotificationViewController { [weak self] route in
+            self?.route(from: route)
+        }
         navigationController.pushViewController(viewController, animated: true)
     }
     
@@ -33,24 +33,5 @@ extension MainCoordinator {
                 self?.route(from: FeedRoute.routeToRecord(recordType))
             }
         }
-    }
-}
-
-@MainActor
-extension MainCoordinator {
-    private func makeNotificationViewController() -> UIViewController {
-        let store: StoreOf<NotificationFeature> = .init(
-            initialState: NotificationFeature.State()
-        ) {
-            NotificationFeature(
-                notificationUseCase: notificationUseCase,
-                router: { [weak self] route in
-                    self?.route(from: route)
-                }
-            )
-        }
-        let view = NotificationView(store: store)
-
-        return UIHostingController(rootView: view)
     }
 }

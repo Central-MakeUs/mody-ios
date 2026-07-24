@@ -12,7 +12,6 @@ import FeedInterface
 import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
-import CoreNotificationInterface
 import CommonDomain
 
 public final class MainCoordinator: MainCoordinating {
@@ -26,16 +25,18 @@ public final class MainCoordinator: MainCoordinating {
     private let challengeBuilder: ChallengeBuildable
     let myPageBuilder: MyPageBuildable
     let modyGroupBuilder: ModyGroupBuildable
-    let notificationUseCase: NotificationUseCaseProtocol
+    private let mainContainerBuilder: MainContainerBuildable
+    let notificationBuilder: NotificationBuildable
 
-    public init(
+    init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
         tabBarController: MainTabBarController = MainTabBarController(),
         feedBuilder: FeedBuildable,
         challengeBuilder: ChallengeBuildable,
         myPageBuilder: MyPageBuildable,
         modyGroupBuilder: ModyGroupBuildable,
-        notificationUseCase: NotificationUseCaseProtocol,
+        mainContainerBuilder: MainContainerBuildable,
+        notificationBuilder: NotificationBuildable,
         delegate: MainCoordinatorDelegate
     ) {
         self.navigationController = navigationController
@@ -44,7 +45,8 @@ public final class MainCoordinator: MainCoordinating {
         self.challengeBuilder = challengeBuilder
         self.myPageBuilder = myPageBuilder
         self.modyGroupBuilder = modyGroupBuilder
-        self.notificationUseCase = notificationUseCase
+        self.mainContainerBuilder = mainContainerBuilder
+        self.notificationBuilder = notificationBuilder
         self.delegate = delegate
         navigationController.setNavigationBarHidden(true, animated: false)
         print("⭕ MainCoordinator init!")
@@ -79,7 +81,7 @@ public final class MainCoordinator: MainCoordinating {
             animated: false
         )
 
-        let mainContainerViewController = MainContainerViewController(
+        let mainContainerViewController = mainContainerBuilder.makeMainContainerViewController(
             tabBarController: tabBarController,
             tabs: tabs
         )

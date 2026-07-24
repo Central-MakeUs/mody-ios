@@ -16,6 +16,12 @@ import CoreNotificationInterface
 
 extension AppAssembly {
     func assembleMain(in container: Container) {
+        container.register(MainReactor.self) { resolver in
+            let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
+
+            return MainReactor(notificationUseCase: notificationUseCase)
+        }
+
         container.register(MainBuildable.self) { resolver in
             let feedBuilder: FeedBuildable = resolver.resolve()
             let challengeBuilder: ChallengeBuildable = resolver.resolve()
@@ -28,7 +34,10 @@ extension AppAssembly {
                 challengeBuilder: challengeBuilder,
                 myPageBuilder: myPageBuilder,
                 modyGroupBuilder: modyGroupBuilder,
-                notificationUseCase: notificationUseCase
+                notificationUseCase: notificationUseCase,
+                makeMainReactor: {
+                    resolver.resolve()
+                }
             )
         }
     }

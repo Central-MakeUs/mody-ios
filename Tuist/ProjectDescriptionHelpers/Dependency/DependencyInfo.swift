@@ -160,7 +160,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain),
                 .module(.Util),
                 .external(.ComposableArchitecture),
-                .external(.SnapKit)
+                .external(.SnapKit),
+                .external(.ReactorKit),
+                .external(.RxSwift),
+                .external(.RxCocoa)
             ]
         ),
         .Challenge: .init(
