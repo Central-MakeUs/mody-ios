@@ -146,7 +146,10 @@ public final class FeedReactor: Reactor {
             newState.isFloatingActionButtonExpanded = isExpanded
         case .setGroups(let groups):
             newState.groups = groups
-            if newState.selectedGroup == nil, groups.count > 0 {
+            if let selectedGroup = newState.selectedGroup,
+               let refreshedSelectedGroup = groups.first(where: { $0.groupId == selectedGroup.groupId }) {
+                newState.selectedGroup = refreshedSelectedGroup
+            } else {
                 newState.selectedGroup = groups.first
             }
         case .setSelectedGroup(let group):

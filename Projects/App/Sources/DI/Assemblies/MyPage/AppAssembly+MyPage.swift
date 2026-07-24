@@ -56,8 +56,8 @@ extension AppAssembly {
                 makeNotificationSettingsFeature: { router in
                     resolver.resolve(argument: router)
                 },
-                makeGroupSettingsFeature: { router in
-                    resolver.resolve(argument: router)
+                makeGroupSettingsFeature: { router, outputHandler in
+                    resolver.resolve(argument: (router, outputHandler))
                 },
                 makeHealthDataSettingsFeature: { router in
                     resolver.resolve(argument: router)
