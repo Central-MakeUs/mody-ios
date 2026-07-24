@@ -142,11 +142,15 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .module(.Util),
+                .microFeature(.CoreCamera),
                 .microFeature(.ModyGroup),
                 .external(.ReactorKit),
                 .external(.RxSwift),
                 .external(.RxCocoa),
                 .external(.RxRelay)
+            ],
+            demo: [
+                .module(.MicroFeature(.CoreCamera))
             ]
         ),
         .Main: .init(
@@ -234,7 +238,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .CoreCamera: .init(
-            implementation: []
+            implementation: [
+                .module(.DesignSystem),
+                .external(.SnapKit)
+            ]
         )
     ]
 )

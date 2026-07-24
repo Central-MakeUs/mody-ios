@@ -65,6 +65,10 @@ final class FeedRecordView: UIView {
             self.scrollExerciseMenuToLastItem()
         }
     }
+
+    func configurePhoto(_ image: UIImage) {
+        uploadView.configure(image: image)
+    }
 }
 
 private extension FeedRecordView {

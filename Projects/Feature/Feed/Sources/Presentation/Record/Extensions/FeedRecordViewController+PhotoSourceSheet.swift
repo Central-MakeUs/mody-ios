@@ -10,11 +10,14 @@ import SwiftUI
 import DesignSystem
 
 extension FeedRecordViewController {
-    func setPhotoSourceSheetPresented(_ isPresented: Bool) {
-        if isPresented {
-            presentPhotoSourceSheet()
-        } else {
+    func setPhotoPresentation(_ presentation: FeedRecordReactor.PhotoPresentation) {
+        switch presentation {
+        case .none:
             dismissPhotoSourceSheet()
+        case .sourceSheet:
+            presentPhotoSourceSheet()
+        case let .capture(source):
+            presentCameraCapture(source: source)
         }
     }
 }
@@ -67,7 +70,11 @@ private extension FeedRecordViewController {
 
 extension FeedRecordViewController: UISheetPresentationControllerDelegate {
     public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        guard presentationController.presentedViewController === photoSourceSheetViewController else {
+            return
+        }
+
         photoSourceSheetViewController = nil
-        reactor?.action.onNext(.didDismissPhotoSourceSheet)
+        reactor?.action.onNext(.didDismissPhotoPresentation)
     }
 }

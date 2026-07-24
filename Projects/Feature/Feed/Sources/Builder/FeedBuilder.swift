@@ -6,18 +6,22 @@
 //
 
 import UIKit
+import CoreCameraInterface
 import FeedInterface
 
 public struct FeedBuilder: FeedBuildable {
     private let makeFeedReactor: (FeedRouter) -> FeedReactor
     private let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor
+    private let cameraCaptureBuilder: CameraCaptureBuildable
     
     public init(
         makeFeedReactor: @escaping (FeedRouter) -> FeedReactor,
-        makeFeedRecordReactor: @escaping (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor
+        makeFeedRecordReactor: @escaping (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor,
+        cameraCaptureBuilder: CameraCaptureBuildable
     ) {
         self.makeFeedReactor = makeFeedReactor
         self.makeFeedRecordReactor = makeFeedRecordReactor
+        self.cameraCaptureBuilder = cameraCaptureBuilder
     }
 
     @MainActor
@@ -30,6 +34,9 @@ public struct FeedBuilder: FeedBuildable {
         router: FeedRecordRouter,
         recordType: FeedRecordType
     ) -> UIViewController {
-        return FeedRecordViewController(reactor: makeFeedRecordReactor(router, recordType))
+        return FeedRecordViewController(
+            reactor: makeFeedRecordReactor(router, recordType),
+            cameraCaptureBuilder: cameraCaptureBuilder
+        )
     }
 }

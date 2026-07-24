@@ -6,12 +6,19 @@
 //
 
 import Foundation
+import CoreCameraInterface
 import FeedInterface
 import ReactorKit
 
 public final class FeedRecordReactor: Reactor {
     public let initialState: State
     private weak var router: FeedRecordRouter?
+
+    public enum PhotoPresentation: Equatable {
+        case none
+        case sourceSheet
+        case capture(CameraCaptureSource)
+    }
 
     public struct State {
         let recordType: FeedRecordType
@@ -22,7 +29,8 @@ public final class FeedRecordReactor: Reactor {
         var exerciseHours = 2
         var exerciseMinutes = 0
         var isExerciseMenuExpanded = false
-        var isPhotoSourceSheetPresented = false
+        var photoPresentation = PhotoPresentation.none
+        var selectedPhoto: CameraCaptureResult?
 
         var isFinishButtonEnabled: Bool {
             switch recordType {
@@ -41,9 +49,10 @@ public final class FeedRecordReactor: Reactor {
     public enum Action {
         case didTapBackButton
         case didTapPhotoUpload
-        case didDismissPhotoSourceSheet
+        case didDismissPhotoPresentation
         case didTapCamera
         case didTapGallery
+        case didCompletePhotoCapture(CameraCaptureResult)
         case didChangeMealMenu(String)
         case didChangeMealTime(Date)
         case didTapExerciseMenu
@@ -54,7 +63,8 @@ public final class FeedRecordReactor: Reactor {
     }
 
     public enum Mutation {
-        case setPhotoSourceSheetPresented(Bool)
+        case setPhotoPresentation(PhotoPresentation)
+        case completePhotoCapture(CameraCaptureResult)
         case setMealMenu(String)
         case setMealTime(Date)
         case setExerciseMenuExpanded(Bool)
@@ -79,16 +89,15 @@ public final class FeedRecordReactor: Reactor {
         case .didTapBackButton:
             return routeToBack()
         case .didTapPhotoUpload:
-            print("[FeedRecordReactor] 사진 업로드하기")
-            return .just(.setPhotoSourceSheetPresented(true))
-        case .didDismissPhotoSourceSheet:
-            return .just(.setPhotoSourceSheetPresented(false))
+            return .just(.setPhotoPresentation(.sourceSheet))
+        case .didDismissPhotoPresentation:
+            return .just(.setPhotoPresentation(.none))
         case .didTapCamera:
-            print("[FeedRecordReactor] 사진 촬영하기")
-            return .just(.setPhotoSourceSheetPresented(false))
+            return .just(.setPhotoPresentation(.capture(.camera)))
         case .didTapGallery:
-            print("[FeedRecordReactor] 갤러리에서 선택하기")
-            return .just(.setPhotoSourceSheetPresented(false))
+            return .just(.setPhotoPresentation(.capture(.photoLibrary)))
+        case let .didCompletePhotoCapture(result):
+            return .just(.completePhotoCapture(result))
         case let .didChangeMealMenu(menu):
             return .just(.setMealMenu(menu))
         case let .didChangeMealTime(date):
@@ -103,7 +112,6 @@ public final class FeedRecordReactor: Reactor {
             return .just(.setExerciseDuration(hours: hours, minutes: minutes))
         case .didTapFinishButton:
             guard currentState.isFinishButtonEnabled else { return .empty() }
-            print("[FeedRecordReactor] 작성 완료")
             return .empty()
         }
     }
@@ -112,8 +120,11 @@ public final class FeedRecordReactor: Reactor {
         var newState = state
 
         switch mutation {
-        case let .setPhotoSourceSheetPresented(isPresented):
-            newState.isPhotoSourceSheetPresented = isPresented
+        case let .setPhotoPresentation(presentation):
+            newState.photoPresentation = presentation
+        case let .completePhotoCapture(result):
+            newState.photoPresentation = .none
+            newState.selectedPhoto = result
         case let .setMealMenu(menu):
             newState.mealMenu = menu
         case let .setMealTime(date):
