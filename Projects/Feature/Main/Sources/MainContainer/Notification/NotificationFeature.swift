@@ -9,6 +9,7 @@ import Base
 import CommonDomain
 import ComposableArchitecture
 import CoreNotificationInterface
+import FeedInterface
 import Foundation
 
 @Reducer
@@ -73,8 +74,8 @@ struct NotificationFeature {
                 return .run { [router] _ in
                     await router(.back)
                 }
-            case .notificationTapped(let item):
-                return .none
+            case let .notificationTapped(item):
+                return route(for: item.type)
             case .onAppear:
                 guard !state.didLoad else { return .none }
                 state.didLoad = true
@@ -128,6 +129,21 @@ struct NotificationFeature {
 }
 
 private extension NotificationFeature {
+    func route(for notificationType: NotificationType) -> Effect<Action> {
+        switch notificationType {
+        case .exerciseReminder:
+            return .run { [router] _ in
+                await router(.record(.exercise))
+            }
+        case .mealReminder:
+            return .run { [router] _ in
+                await router(.record(.meal))
+            }
+        default:
+            return .none
+        }
+    }
+
     func fetchNotifications(cursor: Int?) async -> Action {
         do {
             let page = try await notificationUseCase.getNotifications(
@@ -145,4 +161,5 @@ private extension NotificationFeature {
 // TODO: MicroFeature로 구조 바꾸면서 빠질 예정
 enum NotificationRoute: Equatable {
     case back
+    case record(FeedRecordType)
 }
