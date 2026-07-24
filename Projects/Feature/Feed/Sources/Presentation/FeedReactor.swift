@@ -45,6 +45,7 @@ public final class FeedReactor: Reactor {
     
     public enum Action {
         case viewDidLoad
+        case input(FeedInput)
         case didTapDimmedOverlay
         case didTapFloatingActionButton
         case didTapExerciseRecordButton
@@ -93,11 +94,9 @@ public final class FeedReactor: Reactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
-            return .concat([
-                .just(.setFetchGroupLoading(true)),
-                fetchGroups(),
-                .just(.setFetchGroupLoading(false))
-            ])
+            return fetchGroupsWithLoading()
+        case .input(.refreshGroups):
+            return fetchGroupsWithLoading()
         case .didTapDimmedOverlay:
             return .just(.setFloatingActionButtonExpanded(false))
         case .didTapFloatingActionButton:
@@ -169,6 +168,14 @@ public final class FeedReactor: Reactor {
 }
 
 private extension FeedReactor {
+    func fetchGroupsWithLoading() -> Observable<Mutation> {
+        .concat([
+            .just(.setFetchGroupLoading(true)),
+            fetchGroups(),
+            .just(.setFetchGroupLoading(false))
+        ])
+    }
+
     func fetchGroups() -> Observable<Mutation> {
         Observable.create { [weak self] observer in
             let task = Task {

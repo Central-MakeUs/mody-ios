@@ -13,17 +13,20 @@ public struct ModyGroupRootFeature {
     private let groupInviteFeature: GroupInviteFeature
     private let groupParticipateFeature: GroupParticipateFeature
     private let groupCreateFeature: GroupCreateFeature
+    private let output: @MainActor (ModyGroupOutput) -> Void
     private let router: @MainActor (ModyGroupRoute) -> Void
     
     public init(
         groupInviteFeature: GroupInviteFeature,
         groupParticipateFeature: GroupParticipateFeature,
         groupCreateFeature: GroupCreateFeature,
+        output: @escaping @MainActor (ModyGroupOutput) -> Void,
         router: @escaping @MainActor (ModyGroupRoute) -> Void
     ) {
         self.groupInviteFeature = groupInviteFeature
         self.groupParticipateFeature = groupParticipateFeature
         self.groupCreateFeature = groupCreateFeature
+        self.output = output
         self.router = router
     }
 
@@ -125,7 +128,8 @@ private extension ModyGroupRootFeature {
             state.path.append(.create(.init()))
             return .none
         case .joinGroupSuccessfully:
-            return .run { [router] _ in
+            return .run { [output, router] _ in
+                await output(.groupUpdated)
                 await router(.finish)
             }
         default:
@@ -160,7 +164,8 @@ private extension ModyGroupRootFeature {
             state.path.removeLast()
             return .none
         case .doneButtonTapped:
-            return .run { [router] _ in
+            return .run { [output, router] _ in
+                await output(.groupUpdated)
                 await router(.finish)
             }
         default:
