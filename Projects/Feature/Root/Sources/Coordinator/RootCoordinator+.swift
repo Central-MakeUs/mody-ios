@@ -37,7 +37,8 @@ extension RootCoordinator {
             entryPoint: .root,
             showSignUpDoneContents: showSignUpDoneContents,
             initialScreen: .participate,
-            router: self
+            router: self,
+            outputHandler: nil
         )
         setRoot(viewController, animated: false)
     }
