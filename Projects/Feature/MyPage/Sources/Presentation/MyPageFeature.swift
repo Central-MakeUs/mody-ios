@@ -38,6 +38,7 @@ public struct MyPageFeature {
         var isLoading = false
         var isProfileRefreshing = false
         var isAllFetched = false
+        let isPhaseOne = PhaseManager.shared.isPhaseOne
         @Presents var weightRecordSheet: WeightRecordFeature.State?
 
         public init(defaultAvatar: DefaultAvatar = .random()) {

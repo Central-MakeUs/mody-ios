@@ -60,16 +60,6 @@ public struct NotificationSettingsView: View {
             )
             ScrollView {
                 VStack(spacing: 0) {
-                    notificationRows
-
-                    if store.notificationSetting.mealAndExerciseEnabled {
-                        scheduleEditor(width: contentWidth)
-                            .padding(.horizontal, 24)
-                            .padding(.top, 0)
-                            .padding(.bottom, 24)
-                            .disabled(!store.isNotificationPermissionGranted)
-                    }
-
                     if !store.isNotificationPermissionGranted {
                         MButton(
                             "설정으로 가기",
@@ -79,8 +69,17 @@ public struct NotificationSettingsView: View {
                         ) {
                             openAppSettings()
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 24)
+                        .padding(24)
+                    }
+
+                    notificationRows
+
+                    if store.notificationSetting.mealAndExerciseEnabled {
+                        scheduleEditor(width: contentWidth)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 0)
+                            .padding(.bottom, 24)
+                            .disabled(!store.isNotificationPermissionGranted)
                     }
                 }
             }
@@ -92,6 +91,10 @@ public struct NotificationSettingsView: View {
         .animation(
             .easeInOut(duration: 0.18),
             value: store.notificationSetting.mealAndExerciseEnabled
+        )
+        .animation(
+            .easeInOut(duration: 0.18),
+            value: store.isNotificationPermissionGranted
         )
     }
 }
