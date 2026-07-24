@@ -7,25 +7,37 @@
 
 import Swinject
 import Main
+import MainInterface
 import FeedInterface
 import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
+import CoreNotificationInterface
 
 extension AppAssembly {
     func assembleMain(in container: Container) {
-        container.register(MainCoordinator.self) { (resolver: Resolver, delegate: MainCoordinatorDelegate) in
+        container.register(MainReactor.self) { resolver in
+            let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
+
+            return MainReactor(notificationUseCase: notificationUseCase)
+        }
+
+        container.register(MainBuildable.self) { resolver in
             let feedBuilder: FeedBuildable = resolver.resolve()
             let challengeBuilder: ChallengeBuildable = resolver.resolve()
             let myPageBuilder: MyPageBuildable = resolver.resolve()
             let modyGroupBuilder: ModyGroupBuildable = resolver.resolve()
+            let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
 
-            return MainCoordinator(
+            return MainBuilder(
                 feedBuilder: feedBuilder,
                 challengeBuilder: challengeBuilder,
                 myPageBuilder: myPageBuilder,
                 modyGroupBuilder: modyGroupBuilder,
-                delegate: delegate
+                notificationUseCase: notificationUseCase,
+                makeMainReactor: {
+                    resolver.resolve()
+                }
             )
         }
     }

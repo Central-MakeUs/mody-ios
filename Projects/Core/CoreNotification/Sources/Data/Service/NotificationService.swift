@@ -18,4 +18,42 @@ public struct NotificationService {
         let endpoint = NotificationEndpoint.postPushFCMToken(request)
         let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
     }
+    
+    func getNotifications(
+        cursor: Int?,
+        size: Int,
+        allRead: Bool
+    ) async throws -> NotificationListResponse {
+        let endpoint = NotificationEndpoint.getNotifications(
+            cursor: cursor,
+            size: size,
+            allRead: allRead
+        )
+        let response: CoreNetworkResponse<NotificationListResponse> = try await network.request(
+            endpoint
+        )
+
+        guard let result = response.result else {
+            throw NotificationServiceError.emptyResponse
+        }
+
+        return result
+    }
+
+    func getUnreadExists() async throws -> NotificationUnReadExistsResponse {
+        let endpoint = NotificationEndpoint.getUnreadExists()
+        let response: CoreNetworkResponse<NotificationUnReadExistsResponse> = try await network.request(
+            endpoint
+        )
+
+        guard let result = response.result else {
+            throw NotificationServiceError.emptyResponse
+        }
+
+        return result
+    }
+}
+
+private enum NotificationServiceError: Error {
+    case emptyResponse
 }

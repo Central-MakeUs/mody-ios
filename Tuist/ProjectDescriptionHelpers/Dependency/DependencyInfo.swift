@@ -43,7 +43,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
     moduleDependencies: [
         .App: [
             .module(.Root),
-            .module(.Main),
+            .module(.MicroFeature(.Main)),
             .module(.MicroFeature(.Splash)),
             .module(.MicroFeature(.SignIn)),
             .module(.MicroFeature(.OnBoarding)),
@@ -67,7 +67,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreAuth),
             .microFeature(.CoreKakao),
             .microFeature(.CoreCamera),
-            .microFeature(.CoreNotification)
+            .microFeature(.CoreNotification),
+            .microFeature(.Main)
         ],
         .Root: [
             .microFeature(.Splash),
@@ -75,15 +76,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.OnBoarding),
             .microFeature(.ModyGroup),
             .module(.Base)
-        ],
-        .Main: [
-            .microFeature(.Feed),
-            .microFeature(.Challenge),
-            .microFeature(.MyPage),
-            .microFeature(.ModyGroup),
-            .module(.Base),
-            .module(.CommonDomain),
-            .external(.SnapKit)
         ],
         .DesignSystem: [
             .external(.SnapKit)
@@ -159,6 +151,23 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ],
             demo: [
                 .module(.MicroFeature(.CoreCamera))
+            ]
+        ),
+        .Main: .init(
+            implementation: [
+                .microFeature(.Feed),
+                .microFeature(.Challenge),
+                .microFeature(.MyPage),
+                .microFeature(.ModyGroup),
+                .microFeature(.CoreNotification),
+                .module(.Base),
+                .module(.CommonDomain),
+                .module(.Util),
+                .external(.ComposableArchitecture),
+                .external(.SnapKit),
+                .external(.ReactorKit),
+                .external(.RxSwift),
+                .external(.RxCocoa)
             ]
         ),
         .Challenge: .init(

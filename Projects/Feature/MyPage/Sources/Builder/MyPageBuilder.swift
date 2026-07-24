@@ -15,14 +15,14 @@ public struct MyPageBuilder: MyPageBuildable {
     private let makeMyPageFeature: (MyPageRouter, MyPageOutputHandler) -> MyPageFeature
     private let makeProfileFeature: (MyPageProfileRouter, MyPageOutputHandler) -> ProfileFeature
     private let makeNotificationSettingsFeature: (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature
-    private let makeGroupSettingsFeature: (MyPageGroupSettingsRouter) -> GroupSettingsFeature
+    private let makeGroupSettingsFeature: (MyPageGroupSettingsRouter, MyPageOutputHandler) -> GroupSettingsFeature
     private let makeHealthDataSettingsFeature: (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
     
     public init(
         makeMyPageFeature: @escaping (MyPageRouter, MyPageOutputHandler) -> MyPageFeature,
         makeProfileFeature: @escaping (MyPageProfileRouter, MyPageOutputHandler) -> ProfileFeature,
         makeNotificationSettingsFeature: @escaping (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature,
-        makeGroupSettingsFeature: @escaping (MyPageGroupSettingsRouter) -> GroupSettingsFeature,
+        makeGroupSettingsFeature: @escaping (MyPageGroupSettingsRouter, MyPageOutputHandler) -> GroupSettingsFeature,
         makeHealthDataSettingsFeature: @escaping (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
     ) {
         self.makeMyPageFeature = makeMyPageFeature
@@ -80,12 +80,13 @@ public struct MyPageBuilder: MyPageBuildable {
 
     @MainActor
     public func makeGroupSettingsViewController(
-        router: MyPageGroupSettingsRouter
+        router: MyPageGroupSettingsRouter,
+        outputHandler: MyPageOutputHandler
     ) -> UIViewController {
         let store: StoreOf<GroupSettingsFeature> = .init(
             initialState: GroupSettingsFeature.State()
         ) {
-            makeGroupSettingsFeature(router)
+            makeGroupSettingsFeature(router, outputHandler)
         }
         let view = GroupSettingsView(store: store)
 

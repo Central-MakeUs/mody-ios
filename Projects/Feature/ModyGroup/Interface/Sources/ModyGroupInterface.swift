@@ -13,6 +13,7 @@ public protocol ModyGroupBuildable {
         entryPoint: ModyGroupEntryPoint,
         showSignUpDoneContents: Bool,
         initialScreen: ModyGroupInitialScreen,
-        router: ModyGroupRouter
+        router: ModyGroupRouter,
+        outputHandler: ModyGroupOutputHandler?
     ) -> UIViewController
 }
