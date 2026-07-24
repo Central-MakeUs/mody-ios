@@ -7,17 +7,32 @@
 
 import Swinject
 import CoreCameraInterface
+import CoreNetworkInterface
 import FeedInterface
 import Feed
 import ModyGroupInterface
 
 extension AppAssembly {
     func assembleFeedReactor(in container: Container) {
+        container.register(FeedRepositoryProtocol.self) { resolver in
+            let network: CoreNetworkProtocol = resolver.resolve()
+
+            return FeedRepository(network: network)
+        }
+
+        container.register(FeedUseCaseProtocol.self) { resolver in
+            let repository: FeedRepositoryProtocol = resolver.resolve()
+
+            return FeedUseCase(feedRepository: repository)
+        }
+
         container.register(FeedReactor.self) { (resolver: Resolver, router: FeedRouter) in
             let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
+            let feedUseCase: FeedUseCaseProtocol = resolver.resolve()
 
             return FeedReactor(
                 groupUseCase: groupUseCase,
+                feedUseCase: feedUseCase,
                 router: router
             )
         }

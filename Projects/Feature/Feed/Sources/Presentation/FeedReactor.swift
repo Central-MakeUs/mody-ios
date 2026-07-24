@@ -10,10 +10,10 @@ import CommonDomain
 import FeedInterface
 import ModyGroupInterface
 import ReactorKit
-import FeedInterface
 
 public final class FeedReactor: Reactor {
     private let groupUseCase: GroupUseCaseProtocol
+    private let feedUseCase: FeedUseCaseProtocol
     private weak var router: FeedRouter?
     public let initialState: State
     private let baseDate: Date
@@ -62,9 +62,11 @@ public final class FeedReactor: Reactor {
     
     public init(
         groupUseCase: GroupUseCaseProtocol,
+        feedUseCase: FeedUseCaseProtocol,
         router: FeedRouter
     ) {
         self.groupUseCase = groupUseCase
+        self.feedUseCase = feedUseCase
         self.router = router
         let calendar = Date.koreanCalendar
         let baseDate = Date().startOfDay(calendar: calendar)
@@ -114,12 +116,18 @@ public final class FeedReactor: Reactor {
             guard currentState.groups.contains(where: { $0.groupId == group.groupId }) else {
                 return .empty()
             }
-            return .just(.setSelectedGroup(group))
+            return .concat([
+                .just(.setSelectedGroup(group)),
+                fetchActivityCalendar(
+                    groupId: group.groupId,
+                    offset: currentState.weekOffset
+                )
+            ])
         case .didTapPreviousWeek:
-            return makeCalendarMutation(offset: currentState.weekOffset - 1)
+            return makeCalendarMutationWithActivityFetch(offset: currentState.weekOffset - 1)
         case .didTapNextWeek:
             guard currentState.weekCalendarViewState.canMoveNextWeek else { return .empty() }
-            return makeCalendarMutation(offset: currentState.weekOffset + 1)
+            return makeCalendarMutationWithActivityFetch(offset: currentState.weekOffset + 1)
         case let .didTapCalendarDate(model):
             guard FeedWeekCalendarCalculator.isSelectable(
                 date: model.date,
@@ -175,6 +183,7 @@ private extension FeedReactor {
         .concat([
             .just(.setFetchGroupLoading(true)),
             fetchGroups(),
+            fetchSelectedGroupActivityCalendar(),
             .just(.setFetchGroupLoading(false))
         ])
     }
@@ -186,21 +195,55 @@ private extension FeedReactor {
                 do {
                     try await Task.sleep(for: .seconds(1)) // MARK: 현재 응답이 너무 빨라 테스트 용으로 넣었음. (스켈레톤 볼려고)
                     let groups = try await self.groupUseCase.getGroups()
-                    observer.onNext(.setGroups(groups))
+                    await MainActor.run {
+                        observer.onNext(.setGroups(groups))
+                    }
                 } catch {
-                    observer.onError(error)
+                    await MainActor.run {
+                        observer.onError(error)
+                    }
                 }
 
-                observer.onCompleted()
+                await MainActor.run {
+                    observer.onCompleted()
+                }
             }
 
             return Disposables.create { task.cancel() }
         }
         .observe(on: MainScheduler.instance)
     }
+
+    func fetchSelectedGroupActivityCalendar() -> Observable<Mutation> {
+        .deferred { [weak self] in
+            guard let self,
+                  let groupId = self.currentState.selectedGroup?.groupId else {
+                return .empty()
+            }
+
+            return self.fetchActivityCalendar(
+                groupId: groupId,
+                offset: self.currentState.weekOffset
+            )
+        }
+    }
 }
 
 private extension FeedReactor {
+    func makeCalendarMutationWithActivityFetch(offset: Int) -> Observable<Mutation> {
+        guard let groupId = currentState.selectedGroup?.groupId else {
+            return makeCalendarMutation(offset: offset)
+        }
+
+        return .concat([
+            makeCalendarMutation(offset: offset),
+            fetchActivityCalendar(
+                groupId: groupId,
+                offset: offset
+            )
+        ])
+    }
+
     func makeCalendarMutation(offset: Int) -> Observable<Mutation> {
         guard offset <= 0,
               let targetDate = calendar.date(
@@ -225,6 +268,79 @@ private extension FeedReactor {
             title: weekInfo.title,
             dates: models
         ))
+    }
+
+    func fetchActivityCalendar(groupId: Int, offset: Int) -> Observable<Mutation> {
+        Observable.create { [weak self] observer in
+            let task = Task {
+                guard let self else { return }
+                do {
+                    let activityCalendar = try await self.feedUseCase.fetchActivityCalendar(
+                        groupId: groupId,
+                        baseDate: self.weekStartDateString(offset: offset)
+                    )
+                    observer.onNext(self.makeWeekCalendarMutation(
+                        offset: offset,
+                        activityCalendar: activityCalendar
+                    ))
+                    observer.onCompleted()
+                } catch {
+                    observer.onError(error)
+                }
+            }
+
+            return Disposables.create { task.cancel() }
+        }
+        .observe(on: MainScheduler.instance)
+    }
+
+    func makeWeekCalendarMutation(
+        offset: Int,
+        activityCalendar: FeedActivityCalendarModel
+    ) -> Mutation {
+        let recordedDates = Set(
+            activityCalendar.days
+                .filter(\.hasRecord)
+                .map(\.date)
+        )
+        let targetDate = targetDate(offset: offset)
+        let weekInfo = FeedWeekCalendarCalculator.calculateWeekInfoFromBaseDate(
+            targetDate,
+            calendar: calendar
+        )
+        let models = FeedWeekCalendarCalculator.makeModels(
+            containing: targetDate,
+            recordedDates: recordedDates,
+            calendar: calendar
+        )
+
+        return .setWeekCalendar(
+            offset: offset,
+            title: weekInfo.title,
+            dates: models
+        )
+    }
+
+    func weekStartDateString(offset: Int) -> String {
+        let targetDate = targetDate(offset: offset)
+        let weekDates = FeedWeekCalendarCalculator.makeModels(
+            containing: targetDate,
+            calendar: calendar
+        )
+
+        return weekDates.first?.date ?? targetDate.toString()
+    }
+
+    func targetDate(offset: Int) -> Date {
+        guard let targetDate = calendar.date(
+            byAdding: .weekOfYear,
+            value: offset,
+            to: baseDate
+        ) else {
+            return baseDate
+        }
+
+        return targetDate
     }
     
     func routeToRecord(_ recordType: FeedRecordType) -> Observable<Mutation> {
