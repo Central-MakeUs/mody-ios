@@ -11,6 +11,7 @@ import FeedInterface
 import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
+import CoreNotificationInterface
 import CommonDomain
 
 public final class MainCoordinator {
@@ -24,6 +25,7 @@ public final class MainCoordinator {
     private let challengeBuilder: ChallengeBuildable
     let myPageBuilder: MyPageBuildable
     let modyGroupBuilder: ModyGroupBuildable
+    let notificationUseCase: NotificationUseCaseProtocol
 
     public init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
@@ -32,6 +34,7 @@ public final class MainCoordinator {
         challengeBuilder: ChallengeBuildable,
         myPageBuilder: MyPageBuildable,
         modyGroupBuilder: ModyGroupBuildable,
+        notificationUseCase: NotificationUseCaseProtocol,
         delegate: MainCoordinatorDelegate? = nil
     ) {
         self.navigationController = navigationController
@@ -40,6 +43,7 @@ public final class MainCoordinator {
         self.challengeBuilder = challengeBuilder
         self.myPageBuilder = myPageBuilder
         self.modyGroupBuilder = modyGroupBuilder
+        self.notificationUseCase = notificationUseCase
         self.delegate = delegate
         navigationController.setNavigationBarHidden(true, animated: false)
         print("⭕ MainCoordinator init!")
@@ -84,6 +88,9 @@ public final class MainCoordinator {
         }
         mainContainerViewController.onGroupCreateTap = { [weak self] in
             self?.showGroupCreate(needBackButton: true)
+        }
+        mainContainerViewController.onAlarmTap = { [weak self] in
+            self?.showNotification()
         }
 
         navigationController.setViewControllers([mainContainerViewController], animated: false)

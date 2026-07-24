@@ -81,8 +81,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.Challenge),
             .microFeature(.MyPage),
             .microFeature(.ModyGroup),
+            .microFeature(.CoreNotification),
             .module(.Base),
             .module(.CommonDomain),
+            .external(.ComposableArchitecture),
             .external(.SnapKit)
         ],
         .DesignSystem: [

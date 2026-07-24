@@ -11,6 +11,7 @@ import FeedInterface
 import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
+import CoreNotificationInterface
 
 extension AppAssembly {
     func assembleMain(in container: Container) {
@@ -19,12 +20,14 @@ extension AppAssembly {
             let challengeBuilder: ChallengeBuildable = resolver.resolve()
             let myPageBuilder: MyPageBuildable = resolver.resolve()
             let modyGroupBuilder: ModyGroupBuildable = resolver.resolve()
+            let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
 
             return MainCoordinator(
                 feedBuilder: feedBuilder,
                 challengeBuilder: challengeBuilder,
                 myPageBuilder: myPageBuilder,
                 modyGroupBuilder: modyGroupBuilder,
+                notificationUseCase: notificationUseCase,
                 delegate: delegate
             )
         }
