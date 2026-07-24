@@ -7,6 +7,7 @@
 
 import Base
 import UIKit
+import MainInterface
 import FeedInterface
 import ChallengeInterface
 import MyPageInterface
@@ -14,10 +15,10 @@ import ModyGroupInterface
 import CoreNotificationInterface
 import CommonDomain
 
-public final class MainCoordinator {
+public final class MainCoordinator: MainCoordinating {
     public let navigationController: UINavigationController
     public let tabBarController: MainTabBarController
-    public weak var delegate: MainCoordinatorDelegate?
+    weak var delegate: MainCoordinatorDelegate?
     weak var mainContainerViewController: MainContainerViewController?
     weak var myPageInputHandler: MyPageInputHandler?
 
@@ -35,7 +36,7 @@ public final class MainCoordinator {
         myPageBuilder: MyPageBuildable,
         modyGroupBuilder: ModyGroupBuildable,
         notificationUseCase: NotificationUseCaseProtocol,
-        delegate: MainCoordinatorDelegate? = nil
+        delegate: MainCoordinatorDelegate
     ) {
         self.navigationController = navigationController
         self.tabBarController = tabBarController

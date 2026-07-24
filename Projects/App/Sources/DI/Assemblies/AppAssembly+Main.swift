@@ -7,6 +7,7 @@
 
 import Swinject
 import Main
+import MainInterface
 import FeedInterface
 import ChallengeInterface
 import MyPageInterface
@@ -15,20 +16,19 @@ import CoreNotificationInterface
 
 extension AppAssembly {
     func assembleMain(in container: Container) {
-        container.register(MainCoordinator.self) { (resolver: Resolver, delegate: MainCoordinatorDelegate) in
+        container.register(MainBuildable.self) { resolver in
             let feedBuilder: FeedBuildable = resolver.resolve()
             let challengeBuilder: ChallengeBuildable = resolver.resolve()
             let myPageBuilder: MyPageBuildable = resolver.resolve()
             let modyGroupBuilder: ModyGroupBuildable = resolver.resolve()
             let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
 
-            return MainCoordinator(
+            return MainBuilder(
                 feedBuilder: feedBuilder,
                 challengeBuilder: challengeBuilder,
                 myPageBuilder: myPageBuilder,
                 modyGroupBuilder: modyGroupBuilder,
-                notificationUseCase: notificationUseCase,
-                delegate: delegate
+                notificationUseCase: notificationUseCase
             )
         }
     }
