@@ -24,4 +24,20 @@ public struct NotificationUseCase: NotificationUseCaseProtocol {
             return false
         }
     }
+    
+    public func getNotifications(
+        cursor: Int? = nil,
+        size: Int = 15,
+        allRead: Bool = true
+    ) async throws -> NotificationPage {
+        try await notificationRepository.getNotifications(
+            cursor: cursor,
+            size: size,
+            allRead: allRead
+        )
+    }
+
+    public func hasUnreadNotification() async throws -> Bool {
+        try await notificationRepository.hasUnreadNotification()
+    }
 }

@@ -14,7 +14,7 @@ extension MainCoordinator: MyPageProfileRouter {
         case .back:
             navigationController.popViewController(animated: true)
         case .routeToSignIn:
-            delegate?.didRequestLogout(self)
+            delegate?.didRequestLogout()
         }
     }
 }

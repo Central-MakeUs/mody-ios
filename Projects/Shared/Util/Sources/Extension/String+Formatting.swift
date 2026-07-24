@@ -48,4 +48,15 @@ public extension String {
 
         return formatter.date(from: self)
     }
+
+    func toISO8601Date() -> Date? {
+        let formatter = ISO8601DateFormatter()
+
+        if let date = formatter.date(from: self) {
+            return date
+        }
+
+        formatter.formatOptions.insert(.withFractionalSeconds)
+        return formatter.date(from: self)
+    }
 }
