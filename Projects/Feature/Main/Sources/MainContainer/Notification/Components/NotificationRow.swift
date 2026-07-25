@@ -62,7 +62,7 @@ private extension NotificationRow {
     var relativeTime: String {
         let createdAt = notification.createdAt
         let date = createdAt.toDate(format: .custom("yyyy-MM-dd'T'HH:mm:ss"))
-            ?? createdAt.toISO8601Date()
+            ?? createdAt.toDate(format: .custom("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS"))
 
         return date?.relativeTimeString() ?? String(createdAt.prefix(10))
     }
