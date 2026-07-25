@@ -47,6 +47,6 @@ struct FeedRecordCardViewState: Equatable {
 struct FeedListViewState: Equatable {
     let records: [FeedRecordCardViewState]
     let isInitialLoading: Bool
-    let isNextPageLoading: Bool
+    let hasNextPage: Bool
     let isEmpty: Bool
 }

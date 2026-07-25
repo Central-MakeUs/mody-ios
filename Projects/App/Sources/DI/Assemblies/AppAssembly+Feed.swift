@@ -27,15 +27,11 @@ extension AppAssembly {
 
             return FeedUseCase(feedRepository: feedRepository)
         }
-        container.register(FeedUseCaseProtocol.self) { resolver in
-            let feedUseCase: FeedUseCase = resolver.resolve()
-            return feedUseCase
-        }
 
         container.register(FeedReactor.self) { (resolver: Resolver, router: FeedRouter) in
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
-            let feedUseCase: FeedUseCaseProtocol = resolver.resolve()
+            let feedUseCase: FeedUseCase = resolver.resolve()
 
             return FeedReactor(
                 authUseCase: authUseCase,

@@ -14,7 +14,7 @@ extension AppAssembly {
     func assembleFeedRecordReactor(in container: Container) {
         container.register(((FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor).self) { resolver in
             return { router, recordType, outputHandler in
-                let feedUseCase: FeedUseCaseProtocol = resolver.resolve()
+                let feedUseCase: FeedUseCase = resolver.resolve()
                 let imageUploadUseCase: ImageUploadUseCaseProtocol = resolver.resolve()
                 let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
 

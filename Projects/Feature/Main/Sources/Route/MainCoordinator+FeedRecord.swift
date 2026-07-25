@@ -6,12 +6,32 @@
 //
 
 import FeedInterface
+import UIKit
 
 extension MainCoordinator: FeedRecordRouter {
     public func route(from route: FeedRecordRoute) {
         switch route {
         case .back:
             navigationController.popViewController(animated: true)
+        }
+    }
+}
+
+extension MainCoordinator: FeedRecordOutputHandler {
+    public func handle(output: FeedRecordOutput) {
+        switch output {
+        case .recordCreated:
+            navigationController.popViewController(animated: true)
+
+            if let transitionCoordinator = navigationController.transitionCoordinator {
+                transitionCoordinator.animate(alongsideTransition: nil) { [weak self] _ in
+                    self?.feedInputHandler?.handle(input: .recordCreated)
+                }
+            } else {
+                Task { @MainActor [weak self] in
+                    self?.feedInputHandler?.handle(input: .recordCreated)
+                }
+            }
         }
     }
 }
