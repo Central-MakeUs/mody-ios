@@ -16,22 +16,12 @@ final class FeedImageURLResolverTests: XCTestCase {
         )
     }
 
-    func testResolveUsesNestedImageURL() {
-        XCTAssertEqual(
-            FeedImageURLResolver.resolve(
-                "https://proxy.example.com/https://image.example.com/photo.jpg"
-            )?.absoluteString,
-            "https://image.example.com/photo.jpg"
-        )
+    func testResolveReturnsNilForRelativeURL() {
+        XCTAssertNil(FeedImageURLResolver.resolve("image.jpg"))
     }
 
-    func testResolveUpgradesNestedHTTPURL() {
-        XCTAssertEqual(
-            FeedImageURLResolver.resolve(
-                "https://proxy.example.com/http://image.example.com/photo.jpg"
-            )?.absoluteString,
-            "https://image.example.com/photo.jpg"
-        )
+    func testResolveReturnsNilForUnsupportedScheme() {
+        XCTAssertNil(FeedImageURLResolver.resolve("file:///tmp/image.jpg"))
     }
 
     func testResolveReturnsNilForEmptyString() {

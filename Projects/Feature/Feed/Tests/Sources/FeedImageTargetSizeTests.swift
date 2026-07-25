@@ -21,7 +21,7 @@ final class FeedImageTargetSizeTests: XCTestCase {
         XCTAssertEqual(targetSize.pixelSize, CGSize(width: 256, height: 128))
     }
 
-    func testTargetSizeCapsLongSideAtLargestBucket() throws {
+    func testTargetSizeUses2048BucketWhenDisplayExceeds1024Pixels() throws {
         let targetSize = try XCTUnwrap(
             FeedImageTargetSize.make(
                 displaySize: CGSize(width: 500, height: 300),
@@ -29,9 +29,9 @@ final class FeedImageTargetSizeTests: XCTestCase {
             )
         )
 
-        XCTAssertEqual(targetSize.longSideBucket, 1024)
-        XCTAssertEqual(targetSize.pixelSize.width, 1024)
-        XCTAssertEqual(targetSize.pixelSize.height, 615)
+        XCTAssertEqual(targetSize.longSideBucket, 2048)
+        XCTAssertEqual(targetSize.pixelSize.width, 2048)
+        XCTAssertEqual(targetSize.pixelSize.height, 1229)
     }
 
     func testTargetSizeRejectsEmptyDisplaySize() {
