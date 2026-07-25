@@ -17,7 +17,7 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController {
-        CameraCaptureViewController(
+        CameraContainerViewController(
             initialSource: source,
             onComplete: onComplete,
             onCancel: onCancel

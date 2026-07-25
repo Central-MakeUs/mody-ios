@@ -72,14 +72,16 @@ private extension MyPageView {
             settingsRow(
                 title: "그룹 설정",
                 action: .groupSettingsButtonTapped,
-                hasDivider: true
+                hasDivider: store.isPhaseOne ? false : true
             )
 
-            settingsRow(
-                title: "건강 데이터 연동 설정",
-                action: .healthDataSettingsButtonTapped,
-                hasDivider: false
-            )
+            if !store.isPhaseOne {
+                settingsRow(
+                    title: "건강 데이터 연동 설정",
+                    action: .healthDataSettingsButtonTapped,
+                    hasDivider: false
+                )
+            }
         }
     }
 

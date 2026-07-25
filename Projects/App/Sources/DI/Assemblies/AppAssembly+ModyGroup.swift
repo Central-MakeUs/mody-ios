@@ -33,7 +33,7 @@ extension AppAssembly {
 
         container.register(ModyGroupBuildable.self) { resolver in
             return ModyGroupBuilder(
-                makeModyGroupRootFeature: { router in
+                makeModyGroupRootFeature: { router, outputHandler in
                     let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol = resolver.resolve()
                     let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
 
@@ -46,7 +46,10 @@ extension AppAssembly {
                         ),
                         groupCreateFeature: GroupCreateFeature(
                             groupUseCase: groupUseCase
-                        )
+                        ),
+                        output: { [weak outputHandler] output in
+                            outputHandler?.handle(output: output)
+                        }
                     ) { [weak router] route in
                         router?.route(from: route)
                     }

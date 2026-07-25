@@ -118,16 +118,21 @@ private extension FeedGroupSelectSheetView {
 }
 
 private extension FeedGroupSelectSheetView {
+    var canAddGroup: Bool {
+        groupList.count < 4
+    }
+
     var addGroupButton: some View {
         MButton(
             "그룹 추가하기",
-            style: .gray,
+            style: canAddGroup ? .primary : .gray,
+            isDisabled: !canAddGroup,
             horizontalPadding: 0,
             verticalPadding: 13,
             maxWidth: .infinity,
             trailingIcon: Image.icPlus,
             trailingIconSize: .init(width: 18, height: 18),
-            trailingIconColor: .gray5,
+            trailingIconColor: canAddGroup ? .gray10 : .gray5,
             action: onAddGroupTap
         )
     }

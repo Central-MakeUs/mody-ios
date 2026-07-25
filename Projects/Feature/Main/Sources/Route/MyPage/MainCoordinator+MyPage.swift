@@ -7,6 +7,7 @@
 
 import MyPageInterface
 import CommonDomain
+import FeedInterface
 
 @MainActor
 extension MainCoordinator: MyPageRouter {
@@ -24,7 +25,10 @@ extension MainCoordinator: MyPageRouter {
             let viewController = myPageBuilder.makeNotificationSettingsViewController(router: self)
             navigationController.pushViewController(viewController, animated: true)
         case .routeToGroupSettings:
-            let viewController = myPageBuilder.makeGroupSettingsViewController(router: self)
+            let viewController = myPageBuilder.makeGroupSettingsViewController(
+                router: self,
+                outputHandler: self
+            )
             navigationController.pushViewController(viewController, animated: true)
         case .routeToHealthDataSettings:
             let viewController = myPageBuilder.makeHealthDataSettingsViewController(router: self)
@@ -55,6 +59,8 @@ extension MainCoordinator: MyPageOutputHandler {
             )
         case .profileUpdated:
             myPageInputHandler?.handle(input: .profileUpdated)
+        case .groupUpdated:
+            feedInputHandler?.handle(input: .refreshGroups)
         }
     }
 }

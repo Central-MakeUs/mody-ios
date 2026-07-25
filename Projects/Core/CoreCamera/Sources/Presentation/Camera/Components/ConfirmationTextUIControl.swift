@@ -1,5 +1,5 @@
 //
-//  CameraTextButton.swift
+//  ConfirmationTextUIControl.swift
 //  CoreCamera
 //
 //  Created by 김동준 on 7/21/26.
@@ -9,7 +9,7 @@ import UIKit
 import DesignSystem
 import SnapKit
 
-final class CameraTextButton: UIControl {
+final class ConfirmationTextUIControl: UIControl {
     private let contentStackView = UIStackView()
     private let titleLabel: MUILabel
     private let trailingImageContainerView = UIView()
@@ -43,7 +43,7 @@ final class CameraTextButton: UIControl {
     }
 }
 
-private extension CameraTextButton {
+private extension ConfirmationTextUIControl {
     func setupUI() {
         layer.cornerRadius = 8
 

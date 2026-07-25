@@ -43,4 +43,22 @@ public struct NotificationRepository: NotificationRepositoryProtocol {
             return false
         }
     }
+    
+    public func getNotifications(
+        cursor: Int?,
+        size: Int,
+        allRead: Bool
+    ) async throws -> NotificationPage {
+        let response = try await notificationService.getNotifications(
+            cursor: cursor,
+            size: size,
+            allRead: allRead
+        )
+
+        return response.toDomain()
+    }
+
+    public func hasUnreadNotification() async throws -> Bool {
+        try await notificationService.getUnreadExists().toDomain()
+    }
 }

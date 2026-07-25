@@ -33,7 +33,7 @@ extension AppCoordinator {
     func showMain(animated: Bool) {
         rootCoordinator = nil
 
-        let coordinator = makeMainCoordinator(self)
+        let coordinator = mainBuilder.makeMainCoordinator(delegate: self)
         mainCoordinator = coordinator
         setRoot(coordinator.navigationController, animated: animated)
         coordinator.start()

@@ -12,6 +12,7 @@ public enum MyPageOutput: Equatable {
     case weightRecordSucceeded
     case weightRecordFailed(NetworkError)
     case profileUpdated
+    case groupUpdated
 }
 
 @MainActor

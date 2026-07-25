@@ -5,11 +5,11 @@
 //  Created by 김동준 on 6/30/26
 //
 
-import Main
+import MainInterface
 
 extension AppCoordinator: MainCoordinatorDelegate {
     @MainActor
-    func didRequestLogout(_ coordinator: MainCoordinator) {
+    func didRequestLogout() {
         showSignIn(animated: true)
     }
 }

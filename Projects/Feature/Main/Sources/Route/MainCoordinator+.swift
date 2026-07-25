@@ -25,7 +25,8 @@ extension MainCoordinator {
             entryPoint: entryPoint,
             showSignUpDoneContents: false,
             initialScreen: initialScreen,
-            router: self
+            router: self,
+            outputHandler: self
         )
 
         navigationController.pushViewController(viewController, animated: true)

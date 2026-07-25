@@ -30,7 +30,8 @@ public protocol MyPageBuildable {
 
     @MainActor
     func makeGroupSettingsViewController(
-        router: MyPageGroupSettingsRouter
+        router: MyPageGroupSettingsRouter,
+        outputHandler: MyPageOutputHandler
     ) -> UIViewController
 
     @MainActor

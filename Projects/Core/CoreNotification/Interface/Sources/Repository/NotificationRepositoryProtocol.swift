@@ -7,4 +7,6 @@
 
 public protocol NotificationRepositoryProtocol {
     func postPushFCMToken(_ token: String, deviceID: String?) async throws -> Bool?
+    func getNotifications(cursor: Int?, size: Int, allRead: Bool) async throws -> NotificationPage
+    func hasUnreadNotification() async throws -> Bool
 }

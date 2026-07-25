@@ -7,24 +7,24 @@
 
 import UIKit
 import Root
-import Main
+import MainInterface
 
 final class AppCoordinator {
     let window: UIWindow
     let makeRootCoordinator: (RootCoordinatorDelegate) -> RootCoordinator
-    let makeMainCoordinator: (MainCoordinatorDelegate) -> MainCoordinator
+    let mainBuilder: MainBuildable
 
     var rootCoordinator: RootCoordinator?
-    var mainCoordinator: MainCoordinator?
+    var mainCoordinator: MainCoordinating?
 
     init(
         window: UIWindow,
         makeRootCoordinator: @escaping (RootCoordinatorDelegate) -> RootCoordinator,
-        makeMainCoordinator: @escaping (MainCoordinatorDelegate) -> MainCoordinator
+        mainBuilder: MainBuildable
     ) {
         self.window = window
         self.makeRootCoordinator = makeRootCoordinator
-        self.makeMainCoordinator = makeMainCoordinator
+        self.mainBuilder = mainBuilder
     }
 
     @MainActor

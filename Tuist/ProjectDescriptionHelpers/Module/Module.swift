@@ -11,7 +11,6 @@ public enum Module: Hashable {
     case CommonDomain
     case Base
     case DesignSystem
-    case Main
     case Root
     case App
     case MicroFeature(MicroFeatureModule)
@@ -58,6 +57,7 @@ public enum MicroFeatureModule {
     case MyPage
     case Challenge
     case Feed
+    case Main
     case OnBoarding
     case SignIn
     case Splash
@@ -85,6 +85,7 @@ public enum MicroFeatureModule {
         case .SignIn: "Projects/Feature/SignIn"
         case .OnBoarding: "Projects/Feature/OnBoarding"
         case .Feed: "Projects/Feature/Feed"
+        case .Main: "Projects/Feature/Main"
         case .Challenge: "Projects/Feature/Challenge"
         case .MyPage: "Projects/Feature/MyPage"
         case .SignUpDone: "Projects/Feature/SignUpDone"

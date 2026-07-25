@@ -10,6 +10,7 @@ import ReactorKit
 import DesignSystem
 import SnapKit
 import RxCocoa
+import RxSwift
 import FeedInterface
 
 public final class FeedViewController: UIViewController, View {
@@ -36,6 +37,7 @@ public final class FeedViewController: UIViewController, View {
         isNextPageLoading: false,
         isEmpty: false
     )
+    private let weekNavigationActionSubject = PublishSubject<FeedReactor.Action>()
 
     let dimmedControl = UIControl()
     let floatingActionButtonOverlayView = UIView()
@@ -172,17 +174,22 @@ public final class FeedViewController: UIViewController, View {
 
 private extension FeedViewController {
     func bindWeekCalendar(_ reactor: FeedReactor) {
-        weekCalendarView.onPreviousWeekTap = { [weak reactor] in
-            reactor?.action.onNext(.didTapPreviousWeek)
+        weekCalendarView.onPreviousWeekTap = { [weak self] in
+            self?.weekNavigationActionSubject.onNext(.didTapPreviousWeek)
         }
 
-        weekCalendarView.onNextWeekTap = { [weak reactor] in
-            reactor?.action.onNext(.didTapNextWeek)
+        weekCalendarView.onNextWeekTap = { [weak self] in
+            self?.weekNavigationActionSubject.onNext(.didTapNextWeek)
         }
 
         weekCalendarView.onDateTap = { [weak reactor] model in
             reactor?.action.onNext(.didTapCalendarDate(model))
         }
+
+        weekNavigationActionSubject
+            .debounce(.milliseconds(200), scheduler: MainScheduler.instance)
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
 
         reactor.state
             .map(\.weekCalendarViewState)

@@ -10,9 +10,9 @@ import UIKit
 
 extension FeedRecordViewController {
     func presentCameraCapture(source: CameraCaptureSource) {
-        guard cameraCaptureViewController == nil else { return }
+        guard cameraContainerViewController == nil else { return }
 
-        let viewController = cameraCaptureBuilder.makeCameraViewController(
+        let cameraContainerViewController = cameraCaptureBuilder.makeCameraViewController(
             source: source,
             onComplete: { [weak self] result in
                 self?.dismissCameraCapture {
@@ -25,29 +25,29 @@ extension FeedRecordViewController {
                 }
             }
         )
-        viewController.modalPresentationStyle = .fullScreen
-        cameraCaptureViewController = viewController
+        cameraContainerViewController.modalPresentationStyle = .fullScreen
+        self.cameraContainerViewController = cameraContainerViewController
 
         if let photoSourceSheetViewController {
             self.photoSourceSheetViewController = nil
             photoSourceSheetViewController.dismiss(animated: true) { [weak self] in
-                self?.present(viewController, animated: true)
+                self?.present(cameraContainerViewController, animated: true)
             }
         } else {
-            present(viewController, animated: true)
+            present(cameraContainerViewController, animated: true)
         }
     }
 }
 
 private extension FeedRecordViewController {
     func dismissCameraCapture(completion: @escaping () -> Void = {}) {
-        guard let cameraCaptureViewController else {
+        guard let cameraContainerViewController else {
             completion()
             return
         }
 
-        cameraCaptureViewController.dismiss(animated: true) { [weak self] in
-            self?.cameraCaptureViewController = nil
+        cameraContainerViewController.dismiss(animated: true) { [weak self] in
+            self?.cameraContainerViewController = nil
             completion()
         }
     }

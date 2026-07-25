@@ -2,7 +2,7 @@
 //  FeedUseCase.swift
 //  Feed
 //
-//  Created by 김동준 on 7/21/26
+//  Created by 김동준 on 7/25/26.
 //
 
 public struct FeedUseCase {
@@ -23,6 +23,13 @@ public struct FeedUseCase {
             date: date,
             cursor: cursor,
             size: size
+        )
+    }
+    
+    public func fetchActivityCalendar(groupId: Int, baseDate: String) async throws -> FeedActivityCalendarModel {
+        try await feedRepository.getActivityCalendar(
+            groupId: groupId,
+            baseDate: baseDate
         )
     }
 }

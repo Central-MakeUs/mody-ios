@@ -1,5 +1,5 @@
 //
-//  CameraShutterControlsView.swift
+//  BottomCameraShutterView.swift
 //  CoreCamera
 //
 //  Created by 김동준 on 7/20/26.
@@ -9,7 +9,7 @@ import DesignSystem
 import SnapKit
 import UIKit
 
-final class CameraShutterControlsView: UIView {
+final class BottomCameraShutterView: UIView {
     var onGalleryTap: (() -> Void)?
     var onCaptureTap: (() -> Void)?
     var onSwitchCameraTap: (() -> Void)?
@@ -31,7 +31,7 @@ final class CameraShutterControlsView: UIView {
     }
 }
 
-private extension CameraShutterControlsView {
+private extension BottomCameraShutterView {
     func setupUI() {
         [galleryButton, switchCameraButton].forEach {
             $0.backgroundColor = .gray7

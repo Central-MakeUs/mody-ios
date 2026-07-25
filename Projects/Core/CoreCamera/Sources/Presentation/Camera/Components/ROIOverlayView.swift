@@ -1,5 +1,5 @@
 //
-//  CameraSelectionOverlayView.swift
+//  ROIOverlayView.swift
 //  CoreCamera
 //
 //  Created by 김동준 on 7/20/26.
@@ -8,7 +8,7 @@
 import DesignSystem
 import UIKit
 
-final class CameraSelectionOverlayView: UIView {
+final class ROIOverlayView: UIView {
     private let horizontalInset: CGFloat = 24
     private let selectionHeight: CGFloat = 200
     
@@ -50,7 +50,7 @@ final class CameraSelectionOverlayView: UIView {
     }
 }
 
-private extension CameraSelectionOverlayView {
+private extension ROIOverlayView {
     func setupUI() {
         isOpaque = false
         backgroundColor = .clear
@@ -108,7 +108,7 @@ private extension CameraSelectionOverlayView {
     }
 }
 
-extension CameraSelectionOverlayView: UIGestureRecognizerDelegate {
+extension ROIOverlayView: UIGestureRecognizerDelegate {
     func gestureRecognizer(
         _ gestureRecognizer: UIGestureRecognizer,
         shouldReceive touch: UITouch

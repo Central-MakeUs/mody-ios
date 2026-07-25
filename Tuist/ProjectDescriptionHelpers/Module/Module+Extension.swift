@@ -133,7 +133,6 @@ extension Module {
         switch self {
         case .MicroFeature(let module): .relativeToRoot(module.path)
         case .Root: .relativeToRoot("Projects/Feature/Root")
-        case .Main: .relativeToRoot("Projects/Feature/Main")
         case .Base: .relativeToRoot("Projects/Feature/Base")
         case .CommonDomain: .relativeToRoot("Projects/Domain/CommonDomain")
         case .ModyLogger: .relativeToRoot("Projects/Shared/ModyLogger")

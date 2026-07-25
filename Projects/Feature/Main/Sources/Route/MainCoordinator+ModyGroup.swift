@@ -6,6 +6,7 @@
 //
 
 import ModyGroupInterface
+import FeedInterface
 
 @MainActor
 extension MainCoordinator: ModyGroupRouter {
@@ -15,6 +16,15 @@ extension MainCoordinator: ModyGroupRouter {
             navigationController.popViewController(animated: true)
         case .finish:
             navigationController.popToRootViewController(animated: true)
+        }
+    }
+}
+
+extension MainCoordinator: ModyGroupOutputHandler {
+    public func handle(output: ModyGroupOutput) {
+        switch output {
+        case .groupUpdated:
+            feedInputHandler?.handle(input: .refreshGroups)
         }
     }
 }

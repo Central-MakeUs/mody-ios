@@ -10,6 +10,8 @@ import CommonDomain
 public protocol SplashRepositoryProtocol {
     func getHealthCheck() async throws -> Bool
     func fetchAndActivate() async
-    func getIsPhaseOneFlag(key: String) -> Bool
+    func getRemoteConfigBool(for key: RemoteConfigKeys) -> Bool
+    func getRemoteConfigString(for key: RemoteConfigKeys) -> String
+    func getNoticePopupInfo() -> NoticePopupInfo?
     func getStoredAuthSession() -> AuthSession?
 }

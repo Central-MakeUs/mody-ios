@@ -15,13 +15,16 @@ import ModyGroupInterface
 public struct GroupSettingsFeature {
     private let groupUseCase: GroupUseCaseProtocol
     private let router: @MainActor (MyPageGroupSettingsRoute) -> Void
+    private let output: @MainActor (MyPageOutput) -> Void
 
     public init(
         groupUseCase: GroupUseCaseProtocol,
-        router: @escaping @MainActor (MyPageGroupSettingsRoute) -> Void
+        router: @escaping @MainActor (MyPageGroupSettingsRoute) -> Void,
+        output: @escaping @MainActor (MyPageOutput) -> Void
     ) {
         self.groupUseCase = groupUseCase
         self.router = router
+        self.output = output
     }
 
     @ObservableState
@@ -104,10 +107,17 @@ public struct GroupSettingsFeature {
                 state.isLoading = false
 
                 if state.groups.isEmpty {
-                    return .send(.routeToGroupParticipate)
+                    return .merge(
+                        .run { [output] _ in
+                            await output(.groupUpdated)
+                        },
+                        .send(.routeToGroupParticipate)
+                    )
                 }
 
-                return .none
+                return .run { [output] _ in
+                    await output(.groupUpdated)
+                }
             case let .groupExitFailed(error):
                 state.isLoading = false
                 state.alertCase = .error(error)
