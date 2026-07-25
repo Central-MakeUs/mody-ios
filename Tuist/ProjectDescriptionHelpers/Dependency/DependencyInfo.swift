@@ -248,16 +248,20 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .CoreCamera: .init(
+            interface: [
+                .microFeature(.CoreModyImage)
+            ],
             implementation: [
                 .module(.DesignSystem),
-                .module(.CommonDomain),
-                .microFeature(.CoreNetwork),
-                .external(.Alamofire),
+                .microFeature(.CoreModyImage),
                 .external(.SnapKit)
             ]
         ),
         .CoreModyImage: .init(
             implementation: [
+                .module(.CommonDomain),
+                .microFeature(.CoreNetwork),
+                .external(.Alamofire),
                 .external(.Nuke)
             ]
         )
