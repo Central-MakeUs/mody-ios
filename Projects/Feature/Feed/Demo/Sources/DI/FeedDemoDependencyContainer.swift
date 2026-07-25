@@ -10,7 +10,6 @@ import CoreCamera
 import CoreCameraInterface
 import Feed
 import FeedInterface
-import FeedTesting
 import ModyGroupInterface
 
 final class FeedDemoDependencyContainer {
@@ -20,7 +19,7 @@ final class FeedDemoDependencyContainer {
     private let cameraCaptureBuilder: CameraCaptureBuildable
 
     init(
-        feedRepository: FeedRepositoryProtocol = FeedMockRepository(),
+        feedRepository: FeedRepositoryProtocol = FeedDemoMockRepository(),
         authUseCase: AuthUseCaseProtocol = FeedDemoAuthUseCase(),
         groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCase(),
         cameraCaptureBuilder: CameraCaptureBuildable = CameraCaptureBuilder()
