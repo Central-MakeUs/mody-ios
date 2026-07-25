@@ -153,6 +153,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.RxRelay)
             ],
             demo: [
+                .module(.DesignSystem),
                 .module(.MicroFeature(.CoreCamera))
             ]
         ),
@@ -243,6 +244,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .CoreCamera: .init(
             implementation: [
                 .module(.DesignSystem),
+                .module(.CommonDomain),
+                .microFeature(.CoreNetwork),
+                .external(.Alamofire),
                 .external(.SnapKit)
             ]
         )

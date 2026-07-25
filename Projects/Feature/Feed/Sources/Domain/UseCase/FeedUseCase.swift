@@ -32,4 +32,8 @@ public struct FeedUseCase {
             baseDate: baseDate
         )
     }
+
+    public func createRecord(_ request: FeedRecordCreateRequest) async throws {
+        try await feedRepository.postRecord(request)
+    }
 }

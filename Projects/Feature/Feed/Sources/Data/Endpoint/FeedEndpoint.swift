@@ -39,4 +39,12 @@ enum FeedEndpoint {
             queryParameters: queryParameters
         )
     }
+
+    static func postRecord(_ body: FeedRecordCreateBody) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/records",
+            method: .POST,
+            bodyParameters: body
+        )
+    }
 }

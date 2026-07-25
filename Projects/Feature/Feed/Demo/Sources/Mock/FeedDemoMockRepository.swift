@@ -15,6 +15,17 @@ actor FeedDemoMockRepository: FeedRepositoryProtocol {
         records = Self.defaultRecords
     }
 
+    func getActivityCalendar(
+        groupId: Int,
+        baseDate: String
+    ) async throws -> FeedActivityCalendarModel {
+        FeedActivityCalendarModel(
+            weekStartDate: baseDate,
+            weekEndDate: baseDate,
+            days: []
+        )
+    }
+
     func getRecords(
         groupId: Int,
         date: String,

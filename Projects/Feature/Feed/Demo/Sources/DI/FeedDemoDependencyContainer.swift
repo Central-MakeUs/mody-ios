@@ -17,17 +17,20 @@ final class FeedDemoDependencyContainer {
     private let authUseCase: AuthUseCaseProtocol
     private let groupUseCase: GroupUseCaseProtocol
     private let cameraCaptureBuilder: CameraCaptureBuildable
+    private let imageUploadUseCase: ImageUploadUseCaseProtocol
 
     init(
         feedRepository: FeedRepositoryProtocol = FeedDemoMockRepository(),
         authUseCase: AuthUseCaseProtocol = FeedDemoAuthUseCase(),
         groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCase(),
-        cameraCaptureBuilder: CameraCaptureBuildable = CameraCaptureBuilder()
+        cameraCaptureBuilder: CameraCaptureBuildable = CameraCaptureBuilder(),
+        imageUploadUseCase: ImageUploadUseCaseProtocol = FeedDemoImageUploadUseCase()
     ) {
         self.feedRepository = feedRepository
         self.authUseCase = authUseCase
         self.groupUseCase = groupUseCase
         self.cameraCaptureBuilder = cameraCaptureBuilder
+        self.imageUploadUseCase = imageUploadUseCase
     }
 
     func makeFeedBuildable() -> FeedBuildable {
@@ -42,11 +45,12 @@ final class FeedDemoDependencyContainer {
                     router: router
                 )
             },
-            makeFeedRecordReactor: { router, recordType, outputHandler in
+            makeFeedRecordReactor: { [imageUploadUseCase] router, recordType, outputHandler in
                 FeedRecordReactor(
                     router: router,
                     recordType: recordType,
                     feedUseCase: feedUseCase,
+                    imageUploadUseCase: imageUploadUseCase,
                     outputHandler: outputHandler
                 )
             },
