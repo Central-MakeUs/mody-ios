@@ -8,6 +8,7 @@
 import Swinject
 import CoreAuthInterface
 import CoreCameraInterface
+import CoreModyImageInterface
 import FeedInterface
 import Feed
 import ModyGroupInterface
@@ -26,11 +27,15 @@ extension AppAssembly {
 
             return FeedUseCase(feedRepository: feedRepository)
         }
+        container.register(FeedUseCaseProtocol.self) { resolver in
+            let feedUseCase: FeedUseCase = resolver.resolve()
+            return feedUseCase
+        }
 
         container.register(FeedReactor.self) { (resolver: Resolver, router: FeedRouter) in
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
-            let feedUseCase: FeedUseCase = resolver.resolve()
+            let feedUseCase: FeedUseCaseProtocol = resolver.resolve()
 
             return FeedReactor(
                 authUseCase: authUseCase,
@@ -41,15 +46,17 @@ extension AppAssembly {
         }
         
         container.register(FeedBuildable.self) { resolver in
-            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor = resolver.resolve()
+            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor = resolver.resolve()
             let cameraCaptureBuilder: CameraCaptureBuildable = resolver.resolve()
+            let imageLoader: RemoteImageLoading = resolver.resolve()
 
             return FeedBuilder(
                 makeFeedReactor: { router in
                     resolver.resolve(argument: router)
                 },
                 makeFeedRecordReactor: makeFeedRecordReactor,
-                cameraCaptureBuilder: cameraCaptureBuilder
+                cameraCaptureBuilder: cameraCaptureBuilder,
+                imageLoader: imageLoader
             )
         }
     }

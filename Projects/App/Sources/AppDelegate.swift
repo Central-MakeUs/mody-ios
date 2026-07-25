@@ -5,6 +5,7 @@
 //  Created by 김동준 on 6/23/26.
 
 import UIKit
+import CoreModyImageInterface
 import CoreNotificationInterface
 import DesignSystem
 import FirebaseCore
@@ -16,6 +17,7 @@ import ModyLogger
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     let appDependencyContainer = AppDependencyContainer()
     lazy var notificationUseCase = appDependencyContainer.makeNotificationUseCase()
+    lazy var temporaryImageFileUseCase = appDependencyContainer.makeTemporaryImageFileUseCase()
 
     func application(
         _ application: UIApplication,
@@ -33,6 +35,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         configureNotifications(application)
         configureKakaoSDK()
+        do {
+            try temporaryImageFileUseCase.removeExpiredImages(olderThan: 24 * 60 * 60)
+        } catch {
+            ModyLogger.error("[TemporaryImage] cleanup failed: \(error)")
+        }
         return true
     }
 }

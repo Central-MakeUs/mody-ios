@@ -8,8 +8,10 @@
 import CoreAuthInterface
 import CoreCamera
 import CoreCameraInterface
+import CoreModyImageInterface
 import Feed
 import FeedInterface
+import CoreModyImage
 import ModyGroupInterface
 
 final class FeedDemoDependencyContainer {
@@ -18,19 +20,25 @@ final class FeedDemoDependencyContainer {
     private let groupUseCase: GroupUseCaseProtocol
     private let cameraCaptureBuilder: CameraCaptureBuildable
     private let imageUploadUseCase: ImageUploadUseCaseProtocol
+    private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
 
     init(
         feedRepository: FeedRepositoryProtocol = FeedDemoMockRepository(),
         authUseCase: AuthUseCaseProtocol = FeedDemoAuthUseCase(),
         groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCase(),
-        cameraCaptureBuilder: CameraCaptureBuildable = CameraCaptureBuilder(),
-        imageUploadUseCase: ImageUploadUseCaseProtocol = FeedDemoImageUploadUseCase()
+        imageUploadUseCase: ImageUploadUseCaseProtocol = FeedDemoImageUploadUseCase(),
+        temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = TemporaryImageFileUseCase(
+            repository: TemporaryImageFileRepository()
+        )
     ) {
         self.feedRepository = feedRepository
         self.authUseCase = authUseCase
         self.groupUseCase = groupUseCase
-        self.cameraCaptureBuilder = cameraCaptureBuilder
         self.imageUploadUseCase = imageUploadUseCase
+        self.temporaryImageFileUseCase = temporaryImageFileUseCase
+        self.cameraCaptureBuilder = CameraCaptureBuilder(
+            temporaryImageFileUseCase: temporaryImageFileUseCase
+        )
     }
 
     func makeFeedBuildable() -> FeedBuildable {
@@ -45,16 +53,22 @@ final class FeedDemoDependencyContainer {
                     router: router
                 )
             },
-            makeFeedRecordReactor: { [imageUploadUseCase] router, recordType, outputHandler in
+            makeFeedRecordReactor: {
+                [imageUploadUseCase, temporaryImageFileUseCase]
+                router,
+                recordType,
+                outputHandler in
                 FeedRecordReactor(
                     router: router,
                     recordType: recordType,
                     feedUseCase: feedUseCase,
                     imageUploadUseCase: imageUploadUseCase,
+                    temporaryImageFileUseCase: temporaryImageFileUseCase,
                     outputHandler: outputHandler
                 )
             },
-            cameraCaptureBuilder: cameraCaptureBuilder
+            cameraCaptureBuilder: cameraCaptureBuilder,
+            imageLoader: NukeRemoteImageLoader.shared
         )
     }
 }
