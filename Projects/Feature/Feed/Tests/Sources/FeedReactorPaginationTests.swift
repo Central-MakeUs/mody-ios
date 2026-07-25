@@ -75,6 +75,7 @@ final class FeedReactorPaginationTests: XCTestCase {
             ]
         )
         let reactor = makeReactor(feedRepository: feedRepository)
+        let todayDate = reactor.currentState.weekCalendarViewState.todayDate
 
         let initialPageLoaded = expectation(description: "initial feed page loaded")
         reactor.state
@@ -91,7 +92,12 @@ final class FeedReactorPaginationTests: XCTestCase {
 
         let latestRecordMerged = expectation(description: "latest feed record merged")
         reactor.state
-            .filter { $0.feedRecords.map(\.recordId) == [6, 5, 4] }
+            .filter { state in
+                state.feedRecords.map(\.recordId) == [6, 5, 4]
+                    && state.weekCalendarViewState.calendarDates
+                        .first(where: { $0.date == todayDate })?
+                        .hasRecord == true
+            }
             .take(1)
             .subscribe(onNext: { _ in latestRecordMerged.fulfill() })
             .disposed(by: disposeBag)
@@ -101,6 +107,8 @@ final class FeedReactorPaginationTests: XCTestCase {
 
         let requests = await feedRepository.requests
         XCTAssertEqual(requests.map(\.cursor), [nil, nil])
+        let activityCalendarRequests = await feedRepository.activityCalendarRequests
+        XCTAssertEqual(activityCalendarRequests.count, 1)
         XCTAssertEqual(reactor.currentState.nextFeedCursor, 4)
         XCTAssertTrue(reactor.currentState.hasNextFeedPage)
         XCTAssertFalse(reactor.currentState.isInitialFeedLoading)
@@ -157,6 +165,7 @@ private actor FeedPaginationRepositoryMock: FeedRepositoryProtocol {
 
     private var pages: [FeedRecordPage]
     private(set) var requests: [Request] = []
+    private(set) var activityCalendarRequests: [String] = []
 
     init(pages: [FeedRecordPage]) {
         self.pages = pages
@@ -183,7 +192,8 @@ private actor FeedPaginationRepositoryMock: FeedRepositoryProtocol {
         groupId: Int,
         baseDate: String
     ) async throws -> FeedActivityCalendarModel {
-        FeedActivityCalendarModel(
+        activityCalendarRequests.append(baseDate)
+        return FeedActivityCalendarModel(
             weekStartDate: baseDate,
             weekEndDate: baseDate,
             days: []

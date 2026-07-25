@@ -5,6 +5,7 @@
 //  Created by 김동준 on 7/21/26
 //
 
+import CoreModyImageInterface
 import UIKit
 import DesignSystem
 import SnapKit
@@ -20,6 +21,7 @@ final class FeedRecordCardCell: UICollectionViewCell {
     private let nicknameLabel = MUILabel(style: .b6, color: .gray10, alignment: .left)
     private let streakChipView = UIView()
     private let streakLabel = MUILabel(style: .c2, color: .gray10)
+    private let streakIconImageView = UIImageView(image: .icFireFill)
     private let moreButton = UIButton(type: .custom)
     private let cardView = UIView()
     private let recordImageView = FeedRecordCardImageView()
@@ -47,16 +49,32 @@ final class FeedRecordCardCell: UICollectionViewCell {
         recordImageView.prepareForReuse()
     }
 
-    func configure(_ viewState: FeedRecordCardViewState) {
-        profileImageView.configure(urlString: viewState.profileImageUrl, cornerRadius: 16)
+    func configure(
+        _ viewState: FeedRecordCardViewState,
+        imageLoader: RemoteImageLoading
+    ) {
+        let profileImageRequest = FeedImageURLResolver.resolve(viewState.profileImageUrl).map {
+            RemoteImageRequest(
+                url: $0,
+                variantIdentifier: "feed-profile",
+                maximumPixelSize: 96
+            )
+        }
+        profileImageView.configure(
+            request: profileImageRequest,
+            cornerRadius: 16,
+            fallbackImage: .icModyAvatarSmileLight,
+            imageLoader: imageLoader
+        )
         nicknameLabel.text = viewState.nickname
         streakLabel.text = viewState.streakText
         streakChipView.isHidden = viewState.isStreakChipHidden
         moreButton.isHidden = !viewState.isMine
-        recordImageView.configure(
+        recordImageView.configureRecord(
             urlString: viewState.imageUrl,
+            cropRegion: viewState.imageCropRegion,
             cornerRadius: 16,
-            cropRegion: viewState.imageCropRegion
+            imageLoader: imageLoader
         )
         firstTitleLabel.text = viewState.firstInfoTitle
         firstValueLabel.text = viewState.firstInfoValue
@@ -76,6 +94,8 @@ private extension FeedRecordCardCell {
         streakChipView.layer.cornerRadius = 14
         streakChipView.layer.borderColor = UIColor.gray3.cgColor
         streakChipView.layer.borderWidth = 0.4
+
+        streakIconImageView.contentMode = .scaleAspectFit
 
         moreButton.setImage(UIImage.icMore.withRenderingMode(.alwaysTemplate), for: .normal)
         moreButton.tintColor = .gray6
@@ -100,6 +120,7 @@ private extension FeedRecordCardCell {
         headerView.addSubview(nicknameLabel)
         headerView.addSubview(streakChipView)
         streakChipView.addSubview(streakLabel)
+        streakChipView.addSubview(streakIconImageView)
         headerView.addSubview(moreButton)
 
         cardView.addSubview(recordImageView)
@@ -136,7 +157,15 @@ private extension FeedRecordCardCell {
         }
 
         streakLabel.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8))
+            $0.top.bottom.equalToSuperview().inset(4)
+            $0.leading.equalToSuperview().offset(8)
+        }
+
+        streakIconImageView.snp.makeConstraints {
+            $0.leading.equalTo(streakLabel.snp.trailing).offset(2)
+            $0.trailing.equalToSuperview().inset(8)
+            $0.centerY.equalToSuperview()
+            $0.size.equalTo(18)
         }
 
         moreButton.snp.makeConstraints {

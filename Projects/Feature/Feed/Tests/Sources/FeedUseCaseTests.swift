@@ -10,6 +10,64 @@ import XCTest
 @testable import Feed
 
 final class FeedUseCaseTests: XCTestCase {
+    func testFetchNextFeedRecordsRemovesDuplicatesAndStopsRepeatedCursor() async throws {
+        let repository = FeedUseCaseRepositorySpy(
+            pages: [
+                makePage(
+                    recordIDs: [4, 3],
+                    nextCursor: 4,
+                    hasNext: true
+                )
+            ]
+        )
+        let useCase = FeedUseCase(feedRepository: repository)
+        let currentPage = makePage(
+            recordIDs: [5, 4],
+            nextCursor: 4,
+            hasNext: true
+        )
+
+        let page = try await useCase.fetchNextFeedRecords(
+            groupId: 1,
+            date: "2026-07-26",
+            currentPage: currentPage
+        )
+
+        XCTAssertEqual(page.records.map(\.recordId), [5, 4, 3])
+        XCTAssertEqual(page.nextCursor, 4)
+        XCTAssertFalse(page.hasNext)
+        XCTAssertEqual(repository.requestCursors, [4])
+    }
+
+    func testRefreshLatestFeedRecordsPrependsNewRecordsAndPreservesCursor() async throws {
+        let repository = FeedUseCaseRepositorySpy(
+            pages: [
+                makePage(
+                    recordIDs: [6, 5],
+                    nextCursor: 5,
+                    hasNext: true
+                )
+            ]
+        )
+        let useCase = FeedUseCase(feedRepository: repository)
+        let currentPage = makePage(
+            recordIDs: [5, 4],
+            nextCursor: 4,
+            hasNext: true
+        )
+
+        let page = try await useCase.refreshLatestFeedRecords(
+            groupId: 1,
+            date: "2026-07-26",
+            currentPage: currentPage
+        )
+
+        XCTAssertEqual(page.records.map(\.recordId), [6, 5, 4])
+        XCTAssertEqual(page.nextCursor, 4)
+        XCTAssertTrue(page.hasNext)
+        XCTAssertEqual(repository.requestCursors, [nil])
+    }
+
     func testCreateMealRecordBuildsNormalizedRequest() async throws {
         let repository = FeedUseCaseRepositorySpy()
         let useCase = FeedUseCase(feedRepository: repository)
@@ -92,6 +150,35 @@ final class FeedUseCaseTests: XCTestCase {
 }
 
 private extension FeedUseCaseTests {
+    func makePage(
+        recordIDs: [Int],
+        nextCursor: Int?,
+        hasNext: Bool
+    ) -> FeedRecordPage {
+        FeedRecordPage(
+            records: recordIDs.map(makeRecord),
+            nextCursor: nextCursor,
+            hasNext: hasNext
+        )
+    }
+
+    func makeRecord(recordID: Int) -> FeedRecord {
+        FeedRecord(
+            recordId: recordID,
+            recordType: .meal,
+            memberId: 1,
+            nickname: "테스터",
+            profileImageUrl: nil,
+            recordedTime: "12:00",
+            menu: "메뉴",
+            exerciseDurationMinutes: 0,
+            exerciseName: "",
+            imageUrl: "https://example.com/\(recordID).jpg",
+            imageCropRegion: nil,
+            recordingStreakDays: 1
+        )
+    }
+
     func makeKoreanDate(hour: Int, minute: Int) -> Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
@@ -109,6 +196,12 @@ private extension FeedUseCaseTests {
 
 private final class FeedUseCaseRepositorySpy: FeedRepositoryProtocol {
     private(set) var createdRequest: FeedRecordCreateRequest?
+    private(set) var requestCursors: [Int?] = []
+    private var pages: [FeedRecordPage]
+
+    init(pages: [FeedRecordPage] = []) {
+        self.pages = pages
+    }
 
     func getRecords(
         groupId: Int,
@@ -116,7 +209,8 @@ private final class FeedUseCaseRepositorySpy: FeedRepositoryProtocol {
         cursor: Int?,
         size: Int
     ) async throws -> FeedRecordPage {
-        fatalError("Not used in these tests")
+        requestCursors.append(cursor)
+        return pages.removeFirst()
     }
 
     func getActivityCalendar(

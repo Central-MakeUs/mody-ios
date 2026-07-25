@@ -5,17 +5,18 @@
 //  Created by 김동준 on 7/21/26
 //
 
+import CoreModyImageInterface
 import UIKit
 import DesignSystem
 import SnapKit
 
 final class FeedRecordCardImageView: UIView {
-    private static let imageCache = NSCache<NSString, UIImage>()
-
     private let imageView = UIImageView()
     private let skeletonView = UISkeletonView(width: 1, height: 1)
-    private var imageTask: URLSessionDataTask?
-    private var currentURLString: String?
+    private var imageLoader: RemoteImageLoading?
+    private var requestSource: ImageRequestSource?
+    private var currentRequestIdentity: String?
+    private var fallbackImage: UIImage?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -28,72 +29,76 @@ final class FeedRecordCardImageView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    deinit {
-        imageTask?.cancel()
-    }
-
-    func configure(
-        urlString: String?,
-        cornerRadius: CGFloat,
-        cropRegion: FeedImageCropRegion? = nil
-    ) {
-        imageTask?.cancel()
-        currentURLString = urlString
-        layer.cornerRadius = cornerRadius
-        imageView.layer.cornerRadius = cornerRadius
-        skeletonView.layer.cornerRadius = cornerRadius
-        imageView.layer.contentsRect = cropRegion?.normalizedContentsRect ?? CGRect(x: 0, y: 0, width: 1, height: 1)
-
-        guard let urlString,
-              !urlString.isEmpty,
-              let url = URL(string: urlString) else {
-            imageView.image = nil
-            skeletonView.isHidden = true
-            skeletonView.stopAnimating()
-            return
-        }
-
-        if let cachedImage = Self.imageCache.object(forKey: urlString as NSString) {
-            imageView.image = cachedImage
-            skeletonView.isHidden = true
-            skeletonView.stopAnimating()
-            return
-        }
-
-        imageView.image = nil
-        skeletonView.isHidden = false
-        skeletonView.startAnimating()
-
-        imageTask = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-            guard let self,
-                  let data,
-                  let image = UIImage(data: data) else {
-                return
-            }
-
-            Self.imageCache.setObject(image, forKey: urlString as NSString)
-
-            DispatchQueue.main.async {
-                guard self.currentURLString == urlString else { return }
-                self.imageView.image = image
-                self.skeletonView.isHidden = true
-                self.skeletonView.stopAnimating()
-            }
-        }
-        imageTask?.resume()
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        loadImageIfNeeded()
     }
 
     func prepareForReuse() {
-        imageTask?.cancel()
-        currentURLString = nil
+        requestSource = nil
+        currentRequestIdentity = nil
+        imageLoader = nil
+        fallbackImage = nil
         imageView.image = nil
-        imageView.layer.contentsRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-        skeletonView.isHidden = true
-        skeletonView.stopAnimating()
+        stopSkeleton()
+    }
+
+    func configure(
+        request: RemoteImageRequest?,
+        cornerRadius: CGFloat,
+        fallbackImage: UIImage? = nil,
+        imageLoader: RemoteImageLoading
+    ) {
+        applyConfiguration(
+            requestSource: request.map(ImageRequestSource.preconfigured),
+            cornerRadius: cornerRadius,
+            fallbackImage: fallbackImage,
+            imageLoader: imageLoader
+        )
+    }
+
+    func configureRecord(
+        urlString: String?,
+        cropRegion: FeedImageCropRegion?,
+        cornerRadius: CGFloat,
+        imageLoader: RemoteImageLoading
+    ) {
+        let requestSource = FeedImageURLResolver.resolve(urlString).map {
+            ImageRequestSource.record(url: $0, cropRegion: cropRegion)
+        }
+        applyConfiguration(
+            requestSource: requestSource,
+            cornerRadius: cornerRadius,
+            fallbackImage: nil,
+            imageLoader: imageLoader
+        )
     }
 }
 
 private extension FeedRecordCardImageView {
+    enum ImageRequestSource {
+        case preconfigured(RemoteImageRequest)
+        case record(url: URL, cropRegion: FeedImageCropRegion?)
+
+        func makeRequest(
+            displaySize: CGSize,
+            displayScale: CGFloat
+        ) -> RemoteImageRequest? {
+            switch self {
+            case let .preconfigured(request):
+                return request
+
+            case let .record(url, cropRegion):
+                return FeedImageRequestFactory.makeRecordRequest(
+                    url: url,
+                    cropRegion: cropRegion,
+                    displaySize: displaySize,
+                    displayScale: displayScale
+                )
+            }
+        }
+    }
+
     func setupUI() {
         backgroundColor = .gray1
         clipsToBounds = true
@@ -116,26 +121,77 @@ private extension FeedRecordCardImageView {
             $0.edges.equalToSuperview()
         }
     }
-}
 
-private extension FeedImageCropRegion {
-    var normalizedContentsRect: CGRect? {
-        guard width > 0, height > 0 else { return nil }
+    func applyConfiguration(
+        requestSource: ImageRequestSource?,
+        cornerRadius: CGFloat,
+        fallbackImage: UIImage?,
+        imageLoader: RemoteImageLoading
+    ) {
+        currentRequestIdentity = nil
+        self.requestSource = requestSource
+        self.imageLoader = imageLoader
+        self.fallbackImage = fallbackImage
+        layer.cornerRadius = cornerRadius
+        imageView.layer.cornerRadius = cornerRadius
+        skeletonView.layer.cornerRadius = cornerRadius
 
-        let originX = min(max(x, 0), 1)
-        let originY = min(max(y, 0), 1)
-        let maxWidth = max(1 - originX, 0)
-        let maxHeight = max(1 - originY, 0)
-        let normalizedWidth = min(max(width, 0), maxWidth)
-        let normalizedHeight = min(max(height, 0), maxHeight)
+        guard requestSource != nil else {
+            showFallback()
+            return
+        }
 
-        guard normalizedWidth > 0, normalizedHeight > 0 else { return nil }
+        imageView.image = nil
+        loadImageIfNeeded()
+    }
 
-        return CGRect(
-            x: originX,
-            y: originY,
-            width: normalizedWidth,
-            height: normalizedHeight
-        )
+    func loadImageIfNeeded() {
+        guard let requestSource,
+              let imageLoader,
+              let request = requestSource.makeRequest(
+                displaySize: bounds.size,
+                displayScale: traitCollection.displayScale
+              ),
+              request.identity != currentRequestIdentity else {
+            return
+        }
+
+        currentRequestIdentity = request.identity
+
+        if let cachedImage = imageLoader.cachedImage(for: request) {
+            imageView.image = cachedImage
+            stopSkeleton()
+            return
+        }
+
+        imageView.image = nil
+        skeletonView.isHidden = false
+        skeletonView.startAnimating()
+
+        Task { @MainActor [weak self, imageLoader] in
+            let image = try? await imageLoader.loadImage(with: request)
+            guard let self,
+                  self.currentRequestIdentity == request.identity else {
+                return
+            }
+
+            guard let image else {
+                self.showFallback()
+                return
+            }
+
+            self.imageView.image = image
+            self.stopSkeleton()
+        }
+    }
+
+    func showFallback() {
+        imageView.image = fallbackImage
+        stopSkeleton()
+    }
+
+    func stopSkeleton() {
+        skeletonView.isHidden = true
+        skeletonView.stopAnimating()
     }
 }

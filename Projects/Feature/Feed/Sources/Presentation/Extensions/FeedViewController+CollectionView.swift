@@ -34,7 +34,10 @@ extension FeedViewController: UICollectionViewDataSource, UICollectionViewDelega
             return UICollectionViewCell()
         }
 
-        cell.configure(feedListViewState.records[indexPath.item])
+        cell.configure(
+            feedListViewState.records[indexPath.item],
+            imageLoader: imageLoader
+        )
         return cell
     }
 
@@ -48,6 +51,20 @@ extension FeedViewController: UICollectionViewDataSource, UICollectionViewDelega
             withReuseIdentifier: FeedLoadingFooterView.reuseIdentifier,
             for: indexPath
         )
+    }
+
+    public func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplaySupplementaryView view: UICollectionReusableView,
+        forElementKind elementKind: String,
+        at indexPath: IndexPath
+    ) {
+        guard elementKind == UICollectionView.elementKindSectionFooter,
+              feedListViewState.hasNextPage else {
+            return
+        }
+
+        reactor?.action.onNext(.didReachFeedListBottom)
     }
 
     public func collectionView(
@@ -66,7 +83,7 @@ extension FeedViewController: UICollectionViewDataSource, UICollectionViewDelega
         layout collectionViewLayout: UICollectionViewLayout,
         referenceSizeForFooterInSection section: Int
     ) -> CGSize {
-        guard feedListViewState.isNextPageLoading else { return .zero }
+        guard feedListViewState.hasNextPage else { return .zero }
         return CGSize(width: collectionView.bounds.width, height: 64)
     }
 }

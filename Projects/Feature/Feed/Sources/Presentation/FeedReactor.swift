@@ -29,11 +29,16 @@ public final class FeedReactor: Reactor {
         var isFetchGroupLoading = false
         var myMemberId: Int?
 
-        var feedRecords: [FeedRecord] = []
+        var feedPage = FeedRecordPage(
+            records: [],
+            nextCursor: nil,
+            hasNext: false
+        )
         var isInitialFeedLoading = false
         var isNextPageLoading = false
-        var nextFeedCursor: Int?
-        var hasNextFeedPage = false
+        var feedRecords: [FeedRecord] { feedPage.records }
+        var nextFeedCursor: Int? { feedPage.nextCursor }
+        var hasNextFeedPage: Bool { feedPage.hasNext }
 
         var weekCalendarViewState: FeedWeekCalendarViewState
         var weekOffset = 0
@@ -48,7 +53,6 @@ public final class FeedReactor: Reactor {
         case setInitialFeedLoading(Bool)
         case setNextPageLoading(Bool)
         case setFeedPage(FeedRecordPage)
-        case appendFeedPage(FeedRecordPage)
         case resetFeedRecords
 
         case setWeekCalendar(
@@ -56,6 +60,7 @@ public final class FeedReactor: Reactor {
             title: String,
             dates: [FeedWeekCalendarModel]
         )
+        case markCalendarDateHasRecord(String)
         case setSelectedCalendarDate(String)
     }
     
@@ -163,19 +168,32 @@ public final class FeedReactor: Reactor {
                   !currentState.isNextPageLoading,
                   currentState.hasNextFeedPage,
                   let selectedGroup = currentState.selectedGroup,
-                  let nextCursor = currentState.nextFeedCursor else {
+                  currentState.nextFeedCursor != nil else {
                 return .empty()
             }
 
             return fetchNextFeedPage(
                 groupId: selectedGroup.groupId,
-                date: currentState.weekCalendarViewState.selectedDate,
-                cursor: nextCursor
+                date: currentState.weekCalendarViewState.selectedDate
             )
         case .didTapRecordButton(let recordType):
             return .concat([
                 .just(.setFloatingActionButtonExpanded(false)),
                 routeToRecord(recordType)
+            ])
+        case .input(.recordCreated):
+            guard let groupId = currentState.selectedGroup?.groupId else {
+                return .empty()
+            }
+
+            return .concat([
+                .just(.markCalendarDateHasRecord(
+                    currentState.weekCalendarViewState.todayDate
+                )),
+                fetchLatestFeedPage(
+                    groupId: groupId,
+                    date: currentState.weekCalendarViewState.selectedDate
+                )
             ])
         }
     }
@@ -205,23 +223,34 @@ public final class FeedReactor: Reactor {
         case .setNextPageLoading(let isLoading):
             newState.isNextPageLoading = isLoading
         case .setFeedPage(let page):
-            newState.feedRecords = page.records
-            newState.nextFeedCursor = page.nextCursor
-            newState.hasNextFeedPage = page.hasNext
-        case .appendFeedPage(let page):
-            newState.feedRecords.append(contentsOf: page.records)
-            newState.nextFeedCursor = page.nextCursor
-            newState.hasNextFeedPage = page.hasNext
+            newState.feedPage = page
         case .resetFeedRecords:
-            newState.feedRecords = []
-            newState.nextFeedCursor = nil
-            newState.hasNextFeedPage = false
+            newState.feedPage = FeedRecordPage(
+                records: [],
+                nextCursor: nil,
+                hasNext: false
+            )
         case let .setWeekCalendar(offset, title, dates):
             newState.weekOffset = offset
             newState.weekCalendarViewState.calendarTitle = title
             newState.weekCalendarViewState.calendarDates = dates
             newState.weekCalendarViewState.canMovePreviousWeek = true
             newState.weekCalendarViewState.canMoveNextWeek = offset < 0
+        case let .markCalendarDateHasRecord(date):
+            newState.weekCalendarViewState.calendarDates = newState
+                .weekCalendarViewState
+                .calendarDates
+                .map { model in
+                    guard model.date == date, !model.hasRecord else {
+                        return model
+                    }
+
+                    return FeedWeekCalendarModel(
+                        date: model.date,
+                        dayOfWeek: model.dayOfWeek,
+                        hasRecord: true
+                    )
+                }
         case let .setSelectedCalendarDate(date):
             newState.weekCalendarViewState.selectedDate = date
         }
@@ -232,24 +261,26 @@ public final class FeedReactor: Reactor {
 
 private extension FeedReactor {
     func fetchInitialContent() -> Observable<Mutation> {
-        .concat([
-            .just(.setFetchGroupLoading(true)),
-            .merge(
-                fetchGroups(),
-                fetchMyMemberId()
-            ),
-            fetchSelectedGroupContent(),
-            .just(.setFetchGroupLoading(false))
-        ])
+        withLoading(
+            Mutation.setFetchGroupLoading,
+            operation: .concat([
+                .merge(
+                    fetchGroups(),
+                    fetchMyMemberId()
+                ),
+                fetchSelectedGroupContent()
+            ])
+        )
     }
 
     func fetchGroupsWithLoading() -> Observable<Mutation> {
-        .concat([
-            .just(.setFetchGroupLoading(true)),
-            fetchGroups(),
-            fetchSelectedGroupContent(),
-            .just(.setFetchGroupLoading(false))
-        ])
+        withLoading(
+            Mutation.setFetchGroupLoading,
+            operation: .concat([
+                fetchGroups(),
+                fetchSelectedGroupContent()
+            ])
+        )
     }
     
     func fetchSelectedGroupContent() -> Observable<Mutation> {
@@ -263,20 +294,33 @@ private extension FeedReactor {
                 ])
             }
 
-            return .concat([
-                .just(.setInitialFeedLoading(true)),
-                .merge(
-                    self.fetchActivityCalendar(
-                        groupId: groupId,
-                        offset: self.currentState.weekOffset
-                    ),
-                    self.fetchFeedPage(
-                        groupId: groupId,
-                        date: self.currentState.weekCalendarViewState.selectedDate
+            return self.withLoading(
+                Mutation.setInitialFeedLoading,
+                operation: .concat([
+                    self.fetchMyMemberIdIfNeeded(),
+                    .merge(
+                        self.fetchActivityCalendar(
+                            groupId: groupId,
+                            offset: self.currentState.weekOffset
+                        ),
+                        self.fetchFeedPage(
+                            groupId: groupId,
+                            date: self.currentState.weekCalendarViewState.selectedDate
+                        )
                     )
-                ),
-                .just(.setInitialFeedLoading(false))
-            ])
+                ])
+            )
+        }
+    }
+
+    func fetchMyMemberIdIfNeeded() -> Observable<Mutation> {
+        .deferred { [weak self] in
+            guard let self,
+                  self.currentState.myMemberId == nil else {
+                return .empty()
+            }
+
+            return self.fetchMyMemberId()
         }
     }
 
@@ -288,70 +332,74 @@ private extension FeedReactor {
             return .just(.resetFeedRecords)
         }
 
-        return .concat([
-            .just(.setInitialFeedLoading(true)),
-            fetchFeedPage(groupId: groupId, date: date),
-            .just(.setInitialFeedLoading(false))
-        ])
+        return withLoading(
+            Mutation.setInitialFeedLoading,
+            operation: fetchFeedPage(groupId: groupId, date: date)
+        )
     }
 
     func fetchFeedPage(
         groupId: Int,
         date: String
     ) -> Observable<Mutation> {
-        Observable<Mutation>.create { [weak self] observer in
-            let task = Task {
-                guard let self else { return }
+        mutationObservable { [weak self] in
+            guard let self else { return nil }
 
-                do {
-                    let page = try await self.feedUseCase.fetchFeedRecords(
-                        groupId: groupId,
-                        date: date,
-                        cursor: nil,
-                        size: self.feedPageSize
-                    )
-                    
-                    observer.onNext(.setFeedPage(page))
-                    observer.onCompleted()
-                } catch {
-                    observer.onNext(.resetFeedRecords)
-                    observer.onCompleted()
-                }
+            do {
+                let page = try await self.feedUseCase.fetchFeedRecords(
+                    groupId: groupId,
+                    date: date,
+                    cursor: nil,
+                    size: self.feedPageSize
+                )
+                return .setFeedPage(page)
+            } catch {
+                return .resetFeedRecords
             }
-
-            return Disposables.create { task.cancel() }
         }
-        .observe(on: MainScheduler.instance)
     }
 
     func fetchNextFeedPage(
         groupId: Int,
-        date: String,
-        cursor: Int
+        date: String
     ) -> Observable<Mutation> {
-        Observable<Mutation>.create { [weak self] observer in
-            let task = Task {
-                guard let self else { return }
-                observer.onNext(.setNextPageLoading(true))
+        let currentPage = currentState.feedPage
 
-                do {
-                    let page = try await self.feedUseCase.fetchFeedRecords(
-                        groupId: groupId,
-                        date: date,
-                        cursor: cursor,
-                        size: self.feedPageSize
-                    )
-                    observer.onNext(.appendFeedPage(page))
-                    observer.onCompleted()
-                } catch { }
+        return withLoading(
+            Mutation.setNextPageLoading,
+            operation: mutationObservable { [weak self] in
+                guard let self else { return nil }
 
-                observer.onNext(.setNextPageLoading(false))
-                observer.onCompleted()
+                let page = try? await self.feedUseCase.fetchNextFeedRecords(
+                    groupId: groupId,
+                    date: date,
+                    currentPage: currentPage,
+                    size: self.feedPageSize
+                )
+
+                return page.map(Mutation.setFeedPage)
             }
+        )
+    }
 
-            return Disposables.create { task.cancel() }
+    func fetchLatestFeedPage(
+        groupId: Int,
+        date: String
+    ) -> Observable<Mutation> {
+        let currentPage = currentState.feedPage
+
+        return mutationObservable { [weak self] in
+            guard let self else { return nil }
+
+            let page = try? await self.feedUseCase.refreshLatestFeedRecords(
+                groupId: groupId,
+                date: date,
+                currentPage: currentPage,
+                size: self.feedPageSize
+            )
+
+            return page.map(Mutation.setFeedPage)
         }
-        .observe(on: MainScheduler.instance)
     }
 }
 
@@ -397,25 +445,21 @@ private extension FeedReactor {
     }
 
     func fetchActivityCalendar(groupId: Int, offset: Int) -> Observable<Mutation> {
-        Observable.create { [weak self] observer in
-            let task = Task {
-                guard let self else { return }
-                do {
-                    let activityCalendar = try await self.feedUseCase.fetchActivityCalendar(
-                        groupId: groupId,
-                        baseDate: self.weekStartDateString(offset: offset)
-                    )
-                    observer.onNext(self.makeWeekCalendarMutation(
-                        offset: offset,
-                        activityCalendar: activityCalendar
-                    ))
-                    observer.onCompleted()
-                } catch { }
+        mutationObservable { [weak self] in
+            guard let self else { return nil }
+
+            guard let activityCalendar = try? await self.feedUseCase.fetchActivityCalendar(
+                groupId: groupId,
+                baseDate: self.weekStartDateString(offset: offset)
+            ) else {
+                return nil
             }
 
-            return Disposables.create { task.cancel() }
+            return self.makeWeekCalendarMutation(
+                offset: offset,
+                activityCalendar: activityCalendar
+            )
         }
-        .observe(on: MainScheduler.instance)
     }
 
     func makeWeekCalendarMutation(
@@ -479,32 +523,48 @@ private extension FeedReactor {
 
 private extension FeedReactor {
     func fetchGroups() -> Observable<Mutation> {
-        Observable.create { [weak self] observer in
-            let task = Task {
-                guard let self else { return }
-                do {
-                    let groups = try await self.groupUseCase.getGroups()
-                    observer.onNext(.setGroups(groups))
-                    observer.onCompleted()
-                } catch {
-                    observer.onNext(.setGroups([]))
-                    observer.onCompleted()
-                }
-            }
+        mutationObservable { [weak self] in
+            guard let self else { return nil }
 
-            return Disposables.create { task.cancel() }
+            do {
+                return .setGroups(try await self.groupUseCase.getGroups())
+            } catch {
+                return .setGroups([])
+            }
         }
-        .observe(on: MainScheduler.instance)
     }
 
     func fetchMyMemberId() -> Observable<Mutation> {
-        Observable.create { [weak self] observer in
-            let task = Task {
-                guard let self else { return }
-                let userInfo = try? await self.authUseCase.getUserInfo(needUpdateKeyChain: false)
+        mutationObservable { [weak self] in
+            guard let self,
+                  let userInfo = try? await self.authUseCase.getUserInfo(
+                    needUpdateKeyChain: false
+                  ) else {
+                return nil
+            }
 
-                if let userInfo {
-                    observer.onNext(.setMyMemberId(userInfo.memberId))
+            return .setMyMemberId(userInfo.memberId)
+        }
+    }
+
+    func withLoading(
+        _ mutation: (Bool) -> Mutation,
+        operation: Observable<Mutation>
+    ) -> Observable<Mutation> {
+        .concat([
+            .just(mutation(true)),
+            operation,
+            .just(mutation(false))
+        ])
+    }
+
+    func mutationObservable(
+        _ operation: @escaping @MainActor () async -> Mutation?
+    ) -> Observable<Mutation> {
+        Observable.create { observer in
+            let task = Task { @MainActor in
+                if let mutation = await operation() {
+                    observer.onNext(mutation)
                 }
                 observer.onCompleted()
             }

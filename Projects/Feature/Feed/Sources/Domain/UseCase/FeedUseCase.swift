@@ -21,11 +21,61 @@ public struct FeedUseCase {
         cursor: Int?,
         size: Int = 5
     ) async throws -> FeedRecordPage {
-        try await feedRepository.getRecords(
+        let page = try await feedRepository.getRecords(
             groupId: groupId,
             date: date,
             cursor: cursor,
             size: size
+        )
+
+        return normalized(page)
+    }
+
+    public func fetchNextFeedRecords(
+        groupId: Int,
+        date: String,
+        currentPage: FeedRecordPage,
+        size: Int = 5
+    ) async throws -> FeedRecordPage {
+        guard currentPage.hasNext,
+              let cursor = currentPage.nextCursor else {
+            return currentPage
+        }
+
+        let nextPage = try await fetchFeedRecords(
+            groupId: groupId,
+            date: date,
+            cursor: cursor,
+            size: size
+        )
+
+        return appending(nextPage, to: currentPage)
+    }
+
+    public func refreshLatestFeedRecords(
+        groupId: Int,
+        date: String,
+        currentPage: FeedRecordPage,
+        size: Int = 5
+    ) async throws -> FeedRecordPage {
+        let latestPage = try await fetchFeedRecords(
+            groupId: groupId,
+            date: date,
+            cursor: nil,
+            size: size
+        )
+
+        guard !currentPage.records.isEmpty else {
+            return latestPage
+        }
+
+        return FeedRecordPage(
+            records: newRecords(
+                in: latestPage,
+                excluding: currentPage.records
+            ) + currentPage.records,
+            nextCursor: currentPage.nextCursor,
+            hasNext: currentPage.hasNext
         )
     }
     
@@ -92,6 +142,40 @@ public struct FeedUseCase {
 }
 
 private extension FeedUseCase {
+    func normalized(_ page: FeedRecordPage) -> FeedRecordPage {
+        FeedRecordPage(
+            records: page.records,
+            nextCursor: page.nextCursor,
+            hasNext: page.hasNext && page.nextCursor != nil
+        )
+    }
+
+    func appending(
+        _ nextPage: FeedRecordPage,
+        to currentPage: FeedRecordPage
+    ) -> FeedRecordPage {
+        FeedRecordPage(
+            records: currentPage.records + newRecords(
+                in: nextPage,
+                excluding: currentPage.records
+            ),
+            nextCursor: nextPage.nextCursor,
+            hasNext: nextPage.hasNext
+                && nextPage.nextCursor != currentPage.nextCursor
+        )
+    }
+
+    func newRecords(
+        in page: FeedRecordPage,
+        excluding existingRecords: [FeedRecord]
+    ) -> [FeedRecord] {
+        var recordIDs = Set(existingRecords.map(\.recordId))
+
+        return page.records.filter {
+            recordIDs.insert($0.recordId).inserted
+        }
+    }
+
     func makeImageCropRegionRequest(
         from region: CGRect
     ) -> FeedRecordImageCropRegionRequest {
