@@ -123,7 +123,6 @@ private extension FeedWeekCalendarCalculator {
             value: value,
             to: baseDate
         ) else {
-            assertionFailure("주간 캘린더 날짜 계산에 실패했습니다.")
             return baseDate
         }
 
