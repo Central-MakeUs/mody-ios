@@ -6,10 +6,15 @@
 //
 
 import CoreCameraInterface
+import CoreModyImageInterface
 import UIKit
 
 public struct CameraCaptureBuilder: CameraCaptureBuildable {
-    public init() {}
+    private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
+
+    public init(temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol) {
+        self.temporaryImageFileUseCase = temporaryImageFileUseCase
+    }
 
     @MainActor
     public func makeCameraViewController(
@@ -17,8 +22,14 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController {
-        CameraContainerViewController(
+        let capturedPhotoProcessor = CameraCapturedPhotoProcessor(
+            temporaryImageFileUseCase: temporaryImageFileUseCase,
+            previewMaxPixelSize: CameraContainerViewController.previewMaxPixelSize
+        )
+
+        return CameraContainerViewController(
             initialSource: source,
+            capturedPhotoProcessor: capturedPhotoProcessor,
             onComplete: onComplete,
             onCancel: onCancel
         )

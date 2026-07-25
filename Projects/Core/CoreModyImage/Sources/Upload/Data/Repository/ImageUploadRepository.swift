@@ -68,7 +68,10 @@ public struct ImageUploadRepository: ImageUploadRepositoryProtocol {
 
 private extension ImageUploadRepository {
     func contentType(for fileURL: URL) throws -> String {
-        guard let imageSource = CGImageSourceCreateWithURL(fileURL as CFURL, nil),
+        guard let imageSource = CGImageSourceCreateWithURL(
+            fileURL as CFURL,
+            [kCGImageSourceShouldCache: false] as CFDictionary
+        ),
               let typeIdentifier = CGImageSourceGetType(imageSource),
               let uniformType = UTType(typeIdentifier as String),
               let contentType = uniformType.preferredMIMEType else {

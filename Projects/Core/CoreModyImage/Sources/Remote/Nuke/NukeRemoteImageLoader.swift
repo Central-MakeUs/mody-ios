@@ -14,10 +14,11 @@ import UIKit
 public final class NukeRemoteImageLoader: RemoteImageLoading, @unchecked Sendable {
     public static let shared = NukeRemoteImageLoader()
 
-    public static let memoryCacheCostLimit = 64 * 1024 * 1024
+    public static let memoryCacheCostLimit = 32 * 1024 * 1024
     public static let memoryCacheCountLimit = 100
+    public static let memoryCacheEntryCostLimit = 0.25
     public static let maximumResponseDataSize = 32 * 1024 * 1024
-    public static let httpMemoryCacheCapacity = 16 * 1024 * 1024
+    public static let httpMemoryCacheCapacity = 0
     public static let httpDiskCacheCapacity = 200 * 1024 * 1024
 
     private let pipeline: ImagePipeline
@@ -81,15 +82,18 @@ private extension NukeRemoteImageLoader {
             ]
         }
     }
+}
 
+extension NukeRemoteImageLoader {
     static func makePipeline() -> ImagePipeline {
         // 디코딩·가공된 UIImage는 메모리에만 보관하며 비용과 개수를 모두 제한합니다.
         let imageCache = ImageCache(
             costLimit: memoryCacheCostLimit,
             countLimit: memoryCacheCountLimit
         )
+        imageCache.entryCostLimit = memoryCacheEntryCostLimit
 
-        // 원본 응답 데이터는 URLCache가 HTTP 캐시 정책에 따라 메모리와 디스크에 보관합니다.
+        // 원본 응답 데이터는 decoded UIImage와 중복 보관하지 않고 디스크에만 캐싱합니다.
         let urlCache = URLCache(
             memoryCapacity: httpMemoryCacheCapacity,
             diskCapacity: httpDiskCacheCapacity,
@@ -108,6 +112,9 @@ private extension NukeRemoteImageLoader {
         configuration.maximumResponseDataSize = maximumResponseDataSize
         // 동시에 들어온 동일 요청은 한 작업으로 합쳐 중복 다운로드·가공을 방지합니다.
         configuration.isTaskCoalescingEnabled = true
+        // 취소된 다운로드의 부분 Data를 별도 메모리 캐시에 남기지 않습니다.
+        configuration.isResumableDataEnabled = false
+        configuration.isProgressiveDecodingEnabled = false
 
         return ImagePipeline(configuration: configuration)
     }

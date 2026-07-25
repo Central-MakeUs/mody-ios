@@ -35,7 +35,10 @@ public struct TemporaryImageFileRepository: TemporaryImageFileRepositoryProtocol
         data: Data,
         fileName: String
     ) throws -> TemporaryImageFile {
-        guard let imageSource = CGImageSourceCreateWithData(data as CFData, nil) else {
+        guard let imageSource = CGImageSourceCreateWithData(
+            data as CFData,
+            [kCGImageSourceShouldCache: false] as CFDictionary
+        ) else {
             throw CocoaError(.fileReadCorruptFile)
         }
 
@@ -52,7 +55,10 @@ public struct TemporaryImageFileRepository: TemporaryImageFileRepositoryProtocol
         at sourceURL: URL,
         fileName: String
     ) throws -> TemporaryImageFile {
-        guard let imageSource = CGImageSourceCreateWithURL(sourceURL as CFURL, nil) else {
+        guard let imageSource = CGImageSourceCreateWithURL(
+            sourceURL as CFURL,
+            [kCGImageSourceShouldCache: false] as CFDictionary
+        ) else {
             throw CocoaError(.fileReadCorruptFile)
         }
 

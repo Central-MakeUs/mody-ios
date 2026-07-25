@@ -24,16 +24,18 @@ struct NormalizedCropProcessor: ImageProcessing, Hashable {
     }
 
     func process(_ image: UIImage) -> UIImage? {
-        // 서버의 normalized 영역을 먼저 적용하고 최종 표시 크기로 한 번만 resize 합니다.
-        let cropSource = croppedImage(from: image) ?? image
-        return ImageProcessors.Resize(
-            size: outputPixelSize,
-            unit: .pixels,
-            contentMode: .aspectFill,
-            crop: true,
-            upscale: true
-        )
-        .process(cropSource)
+        autoreleasepool {
+            // 서버의 normalized 영역을 먼저 적용하고 최종 표시 크기로 한 번만 resize 합니다.
+            let cropSource = croppedImage(from: image) ?? image
+            return ImageProcessors.Resize(
+                size: outputPixelSize,
+                unit: .pixels,
+                contentMode: .aspectFill,
+                crop: true,
+                upscale: true
+            )
+            .process(cropSource)
+        }
     }
 
     /// Nuke가 crop 좌표와 출력 크기가 다른 가공 결과를 별도 캐시 항목으로 구분합니다.

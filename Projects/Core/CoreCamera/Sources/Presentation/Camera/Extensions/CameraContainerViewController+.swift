@@ -12,17 +12,32 @@ import UIKit
 
 extension CameraContainerViewController {
     func capturePhoto() {
-        sessionController.capture { [weak self] image in
-            guard let image else { return }
-            self?.setCapturedPhoto(
-                image,
-                originalFileName: PhotoFileNameUtil.makeCameraFileName()
-            )
+        let capturedPhotoProcessor = capturedPhotoProcessor
+
+        sessionController.capture { [weak self, capturedPhotoProcessor] data in
+            // AVFoundation 콜백 큐에서 파일 저장과 다운샘플링을 끝내고 UI만 main으로 넘깁니다.
+            guard self != nil,
+                  let data,
+                  let capturedPhoto = try? capturedPhotoProcessor.makeCapturedPhoto(
+                    data: data,
+                    fileName: PhotoFileNameUtil.makeCameraFileName()
+                  ) else {
+                return
+            }
+
+            DispatchQueue.main.async { [weak self, capturedPhotoProcessor] in
+                guard let self else {
+                    capturedPhotoProcessor.removeCapturedPhoto(capturedPhoto)
+                    return
+                }
+                self.setCapturedPhoto(capturedPhoto)
+            }
         }
     }
 
     func presentPhotoLibrary() {
         guard presentedViewController == nil else { return }
+        cancelPhotoLibraryLoad()
 
         var configuration = PHPickerConfiguration(photoLibrary: .shared())
         configuration.filter = .images
@@ -33,15 +48,10 @@ extension CameraContainerViewController {
         present(picker, animated: true)
     }
 
-    func setCapturedPhoto(
-        _ image: UIImage,
-        originalFileName: String
-    ) {
-        capturedPhoto = CapturedPhoto(
-            image: image,
-            originalFileName: originalFileName
-        )
-        selectedImageView.image = image
+    func setCapturedPhoto(_ capturedPhoto: CameraCapturedPhoto) {
+        clearCapturedPhoto(removingFile: true)
+        self.capturedPhoto = capturedPhoto
+        selectedImageView.image = capturedPhoto.previewImage
         selectedImageView.isHidden = false
         bottomCameraShutterView.isHidden = true
         photoConfirmationContainerView.isHidden = false
@@ -51,8 +61,8 @@ extension CameraContainerViewController {
     }
 
     func resetCapturedPhoto() {
-        capturedPhoto = nil
-        selectedImageView.image = nil
+        cancelPhotoLibraryLoad()
+        clearCapturedPhoto(removingFile: true)
         selectedImageView.isHidden = true
         bottomCameraShutterView.isHidden = false
         photoConfirmationContainerView.isHidden = true
@@ -62,48 +72,55 @@ extension CameraContainerViewController {
     }
 
     func completeCapture() {
-        guard let capturedPhoto else { return }
+        cancelPhotoLibraryLoad()
 
-        let selectionFrame = roiOverlayView.selectionFrame
-        let selectionContainerSize = roiOverlayView.bounds.size
-        let cropOutput = CameraImageCropper().crop(
-            image: capturedPhoto.image,
-            selectionFrame: selectionFrame,
-            containerSize: selectionContainerSize
-        )
-        guard let cropOutput else { return }
+        guard let result = autoreleasepool(invoking: { () -> CameraCaptureResult? in
+            guard let capturedPhoto else { return nil }
 
-        printSelectionCoordinates(
-            selectionFrame: selectionFrame,
-            cropOutput: cropOutput
-        )
-
-        onComplete(
-            CameraCaptureResult(
-                image: capturedPhoto.image,
-                croppedImage: cropOutput.croppedImage,
-                normalizedSelectionFrame: cropOutput.normalizedSelectionFrame,
-                originalFileName: capturedPhoto.originalFileName
+            let cropOutput = CameraImageCropper().crop(
+                image: capturedPhoto.previewImage,
+                selectionFrame: roiOverlayView.selectionFrame,
+                containerSize: roiOverlayView.bounds.size
             )
-        )
-    }
+            guard let cropOutput else { return nil }
 
-    func printSelectionCoordinates(
-        selectionFrame: CGRect,
-        cropOutput: CameraImageCropOutput
-    ) {
-        print(
-            """
-            [CoreCamera][Upload]
-            관심 영역 좌표 (화면, 좌상단 원점): \(selectionFrame)
-            원본 사진 좌표 (좌상단 원점): \(cropOutput.originalImageBounds)
-            관심 영역 좌표 (원본 사진 기준, 좌상단 원점): \(cropOutput.selectionFrameInOriginalImage)
-            관심 영역 정규화 좌표 (원본 사진 기준, 0...1): \(cropOutput.normalizedSelectionFrame)
-            """
-        )
+            let result = CameraCaptureResult(
+                originalFile: capturedPhoto.originalFile,
+                croppedPreviewImage: cropOutput.croppedImage,
+                normalizedSelectionFrame: cropOutput.normalizedSelectionFrame
+            )
+            clearCapturedPhoto(removingFile: false)
+            return result
+        }) else {
+            return
+        }
+
+        onComplete(result)
     }
 
     @objc func closeTapped() {
+        cancelPhotoLibraryLoad()
+        sessionController.cancelPendingCapture()
+        clearCapturedPhoto(removingFile: true)
         onCancel()
+    }
+
+    func removeCapturedPhotoFile() {
+        guard let capturedPhoto else { return }
+        capturedPhotoProcessor.removeCapturedPhoto(capturedPhoto)
+    }
+
+    func clearCapturedPhoto(removingFile: Bool) {
+        if removingFile {
+            removeCapturedPhotoFile()
+        }
+        capturedPhoto = nil
+        selectedImageView.image = nil
+    }
+
+    func cancelPhotoLibraryLoad() {
+        photoLibraryLoadProgress?.cancel()
+        photoLibraryLoadProgress = nil
+        photoLibraryLoadID = nil
     }
 }

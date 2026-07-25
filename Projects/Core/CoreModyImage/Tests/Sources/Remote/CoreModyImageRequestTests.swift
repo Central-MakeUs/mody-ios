@@ -72,15 +72,63 @@ final class CoreModyImageRequestTests: XCTestCase {
         XCTAssertEqual(nukeRequest.imageID, request.identity)
     }
 
+    func testRequestBoundsDecodeAndProcessingPixelSizes() {
+        let request = RemoteImageRequest(
+            url: url,
+            variantIdentifier: "oversized",
+            maximumPixelSize: 10_000,
+            processing: .aspectFill(
+                pixelSize: CGSize(width: 8_000, height: 4_000),
+                normalizedCrop: nil
+            )
+        )
+
+        XCTAssertEqual(
+            request.maximumPixelSize,
+            RemoteImageRequest.maximumAllowedPixelSize
+        )
+
+        guard case let .aspectFill(pixelSize, _) = request.processing else {
+            return XCTFail("Expected bounded aspect-fill processing")
+        }
+        XCTAssertEqual(pixelSize, CGSize(width: 2048, height: 1024))
+    }
+
+    func testRequestSanitizesInvalidProcessingPixelSizes() {
+        let request = RemoteImageRequest(
+            url: url,
+            variantIdentifier: "invalid-size",
+            maximumPixelSize: 2048,
+            processing: .aspectFill(
+                pixelSize: CGSize(
+                    width: CGFloat.infinity,
+                    height: CGFloat.nan
+                ),
+                normalizedCrop: nil
+            )
+        )
+
+        guard case let .aspectFill(pixelSize, _) = request.processing else {
+            return XCTFail("Expected sanitized aspect-fill processing")
+        }
+        XCTAssertEqual(pixelSize, CGSize(width: 1, height: 1))
+    }
+
     func testPipelineMemoryAndResponseLimitsStayBounded() {
         XCTAssertEqual(
             NukeRemoteImageLoader.memoryCacheCostLimit,
-            64 * 1024 * 1024
+            32 * 1024 * 1024
         )
         XCTAssertEqual(NukeRemoteImageLoader.memoryCacheCountLimit, 100)
+        XCTAssertEqual(NukeRemoteImageLoader.memoryCacheEntryCostLimit, 0.25)
         XCTAssertEqual(
             NukeRemoteImageLoader.maximumResponseDataSize,
             32 * 1024 * 1024
         )
+        XCTAssertEqual(NukeRemoteImageLoader.httpMemoryCacheCapacity, 0)
+
+        let configuration = NukeRemoteImageLoader.makePipeline().configuration
+        XCTAssertFalse(configuration.isResumableDataEnabled)
+        XCTAssertFalse(configuration.isProgressiveDecodingEnabled)
     }
 }

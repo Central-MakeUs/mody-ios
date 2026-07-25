@@ -6,25 +6,31 @@
 //
 
 import AVFoundation
-import UIKit
+import Foundation
 
+/// 세션 구성과 실행은 전용 직렬 큐에서 처리하며, 촬영 완료 콜백은 main queue를 보장하지 않습니다.
 final class CameraCaptureSessionController: NSObject, @unchecked Sendable {
+    private struct PendingCapture {
+        let uniqueID: Int64
+        let completion: (Data?) -> Void
+    }
+
     let session = AVCaptureSession()
 
     private let permissionService = CameraPermissionService()
     private let photoOutput = AVCapturePhotoOutput()
     private let sessionQueue = DispatchQueue(label: "com.mody.core-camera.capture-session")
+    private let captureCompletionLock = NSLock()
 
     private var videoInput: AVCaptureDeviceInput?
-    private var captureCompletion: ((UIImage?) -> Void)?
+    private var pendingCapture: PendingCapture?
     private var isConfigured = false
 }
 
 extension CameraCaptureSessionController {
     func start() {
-        Task { [weak self] in
-            guard let self else { return }
-
+        let permissionService = permissionService
+        Task { [weak self, permissionService] in
             let isGranted: Bool
             if permissionService.isCameraPermissionNotDetermined() {
                 isGranted = await permissionService.requestCameraPermission()
@@ -32,7 +38,7 @@ extension CameraCaptureSessionController {
                 isGranted = permissionService.isCameraPermissionGranted()
             }
 
-            guard isGranted else { return }
+            guard isGranted, let self else { return }
 
             sessionQueue.async { [weak self] in
                 guard let self else { return }
@@ -50,16 +56,35 @@ extension CameraCaptureSessionController {
         }
     }
 
-    func capture(completion: @escaping (UIImage?) -> Void) {
+    func capture(completion: @escaping (Data?) -> Void) {
         sessionQueue.async { [weak self] in
             guard let self, isConfigured else {
-                DispatchQueue.main.async { completion(nil) }
+                completion(nil)
                 return
             }
 
-            captureCompletion = completion
-            let settings = AVCapturePhotoSettings()
+            let settings: AVCapturePhotoSettings
+            if photoOutput.availablePhotoCodecTypes.contains(.jpeg) {
+                settings = AVCapturePhotoSettings(
+                    format: [AVVideoCodecKey: AVVideoCodecType.jpeg]
+                )
+            } else {
+                settings = AVCapturePhotoSettings()
+            }
+            guard storeCaptureCompletionIfPossible(
+                completion,
+                uniqueID: settings.uniqueID
+            ) else {
+                completion(nil)
+                return
+            }
             photoOutput.capturePhoto(with: settings, delegate: self)
+        }
+    }
+
+    func cancelPendingCapture() {
+        sessionQueue.async { [weak self] in
+            self?.clearPendingCapture()
         }
     }
 
@@ -114,6 +139,36 @@ private extension CameraCaptureSessionController {
             position: position
         )
     }
+
+    func storeCaptureCompletionIfPossible(
+        _ completion: @escaping (Data?) -> Void,
+        uniqueID: Int64
+    ) -> Bool {
+        captureCompletionLock.lock()
+        defer { captureCompletionLock.unlock() }
+
+        guard pendingCapture == nil else { return false }
+        pendingCapture = PendingCapture(
+            uniqueID: uniqueID,
+            completion: completion
+        )
+        return true
+    }
+
+    func takeCaptureCompletion(uniqueID: Int64) -> ((Data?) -> Void)? {
+        captureCompletionLock.lock()
+        defer { captureCompletionLock.unlock() }
+
+        guard pendingCapture?.uniqueID == uniqueID else { return nil }
+        defer { pendingCapture = nil }
+        return pendingCapture?.completion
+    }
+
+    func clearPendingCapture() {
+        captureCompletionLock.lock()
+        defer { captureCompletionLock.unlock() }
+        pendingCapture = nil
+    }
 }
 
 extension CameraCaptureSessionController: AVCapturePhotoCaptureDelegate {
@@ -122,14 +177,15 @@ extension CameraCaptureSessionController: AVCapturePhotoCaptureDelegate {
         didFinishProcessingPhoto photo: AVCapturePhoto,
         error: Error?
     ) {
-        let image = error == nil
-            ? photo.fileDataRepresentation().flatMap(UIImage.init(data:))
-            : nil
-        let completion = captureCompletion
-        captureCompletion = nil
-
-        DispatchQueue.main.async {
-            completion?(image)
+        guard let completion = takeCaptureCompletion(
+            uniqueID: photo.resolvedSettings.uniqueID
+        ) else {
+            return
         }
+
+        let data = autoreleasepool {
+            error == nil ? photo.fileDataRepresentation() : nil
+        }
+        completion(data)
     }
 }

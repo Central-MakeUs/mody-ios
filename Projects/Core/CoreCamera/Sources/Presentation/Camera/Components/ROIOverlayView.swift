@@ -18,8 +18,15 @@ final class ROIOverlayView: UIView {
 
     private let dimLayer = CAShapeLayer()
     private let borderLayer = CAShapeLayer()
+    private var selectableFrame: CGRect?
     private var currentSelectionFrame = CGRect.zero
     private var panStartFrame = CGRect.zero
+
+    func resetSelection(in selectableFrame: CGRect?) {
+        self.selectableFrame = selectableFrame
+        currentSelectionFrame = defaultSelectionFrame()
+        updateLayers()
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -35,13 +42,7 @@ final class ROIOverlayView: UIView {
         super.layoutSubviews()
 
         if currentSelectionFrame == .zero {
-            let width = max(0, bounds.width - (horizontalInset * 2))
-            currentSelectionFrame = CGRect(
-                x: horizontalInset,
-                y: max(0, (bounds.height - selectionHeight) / 2),
-                width: width,
-                height: min(selectionHeight, bounds.height)
-            )
+            currentSelectionFrame = defaultSelectionFrame()
         } else {
             currentSelectionFrame = constrainedFrame(currentSelectionFrame)
         }
@@ -83,12 +84,47 @@ private extension ROIOverlayView {
         borderLayer.path = UIBezierPath(rect: currentSelectionFrame).cgPath
     }
 
+    func defaultSelectionFrame() -> CGRect {
+        let selectableFrame = effectiveSelectableFrame()
+        let horizontalMargin = min(horizontalInset, selectableFrame.width / 2)
+        let width = max(0, selectableFrame.width - (horizontalMargin * 2))
+        let height = min(selectionHeight, selectableFrame.height)
+
+        return CGRect(
+            x: selectableFrame.minX + horizontalMargin,
+            y: selectableFrame.minY + max(0, (selectableFrame.height - height) / 2),
+            width: width,
+            height: height
+        )
+    }
+
+    func effectiveSelectableFrame() -> CGRect {
+        guard let selectableFrame else { return bounds }
+
+        let effectiveFrame = selectableFrame.intersection(bounds)
+        guard !effectiveFrame.isNull,
+              effectiveFrame.width > 0,
+              effectiveFrame.height > 0 else { return bounds }
+
+        return effectiveFrame
+    }
+
     func constrainedFrame(_ frame: CGRect) -> CGRect {
-        CGRect(
-            x: min(max(0, frame.minX), max(0, bounds.width - frame.width)),
-            y: min(max(0, frame.minY), max(0, bounds.height - frame.height)),
-            width: min(frame.width, bounds.width),
-            height: min(frame.height, bounds.height)
+        let selectableFrame = effectiveSelectableFrame()
+        let width = min(frame.width, selectableFrame.width)
+        let height = min(frame.height, selectableFrame.height)
+
+        return CGRect(
+            x: min(
+                max(selectableFrame.minX, frame.minX),
+                max(selectableFrame.minX, selectableFrame.maxX - width)
+            ),
+            y: min(
+                max(selectableFrame.minY, frame.minY),
+                max(selectableFrame.minY, selectableFrame.maxY - height)
+            ),
+            width: width,
+            height: height
         )
     }
 
