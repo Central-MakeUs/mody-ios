@@ -50,7 +50,7 @@ final class FeedRecordReactorImageLifecycleTests: XCTestCase {
         )
     }
 
-    func testRecordRetryReusesUploadedImageKey() async throws {
+    func testRecordRetryUploadsImageAgain() async throws {
         let dependencies = makeDependencies()
         dependencies.feedRepository.createRecordError = NetworkError.invalidResponse
         let failureExpectation = expectation(description: "record failure state")
@@ -62,10 +62,7 @@ final class FeedRecordReactorImageLifecycleTests: XCTestCase {
         let captureResult = makeCaptureResult(fileName: "retry.jpg")
 
         reactor.state
-            .filter {
-                $0.recordFailureAlert != nil
-                    && $0.pendingImageKey == dependencies.imageUpload.imageKey
-            }
+            .filter { $0.recordFailureAlert != nil }
             .take(1)
             .subscribe(onNext: { _ in
                 failureExpectation.fulfill()
@@ -84,7 +81,7 @@ final class FeedRecordReactorImageLifecycleTests: XCTestCase {
         reactor.action.onNext(.didTapFinishButton)
         await fulfillment(of: [outputExpectation], timeout: 1)
 
-        XCTAssertEqual(dependencies.imageUpload.uploadCallCount, 1)
+        XCTAssertEqual(dependencies.imageUpload.uploadCallCount, 2)
         XCTAssertEqual(dependencies.feedRepository.createRecordCallCount, 2)
         XCTAssertEqual(
             dependencies.temporaryFiles.removedFileURLs,
@@ -109,7 +106,6 @@ final class FeedRecordReactorImageLifecycleTests: XCTestCase {
             reactor.currentState.selectedPhoto?.originalFile,
             secondCaptureResult.originalFile
         )
-        XCTAssertNil(reactor.currentState.pendingImageKey)
     }
 
     func testBackRemovesSelectedTemporaryFile() async {

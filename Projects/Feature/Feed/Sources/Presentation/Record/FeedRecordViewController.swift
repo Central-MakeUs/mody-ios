@@ -24,6 +24,9 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
     private var finishButtonHostingController: UIHostingController<FeedRecordFinishButtonView>?
     var photoSourceSheetViewController: UIViewController?
     var cameraContainerViewController: UIViewController?
+    
+    var recordFailureAlertHostingController: UIHostingController<MAlertView>?
+    var recordLoadingHostingController: UIHostingController<AnyView>?
 
     public init(
         reactor: FeedRecordReactor,
@@ -51,6 +54,7 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
 
         configureNavigationBar()
         configureRecordTypeContent()
+        configureRecordLoadingView()
     }
 
     public func bind(reactor: FeedRecordReactor) {
@@ -73,36 +77,55 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
         }
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.photoPresentation)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, presentation in
                 owner.setPhotoPresentation(presentation)
             }
             .disposed(by: disposeBag)
 
         reactor.state
-            .map(\.selectedPhoto)
-            .compactMap { $0?.croppedImage }
-            .distinctUntilChanged { $0 === $1 }
             .observe(on: MainScheduler.instance)
+            .map(\.selectedPhoto)
+            .compactMap { $0?.croppedPreviewImage }
+            .distinctUntilChanged { $0 === $1 }
             .bind(with: self) { owner, image in
                 owner.recordView.configurePhoto(image)
             }
             .disposed(by: disposeBag)
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.isFinishButtonEnabled)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, isEnabled in
                 owner.configureFinishButton(isEnabled: isEnabled)
+            }
+            .disposed(by: disposeBag)
+
+        reactor.state
+            .observe(on: MainScheduler.instance)
+            .map(\.isSubmittingRecord)
+            .distinctUntilChanged()
+            .bind(with: self) { owner, isSubmitting in
+                owner.setRecordLoadingVisible(isSubmitting)
+            }
+            .disposed(by: disposeBag)
+
+        reactor.state
+            .observe(on: MainScheduler.instance)
+            .map(\.recordFailureAlert)
+            .distinctUntilChanged()
+            .bind(with: self) { owner, error in
+                owner.setRecordFailureAlert(error)
             }
             .disposed(by: disposeBag)
 
         guard recordType == .exercise else { return }
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map { state in
                 FeedRecordExerciseInputViewState(
                     selectedType: state.selectedExerciseType,
@@ -111,7 +134,6 @@ public final class FeedRecordViewController: UIViewController, ReactorKit.View {
                 )
             }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, viewState in
                 owner.recordView.configureExerciseInput(viewState)
             }
@@ -203,6 +225,7 @@ private extension FeedRecordViewController {
         let rootView = FeedRecordFinishButtonView(
             isEnabled: isEnabled,
             onTap: { [weak self] in
+                self?.view.endEditing(true)
                 self?.reactor?.action.onNext(.didTapFinishButton)
             }
         )
