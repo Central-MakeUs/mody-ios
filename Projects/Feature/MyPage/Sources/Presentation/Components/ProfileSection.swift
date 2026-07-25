@@ -6,6 +6,7 @@
 //
 
 import CommonDomain
+import CoreModyImageInterface
 import DesignSystem
 import Foundation
 import SwiftUI
@@ -14,6 +15,7 @@ struct ProfileSection: View {
     let imageURL: URL?
     let defaultAvatar: DefaultAvatar
     let userInfo: UserInfo?
+    let imageLoader: RemoteImageLoading
     let onProfileButtonTapped: () -> Void
 
     var body: some View {
@@ -39,7 +41,8 @@ private extension ProfileSection {
         } else {
             ProfileAvatarView(
                 imageURL: imageURL,
-                defaultAvatar: defaultAvatar
+                defaultAvatar: defaultAvatar,
+                imageLoader: imageLoader
             )
         }
     }

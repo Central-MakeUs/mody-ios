@@ -1,5 +1,6 @@
 import CommonDomain
 import CoreAuthInterface
+import CoreModyImage
 import SwiftUI
 import MyPage
 
@@ -17,7 +18,8 @@ struct MyPageDemoApp: App {
                         router: { _ in },
                         output: { _ in }
                     )
-                }
+                },
+                imageLoader: NukeRemoteImageLoader.shared
             )
         }
     }

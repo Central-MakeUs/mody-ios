@@ -5,6 +5,7 @@
 //  Created by 김동준 on 6/30/26
 //
 
+import CoreModyImageInterface
 import UIKit
 import SwiftUI
 import CommonDomain
@@ -17,19 +18,22 @@ public struct MyPageBuilder: MyPageBuildable {
     private let makeNotificationSettingsFeature: (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature
     private let makeGroupSettingsFeature: (MyPageGroupSettingsRouter, MyPageOutputHandler) -> GroupSettingsFeature
     private let makeHealthDataSettingsFeature: (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
+    private let imageLoader: RemoteImageLoading
     
     public init(
         makeMyPageFeature: @escaping (MyPageRouter, MyPageOutputHandler) -> MyPageFeature,
         makeProfileFeature: @escaping (MyPageProfileRouter, MyPageOutputHandler) -> ProfileFeature,
         makeNotificationSettingsFeature: @escaping (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature,
         makeGroupSettingsFeature: @escaping (MyPageGroupSettingsRouter, MyPageOutputHandler) -> GroupSettingsFeature,
-        makeHealthDataSettingsFeature: @escaping (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
+        makeHealthDataSettingsFeature: @escaping (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature,
+        imageLoader: RemoteImageLoading
     ) {
         self.makeMyPageFeature = makeMyPageFeature
         self.makeProfileFeature = makeProfileFeature
         self.makeNotificationSettingsFeature = makeNotificationSettingsFeature
         self.makeGroupSettingsFeature = makeGroupSettingsFeature
         self.makeHealthDataSettingsFeature = makeHealthDataSettingsFeature
+        self.imageLoader = imageLoader
     }
 
     @MainActor
@@ -41,7 +45,10 @@ public struct MyPageBuilder: MyPageBuildable {
             makeMyPageFeature(router, outputHandler)
         }
 
-        return MyPageHostingController(store: store)
+        return MyPageHostingController(
+            store: store,
+            imageLoader: imageLoader
+        )
     }
 
     @MainActor
@@ -59,7 +66,10 @@ public struct MyPageBuilder: MyPageBuildable {
         ) {
             makeProfileFeature(router, outputHandler)
         }
-        let view = ProfileView(store: store)
+        let view = ProfileView(
+            store: store,
+            imageLoader: imageLoader
+        )
 
         return UIHostingController(rootView: view)
     }

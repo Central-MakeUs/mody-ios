@@ -7,6 +7,7 @@
 
 import Swinject
 import CoreAuthInterface
+import CoreModyImageInterface
 import CoreNetworkInterface
 import MyPageInterface
 import MyPage
@@ -46,6 +47,8 @@ extension AppAssembly {
         }
 
         container.register(MyPageBuildable.self) { resolver in
+            let imageLoader: RemoteImageLoading = resolver.resolve()
+
             return MyPageBuilder(
                 makeMyPageFeature: { router, outputHandler in
                     resolver.resolve(argument: (router, outputHandler))
@@ -61,7 +64,8 @@ extension AppAssembly {
                 },
                 makeHealthDataSettingsFeature: { router in
                     resolver.resolve(argument: router)
-                }
+                },
+                imageLoader: imageLoader
             )
         }
     }

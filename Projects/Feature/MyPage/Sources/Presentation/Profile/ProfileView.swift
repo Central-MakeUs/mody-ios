@@ -8,13 +8,19 @@
 import SwiftUI
 import Base
 import ComposableArchitecture
+import CoreModyImageInterface
 import DesignSystem
 
 public struct ProfileView: View {
     @Bindable private var store: StoreOf<ProfileFeature>
+    private let imageLoader: RemoteImageLoading
 
-    public init(store: StoreOf<ProfileFeature>) {
+    public init(
+        store: StoreOf<ProfileFeature>,
+        imageLoader: RemoteImageLoading
+    ) {
         self.store = store
+        self.imageLoader = imageLoader
     }
 
     public var body: some View {
@@ -39,7 +45,8 @@ private extension ProfileView {
                         imageURL: store.profileImageURL,
                         defaultAvatar: store.defaultAvatar,
                         size: .init(width: 100, height: 100),
-                        hasStroke: true
+                        hasStroke: true,
+                        imageLoader: imageLoader
                     )
                     .padding(.top, 28)
 
