@@ -58,6 +58,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreKakao)),
             .module(.MicroFeature(.CoreCamera)),
             .module(.MicroFeature(.CoreNotification)),
+            .module(.MicroFeature(.CoreModyImage)),
             
             .external(.FirebaseCore),
             .external(.FirebaseMessaging),
@@ -68,6 +69,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreKakao),
             .microFeature(.CoreCamera),
             .microFeature(.CoreNotification),
+            .microFeature(.CoreModyImage),
             .microFeature(.Main)
         ],
         .Root: [
@@ -150,11 +152,13 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.ReactorKit),
                 .external(.RxSwift),
                 .external(.RxCocoa),
-                .external(.RxRelay)
+                .external(.RxRelay),
+                .microFeature(.CoreModyImage)
             ],
             demo: [
                 .module(.DesignSystem),
-                .module(.MicroFeature(.CoreCamera))
+                .module(.MicroFeature(.CoreCamera)),
+                .module(.MicroFeature(.CoreModyImage))
             ]
         ),
         .Main: .init(
@@ -191,11 +195,13 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreNotification),
-                .microFeature(.ModyGroup)
+                .microFeature(.ModyGroup),
+                .microFeature(.CoreModyImage)
             ],
             demo: [
                 .module(.CommonDomain),
-                .microFeature(.CoreAuth)
+                .microFeature(.CoreAuth),
+                .module(.MicroFeature(.CoreModyImage))
             ]
         ),
         .CoreNetwork: .init(
@@ -248,6 +254,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .external(.Alamofire),
                 .external(.SnapKit)
+            ]
+        ),
+        .CoreModyImage: .init(
+            implementation: [
+                .external(.Nuke)
             ]
         )
     ]
