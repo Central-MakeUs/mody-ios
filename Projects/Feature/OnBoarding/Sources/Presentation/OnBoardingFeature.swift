@@ -39,11 +39,6 @@ public struct OnBoardingFeature {
             case error(NetworkError)
         }
 
-        enum Stage: Equatable {
-            case agreement
-            case steps
-        }
-
         struct StepStoredRequest: Equatable {
             var nickname: String?
             var birthDate: String?
@@ -63,9 +58,7 @@ public struct OnBoardingFeature {
 
         var isLoading: Bool = false
         var isPermissionRequesting = false
-        var stage: Stage = .agreement
         var currentStep: Step = .one
-        var path: StackState<OnBoardingPath.State> = .init()
         var request: StepStoredRequest = .init()
         var stepOne: OnBoardingStepOneFeature.State = .init()
         var stepTwo: OnBoardingStepTwoFeature.State = .init()
@@ -75,30 +68,15 @@ public struct OnBoardingFeature {
         var alertState = AlertFeature.State()
         let isHealthPermissionVisible: Bool
 
-        var isPrivacyPolicyAccepted = false
-        var isTermsOfServiceAccepted = false
-        var isAllRequiredAgreementsAccepted: Bool {
-            isPrivacyPolicyAccepted && isTermsOfServiceAccepted
-        }
-
         var buttonTitle: String {
-            switch stage {
-            case .agreement:
-                return "시작하기"
-            case .steps:
-                return currentStep == .permission ? "확인" : "다음으로"
-            }
+            currentStep == .permission ? "확인" : "다음으로"
         }
 
         var showsStepIndicator: Bool {
-            stage == .steps && currentStep != .permission
+            currentStep != .permission
         }
 
         var isNextButtonEnabled: Bool {
-            guard stage == .steps else {
-                return isAllRequiredAgreementsAccepted
-            }
-
             switch currentStep {
             case .one:
                 return stepOne.isNextButtonEnabled
@@ -119,13 +97,8 @@ public struct OnBoardingFeature {
     }
     
     public enum Action {
-        case path(StackActionOf<OnBoardingPath>)
         case alertAction(AlertFeature.Action)
         case showAlert(State.AlertCase)
-        case allAgreementTapped
-        case privacyPolicyAgreementTapped
-        case termsOfServiceAgreementTapped
-        case agreementDetailTapped(OnBoardingAgreementDocument)
         case nextButtonTapped
         case stepOne(OnBoardingStepOneFeature.Action)
         case stepTwo(OnBoardingStepTwoFeature.Action)
@@ -162,11 +135,6 @@ public struct OnBoardingFeature {
 
         Reduce { state, action in
             switch action {
-            case .path(.element(id: _, action: .agreementDetail(.backButtonTapped))):
-                state.path.removeLast()
-                return .none
-            case .path:
-                return .none
             case .alertAction:
                 return .none
             case let .showAlert(alertCase):
@@ -175,11 +143,6 @@ public struct OnBoardingFeature {
                 return .send(.alertAction(.present))
             case .nextButtonTapped:
                 guard state.isNextButtonEnabled else { return .none }
-
-                if state.stage == .agreement {
-                    state.stage = .steps
-                    return .none
-                }
 
                 if state.currentStep == .permission {
                     return .send(.requestPermissions)
@@ -229,23 +192,8 @@ public struct OnBoardingFeature {
                 return .run { [router] _ in
                     await router(.routeToGroupParticipate)
                 }
-            case .allAgreementTapped:
-                let isAccepted = !state.isAllRequiredAgreementsAccepted
-                state.isPrivacyPolicyAccepted = isAccepted
-                state.isTermsOfServiceAccepted = isAccepted
-                return .none
-            case .privacyPolicyAgreementTapped:
-                state.isPrivacyPolicyAccepted.toggle()
-                return .none
-            case .termsOfServiceAgreementTapped:
-                state.isTermsOfServiceAccepted.toggle()
-                return .none
-            case let .agreementDetailTapped(document):
-                state.path.append(.agreementDetail(.init(document: document)))
-                return .none
             }
         }
-        .forEach(\.path, action: \.path)
     }
 }
 
