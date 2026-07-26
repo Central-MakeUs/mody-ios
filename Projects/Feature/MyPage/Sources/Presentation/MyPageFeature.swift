@@ -210,7 +210,6 @@ public struct MyPageFeature {
 private extension MyPageFeature {
     func getUserInfo() async -> Action {
         do {
-            try? await Task.sleep(for: .seconds(3)) // MARK: 임시 추가 (일부러 시간 늘리려고)
             let userInfo = try await authUseCase.getUserInfo(needUpdateKeyChain: false)
             return .userInfoFetched(userInfo)
         } catch {
@@ -220,7 +219,6 @@ private extension MyPageFeature {
 
     func getWeightRecord() async -> Action {
         do {
-            try? await Task.sleep(for: .seconds(3)) // MARK: 임시 추가 (일부러 시간 늘리려고)
             let weightRecord = try await myPageUseCase.getWeightRecord()
             return .weightRecordFetched(weightRecord)
         } catch {
