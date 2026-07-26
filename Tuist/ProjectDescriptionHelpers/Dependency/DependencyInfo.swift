@@ -107,6 +107,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.ComposableArchitecture),
                 .module(.Base),
                 .module(.CommonDomain),
+                .microFeature(.FirebaseService),
                 .microFeature(.CoreAuth)
             ]
         ),
@@ -147,7 +148,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
-                .microFeature(.CoreNetwork),
                 .microFeature(.ModyGroup),
                 .external(.ReactorKit),
                 .external(.RxSwift),
