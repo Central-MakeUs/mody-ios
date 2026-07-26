@@ -39,10 +39,15 @@ struct OnBoardingAgreementList: View {
     }
 
     var body: some View {
+        agreementBody
+    }
+    
+    private var agreementBody: some View {
         VStack(spacing: 0) {
             allAgreementButton
-
-            VStack(spacing: 0) {
+                .padding(.bottom, 24)
+            
+            VStack(spacing: 16) {
                 OnBoardingAgreementRow(
                     title: "개인정보처리방침 (필수)",
                     isAccepted: isPrivacyPolicyAccepted,
@@ -57,24 +62,33 @@ struct OnBoardingAgreementList: View {
                     onDetailTapped: onTermsOfServiceDetailTapped
                 )
             }
-            .padding(.top, 16)
-            .padding(.leading, 14)
+            .hPadding(14)
         }
     }
 }
 
 private extension OnBoardingAgreementList {
     var allAgreementButton: some View {
-        MButton(
-            "전체 동의",
-            style: .primary,
-            horizontalPadding: 0,
-            verticalPadding: 13,
-            maxWidth: .infinity,
-            trailingIcon: .icCheck,
-            trailingIconSize: .init(width: 24, height: 24),
-            trailingIconColor: isAllAccepted ? .gray10 : .gray5,
-            action: onAllAgreementTapped
-        )
+        Button {
+            onAllAgreementTapped()
+        } label: {
+            HStack(spacing: 0) {
+                Image.icCheck
+                    .resizable()
+                    .renderingMode(.template)
+                    .frame(width: 24, height: 24)
+                    .foregroundStyle(isAllAccepted ? Color.gray10 : Color.gray3)
+                
+                MText(
+                    "전체 동의",
+                    style: .b3,
+                    color: .gray10
+                )
+            }
+            .padding(14)
+            .greedyWidth(.leading)
+        }
+        .background(Color.main)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

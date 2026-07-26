@@ -37,10 +37,10 @@ struct OnBoardingAgreementSection: Equatable {
     let body: String
 }
 
-enum OnBoardingAgreementConstants {
-    static let effectiveDateNotice = "공고일: 2026년 08월 01일  |  시행일: 2026년 08월 15일"
+fileprivate enum OnBoardingAgreementConstants {
+    fileprivate static let effectiveDateNotice = "공고일: 2026년 08월 01일  |  시행일: 2026년 08월 15일"
 
-    static let privacyPolicySections: [OnBoardingAgreementSection] = [
+    fileprivate static let privacyPolicySections: [OnBoardingAgreementSection] = [
         .init(
             title: "제1조 (개인정보 항목 및 수집 방법)",
             body: """
@@ -132,7 +132,7 @@ enum OnBoardingAgreementConstants {
         )
     ]
 
-    static let termsOfServiceSections: [OnBoardingAgreementSection] = [
+    fileprivate static let termsOfServiceSections: [OnBoardingAgreementSection] = [
         .init(
             title: "제1조 (목적)",
             body: "본 약관은 작심삼일(이하 '회사')가 운영하는 모바일 애플리케이션 'Mody'(이하 '서비스')의 이용 조건 및 절차, 회사와 이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다."

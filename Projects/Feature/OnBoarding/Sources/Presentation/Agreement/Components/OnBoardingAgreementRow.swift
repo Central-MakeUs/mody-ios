@@ -56,6 +56,5 @@ struct OnBoardingAgreementRow: View {
                     .frame(width: 24, height: 24)
             }
         }
-        .frame(height: 40)
     }
 }
