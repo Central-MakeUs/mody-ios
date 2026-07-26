@@ -43,6 +43,8 @@ private extension ProfileSocialLoginStatus {
             return .icKakao
         case .apple:
             return .icApple
+        case .iosTest:
+            return .imgModyAppIcon
         }
     }
 
@@ -52,6 +54,8 @@ private extension ProfileSocialLoginStatus {
             return "카카오 계정으로 로그인 중"
         case .apple:
             return "Apple 계정으로 로그인 중"
+        case .iosTest:
+            return "데모 계정으로 로그인 중"
         }
     }
 
@@ -61,6 +65,8 @@ private extension ProfileSocialLoginStatus {
             return .kakaoBackground
         case .apple:
             return .systemBlack
+        case .iosTest:
+            return .gray1
         }
     }
 
@@ -70,6 +76,8 @@ private extension ProfileSocialLoginStatus {
             return .systemBlack
         case .apple:
             return .systemWhite
+        case .iosTest:
+            return .gray10
         }
     }
 }

@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import Base
 import ComposableArchitecture
 import DesignSystem
 
 public struct SignInView: View {
-    private let store: StoreOf<SignInFeature>
+    @Bindable private var store: StoreOf<SignInFeature>
     
     public init(store: StoreOf<SignInFeature>) {
         self.store = store
@@ -20,6 +21,34 @@ public struct SignInView: View {
         signInBody
             .onAppear { store.send(.onAppear) }
             .mLoading(isPresent: store.isLoading)
+            .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
+                alertView
+            }
+            .alert("데모 로그인", isPresented: $store.isDemoLoginAlertPresented) {
+                SecureField("비밀번호", text: $store.demoLoginPassword)
+
+                Button("취소", role: .cancel) {
+                    store.send(.demoLoginCancelButtonTapped)
+                }
+
+                Button("로그인") {
+                    store.send(.demoLoginConfirmButtonTapped)
+                }
+            }
+    }
+}
+
+private extension SignInView {
+    @ViewBuilder
+    var alertView: some View {
+        if let alertCase = store.alertCase {
+            switch alertCase {
+            case let .error(networkError):
+                CommonErrorAlertView(networkError) {
+                    store.send(.alertAction(.dismiss))
+                }
+            }
+        }
     }
 }
 
@@ -53,6 +82,10 @@ private extension SignInView {
                 .frame(78, 78)
             
             titleText
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            store.send(.demoLoginTriggerAreaTapped)
         }
     }
     

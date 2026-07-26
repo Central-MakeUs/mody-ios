@@ -17,7 +17,7 @@ enum AuthEndpoint {
         CoreNetworkEndpoint(
             path: "api/v1/oauth/client/\(loginType.rawValue)",
             method: .GET,
-            queryParameters: ["accessToken": accessToken],
+            queryParameters: loginType == .iosTest ? [:] : ["accessToken": accessToken],
             requiresAuthorization: false
         )
     }

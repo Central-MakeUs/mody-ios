@@ -8,4 +8,5 @@
 public enum SocialLoginType: String, Codable {
     case kakao = "KAKAO"
     case apple = "APPLE"
+    case iosTest = "IOSTEST"
 }
