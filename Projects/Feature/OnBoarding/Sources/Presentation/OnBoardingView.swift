@@ -11,18 +11,22 @@ import DesignSystem
 import Base
 
 public struct OnBoardingView: View {
-    private let store: StoreOf<OnBoardingFeature>
+    @Bindable private var store: StoreOf<OnBoardingFeature>
 
     public init(store: StoreOf<OnBoardingFeature>) {
         self.store = store
     }
     
     public var body: some View {
-        onBoardingBody
-            .mLoading(isPresent: store.isLoading)
-            .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
-                alertView
-            }
+        NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
+            onBoardingBody
+        } destination: { store in
+            OnBoardingPathView(store: store)
+        }
+        .mLoading(isPresent: store.isLoading)
+        .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
+            alertView
+        }
     }
     
     private var onBoardingBody: some View {
@@ -59,6 +63,39 @@ private extension OnBoardingView {
 
     @ViewBuilder
     var stepBody: some View {
+        switch store.stage {
+        case .agreement:
+            agreementView
+        case .steps:
+            stepContent
+        }
+    }
+    
+    var agreementView: some View {
+        OnBoardingAgreementView(
+            isAllAccepted: store.isAllRequiredAgreementsAccepted,
+            isPrivacyPolicyAccepted: store.isPrivacyPolicyAccepted,
+            isTermsOfServiceAccepted: store.isTermsOfServiceAccepted,
+            onAllAgreementTapped: {
+                store.send(.allAgreementTapped)
+            },
+            onPrivacyPolicyAgreementTapped: {
+                store.send(.privacyPolicyAgreementTapped)
+            },
+            onTermsOfServiceAgreementTapped: {
+                store.send(.termsOfServiceAgreementTapped)
+            },
+            onPrivacyPolicyDetailTapped: {
+                store.send(.agreementDetailTapped(.privacyPolicy))
+            },
+            onTermsOfServiceDetailTapped: {
+                store.send(.agreementDetailTapped(.termsOfService))
+            }
+        )
+    }
+
+    @ViewBuilder
+    var stepContent: some View {
         switch store.currentStep {
         case .one:
             OnBoardingStepOneView(store: store.scope(state: \.stepOne, action: \.stepOne))
