@@ -69,7 +69,7 @@ final class FeedRecordCardCell: UICollectionViewCell {
         nicknameLabel.text = viewState.nickname
         streakLabel.text = viewState.streakText
         streakChipView.isHidden = viewState.isStreakChipHidden
-        moreButton.isHidden = !viewState.isMine
+        moreButton.isHidden = PhaseManager.shared.isPhaseOne || !viewState.isMine 
         recordImageView.configureRecord(
             urlString: viewState.imageUrl,
             cropRegion: viewState.imageCropRegion,
