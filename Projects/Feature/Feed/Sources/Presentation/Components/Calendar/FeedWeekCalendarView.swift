@@ -65,6 +65,14 @@ final class FeedWeekCalendarView: UIView {
             )
         }
     }
+
+    func setShadowVisible(_ isVisible: Bool) {
+        layer.shadowColor = UIColor.gray6.cgColor
+        layer.shadowOpacity = isVisible ? 0.3 : 0
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowRadius = 5
+        layer.masksToBounds = false
+    }
 }
 
 private extension FeedWeekCalendarView {

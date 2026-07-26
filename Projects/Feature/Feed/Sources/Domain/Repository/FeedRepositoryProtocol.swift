@@ -7,4 +7,12 @@
 
 public protocol FeedRepositoryProtocol {
     func getActivityCalendar(groupId: Int, baseDate: String) async throws -> FeedActivityCalendarModel
+    func getRecords(
+        groupId: Int,
+        date: String,
+        cursor: Int?,
+        size: Int
+    ) async throws -> FeedRecordPage
+
+    func postRecord(_ request: FeedRecordCreateRequest) async throws
 }

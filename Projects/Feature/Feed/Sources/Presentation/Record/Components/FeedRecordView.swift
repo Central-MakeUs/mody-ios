@@ -126,7 +126,8 @@ private extension FeedRecordView {
 
         finishButtonContainerView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(24)
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(40)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(40).priority(.low)
+            $0.bottom.lessThanOrEqualTo(keyboardLayoutGuide.snp.top).offset(-20)
         }
 
         scrollView.snp.makeConstraints {

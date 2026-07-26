@@ -6,43 +6,60 @@
 //
 
 import CommonDomain
+import CoreModyImageInterface
 import DesignSystem
 import Foundation
 import SwiftUI
+import UIKit
 
 struct ProfileAvatarView: View {
-    let imageURL: URL?
+    @State private var imagePhase: ImagePhase = .empty
+
     let defaultAvatar: DefaultAvatar
     let size: CGSize
     let hasStroke: Bool
+    let imageLoader: RemoteImageLoading
+    private let imageRequest: RemoteImageRequest?
 
     init(
         imageURL: URL?,
         defaultAvatar: DefaultAvatar,
         size: CGSize = .init(width: 50, height: 50),
-        hasStroke: Bool = false
+        hasStroke: Bool = false,
+        imageLoader: RemoteImageLoading
     ) {
-        self.imageURL = imageURL
         self.defaultAvatar = defaultAvatar
         self.size = size
         self.hasStroke = hasStroke
+        self.imageLoader = imageLoader
+
+        let maximumPixelSize = max(size.width, size.height) * UIScreen.main.scale
+        if let imageURL, maximumPixelSize.isFinite, maximumPixelSize > 0 {
+            self.imageRequest = RemoteImageRequest(
+                url: imageURL,
+                variantIdentifier: "my-page-profile",
+                maximumPixelSize: Int(maximumPixelSize.rounded(.up))
+            )
+        } else {
+            self.imageRequest = nil
+        }
     }
 
     var body: some View {
         Group {
-            if let imageURL {
-                AsyncImage(url: imageURL) { phase in
-                    switch phase {
-                    case let .success(image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    case .empty:
-                        SkeletonView(width: 50, height: 50)
-                            .clipShape(Circle())
-                    default:
-                        defaultAvatarImage
-                    }
+            if imageRequest != nil {
+                switch imagePhase {
+                case let .success(image):
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+
+                case .empty, .loading:
+                    SkeletonView(width: size.width, height: size.height)
+                        .clipShape(Circle())
+
+                case .failure:
+                    defaultAvatarImage
                 }
             } else {
                 defaultAvatarImage
@@ -55,6 +72,9 @@ struct ProfileAvatarView: View {
                 Circle()
                     .strokeBorder(Color.gray2, lineWidth: 2)
             }
+        }
+        .task(id: imageRequest?.identity) {
+            await loadImage(for: imageRequest)
         }
     }
 }
@@ -83,6 +103,42 @@ private extension DefaultAvatar {
             Image.icModyAvatarSurpriseBlack
         case .surpriseLight:
             Image.icModyAvatarSurpriseLight
+        }
+    }
+}
+
+private extension ProfileAvatarView {
+    enum ImagePhase {
+        case empty
+        case loading
+        case success(UIImage)
+        case failure
+    }
+
+    @MainActor
+    func loadImage(for request: RemoteImageRequest?) async {
+        guard let request else {
+            imagePhase = .empty
+            return
+        }
+
+        imagePhase = .loading
+
+        if let cachedImage = imageLoader.cachedImage(for: request) {
+            imagePhase = .success(cachedImage)
+            return
+        }
+
+        do {
+            let image = try await imageLoader.loadImage(with: request)
+            guard !Task.isCancelled else { return }
+            imagePhase = .success(image)
+
+        } catch is CancellationError {
+            return
+        } catch {
+            guard !Task.isCancelled else { return }
+            imagePhase = .failure
         }
     }
 }

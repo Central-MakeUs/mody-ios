@@ -13,6 +13,7 @@ struct AppAssembly: Assembly {
         assembleCoreNetwork(in: container)
         assembleCoreKakao(in: container)
         assembleCoreAuth(in: container)
+        assembleCoreModyImage(in: container)
         assembleCoreCamera(in: container)
         assembleCoreNotification(in: container)
         assembleFeature(in: container)

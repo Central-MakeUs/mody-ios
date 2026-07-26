@@ -5,6 +5,7 @@
 //  Created by 김동준 on 6/30/26
 //
 
+import CoreModyImageInterface
 import UIKit
 import ReactorKit
 import DesignSystem
@@ -19,7 +20,26 @@ public final class FeedViewController: UIViewController, View {
     private let groupHeaderView = UIView()
     private let groupButton = FeedGroupButton()
     private let weekCalendarView = FeedWeekCalendarView()
+    private let feedEmptyView = FeedEmptyView()
+    private let feedCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumLineSpacing = 20
+        layout.sectionInset = UIEdgeInsets(top: 16, left: 24, bottom: 36, right: 24)
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .systemWhite
+        collectionView.showsVerticalScrollIndicator = true
+        return collectionView
+    }()
+    var feedListViewState = FeedListViewState(
+        records: [],
+        isInitialLoading: false,
+        hasNextPage: false,
+        isEmpty: false
+    )
     private let weekNavigationActionSubject = PublishSubject<FeedReactor.Action>()
+    let imageLoader: RemoteImageLoading
 
     let dimmedControl = UIControl()
     let floatingActionButtonOverlayView = UIView()
@@ -61,7 +81,11 @@ public final class FeedViewController: UIViewController, View {
         iconTintColor: .systemWhite
     )
 
-    public init(reactor: FeedReactor) {
+    public init(
+        reactor: FeedReactor,
+        imageLoader: RemoteImageLoading
+    ) {
+        self.imageLoader = imageLoader
         defer { self.reactor = reactor }
         super.init(nibName: nil, bundle: nil)
     }
@@ -124,15 +148,16 @@ public final class FeedViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.isFloatingActionButtonExpanded)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, isExpanded in
                 owner.setFloatingActionButtonOverlayVisible(isExpanded)
             }
             .disposed(by: disposeBag)
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map { state in
                 FeedGroupHeaderViewState(
                     isLoading: state.isFetchGroupLoading,
@@ -140,7 +165,6 @@ public final class FeedViewController: UIViewController, View {
                 )
             }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, viewState in
                 owner.groupButton.configure(
                     title: viewState.groupName,
@@ -150,6 +174,7 @@ public final class FeedViewController: UIViewController, View {
             .disposed(by: disposeBag)
 
         bindWeekCalendar(reactor)
+        bindFeedList(reactor)
     }
 }
 
@@ -173,9 +198,9 @@ private extension FeedViewController {
             .disposed(by: disposeBag)
 
         reactor.state
+            .observe(on: MainScheduler.instance)
             .map(\.weekCalendarViewState)
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, viewState in
                 owner.weekCalendarView.configure(
                     title: viewState.calendarTitle,
@@ -191,10 +216,108 @@ private extension FeedViewController {
 }
 
 private extension FeedViewController {
+    func bindFeedList(_ reactor: FeedReactor) {
+        reactor.state
+            .observe(on: MainScheduler.instance)
+            .map { state in
+                FeedListViewState(
+                    records: state.feedRecords.map {
+                        FeedRecordCardViewState(
+                            record: $0,
+                            myMemberId: state.myMemberId
+                        )
+                    },
+                    isInitialLoading: state.isInitialFeedLoading,
+                    hasNextPage: state.hasNextFeedPage,
+                    isEmpty: !state.isInitialFeedLoading && state.feedRecords.isEmpty
+                )
+            }
+            .distinctUntilChanged()
+            .bind(with: self) { owner, viewState in
+                owner.applyFeedListViewState(viewState)
+            }
+            .disposed(by: disposeBag)
+
+        feedCollectionView.rx.contentOffset
+            .map { $0.y > 0 }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, isScrolled in
+                owner.weekCalendarView.setShadowVisible(isScrolled)
+            }
+            .disposed(by: disposeBag)
+    }
+
+    func applyFeedListViewState(_ viewState: FeedListViewState) {
+        let previousViewState = feedListViewState
+        let previousRecords = previousViewState.records
+        let currentRecords = viewState.records
+        let previousRecordCount = previousRecords.count
+        let currentRecordCount = currentRecords.count
+        let hasInsertedRecords = currentRecordCount > previousRecordCount
+
+        feedListViewState = viewState
+        feedCollectionView.isHidden = viewState.isEmpty
+        feedEmptyView.isHidden = !viewState.isEmpty
+
+        guard previousViewState.isInitialLoading == viewState.isInitialLoading,
+              !viewState.isInitialLoading else {
+            feedCollectionView.reloadData()
+            feedCollectionView.collectionViewLayout.invalidateLayout()
+            return
+        }
+
+        let insertedIndexPaths: [IndexPath]
+
+        if hasInsertedRecords,
+           currentRecords.starts(with: previousRecords) {
+            insertedIndexPaths = (previousRecordCount..<currentRecordCount)
+                .map { IndexPath(item: $0, section: 0) }
+        } else if hasInsertedRecords,
+                  currentRecords.suffix(previousRecordCount).elementsEqual(previousRecords) {
+            let insertedCount = currentRecordCount - previousRecordCount
+            insertedIndexPaths = (0..<insertedCount)
+                .map { IndexPath(item: $0, section: 0) }
+        } else {
+            guard currentRecords != previousRecords else {
+                feedCollectionView.collectionViewLayout.invalidateLayout()
+                return
+            }
+
+            feedCollectionView.reloadData()
+            feedCollectionView.collectionViewLayout.invalidateLayout()
+            return
+        }
+
+        feedCollectionView.performBatchUpdates {
+            feedCollectionView.insertItems(at: insertedIndexPaths)
+        } completion: { [weak self] _ in
+            self?.feedCollectionView.collectionViewLayout.invalidateLayout()
+        }
+    }
+}
+
+private extension FeedViewController {
     func setupUI() {
         view.backgroundColor = .systemWhite
         groupHeaderView.backgroundColor = .systemWhite
         dimmedControl.backgroundColor = .systemBlack.withAlphaComponent(0.6)
+        feedEmptyView.isHidden = true
+        feedCollectionView.dataSource = self
+        feedCollectionView.delegate = self
+        feedCollectionView.register(
+            FeedRecordCardCell.self,
+            forCellWithReuseIdentifier: FeedRecordCardCell.reuseIdentifier
+        )
+        feedCollectionView.register(
+            FeedRecordSkeletonCell.self,
+            forCellWithReuseIdentifier: FeedRecordSkeletonCell.reuseIdentifier
+        )
+        feedCollectionView.register(
+            FeedLoadingFooterView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: FeedLoadingFooterView.reuseIdentifier
+        )
         
         expandedButtonStackView.axis = .vertical
         expandedButtonStackView.alignment = .trailing
@@ -203,8 +326,9 @@ private extension FeedViewController {
     
     func setupLayout() {
         configureGroupHeaderLayout()
-        configureFloatingActionButtonLayout()
         configureWeekCalendarLayout()
+        configureFeedListLayout()
+        configureFloatingActionButtonLayout()
     }
 
     func configureGroupHeaderLayout() {
@@ -236,6 +360,22 @@ private extension FeedViewController {
         weekCalendarView.snp.makeConstraints {
             $0.top.equalTo(groupHeaderView.snp.bottom)
             $0.leading.trailing.equalToSuperview()
+        }
+    }
+
+    func configureFeedListLayout() {
+        view.addSubview(feedCollectionView)
+        view.addSubview(feedEmptyView)
+        view.bringSubviewToFront(weekCalendarView)
+
+        feedCollectionView.snp.makeConstraints {
+            $0.top.equalTo(weekCalendarView.snp.bottom)
+            $0.leading.trailing.bottom.equalToSuperview()
+        }
+
+        feedEmptyView.snp.makeConstraints {
+            $0.top.equalTo(weekCalendarView.snp.bottom)
+            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
 }

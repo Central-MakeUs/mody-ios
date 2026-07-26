@@ -13,15 +13,13 @@ import SnapKit
 import UIKit
 
 final class CameraContainerViewController: UIViewController {
-    struct CapturedPhoto {
-        let image: UIImage
-        let originalFileName: String
-    }
+    static let previewMaxPixelSize = 2048
 
     private let initialSource: CameraCaptureSource
     let onComplete: (CameraCaptureResult) -> Void
     let onCancel: () -> Void
     let sessionController = CameraCaptureSessionController()
+    let capturedPhotoProcessor: CameraCapturedPhotoProcessor
 
     private let previewView = CameraPreviewView()
     let selectedImageView = UIImageView()
@@ -30,15 +28,19 @@ final class CameraContainerViewController: UIViewController {
     let photoConfirmationContainerView = PhotoConfirmationContainerView()
     let roiOverlayView = ROIOverlayView()
 
-    var capturedPhoto: CapturedPhoto?
+    var capturedPhoto: CameraCapturedPhoto?
+    var photoLibraryLoadProgress: Progress?
+    var photoLibraryLoadID: UUID?
     private var didPresentInitialPhotoLibrary = false
 
     init(
         initialSource: CameraCaptureSource,
+        capturedPhotoProcessor: CameraCapturedPhotoProcessor,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
         self.initialSource = initialSource
+        self.capturedPhotoProcessor = capturedPhotoProcessor
         self.onComplete = onComplete
         self.onCancel = onCancel
         super.init(nibName: nil, bundle: nil)
@@ -72,7 +74,13 @@ final class CameraContainerViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        sessionController.cancelPendingCapture()
         sessionController.stop()
+    }
+
+    deinit {
+        photoLibraryLoadProgress?.cancel()
+        removeCapturedPhotoFile()
     }
 }
 

@@ -6,15 +6,24 @@
 //
 
 import ComposableArchitecture
+import CoreModyImageInterface
 import MyPageInterface
 import SwiftUI
 
 final class MyPageHostingController: UIHostingController<MyPageView>, MyPageInputHandler {
     private let store: StoreOf<MyPageFeature>
 
-    init(store: StoreOf<MyPageFeature>) {
+    init(
+        store: StoreOf<MyPageFeature>,
+        imageLoader: RemoteImageLoading
+    ) {
         self.store = store
-        super.init(rootView: MyPageView(store: store))
+        super.init(
+            rootView: MyPageView(
+                store: store,
+                imageLoader: imageLoader
+            )
+        )
     }
 
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {

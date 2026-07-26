@@ -6,14 +6,20 @@
 //
 
 import ComposableArchitecture
+import CoreModyImageInterface
 import DesignSystem
 import SwiftUI
 
 public struct MyPageView: View {
     @Bindable private var store: StoreOf<MyPageFeature>
+    private let imageLoader: RemoteImageLoading
 
-    public init(store: StoreOf<MyPageFeature>) {
+    public init(
+        store: StoreOf<MyPageFeature>,
+        imageLoader: RemoteImageLoading
+    ) {
         self.store = store
+        self.imageLoader = imageLoader
     }
 
     public var body: some View {
@@ -35,7 +41,8 @@ private extension MyPageView {
                 ProfileSection(
                     imageURL: store.profileImageURL,
                     defaultAvatar: store.defaultAvatar,
-                    userInfo: store.isProfileRefreshing ? nil : store.userInfo
+                    userInfo: store.isProfileRefreshing ? nil : store.userInfo,
+                    imageLoader: imageLoader
                 ) {
                     store.send(.profileEditButtonTapped)
                 }

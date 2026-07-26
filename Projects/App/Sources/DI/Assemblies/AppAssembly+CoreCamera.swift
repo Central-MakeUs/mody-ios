@@ -7,6 +7,7 @@
 
 import CoreCamera
 import CoreCameraInterface
+import CoreModyImageInterface
 import Swinject
 
 extension AppAssembly {
@@ -14,8 +15,12 @@ extension AppAssembly {
         container.register(CameraPermissionInterface.self) { _ in
             CameraPermissionService()
         }
-        container.register(CameraCaptureBuildable.self) { _ in
-            CameraCaptureBuilder()
+        container.register(CameraCaptureBuildable.self) { resolver in
+            let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
+
+            return CameraCaptureBuilder(
+                temporaryImageFileUseCase: temporaryImageFileUseCase
+            )
         }
     }
 }

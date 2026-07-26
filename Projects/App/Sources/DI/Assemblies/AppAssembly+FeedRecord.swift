@@ -6,16 +6,25 @@
 //
 
 import Swinject
+import CoreModyImageInterface
 import FeedInterface
 import Feed
 
 extension AppAssembly {
     func assembleFeedRecordReactor(in container: Container) {
-        container.register(((FeedRecordRouter, FeedRecordType) -> FeedRecordReactor).self) { _ in
-            return { router, recordType in
+        container.register(((FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor).self) { resolver in
+            return { router, recordType, outputHandler in
+                let feedUseCase: FeedUseCase = resolver.resolve()
+                let imageUploadUseCase: ImageUploadUseCaseProtocol = resolver.resolve()
+                let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
+
                 return FeedRecordReactor(
                     router: router,
-                    recordType: recordType
+                    recordType: recordType,
+                    feedUseCase: feedUseCase,
+                    imageUploadUseCase: imageUploadUseCase,
+                    temporaryImageFileUseCase: temporaryImageFileUseCase,
+                    outputHandler: outputHandler
                 )
             }
         }

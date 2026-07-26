@@ -6,11 +6,13 @@
 //
 
 import Swinject
+import CoreAuthInterface
 import CoreCameraInterface
-import CoreNetworkInterface
+import CoreModyImageInterface
 import FeedInterface
 import Feed
 import ModyGroupInterface
+import CoreNetworkInterface
 
 extension AppAssembly {
     func assembleFeedReactor(in container: Container) {
@@ -20,17 +22,19 @@ extension AppAssembly {
             return FeedRepository(network: network)
         }
 
-        container.register(FeedUseCaseProtocol.self) { resolver in
-            let repository: FeedRepositoryProtocol = resolver.resolve()
+        container.register(FeedUseCase.self) { resolver in
+            let feedRepository: FeedRepositoryProtocol = resolver.resolve()
 
-            return FeedUseCase(feedRepository: repository)
+            return FeedUseCase(feedRepository: feedRepository)
         }
 
         container.register(FeedReactor.self) { (resolver: Resolver, router: FeedRouter) in
+            let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
-            let feedUseCase: FeedUseCaseProtocol = resolver.resolve()
+            let feedUseCase: FeedUseCase = resolver.resolve()
 
             return FeedReactor(
+                authUseCase: authUseCase,
                 groupUseCase: groupUseCase,
                 feedUseCase: feedUseCase,
                 router: router
@@ -38,15 +42,17 @@ extension AppAssembly {
         }
         
         container.register(FeedBuildable.self) { resolver in
-            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType) -> FeedRecordReactor = resolver.resolve()
+            let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor = resolver.resolve()
             let cameraCaptureBuilder: CameraCaptureBuildable = resolver.resolve()
+            let imageLoader: RemoteImageLoading = resolver.resolve()
 
             return FeedBuilder(
                 makeFeedReactor: { router in
                     resolver.resolve(argument: router)
                 },
                 makeFeedRecordReactor: makeFeedRecordReactor,
-                cameraCaptureBuilder: cameraCaptureBuilder
+                cameraCaptureBuilder: cameraCaptureBuilder,
+                imageLoader: imageLoader
             )
         }
     }

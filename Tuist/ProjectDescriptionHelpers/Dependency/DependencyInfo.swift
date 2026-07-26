@@ -58,6 +58,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreKakao)),
             .module(.MicroFeature(.CoreCamera)),
             .module(.MicroFeature(.CoreNotification)),
+            .module(.MicroFeature(.CoreModyImage)),
             
             .external(.FirebaseCore),
             .external(.FirebaseMessaging),
@@ -68,6 +69,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreKakao),
             .microFeature(.CoreCamera),
             .microFeature(.CoreNotification),
+            .microFeature(.CoreModyImage),
             .microFeature(.Main)
         ],
         .Root: [
@@ -142,16 +144,21 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .module(.Util),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNetwork),
                 .microFeature(.ModyGroup),
                 .external(.ReactorKit),
                 .external(.RxSwift),
                 .external(.RxCocoa),
-                .external(.RxRelay)
+                .external(.RxRelay),
+                .microFeature(.CoreModyImage)
             ],
             demo: [
-                .module(.MicroFeature(.CoreCamera))
+                .module(.DesignSystem),
+                .module(.MicroFeature(.CoreCamera)),
+                .module(.MicroFeature(.CoreModyImage))
             ]
         ),
         .Main: .init(
@@ -188,11 +195,13 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreNotification),
-                .microFeature(.ModyGroup)
+                .microFeature(.ModyGroup),
+                .microFeature(.CoreModyImage)
             ],
             demo: [
                 .module(.CommonDomain),
-                .microFeature(.CoreAuth)
+                .microFeature(.CoreAuth),
+                .module(.MicroFeature(.CoreModyImage))
             ]
         ),
         .CoreNetwork: .init(
@@ -239,9 +248,21 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .CoreCamera: .init(
+            interface: [
+                .microFeature(.CoreModyImage)
+            ],
             implementation: [
                 .module(.DesignSystem),
+                .microFeature(.CoreModyImage),
                 .external(.SnapKit)
+            ]
+        ),
+        .CoreModyImage: .init(
+            implementation: [
+                .module(.CommonDomain),
+                .microFeature(.CoreNetwork),
+                .external(.Alamofire),
+                .external(.Nuke)
             ]
         )
     ]

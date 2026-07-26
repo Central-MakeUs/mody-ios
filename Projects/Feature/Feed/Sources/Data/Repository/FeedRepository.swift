@@ -28,4 +28,50 @@ public struct FeedRepository: FeedRepositoryProtocol {
 
         return result.toDomain()
     }
+    
+    public func getRecords(
+        groupId: Int,
+        date: String,
+        cursor: Int?,
+        size: Int
+    ) async throws -> FeedRecordPage {
+        let endpoint = FeedEndpoint.getRecords(
+            groupId: groupId,
+            date: date,
+            cursor: cursor,
+            size: size
+        )
+        let response: CoreNetworkResponse<FeedRecordListResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
+    }
+
+    public func postRecord(_ request: FeedRecordCreateRequest) async throws {
+        let body = FeedRecordCreateBody(
+            recordType: request.recordType.rawValue,
+            imageKey: request.imageKey,
+            mealTime: request.mealTime,
+            menu: request.menu,
+            exerciseDurationHours: request.exerciseDurationHours,
+            exerciseDurationMinutes: request.exerciseDurationMinutes,
+            exerciseName: request.exerciseName,
+            imageCropRegion: FeedRecordImageCropRegionBody(
+                x: request.imageCropRegion.x,
+                y: request.imageCropRegion.y,
+                width: request.imageCropRegion.width,
+                height: request.imageCropRegion.height
+            )
+        )
+        let response: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(
+            FeedEndpoint.postRecord(body)
+        )
+
+        guard response.isSuccess != false else {
+            throw NetworkError.invalidResponse
+        }
+    }
 }

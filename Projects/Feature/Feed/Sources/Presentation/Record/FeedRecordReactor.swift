@@ -6,13 +6,19 @@
 //
 
 import Foundation
+import CommonDomain
 import CoreCameraInterface
+import CoreModyImageInterface
 import FeedInterface
 import ReactorKit
 
 public final class FeedRecordReactor: Reactor {
     public let initialState: State
     private weak var router: FeedRecordRouter?
+    private let feedUseCase: FeedUseCase
+    private let imageUploadUseCase: ImageUploadUseCaseProtocol
+    private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
+    private let output: @MainActor (FeedRecordOutput) -> Void
 
     public enum PhotoPresentation: Equatable {
         case none
@@ -31,8 +37,15 @@ public final class FeedRecordReactor: Reactor {
         var isExerciseMenuExpanded = false
         var photoPresentation = PhotoPresentation.none
         var selectedPhoto: CameraCaptureResult?
+        var isSubmittingRecord = false
+        var recordFailureAlert: NetworkError?
 
         var isFinishButtonEnabled: Bool {
+            guard selectedPhoto != nil,
+                  !isSubmittingRecord else {
+                return false
+            }
+
             switch recordType {
             case .meal:
                 return !mealMenu.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -60,6 +73,7 @@ public final class FeedRecordReactor: Reactor {
         case didChangeCustomExerciseName(String)
         case didChangeExerciseDuration(hours: Int, minutes: Int)
         case didTapFinishButton
+        case didDismissRecordFailureAlert
     }
 
     public enum Mutation {
@@ -71,22 +85,40 @@ public final class FeedRecordReactor: Reactor {
         case setExerciseType(FeedExerciseType)
         case setCustomExerciseName(String)
         case setExerciseDuration(hours: Int, minutes: Int)
+        case setSubmittingRecord(Bool)
+        case setRecordFailureAlert(NetworkError?)
     }
 
     public init(
         router: FeedRecordRouter,
-        recordType: FeedRecordType
+        recordType: FeedRecordType,
+        feedUseCase: FeedUseCase,
+        imageUploadUseCase: ImageUploadUseCaseProtocol,
+        temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol,
+        outputHandler: FeedRecordOutputHandler
     ) {
         self.router = router
+        self.feedUseCase = feedUseCase
+        self.imageUploadUseCase = imageUploadUseCase
+        self.temporaryImageFileUseCase = temporaryImageFileUseCase
+        self.output = { [weak outputHandler] output in
+            outputHandler?.handle(output: output)
+        }
         self.initialState = State(
             recordType: recordType,
             mealTime: Self.makeInitialMealTime()
         )
     }
 
+    deinit {
+        removeSelectedPhotoFile()
+    }
+
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .didTapBackButton:
+            guard !currentState.isSubmittingRecord else { return .empty() }
+            removeSelectedPhotoFile()
             return routeToBack()
         case .didTapPhotoUpload:
             return .just(.setPhotoPresentation(.sourceSheet))
@@ -97,6 +129,7 @@ public final class FeedRecordReactor: Reactor {
         case .didTapGallery:
             return .just(.setPhotoPresentation(.capture(.photoLibrary)))
         case let .didCompletePhotoCapture(result):
+            removeSelectedPhotoFile()
             return .just(.completePhotoCapture(result))
         case let .didChangeMealMenu(menu):
             return .just(.setMealMenu(menu))
@@ -112,7 +145,9 @@ public final class FeedRecordReactor: Reactor {
             return .just(.setExerciseDuration(hours: hours, minutes: minutes))
         case .didTapFinishButton:
             guard currentState.isFinishButtonEnabled else { return .empty() }
-            return .empty()
+            return submitRecord(currentState)
+        case .didDismissRecordFailureAlert:
+            return .just(.setRecordFailureAlert(nil))
         }
     }
 
@@ -139,6 +174,10 @@ public final class FeedRecordReactor: Reactor {
         case let .setExerciseDuration(hours, minutes):
             newState.exerciseHours = hours
             newState.exerciseMinutes = minutes
+        case let .setSubmittingRecord(isSubmitting):
+            newState.isSubmittingRecord = isSubmitting
+        case let .setRecordFailureAlert(error):
+            newState.recordFailureAlert = error
         }
 
         return newState
@@ -164,5 +203,60 @@ private extension FeedRecordReactor {
             }
             return .empty()
         }
+    }
+
+    func submitRecord(_ state: State) -> Observable<Mutation> {
+        guard let selectedPhoto = state.selectedPhoto else {
+            return .just(.setRecordFailureAlert(.invalidResponse))
+        }
+
+        return Observable<Mutation>.create { [weak self] observer in
+            let task = Task {
+                guard let self else { return }
+                await MainActor.run {
+                    observer.onNext(.setSubmittingRecord(true))
+                }
+
+                do {
+                    let imageKey = try await self.imageUploadUseCase.uploadImage(
+                        fileURL: selectedPhoto.originalFile.fileURL,
+                        fileName: selectedPhoto.originalFile.fileName,
+                        domain: .record
+                    )
+
+                    guard let request = self.feedUseCase.makeRecordCreationRequest(
+                        imageKey: imageKey,
+                        recordType: state.recordType,
+                        mealTime: state.mealTime,
+                        mealMenu: state.mealMenu,
+                        exerciseType: state.selectedExerciseType,
+                        customExerciseName: state.customExerciseName,
+                        exerciseDurationHours: state.exerciseHours,
+                        exerciseDurationMinutes: state.exerciseMinutes,
+                        normalizedImageCropRegion: selectedPhoto.normalizedSelectionFrame
+                    ) else {
+                        throw NetworkError.invalidResponse
+                    }
+                    try await self.feedUseCase.createRecord(request)
+                    try? self.temporaryImageFileUseCase.removeImage(
+                        at: selectedPhoto.originalFile.fileURL
+                    )
+                    await self.output(.recordCreated)
+                    observer.onCompleted()
+                } catch {
+                    observer.onNext(.setSubmittingRecord(false))
+                    observer.onNext(.setRecordFailureAlert(error as? NetworkError ?? .unknown))
+                    observer.onCompleted()
+                }
+            }
+
+            return Disposables.create { task.cancel() }
+        }
+        .observe(on: MainScheduler.instance)
+    }
+
+    func removeSelectedPhotoFile() {
+        guard let fileURL = currentState.selectedPhoto?.originalFile.fileURL else { return }
+        try? temporaryImageFileUseCase.removeImage(at: fileURL)
     }
 }

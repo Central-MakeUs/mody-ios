@@ -14,6 +14,7 @@ public protocol FeedBuildable {
     @MainActor
     func makeFeedRecordViewController(
         router: FeedRecordRouter,
-        recordType: FeedRecordType
+        recordType: FeedRecordType,
+        outputHandler: FeedRecordOutputHandler
     ) -> UIViewController
 }

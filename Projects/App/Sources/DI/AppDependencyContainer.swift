@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreModyImageInterface
 import CoreNotificationInterface
 import Swinject
 
@@ -23,6 +24,10 @@ final class AppDependencyContainer {
     }
 
     func makeNotificationUseCase() -> NotificationUseCaseProtocol {
+        assembler.resolver.resolve()
+    }
+
+    func makeTemporaryImageFileUseCase() -> TemporaryImageFileUseCaseProtocol {
         assembler.resolver.resolve()
     }
 }

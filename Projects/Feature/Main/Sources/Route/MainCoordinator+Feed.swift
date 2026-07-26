@@ -15,7 +15,8 @@ extension MainCoordinator: FeedRouter {
         case .routeToRecord(let recordType):
             let viewController = feedBuilder.makeFeedRecordViewController(
                 router: self,
-                recordType: recordType
+                recordType: recordType,
+                outputHandler: self
             )
             navigationController.pushViewController(viewController, animated: true)
         }
