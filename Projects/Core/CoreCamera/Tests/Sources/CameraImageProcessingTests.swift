@@ -5,6 +5,8 @@
 //  Created by 김동준 on 7/25/26.
 //
 
+import CoreCameraInterface
+import CoreModyImageInterface
 import UIKit
 import XCTest
 @testable import CoreCamera
@@ -47,6 +49,43 @@ final class CameraImageProcessingTests: XCTestCase {
             CGRect(x: 0.25, y: 0.25, width: 0.5, height: 0.5)
         )
     }
+
+    @MainActor
+    func testCropDisabledReturnsExistingPreviewAndFullFrame() throws {
+        let previewImage = makeImage(size: CGSize(width: 300, height: 150))
+        var capturedResult: CameraCaptureResult?
+        let viewController = CameraContainerViewController(
+            initialSource: .photoLibrary,
+            isCropEnabled: false,
+            capturedPhotoProcessor: CameraCapturedPhotoProcessor(
+                temporaryImageFileUseCase: CameraTemporaryImageFileUseCaseStub(),
+                previewMaxPixelSize: CameraContainerViewController.previewMaxPixelSize
+            ),
+            onComplete: { capturedResult = $0 },
+            onCancel: {}
+        )
+
+        viewController.loadViewIfNeeded()
+        viewController.setCapturedPhoto(
+            CameraCapturedPhoto(
+                originalFile: TemporaryImageFile(
+                    fileURL: FileManager.default.temporaryDirectory
+                        .appendingPathComponent(UUID().uuidString),
+                    fileName: "profile.jpg",
+                    contentType: "image/jpeg"
+                ),
+                previewImage: previewImage
+            )
+        )
+        viewController.completeCapture()
+
+        XCTAssertNil(viewController.roiOverlayView.superview)
+        XCTAssertTrue(capturedResult?.croppedPreviewImage === previewImage)
+        XCTAssertEqual(
+            capturedResult?.normalizedSelectionFrame,
+            CGRect(x: 0, y: 0, width: 1, height: 1)
+        )
+    }
 }
 
 private extension CameraImageProcessingTests {
@@ -58,4 +97,24 @@ private extension CameraImageProcessingTests {
             context.fill(CGRect(origin: .zero, size: size))
         }
     }
+}
+
+private struct CameraTemporaryImageFileUseCaseStub: TemporaryImageFileUseCaseProtocol {
+    func saveImage(
+        data: Data,
+        fileName: String
+    ) throws -> TemporaryImageFile {
+        throw CocoaError(.featureUnsupported)
+    }
+
+    func copyImage(
+        at sourceURL: URL,
+        fileName: String
+    ) throws -> TemporaryImageFile {
+        throw CocoaError(.featureUnsupported)
+    }
+
+    func removeImage(at fileURL: URL) throws {}
+
+    func removeExpiredImages(olderThan expirationInterval: TimeInterval) throws {}
 }

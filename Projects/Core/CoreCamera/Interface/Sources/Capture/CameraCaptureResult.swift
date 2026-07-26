@@ -8,10 +8,10 @@
 import CoreModyImageInterface
 import UIKit
 
-/// 촬영 완료 후 호출자에게 전달되는 원본 파일과 화면용 크롭 정보입니다.
+/// 촬영 완료 후 호출자에게 전달되는 원본 파일과 화면용 미리보기 정보입니다.
 public struct CameraCaptureResult {
     public let originalFile: TemporaryImageFile
-    /// 화면 표시용으로 다운샘플된 이미지에서 만든 크롭 미리보기입니다.
+    /// crop이 활성화되면 crop 결과이며, 비활성화되면 전체 미리보기입니다.
     public let croppedPreviewImage: UIImage
     public let normalizedSelectionFrame: CGRect
 

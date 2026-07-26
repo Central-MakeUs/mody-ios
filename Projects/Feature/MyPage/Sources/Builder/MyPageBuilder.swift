@@ -5,6 +5,7 @@
 //  Created by 김동준 on 6/30/26
 //
 
+import CoreCameraInterface
 import CoreModyImageInterface
 import UIKit
 import SwiftUI
@@ -19,6 +20,7 @@ public struct MyPageBuilder: MyPageBuildable {
     private let makeGroupSettingsFeature: (MyPageGroupSettingsRouter, MyPageOutputHandler) -> GroupSettingsFeature
     private let makeHealthDataSettingsFeature: (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature
     private let imageLoader: RemoteImageLoading
+    private let cameraCaptureBuilder: CameraCaptureBuildable
     
     public init(
         makeMyPageFeature: @escaping (MyPageRouter, MyPageOutputHandler) -> MyPageFeature,
@@ -26,7 +28,8 @@ public struct MyPageBuilder: MyPageBuildable {
         makeNotificationSettingsFeature: @escaping (MyPageNotificationSettingsRouter) -> NotificationSettingsFeature,
         makeGroupSettingsFeature: @escaping (MyPageGroupSettingsRouter, MyPageOutputHandler) -> GroupSettingsFeature,
         makeHealthDataSettingsFeature: @escaping (MyPageHealthDataSettingsRouter) -> HealthDataSettingsFeature,
-        imageLoader: RemoteImageLoading
+        imageLoader: RemoteImageLoading,
+        cameraCaptureBuilder: CameraCaptureBuildable
     ) {
         self.makeMyPageFeature = makeMyPageFeature
         self.makeProfileFeature = makeProfileFeature
@@ -34,6 +37,7 @@ public struct MyPageBuilder: MyPageBuildable {
         self.makeGroupSettingsFeature = makeGroupSettingsFeature
         self.makeHealthDataSettingsFeature = makeHealthDataSettingsFeature
         self.imageLoader = imageLoader
+        self.cameraCaptureBuilder = cameraCaptureBuilder
     }
 
     @MainActor
@@ -68,7 +72,8 @@ public struct MyPageBuilder: MyPageBuildable {
         }
         let view = ProfileView(
             store: store,
-            imageLoader: imageLoader
+            imageLoader: imageLoader,
+            cameraCaptureBuilder: cameraCaptureBuilder
         )
 
         return UIHostingController(rootView: view)

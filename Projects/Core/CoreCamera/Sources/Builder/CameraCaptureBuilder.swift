@@ -19,6 +19,7 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
     @MainActor
     public func makeCameraViewController(
         source: CameraCaptureSource,
+        isCropEnabled: Bool,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController {
@@ -29,6 +30,7 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
 
         return CameraContainerViewController(
             initialSource: source,
+            isCropEnabled: isCropEnabled,
             capturedPhotoProcessor: capturedPhotoProcessor,
             onComplete: onComplete,
             onCancel: onCancel

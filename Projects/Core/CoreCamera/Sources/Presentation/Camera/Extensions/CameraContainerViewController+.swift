@@ -55,7 +55,7 @@ extension CameraContainerViewController {
         selectedImageView.isHidden = false
         bottomCameraShutterView.isHidden = true
         photoConfirmationContainerView.isHidden = false
-        roiOverlayView.isHidden = false
+        roiOverlayView.isHidden = !isCropEnabled
         closeButton.tintColor = .systemWhite
         sessionController.stop()
     }
@@ -77,17 +77,28 @@ extension CameraContainerViewController {
         guard let result = autoreleasepool(invoking: { () -> CameraCaptureResult? in
             guard let capturedPhoto else { return nil }
 
-            let cropOutput = CameraImageCropper().crop(
-                image: capturedPhoto.previewImage,
-                selectionFrame: roiOverlayView.selectionFrame,
-                containerSize: roiOverlayView.bounds.size
-            )
-            guard let cropOutput else { return nil }
+            let previewImage: UIImage
+            let normalizedSelectionFrame: CGRect
+
+            if isCropEnabled {
+                guard let cropOutput = CameraImageCropper().crop(
+                    image: capturedPhoto.previewImage,
+                    selectionFrame: roiOverlayView.selectionFrame,
+                    containerSize: roiOverlayView.bounds.size
+                ) else {
+                    return nil
+                }
+                previewImage = cropOutput.croppedImage
+                normalizedSelectionFrame = cropOutput.normalizedSelectionFrame
+            } else {
+                previewImage = capturedPhoto.previewImage
+                normalizedSelectionFrame = CGRect(x: 0, y: 0, width: 1, height: 1)
+            }
 
             let result = CameraCaptureResult(
                 originalFile: capturedPhoto.originalFile,
-                croppedPreviewImage: cropOutput.croppedImage,
-                normalizedSelectionFrame: cropOutput.normalizedSelectionFrame
+                croppedPreviewImage: previewImage,
+                normalizedSelectionFrame: normalizedSelectionFrame
             )
             clearCapturedPhoto(removingFile: false)
             return result
