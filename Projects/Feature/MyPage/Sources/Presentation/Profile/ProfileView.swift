@@ -8,19 +8,23 @@
 import SwiftUI
 import Base
 import ComposableArchitecture
+import CoreCameraInterface
 import CoreModyImageInterface
 import DesignSystem
 
 public struct ProfileView: View {
     @Bindable private var store: StoreOf<ProfileFeature>
     private let imageLoader: RemoteImageLoading
+    private let cameraCaptureBuilder: CameraCaptureBuildable
 
     public init(
         store: StoreOf<ProfileFeature>,
-        imageLoader: RemoteImageLoading
+        imageLoader: RemoteImageLoading,
+        cameraCaptureBuilder: CameraCaptureBuildable
     ) {
         self.store = store
         self.imageLoader = imageLoader
+        self.cameraCaptureBuilder = cameraCaptureBuilder
     }
 
     public var body: some View {
@@ -30,6 +34,32 @@ public struct ProfileView: View {
             .mLoading(isPresent: store.isLoading)
             .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
                 alertView
+            }
+            .sheet(
+                isPresented: $store.isPhotoFlowPresented,
+                onDismiss: { store.send(.photoPresentationDismissed) }
+            ) {
+                MPhotoSourceSheetView(
+                    onCameraTap: { store.send(.cameraSourceTapped) },
+                    onGalleryTap: { store.send(.gallerySourceTapped) }
+                )
+                .presentationDetents([.height(200)])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(36)
+                .fullScreenCover(
+                    isPresented: $store.isCameraPresented,
+                    onDismiss: { store.send(.photoCaptureCancelled) }
+                ) {
+                    if let source = store.photoCaptureSource {
+                        ProfileCameraCaptureView(
+                            source: source,
+                            cameraCaptureBuilder: cameraCaptureBuilder,
+                            onComplete: { store.send(.photoCaptureCompleted($0)) },
+                            onCancel: { store.send(.photoCaptureCancelled) }
+                        )
+                        .ignoresSafeArea()
+                    }
+                }
             }
     }
 }
@@ -41,13 +71,18 @@ private extension ProfileView {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    ProfileAvatarView(
-                        imageURL: store.profileImageURL,
-                        defaultAvatar: store.defaultAvatar,
-                        size: .init(width: 100, height: 100),
-                        hasStroke: true,
-                        imageLoader: imageLoader
-                    )
+                    Button {
+                        store.send(.profileImageTapped)
+                    } label: {
+                        ProfileAvatarView(
+                            imageURL: store.profileImageURL,
+                            localImage: store.selectedPhoto?.croppedPreviewImage,
+                            defaultAvatar: store.defaultAvatar,
+                            size: .init(width: 100, height: 100),
+                            hasStroke: true,
+                            imageLoader: imageLoader
+                        )
+                    }
                     .padding(.top, 28)
 
                     ProfileForm(

@@ -19,10 +19,12 @@ struct ProfileAvatarView: View {
     let size: CGSize
     let hasStroke: Bool
     let imageLoader: RemoteImageLoading
+    private let localImage: UIImage?
     private let imageRequest: RemoteImageRequest?
 
     init(
         imageURL: URL?,
+        localImage: UIImage? = nil,
         defaultAvatar: DefaultAvatar,
         size: CGSize = .init(width: 50, height: 50),
         hasStroke: Bool = false,
@@ -32,6 +34,7 @@ struct ProfileAvatarView: View {
         self.size = size
         self.hasStroke = hasStroke
         self.imageLoader = imageLoader
+        self.localImage = localImage
 
         let maximumPixelSize = max(size.width, size.height) * UIScreen.main.scale
         if let imageURL, maximumPixelSize.isFinite, maximumPixelSize > 0 {
@@ -47,7 +50,11 @@ struct ProfileAvatarView: View {
 
     var body: some View {
         Group {
-            if imageRequest != nil {
+            if let localImage {
+                Image(uiImage: localImage)
+                    .resizable()
+                    .scaledToFill()
+            } else if imageRequest != nil {
                 switch imagePhase {
                 case let .success(image):
                     Image(uiImage: image)
@@ -74,6 +81,7 @@ struct ProfileAvatarView: View {
             }
         }
         .task(id: imageRequest?.identity) {
+            guard localImage == nil else { return }
             await loadImage(for: imageRequest)
         }
     }

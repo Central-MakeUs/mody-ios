@@ -45,21 +45,12 @@ public struct MyPageFeature {
             self.defaultAvatar = defaultAvatar
         }
 
-        // MARK: 추후 캐싱 라이브러리 사용하면서 걷어낼 예정
         var profileImageURL: URL? {
-            guard let urlString = userInfo?.profileImageUrl else { return nil }
-
-            let trimmedURLString = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard
-                !trimmedURLString.isEmpty,
-                let url = URL(string: trimmedURLString),
-                let scheme = url.scheme?.lowercased(),
-                scheme == "http" || scheme == "https"
-            else {
+            guard let profileImageUrl = userInfo?.profileImageUrl else {
                 return nil
             }
 
-            return url
+            return URL(string: profileImageUrl)
         }
     }
 
