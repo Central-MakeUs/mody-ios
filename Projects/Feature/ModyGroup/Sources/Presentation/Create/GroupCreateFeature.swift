@@ -5,6 +5,7 @@
 //  Created by 김동준 on 6/26/26
 //
 
+import Base
 import ComposableArchitecture
 import CommonDomain
 import ModyGroupInterface
@@ -15,7 +16,7 @@ public struct GroupCreateFeature {
 
     @ObservableState
     public struct State: Equatable {
-        enum AlertCase: Equatable {
+        public enum AlertCase: Equatable {
             case error(NetworkError)
         }
 
@@ -23,6 +24,7 @@ public struct GroupCreateFeature {
         var groupName: String = ""
         var isLoading: Bool = false
         var alertCase: AlertCase?
+        var alertState = AlertFeature.State()
         let maxGroupNameCount = 14
 
         var isGroupNameValid: Bool? {
@@ -46,10 +48,11 @@ public struct GroupCreateFeature {
     
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
+        case alertAction(AlertFeature.Action)
+        case showAlert(State.AlertCase)
         case backButtonTapped
         case nextButtonTapped
         case createGroupSuccessfully(code: String)
-        case createGroupFailure(NetworkError)
     }
 
     public init(groupUseCase: GroupUseCaseProtocol) {
@@ -59,10 +62,23 @@ public struct GroupCreateFeature {
     public var body: some ReducerOf<Self> {
         BindingReducer()
 
+        Scope(state: \.alertState, action: \.alertAction) {
+            AlertFeature()
+        }
+
         Reduce { state, action in
             switch action {
             case .binding:
                 return .none
+            case .alertAction(.dismiss):
+                state.alertCase = nil
+                return .none
+            case .alertAction:
+                return .none
+            case let .showAlert(alertCase):
+                state.isLoading = false
+                state.alertCase = alertCase
+                return .send(.alertAction(.present))
             case .nextButtonTapped:
                 guard state.isNextButtonEnabled else { return .none }
                 let groupName = state.groupName
@@ -72,18 +88,12 @@ public struct GroupCreateFeature {
                     do {
                         let code = try await groupUseCase.createGroup(name: groupName)
                         await send(.createGroupSuccessfully(code: code))
-                    } catch let error as NetworkError {
-                        await send(.createGroupFailure(error))
                     } catch {
-                        await send(.createGroupFailure(.unknown))
+                        await send(.showAlert(.error(error as? NetworkError ?? .unknown)))
                     }
                 }
             case .createGroupSuccessfully:
                 state.isLoading = false
-                return .none
-            case let .createGroupFailure(error):
-                state.isLoading = false
-                state.alertCase = .error(error)
                 return .none
             case .backButtonTapped:
                 return .none

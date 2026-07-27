@@ -46,9 +46,19 @@ extension FeedRecordViewController {
 
         guard recordFailureAlertHostingController == nil else { return }
 
+        let title: String
+        let contents: String
+        if case let .serverError(_, _, fallback) = error {
+            title = fallback.title
+            contents = fallback.message
+        } else {
+            title = error.title
+            contents = error.message
+        }
+
         let alertView = MAlertView(
-            title: error.title,
-            contents: error.message,
+            title: title,
+            contents: contents,
             trailingButton: MAlertButton("확인") { [weak self] in
                 self?.reactor?.action.onNext(.didDismissRecordFailureAlert)
             },

@@ -5,6 +5,7 @@
 //  Created by 김동준 on 6/26/26
 //
 
+import Base
 import SwiftUI
 import ComposableArchitecture
 import DesignSystem
@@ -22,6 +23,9 @@ public struct GroupCreateView: View {
             .background(Color.systemWhite)
             .navigationBarBackButtonHidden()
             .mLoading(isPresent: store.isLoading)
+            .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
+                alertView
+            }
             .onAppear {
                 isNameFieldFocused = true
             }
@@ -49,6 +53,20 @@ public struct GroupCreateView: View {
             nextButton
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
+        }
+    }
+}
+
+private extension GroupCreateView {
+    @ViewBuilder
+    var alertView: some View {
+        if let alertCase = store.alertCase {
+            switch alertCase {
+            case let .error(networkError):
+                CommonErrorAlertView(networkError) {
+                    store.send(.alertAction(.dismiss))
+                }
+            }
         }
     }
 }
