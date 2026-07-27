@@ -51,10 +51,20 @@ extension MainCoordinator: MyPageOutputHandler {
                 )
             )
         case let .weightRecordFailed(error):
+            let title: String
+            let contents: String
+            if case let .serverError(_, _, fallback) = error {
+                title = fallback.title
+                contents = fallback.message
+            } else {
+                title = error.title
+                contents = error.message
+            }
+
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(
-                    title: error.title,
-                    contents: error.message
+                    title: title,
+                    contents: contents
                 )
             )
         case .profileUpdated:

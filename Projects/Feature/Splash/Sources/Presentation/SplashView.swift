@@ -29,7 +29,6 @@ public struct SplashView: View {
     
     private var splashBody: some View {
         VStack(spacing: 0) {
-            Text("Hello, Splash~")
         }
     }
 }

@@ -23,9 +23,25 @@ public struct CommonErrorAlertView: View {
 
     public var body: some View {
         MAlertContentView(
-            title: networkError.title,
-            contents: networkError.message,
+            title: title,
+            contents: message,
             trailingButton: MAlertButton("확인", action: primaryButtonAction)
         )
+    }
+    
+    private var title: String {
+        guard case let .serverError(_, _, fallback) = networkError else {
+            return networkError.title
+        }
+        
+        return fallback.title
+    }
+    
+    private var message: String {
+        guard case let .serverError(_, _, fallback) = networkError else {
+            return networkError.message
+        }
+        
+        return fallback.message
     }
 }
