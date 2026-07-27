@@ -28,7 +28,7 @@ private extension FeedRecordViewController {
               presentedViewController == nil else { return }
 
         let viewController = UIHostingController(
-            rootView: FeedRecordPhotoSourceSheetView(
+            rootView: MPhotoSourceSheetView(
                 onCameraTap: { [weak self] in
                     self?.reactor?.action.onNext(.didTapCamera)
                 },
