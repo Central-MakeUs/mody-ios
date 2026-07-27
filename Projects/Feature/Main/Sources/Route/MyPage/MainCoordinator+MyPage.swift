@@ -59,6 +59,7 @@ extension MainCoordinator: MyPageOutputHandler {
             )
         case .profileUpdated:
             myPageInputHandler?.handle(input: .profileUpdated)
+            feedInputHandler?.handle(input: .profileUpdated)
         case .groupUpdated:
             feedInputHandler?.handle(input: .refreshGroups)
         }

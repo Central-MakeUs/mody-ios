@@ -195,6 +195,11 @@ public final class FeedReactor: Reactor {
                     date: currentState.weekCalendarViewState.selectedDate
                 )
             ])
+        case .input(.profileUpdated):
+            return fetchFirstFeedPage(
+                groupId: currentState.selectedGroup?.groupId,
+                date: currentState.weekCalendarViewState.selectedDate
+            )
         }
     }
 
