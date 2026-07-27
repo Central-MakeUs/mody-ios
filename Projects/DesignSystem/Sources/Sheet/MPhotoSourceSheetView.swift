@@ -1,18 +1,17 @@
 //
-//  FeedRecordPhotoSourceSheetView.swift
-//  Feed
+//  MPhotoSourceSheetView.swift
+//  DesignSystem
 //
-//  Created by 김동준 on 7/15/26.
+//  Created by 김동준 on 7/26/26.
 //
 
 import SwiftUI
-import DesignSystem
 
-struct FeedRecordPhotoSourceSheetView: View {
+public struct MPhotoSourceSheetView: View {
     private let onCameraTap: () -> Void
     private let onGalleryTap: () -> Void
 
-    init(
+    public init(
         onCameraTap: @escaping () -> Void,
         onGalleryTap: @escaping () -> Void
     ) {
@@ -20,7 +19,7 @@ struct FeedRecordPhotoSourceSheetView: View {
         self.onGalleryTap = onGalleryTap
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 4) {
             sourceButton(
                 title: "사진 촬영하기",
@@ -47,7 +46,7 @@ struct FeedRecordPhotoSourceSheetView: View {
     }
 }
 
-private extension FeedRecordPhotoSourceSheetView {
+private extension MPhotoSourceSheetView {
     func sourceButton(
         title: String,
         image: Image,

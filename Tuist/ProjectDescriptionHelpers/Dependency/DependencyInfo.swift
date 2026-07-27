@@ -196,6 +196,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreNotification),
                 .microFeature(.ModyGroup),
+                .microFeature(.CoreCamera),
                 .microFeature(.CoreModyImage)
             ],
             demo: [

@@ -9,6 +9,8 @@ import ComposableArchitecture
 import Base
 import CommonDomain
 import CoreAuthInterface
+import CoreCameraInterface
+import CoreModyImageInterface
 import Foundation
 import MyPageInterface
 import ModyLogger
@@ -17,23 +19,29 @@ import ModyLogger
 public struct ProfileFeature {
     private let authUseCase: AuthUseCaseProtocol
     private let myPageUseCase: MyPageUseCase
+    private let imageUploadUseCase: ImageUploadUseCaseProtocol
+    private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
     private let router: @MainActor (MyPageProfileRoute) -> Void
     private let output: @MainActor (MyPageOutput) -> Void
 
     public init(
         authUseCase: AuthUseCaseProtocol,
         myPageUseCase: MyPageUseCase,
+        imageUploadUseCase: ImageUploadUseCaseProtocol,
+        temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol,
         router: @escaping @MainActor (MyPageProfileRoute) -> Void,
         output: @escaping @MainActor (MyPageOutput) -> Void
     ) {
         self.authUseCase = authUseCase
         self.myPageUseCase = myPageUseCase
+        self.imageUploadUseCase = imageUploadUseCase
+        self.temporaryImageFileUseCase = temporaryImageFileUseCase
         self.router = router
         self.output = output
     }
 
     @ObservableState
-    public struct State: Equatable {
+    public struct State {
         public enum AlertCase: Equatable {
             case deleteConfirmation
             case deleteCompleted
@@ -47,6 +55,10 @@ public struct ProfileFeature {
         var socialLoginType: SocialLoginType?
         var name = ""
         var birthDate = ""
+        var isPhotoFlowPresented = false
+        var isCameraPresented = false
+        var photoCaptureSource: CameraCaptureSource?
+        var selectedPhoto: CameraCaptureResult?
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
 
@@ -83,6 +95,12 @@ public struct ProfileFeature {
         case onAppear
         case backButtonTapped
         case saveButtonTapped
+        case profileImageTapped
+        case photoPresentationDismissed
+        case cameraSourceTapped
+        case gallerySourceTapped
+        case photoCaptureCompleted(CameraCaptureResult)
+        case photoCaptureCancelled
         case profileFetched(MyPageProfile)
         case profileFetchFailed(NetworkError)
         case profileUpdated
@@ -131,23 +149,71 @@ public struct ProfileFeature {
             case let .profileFetchFailed(error):
                 return .send(.showAlert(.error(error)))
             case .backButtonTapped:
+                let selectedPhotoURL = state.selectedPhoto?.originalFile.fileURL
+                state.selectedPhoto = nil
+                state.isPhotoFlowPresented = false
+                state.isCameraPresented = false
+                state.photoCaptureSource = nil
+                if let selectedPhotoURL {
+                    try? temporaryImageFileUseCase.removeImage(at: selectedPhotoURL)
+                }
+
                 return .run { [router] _ in
                     await router(.back)
                 }
+            case .profileImageTapped:
+                guard !state.isLoading else { return .none }
+                state.isPhotoFlowPresented = true
+                return .none
+            case .photoPresentationDismissed:
+                state.isPhotoFlowPresented = false
+                state.isCameraPresented = false
+                state.photoCaptureSource = nil
+                return .none
+            case .cameraSourceTapped:
+                state.photoCaptureSource = .camera
+                state.isCameraPresented = true
+                return .none
+            case .gallerySourceTapped:
+                state.photoCaptureSource = .photoLibrary
+                state.isCameraPresented = true
+                return .none
+            case let .photoCaptureCompleted(result):
+                let previousPhotoURL = state.selectedPhoto?.originalFile.fileURL
+                state.selectedPhoto = result
+                state.isPhotoFlowPresented = false
+                state.isCameraPresented = false
+                state.photoCaptureSource = nil
+
+                if let previousPhotoURL {
+                    try? temporaryImageFileUseCase.removeImage(at: previousPhotoURL)
+                }
+                return .none
+            case .photoCaptureCancelled:
+                state.isPhotoFlowPresented = false
+                state.isCameraPresented = false
+                state.photoCaptureSource = nil
+                return .none
             case .saveButtonTapped:
                 guard state.isSaveButtonEnabled else { return .none }
 
-                let request = MyPageProfileUpdateRequest(
-                    nickname: state.name,
-                    birthDate: state.birthDate
-                )
+                let nickname = state.name
+                let birthDate = state.birthDate
+                let selectedPhoto = state.selectedPhoto
                 state.isLoading = true
 
                 return .run { send in
-                    await send(updateProfile(request))
+                    await send(
+                        updateProfile(
+                            nickname: nickname,
+                            birthDate: birthDate,
+                            selectedPhoto: selectedPhoto
+                        )
+                    )
                 }
             case .profileUpdated:
                 state.isLoading = false
+                state.selectedPhoto = nil
                 return .run { [output] send in
                     await output(.profileUpdated)
                     await send(.backButtonTapped)
@@ -208,9 +274,35 @@ private extension ProfileFeature {
         }
     }
 
-    func updateProfile(_ request: MyPageProfileUpdateRequest) async -> Action {
+    func updateProfile(
+        nickname: String,
+        birthDate: String,
+        selectedPhoto: CameraCaptureResult?
+    ) async -> Action {
         do {
+            let imageKey: String?
+            if let selectedPhoto {
+                imageKey = try await imageUploadUseCase.uploadImage(
+                    fileURL: selectedPhoto.originalFile.fileURL,
+                    fileName: selectedPhoto.originalFile.fileName,
+                    domain: .profile
+                )
+            } else {
+                imageKey = nil
+            }
+
+            let request = MyPageProfileUpdateRequest(
+                nickname: nickname,
+                birthDate: birthDate,
+                imageKey: imageKey
+            )
             try await myPageUseCase.updateMyPageProfile(request)
+
+            if let selectedPhoto {
+                try? temporaryImageFileUseCase.removeImage(
+                    at: selectedPhoto.originalFile.fileURL
+                )
+            }
             return .profileUpdated
         } catch {
             return .profileUpdateFailed(error as? NetworkError ?? .unknown)

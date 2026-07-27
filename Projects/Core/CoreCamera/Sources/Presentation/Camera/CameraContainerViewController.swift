@@ -16,6 +16,7 @@ final class CameraContainerViewController: UIViewController {
     static let previewMaxPixelSize = 2048
 
     private let initialSource: CameraCaptureSource
+    let isCropEnabled: Bool
     let onComplete: (CameraCaptureResult) -> Void
     let onCancel: () -> Void
     let sessionController = CameraCaptureSessionController()
@@ -35,11 +36,13 @@ final class CameraContainerViewController: UIViewController {
 
     init(
         initialSource: CameraCaptureSource,
+        isCropEnabled: Bool = true,
         capturedPhotoProcessor: CameraCapturedPhotoProcessor,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
         self.initialSource = initialSource
+        self.isCropEnabled = isCropEnabled
         self.capturedPhotoProcessor = capturedPhotoProcessor
         self.onComplete = onComplete
         self.onCancel = onCancel
@@ -102,14 +105,17 @@ private extension CameraContainerViewController {
     }
 
     func setupLayout() {
-        [
+        var subviews: [UIView] = [
             previewView,
             selectedImageView,
-            roiOverlayView,
             closeButton,
             bottomCameraShutterView,
             photoConfirmationContainerView
-        ].forEach {
+        ]
+        if isCropEnabled {
+            subviews.insert(roiOverlayView, at: 2)
+        }
+        subviews.forEach {
             view.addSubview($0)
         }
 
@@ -121,8 +127,10 @@ private extension CameraContainerViewController {
             $0.edges.equalToSuperview()
         }
 
-        roiOverlayView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+        if isCropEnabled {
+            roiOverlayView.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+            }
         }
 
         closeButton.snp.makeConstraints {

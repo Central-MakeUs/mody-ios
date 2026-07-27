@@ -7,6 +7,7 @@
 
 import Swinject
 import CoreAuthInterface
+import CoreModyImageInterface
 import MyPageInterface
 import MyPage
 
@@ -19,10 +20,14 @@ extension AppAssembly {
             let (router, outputHandler) = arguments
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let myPageUseCase: MyPageUseCase = resolver.resolve()
+            let imageUploadUseCase: ImageUploadUseCaseProtocol = resolver.resolve()
+            let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
 
             return ProfileFeature(
                 authUseCase: authUseCase,
                 myPageUseCase: myPageUseCase,
+                imageUploadUseCase: imageUploadUseCase,
+                temporaryImageFileUseCase: temporaryImageFileUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
                 },

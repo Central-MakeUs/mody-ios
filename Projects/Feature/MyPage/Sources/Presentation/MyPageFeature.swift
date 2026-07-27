@@ -45,21 +45,12 @@ public struct MyPageFeature {
             self.defaultAvatar = defaultAvatar
         }
 
-        // MARK: 추후 캐싱 라이브러리 사용하면서 걷어낼 예정
         var profileImageURL: URL? {
-            guard let urlString = userInfo?.profileImageUrl else { return nil }
-
-            let trimmedURLString = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard
-                !trimmedURLString.isEmpty,
-                let url = URL(string: trimmedURLString),
-                let scheme = url.scheme?.lowercased(),
-                scheme == "http" || scheme == "https"
-            else {
+            guard let profileImageUrl = userInfo?.profileImageUrl else {
                 return nil
             }
 
-            return url
+            return URL(string: profileImageUrl)
         }
     }
 
@@ -210,7 +201,6 @@ public struct MyPageFeature {
 private extension MyPageFeature {
     func getUserInfo() async -> Action {
         do {
-            try? await Task.sleep(for: .seconds(3)) // MARK: 임시 추가 (일부러 시간 늘리려고)
             let userInfo = try await authUseCase.getUserInfo(needUpdateKeyChain: false)
             return .userInfoFetched(userInfo)
         } catch {
@@ -220,7 +210,6 @@ private extension MyPageFeature {
 
     func getWeightRecord() async -> Action {
         do {
-            try? await Task.sleep(for: .seconds(3)) // MARK: 임시 추가 (일부러 시간 늘리려고)
             let weightRecord = try await myPageUseCase.getWeightRecord()
             return .weightRecordFetched(weightRecord)
         } catch {

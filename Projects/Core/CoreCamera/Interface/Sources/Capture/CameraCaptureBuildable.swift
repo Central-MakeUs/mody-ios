@@ -11,6 +11,7 @@ public protocol CameraCaptureBuildable {
     @MainActor
     func makeCameraViewController(
         source: CameraCaptureSource,
+        isCropEnabled: Bool,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController

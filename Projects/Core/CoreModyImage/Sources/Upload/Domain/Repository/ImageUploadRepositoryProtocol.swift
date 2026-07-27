@@ -14,5 +14,9 @@ public protocol ImageUploadRepositoryProtocol {
         fileName: String
     ) async throws -> PresignedImageUpload
 
-    func putImage(fileURL: URL, to url: URL) async throws
+    func putImage(
+        fileURL: URL,
+        to url: URL,
+        maximumPixelSize: Int?
+    ) async throws
 }

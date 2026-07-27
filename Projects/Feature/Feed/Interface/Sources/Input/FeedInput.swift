@@ -8,6 +8,7 @@
 public enum FeedInput {
     case refreshGroups
     case recordCreated
+    case profileUpdated
 }
 
 @MainActor
