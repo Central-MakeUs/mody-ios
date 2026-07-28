@@ -57,7 +57,7 @@ public extension FirebaseService {
     }
     
     func configureCrashlytics() {
-        #if DEBUG
+        #if DEV
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
         #else
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
