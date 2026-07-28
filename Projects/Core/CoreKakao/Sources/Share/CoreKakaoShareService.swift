@@ -14,8 +14,8 @@ public final class CoreKakaoShareService: CoreKakaoShareInterface {
     public init() {}
 
     @MainActor
-    public func shareCodeToKakao(code: String) async throws {
-        guard let template = makeTemplate(code: code) else { return }
+    public func shareCodeToKakao(code: String, groupName: String) async throws {
+        guard let template = makeTemplate(code: code, groupName: groupName) else { return }
 
         let sharingURL = try await makeSharingURL(from: template)
         await UIApplication.shared.open(sharingURL)
@@ -40,7 +40,7 @@ private extension CoreKakaoShareService {
         return baseURL.appending(path: "invite")
     }
 
-    func makeTemplate(code: String) -> FeedTemplate? {
+    func makeTemplate(code: String, groupName: String) -> FeedTemplate? {
         guard let groupCodeWebURL else { return nil }
 
         let inviteURL = groupCodeWebURL.appending(queryItems: [
@@ -56,16 +56,20 @@ private extension CoreKakaoShareService {
 
         return FeedTemplate(
             content: .init(
-                title: "모디 그룹에 초대합니다.",
+                title: "MODY에서 함께해요",
                 imageUrl: inviteImageURL,
                 imageWidth: 960,
                 imageHeight: 832,
-                description: "초대 코드: \(code)\n나중에 문구 정하면 수정 필요",
+                description: """
+                \(groupName)그룹에서 함께하고 싶어요! \
+                MODY를 다운로드 받고 그룹 참여하기에서 아래 코드를 입력해보세요.
+                그룹 코드 : \(code)
+                """,
                 link: link
             ),
             buttons: [
                 .init(
-                    title: "바뀔 버튼 타이틀 아직안정함",
+                    title: "모디로 이동하기",
                     link: link
                 )
             ]

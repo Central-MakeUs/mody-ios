@@ -147,8 +147,8 @@ private extension ModyGroupRootFeature {
             return .none
         case .nextButtonTapped:
             return .none
-        case .createGroupSuccessfully(let code):
-            state.path.append(.invite(.init(inviteCode: code)))
+        case let .createGroupSuccessfully(code, groupName):
+            state.path.append(.invite(.init(inviteCode: code, groupName: groupName)))
             return .none
         default:
             return .none
@@ -184,8 +184,8 @@ private extension ModyGroupRootFeature {
             }
         case .nextButtonTapped:
             return .none
-        case .createGroupSuccessfully(let code):
-            state.path.append(.invite(.init(inviteCode: code)))
+        case let .createGroupSuccessfully(code, groupName):
+            state.path.append(.invite(.init(inviteCode: code, groupName: groupName)))
             return .none
         default:
             return .none

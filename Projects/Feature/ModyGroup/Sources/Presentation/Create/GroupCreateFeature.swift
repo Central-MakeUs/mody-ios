@@ -52,7 +52,7 @@ public struct GroupCreateFeature {
         case showAlert(State.AlertCase)
         case backButtonTapped
         case nextButtonTapped
-        case createGroupSuccessfully(code: String)
+        case createGroupSuccessfully(code: String, groupName: String)
     }
 
     public init(groupUseCase: GroupUseCaseProtocol) {
@@ -87,7 +87,7 @@ public struct GroupCreateFeature {
                 return .run { send in
                     do {
                         let code = try await groupUseCase.createGroup(name: groupName)
-                        await send(.createGroupSuccessfully(code: code))
+                        await send(.createGroupSuccessfully(code: code, groupName: groupName))
                     } catch {
                         await send(.showAlert(.error(error as? NetworkError ?? .unknown)))
                     }
