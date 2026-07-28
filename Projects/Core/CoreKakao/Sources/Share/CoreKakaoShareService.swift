@@ -56,16 +56,17 @@ private extension CoreKakaoShareService {
 
         return FeedTemplate(
             content: .init(
-                title: "MODY에서 함께해요",
+                title: "\(groupName)그룹에서 함께하고 싶어요!",
                 imageUrl: inviteImageURL,
                 imageWidth: 960,
                 imageHeight: 832,
                 description: """
-                \(groupName)그룹에서 함께하고 싶어요! \
-                MODY를 다운로드 받고 그룹 참여하기에서 아래 코드를 입력해보세요.
-                그룹 코드 : \(code)
+                그룹 참여하기에서 코드를 입력해보세요.
                 """,
                 link: link
+            ),
+            itemContent: .init(
+                profileText: "그룹 코드 : \(code)"
             ),
             buttons: [
                 .init(
