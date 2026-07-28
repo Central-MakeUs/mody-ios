@@ -29,7 +29,7 @@ private enum CoreKakaoShareError: Error {
 
 private extension CoreKakaoShareService {
     var inviteImageURL: URL {
-        URL(string: "https://search.pstatic.net/sunny/?src=https%3A%2F%2Fst.depositphotos.com%2F1000604%2F2576%2Fi%2F450%2Fdepositphotos_25763201-stock-photo-lonely-tree.jpg&type=sc960_832")!
+        URL(string: "https://storage.googleapis.com/mody-images/profiles/%E1%84%86%E1%85%A9%E1%84%83%E1%85%B5%20%E1%84%8F%E1%85%A1%E1%84%90%E1%85%A9%E1%86%A8%20%E1%84%80%E1%85%A9%E1%86%BC%E1%84%8B%E1%85%B2%20%E1%84%8B%E1%85%B5%E1%84%86%E1%85%B5%E1%84%8C%E1%85%B5.png")!
     }
 
     var groupCodeWebURL: URL? {
@@ -56,16 +56,17 @@ private extension CoreKakaoShareService {
 
         return FeedTemplate(
             content: .init(
-                title: "MODY에서 함께해요",
+                title: "\(groupName)그룹에서 함께하고 싶어요!",
                 imageUrl: inviteImageURL,
-                imageWidth: 960,
-                imageHeight: 832,
+                imageWidth: 1200,
+                imageHeight: 630,
                 description: """
-                \(groupName)그룹에서 함께하고 싶어요! \
-                MODY를 다운로드 받고 그룹 참여하기에서 아래 코드를 입력해보세요.
-                그룹 코드 : \(code)
+                그룹 참여하기에서 코드를 입력해보세요.
                 """,
                 link: link
+            ),
+            itemContent: .init(
+                profileText: "그룹 코드 : \(code)"
             ),
             buttons: [
                 .init(
