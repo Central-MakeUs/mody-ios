@@ -78,6 +78,7 @@ public final class FeedReactor: Reactor {
         case didTapNextWeek
         case didTapCalendarDate(FeedWeekCalendarModel)
         case didReachFeedListBottom
+        case didTapRecordMenu(FeedRecordMenu, recordId: Int)
         
         case didTapRecordButton(FeedRecordType)
     }
@@ -176,6 +177,8 @@ public final class FeedReactor: Reactor {
                 groupId: selectedGroup.groupId,
                 date: currentState.weekCalendarViewState.selectedDate
             )
+        case .didTapRecordMenu:
+            return .empty()
         case .didTapRecordButton(let recordType):
             return .concat([
                 .just(.setFloatingActionButtonExpanded(false)),

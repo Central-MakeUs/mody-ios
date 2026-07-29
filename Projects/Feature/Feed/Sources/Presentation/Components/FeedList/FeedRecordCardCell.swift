@@ -15,6 +15,8 @@ final class FeedRecordCardCell: UICollectionViewCell {
     static let reuseIdentifier = "FeedRecordCardCell"
     static let contentHeight: CGFloat = 244
 
+    var onMenuSelect: ((FeedRecordMenu) -> Void)?
+
     private let contentStackView = UIStackView()
     private let headerView = UIView()
     private let profileImageView = FeedRecordCardImageView()
@@ -23,6 +25,7 @@ final class FeedRecordCardCell: UICollectionViewCell {
     private let streakLabel = MUILabel(style: .c2, color: .gray10)
     private let streakIconImageView = UIImageView(image: .icFireFill)
     private let moreButton = UIButton(type: .custom)
+    private let menuView = FeedRecordMenuView()
     private let cardView = UIView()
     private let recordImageView = FeedRecordCardImageView()
     private let infoStackView = UIStackView()
@@ -47,12 +50,16 @@ final class FeedRecordCardCell: UICollectionViewCell {
         super.prepareForReuse()
         profileImageView.prepareForReuse()
         recordImageView.prepareForReuse()
+        onMenuSelect = nil
+        dismissMenu()
     }
 
     func configure(
         _ viewState: FeedRecordCardViewState,
         imageLoader: RemoteImageLoading
     ) {
+        dismissMenu()
+
         let profileImageRequest = FeedImageURLResolver.resolve(viewState.profileImageUrl).map {
             RemoteImageRequest(
                 url: $0,
@@ -69,7 +76,8 @@ final class FeedRecordCardCell: UICollectionViewCell {
         nicknameLabel.text = viewState.nickname
         streakLabel.text = viewState.streakText
         streakChipView.isHidden = viewState.isStreakChipHidden
-        moreButton.isHidden = PhaseManager.shared.isPhaseOne || !viewState.isMine 
+        moreButton.isHidden = !viewState.showsMoreButton
+        menuView.configure(menus: viewState.menus)
         recordImageView.configureRecord(
             urlString: viewState.imageUrl,
             cropRegion: viewState.imageCropRegion,
@@ -80,6 +88,10 @@ final class FeedRecordCardCell: UICollectionViewCell {
         firstValueLabel.text = viewState.firstInfoValue
         secondTitleLabel.text = viewState.secondInfoTitle
         secondValueLabel.text = viewState.secondInfoValue
+    }
+
+    private func dismissMenu() {
+        menuView.isHidden = true
     }
 }
 
@@ -99,6 +111,18 @@ private extension FeedRecordCardCell {
 
         moreButton.setImage(UIImage.icMore.withRenderingMode(.alwaysTemplate), for: .normal)
         moreButton.tintColor = .gray6
+        moreButton.addAction(
+            UIAction { [weak self] _ in
+                self?.toggleMenu()
+            },
+            for: .touchUpInside
+        )
+
+        menuView.isHidden = true
+        menuView.onSelect = { [weak self] menu in
+            self?.dismissMenu()
+            self?.onMenuSelect?(menu)
+        }
 
         cardView.layer.cornerRadius = 16
         cardView.clipsToBounds = true
@@ -123,6 +147,7 @@ private extension FeedRecordCardCell {
         streakChipView.addSubview(streakIconImageView)
         headerView.addSubview(moreButton)
 
+        contentView.addSubview(menuView)
         cardView.addSubview(recordImageView)
         cardView.addSubview(infoStackView)
         cardView.addSubview(arrowButton)
@@ -173,6 +198,12 @@ private extension FeedRecordCardCell {
             $0.size.equalTo(24)
         }
 
+        menuView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(32)
+            $0.trailing.equalToSuperview()
+            $0.width.equalTo(88)
+        }
+
         cardView.snp.makeConstraints {
             $0.height.equalTo(200)
         }
@@ -199,5 +230,10 @@ private extension FeedRecordCardCell {
         stackView.spacing = 0
         stackView.alignment = .leading
         return stackView
+    }
+
+    func toggleMenu() {
+        guard menuView.hasMenus else { return }
+        menuView.isHidden.toggle()
     }
 }
