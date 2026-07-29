@@ -38,7 +38,7 @@ struct OnBoardingAgreementSection: Equatable {
 }
 
 fileprivate enum OnBoardingAgreementConstants {
-    fileprivate static let effectiveDateNotice = "공고일: 2026년 08월 01일  |  시행일: 2026년 08월 15일"
+    fileprivate static let effectiveDateNotice = "공고일: 2026년 7월 27일 | 시행일: 2026년 7월 29일"
 
     fileprivate static let privacyPolicySections: [OnBoardingAgreementSection] = [
         .init(
@@ -53,23 +53,21 @@ fileprivate enum OnBoardingAgreementConstants {
             2. 서비스 이용 과정에서 수집
             • 회원가입 정보: 닉네임, 생년월일, 현재 체중, 목표 체중
             • 서비스 이용 정보: 식사 기록(사진, 식사 시간, 메뉴), 운동 기록(사진, 운동 시간, 운동 종류), 체중 기록
-            • 건강 데이터: 걸음수 (이용자 동의 시 iOS HealthKit 또는 Android Health Connect를 통해 수집)
             • 기기 정보: 기기 식별자(FCM 토큰), 운영체제 및 앱 버전
             • 접속 로그: 서비스 이용 일시, 서비스 이용 기록
 
             3. 접근 권한 안내
             서비스 이용을 위해 다음 접근 권한을 요청합니다. 모든 권한은 선택 사항이며, 허용하지 않아도 서비스 이용이 가능합니다. 단, 미허용 시 일부 기능이 제한될 수 있습니다.
-            • 알림 (선택): 버디 인증, 댓글, 챌린지 달성 등 알림 수신
+            • 알림 (선택): 버디 인증 등 알림 수신
             • 카메라 (선택): 식단 및 운동 사진 촬영
             • 사진 라이브러리 (선택): 갤러리에서 사진 선택
-            • 건강 정보 (선택): 걸음수 챌린지 자동 집계를 위한 걸음수 읽기
             """
         ),
         .init(
             title: "제2조 (개인정보의 처리 목적)",
             body: """
             • 회원 식별 및 인증: 소셜 로그인을 통한 계정 생성 및 로그인 처리
-            • 서비스 제공: 피드 게시, 그룹 챌린지, 걸음수 집계, 알림 발송
+            • 서비스 제공: 피드 게시, 알림 발송
             • 서비스 개선: 이용 현황 분석 및 기능 개선
             • 법적 의무 이행: 관련 법령에 따른 의무 이행
             """
@@ -102,7 +100,7 @@ fileprivate enum OnBoardingAgreementConstants {
             title: "제6조 (개인정보 처리 위탁)",
             body: """
             회사는 서비스 제공을 위해 다음과 같이 개인정보 처리 업무를 위탁합니다.
-            • Amazon Web Services (AWS): 서버 운영 및 데이터 저장
+            • Google Cloud Platform (GCP) : 서버 운영 및 데이터 저장
             • Google Firebase (FCM): 푸시 알림 발송
             • 카카오: 카카오 로그인 인증 처리
             • Google: Google 로그인 인증 처리
