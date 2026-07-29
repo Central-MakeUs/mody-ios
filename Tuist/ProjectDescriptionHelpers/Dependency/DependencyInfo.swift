@@ -141,6 +141,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .Feed: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
                 .module(.Base),
                 .module(.CommonDomain),

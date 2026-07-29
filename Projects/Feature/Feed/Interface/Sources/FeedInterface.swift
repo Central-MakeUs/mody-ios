@@ -9,7 +9,10 @@ import UIKit
 
 public protocol FeedBuildable {
     @MainActor
-    func makeFeedViewController(router: FeedRouter) -> UIViewController
+    func makeFeedViewController(
+        router: FeedRouter,
+        outputHandler: FeedOutputHandler
+    ) -> UIViewController
 
     @MainActor
     func makeFeedRecordViewController(

@@ -74,6 +74,8 @@ actor FeedDemoMockRepository: FeedRepositoryProtocol {
             )
         )
     }
+
+    func postRecordReport(groupId: Int, recordId: Int) async throws {}
 }
 
 private extension FeedDemoMockRepository {

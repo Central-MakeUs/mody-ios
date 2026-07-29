@@ -6,6 +6,7 @@
 //
 
 import FeedInterface
+import CommonDomain
 import UIKit
 
 @MainActor
@@ -20,7 +21,10 @@ final class FeedDemoCoordinator: ObservableObject {
     }
 
     func makeRootViewController() -> UINavigationController {
-        let feedViewController = feedBuildable.makeFeedViewController(router: self)
+        let feedViewController = feedBuildable.makeFeedViewController(
+            router: self,
+            outputHandler: self
+        )
         feedInputHandler = feedViewController as? FeedInputHandler
         let mainContainerViewController = FeedDemoMainContainerViewController(
             feedViewController: feedViewController
@@ -29,6 +33,52 @@ final class FeedDemoCoordinator: ObservableObject {
         navigationController.setViewControllers([mainContainerViewController], animated: false)
         navigationController.navigationBar.isHidden = true
         return navigationController
+    }
+}
+
+extension FeedDemoCoordinator: FeedOutputHandler {
+    func handle(output: FeedOutput) {
+        switch output {
+        case let .reportConfirmationRequested(recordId):
+            let alert = UIAlertController(
+                title: "게시물을 신고하시겠어요?",
+                message: "신고한 게시물은 검토 후 삭제 처리할 예정입니다.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+            alert.addAction(UIAlertAction(title: "신고하기", style: .default) { [weak self] _ in
+                self?.feedInputHandler?.handle(
+                    input: .reportConfirmed(recordId: recordId)
+                )
+            })
+            navigationController.present(alert, animated: true)
+        case .reportSucceeded:
+            presentReportResultAlert(
+                title: "신고가 완료되었어요",
+                message: "검토 및 처리는 최대 7일까지 걸릴 수 있어요."
+            )
+        case let .reportFailed(error):
+            let title: String
+            let message: String
+            if case let .serverError(_, _, fallback) = error {
+                title = fallback.title
+                message = fallback.message
+            } else {
+                title = error.title
+                message = error.message
+            }
+            presentReportResultAlert(title: title, message: message)
+        }
+    }
+
+    private func presentReportResultAlert(title: String, message: String) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        navigationController.present(alert, animated: true)
     }
 }
 

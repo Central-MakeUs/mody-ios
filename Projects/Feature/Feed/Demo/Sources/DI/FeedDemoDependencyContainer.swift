@@ -45,12 +45,15 @@ final class FeedDemoDependencyContainer {
         let feedUseCase = FeedUseCase(feedRepository: feedRepository)
 
         return FeedBuilder(
-            makeFeedReactor: { [authUseCase, groupUseCase] router in
+            makeFeedReactor: { [authUseCase, groupUseCase] router, outputHandler in
                 FeedReactor(
                     authUseCase: authUseCase,
                     groupUseCase: groupUseCase,
                     feedUseCase: feedUseCase,
-                    router: router
+                    router: router,
+                    output: { [weak outputHandler] output in
+                        outputHandler?.handle(output: output)
+                    }
                 )
             },
             makeFeedRecordReactor: {
@@ -64,7 +67,9 @@ final class FeedDemoDependencyContainer {
                     feedUseCase: feedUseCase,
                     imageUploadUseCase: imageUploadUseCase,
                     temporaryImageFileUseCase: temporaryImageFileUseCase,
-                    outputHandler: outputHandler
+                    output: { [weak outputHandler] output in
+                        outputHandler?.handle(output: output)
+                    }
                 )
             },
             cameraCaptureBuilder: cameraCaptureBuilder,

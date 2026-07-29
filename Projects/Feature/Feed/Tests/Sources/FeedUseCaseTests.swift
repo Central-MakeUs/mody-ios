@@ -147,6 +147,16 @@ final class FeedUseCaseTests: XCTestCase {
             )
         )
     }
+
+    func testReportRecordForwardsGroupAndRecordIDs() async throws {
+        let repository = FeedUseCaseRepositorySpy()
+        let useCase = FeedUseCase(feedRepository: repository)
+
+        try await useCase.reportRecord(groupId: 11, recordId: 22)
+
+        XCTAssertEqual(repository.reportedGroupID, 11)
+        XCTAssertEqual(repository.reportedRecordID, 22)
+    }
 }
 
 private extension FeedUseCaseTests {
@@ -196,6 +206,8 @@ private extension FeedUseCaseTests {
 
 private final class FeedUseCaseRepositorySpy: FeedRepositoryProtocol {
     private(set) var createdRequest: FeedRecordCreateRequest?
+    private(set) var reportedGroupID: Int?
+    private(set) var reportedRecordID: Int?
     private(set) var requestCursors: [Int?] = []
     private var pages: [FeedRecordPage]
 
@@ -222,5 +234,10 @@ private final class FeedUseCaseRepositorySpy: FeedRepositoryProtocol {
 
     func postRecord(_ request: FeedRecordCreateRequest) async throws {
         createdRequest = request
+    }
+
+    func postRecordReport(groupId: Int, recordId: Int) async throws {
+        reportedGroupID = groupId
+        reportedRecordID = recordId
     }
 }

@@ -151,7 +151,9 @@ private extension FeedRecordReactorImageLifecycleTests {
             feedUseCase: FeedUseCase(feedRepository: dependencies.feedRepository),
             imageUploadUseCase: dependencies.imageUpload,
             temporaryImageFileUseCase: dependencies.temporaryFiles,
-            outputHandler: dependencies.output
+            output: { [weak output = dependencies.output] event in
+                output?.handle(output: event)
+            }
         )
     }
 
@@ -216,6 +218,8 @@ private final class FeedRepositoryMock: FeedRepositoryProtocol {
             throw createRecordError
         }
     }
+
+    func postRecordReport(groupId: Int, recordId: Int) async throws {}
 }
 
 private final class ImageUploadUseCaseMock: ImageUploadUseCaseProtocol {

@@ -95,15 +95,13 @@ public final class FeedRecordReactor: Reactor {
         feedUseCase: FeedUseCase,
         imageUploadUseCase: ImageUploadUseCaseProtocol,
         temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol,
-        outputHandler: FeedRecordOutputHandler
+        output: @escaping @MainActor (FeedRecordOutput) -> Void
     ) {
         self.router = router
         self.feedUseCase = feedUseCase
         self.imageUploadUseCase = imageUploadUseCase
         self.temporaryImageFileUseCase = temporaryImageFileUseCase
-        self.output = { [weak outputHandler] output in
-            outputHandler?.handle(output: output)
-        }
+        self.output = output
         self.initialState = State(
             recordType: recordType,
             mealTime: Self.makeInitialMealTime()

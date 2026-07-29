@@ -47,4 +47,14 @@ enum FeedEndpoint {
             bodyParameters: body
         )
     }
+
+    static func postRecordReport(
+        groupId: Int,
+        recordId: Int
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/records/\(recordId)/report",
+            method: .POST
+        )
+    }
 }

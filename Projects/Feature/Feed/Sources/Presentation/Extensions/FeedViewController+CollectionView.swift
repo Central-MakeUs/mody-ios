@@ -34,8 +34,17 @@ extension FeedViewController: UICollectionViewDataSource, UICollectionViewDelega
             return UICollectionViewCell()
         }
 
+        let viewState = feedListViewState.records[indexPath.item]
+        cell.onMenuSelect = { [weak self] menu in
+            self?.reactor?.action.onNext(
+                .didTapRecordMenu(
+                    menu,
+                    recordId: viewState.recordId
+                )
+            )
+        }
         cell.configure(
-            feedListViewState.records[indexPath.item],
+            viewState,
             imageLoader: imageLoader
         )
         return cell
