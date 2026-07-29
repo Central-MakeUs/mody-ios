@@ -17,6 +17,8 @@ public final class FeedReactor: Reactor {
     private let groupUseCase: GroupUseCaseProtocol
     private let feedUseCase: FeedUseCase
     private weak var router: FeedRouter?
+    private let output: @MainActor (FeedOutput) -> Void
+
     public let initialState: State
     private let baseDate: Date
     private let calendar: Calendar
@@ -36,6 +38,7 @@ public final class FeedReactor: Reactor {
         )
         var isInitialFeedLoading = false
         var isNextPageLoading = false
+        var isReportLoading = false
         var feedRecords: [FeedRecord] { feedPage.records }
         var nextFeedCursor: Int? { feedPage.nextCursor }
         var hasNextFeedPage: Bool { feedPage.hasNext }
@@ -52,6 +55,7 @@ public final class FeedReactor: Reactor {
         case setMyMemberId(Int?)
         case setInitialFeedLoading(Bool)
         case setNextPageLoading(Bool)
+        case setReportLoading(Bool)
         case setFeedPage(FeedRecordPage)
         case resetFeedRecords
 
@@ -87,12 +91,14 @@ public final class FeedReactor: Reactor {
         authUseCase: AuthUseCaseProtocol,
         groupUseCase: GroupUseCaseProtocol,
         feedUseCase: FeedUseCase,
-        router: FeedRouter
+        router: FeedRouter,
+        output: @escaping @MainActor (FeedOutput) -> Void
     ) {
         self.authUseCase = authUseCase
         self.groupUseCase = groupUseCase
         self.feedUseCase = feedUseCase
         self.router = router
+        self.output = output
         let calendar = Date.koreanCalendar
         let baseDate = Date().startOfDay(calendar: calendar)
         let weekInfo = FeedWeekCalendarCalculator.calculateWeekInfoFromBaseDate(
@@ -124,6 +130,12 @@ public final class FeedReactor: Reactor {
             return fetchInitialContent()
         case .input(.refreshGroups):
             return fetchGroupsWithLoading()
+        case let .input(.reportConfirmed(recordId)):
+            guard !currentState.isReportLoading else { return .empty() }
+            guard let groupId = currentState.selectedGroup?.groupId else {
+                return sendOutput(.reportFailed(.invalidResponse))
+            }
+            return reportRecord(groupId: groupId, recordId: recordId)
         case .didTapDimmedOverlay,
              .didTapExerciseRecordButton,
              .didTapMealRecordButton:
@@ -177,8 +189,8 @@ public final class FeedReactor: Reactor {
                 groupId: selectedGroup.groupId,
                 date: currentState.weekCalendarViewState.selectedDate
             )
-        case .didTapRecordMenu:
-            return .empty()
+        case let .didTapRecordMenu(.report, recordId):
+            return sendOutput(.reportConfirmationRequested(recordId: recordId))
         case .didTapRecordButton(let recordType):
             return .concat([
                 .just(.setFloatingActionButtonExpanded(false)),
@@ -230,6 +242,8 @@ public final class FeedReactor: Reactor {
             newState.isInitialFeedLoading = isLoading
         case .setNextPageLoading(let isLoading):
             newState.isNextPageLoading = isLoading
+        case .setReportLoading(let isLoading):
+            newState.isReportLoading = isLoading
         case .setFeedPage(let page):
             newState.feedPage = page
         case .resetFeedRecords:
@@ -268,6 +282,37 @@ public final class FeedReactor: Reactor {
 }
 
 private extension FeedReactor {
+    func sendOutput(_ output: FeedOutput) -> Observable<Mutation> {
+        mutationObservable { [weak self] in
+            self?.output(output)
+            return nil
+        }
+    }
+
+    func reportRecord(
+        groupId: Int,
+        recordId: Int
+    ) -> Observable<Mutation> {
+        withLoading(
+            Mutation.setReportLoading,
+            operation: mutationObservable { [weak self] in
+                guard let self else { return nil }
+
+                do {
+                    try await self.feedUseCase.reportRecord(
+                        groupId: groupId,
+                        recordId: recordId
+                    )
+                    self.output(.reportSucceeded)
+                } catch {
+                    self.output(.reportFailed(error as? NetworkError ?? .unknown))
+                }
+
+                return nil
+            }
+        )
+    }
+
     func fetchInitialContent() -> Observable<Mutation> {
         withLoading(
             Mutation.setFetchGroupLoading,

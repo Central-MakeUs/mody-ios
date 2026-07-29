@@ -59,7 +59,10 @@ public final class MainCoordinator: MainCoordinating {
 
     @MainActor
     public func start() {
-        let feedViewController = feedBuilder.makeFeedViewController(router: self)
+        let feedViewController = feedBuilder.makeFeedViewController(
+            router: self,
+            outputHandler: self
+        )
         feedInputHandler = feedViewController as? FeedInputHandler
         let challengeViewController = challengeBuilder.makeChallengeViewController(router: self)
         let myPageViewController = myPageBuilder.makeMyPageViewController(

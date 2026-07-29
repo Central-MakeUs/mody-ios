@@ -34,7 +34,10 @@ final class FeedReactorPaginationTests: XCTestCase {
                 makePage(recordIDs: [3, 2], nextCursor: nil, hasNext: false)
             ]
         )
-        let reactor = makeReactor(feedRepository: feedRepository)
+        let reactor = makeReactor(
+            feedRepository: feedRepository,
+            outputHandler: FeedOutputHandlerSpy()
+        )
 
         let initialPageLoaded = expectation(description: "initial feed page loaded")
         reactor.state
@@ -74,7 +77,10 @@ final class FeedReactorPaginationTests: XCTestCase {
                 makePage(recordIDs: [6, 5], nextCursor: 5, hasNext: true)
             ]
         )
-        let reactor = makeReactor(feedRepository: feedRepository)
+        let reactor = makeReactor(
+            feedRepository: feedRepository,
+            outputHandler: FeedOutputHandlerSpy()
+        )
         let todayDate = reactor.currentState.weekCalendarViewState.todayDate
 
         let initialPageLoaded = expectation(description: "initial feed page loaded")
@@ -113,16 +119,117 @@ final class FeedReactorPaginationTests: XCTestCase {
         XCTAssertTrue(reactor.currentState.hasNextFeedPage)
         XCTAssertFalse(reactor.currentState.isInitialFeedLoading)
     }
+
+    func testReportMenuTapRequestsConfirmationWithoutCallingAPI() async {
+        let feedRepository = FeedPaginationRepositoryMock(pages: [])
+        let outputHandler = FeedOutputHandlerSpy()
+        let reactor = makeReactor(
+            feedRepository: feedRepository,
+            outputHandler: outputHandler
+        )
+        let confirmationRequested = expectation(description: "report confirmation requested")
+        outputHandler.onOutput = { output in
+            guard output == .reportConfirmationRequested(recordId: 22) else { return }
+            confirmationRequested.fulfill()
+        }
+
+        reactor.action.onNext(.didTapRecordMenu(.report, recordId: 22))
+
+        await fulfillment(of: [confirmationRequested], timeout: 1)
+        XCTAssertEqual(
+            outputHandler.outputs,
+            [.reportConfirmationRequested(recordId: 22)]
+        )
+        let reportRequests = await feedRepository.reportRequests
+        XCTAssertTrue(reportRequests.isEmpty)
+    }
+
+    func testReportConfirmedCallsAPIAndEmitsSuccess() async {
+        let feedRepository = FeedPaginationRepositoryMock(
+            pages: [makePage(recordIDs: [], nextCursor: nil, hasNext: false)]
+        )
+        let outputHandler = FeedOutputHandlerSpy()
+        let reactor = makeReactor(
+            feedRepository: feedRepository,
+            outputHandler: outputHandler
+        )
+        await loadInitialContent(of: reactor)
+
+        let reportSucceeded = expectation(description: "report succeeded")
+        outputHandler.onOutput = { output in
+            guard output == .reportSucceeded else { return }
+            reportSucceeded.fulfill()
+        }
+
+        reactor.action.onNext(.input(.reportConfirmed(recordId: 22)))
+
+        await fulfillment(of: [reportSucceeded], timeout: 1)
+        XCTAssertEqual(
+            outputHandler.outputs,
+            [.reportSucceeded]
+        )
+        let reportRequests = await feedRepository.reportRequests
+        XCTAssertEqual(reportRequests, [.init(groupId: 1, recordId: 22)])
+    }
+
+    func testReportFailureEmitsNormalizedCommonError() async {
+        let feedRepository = FeedPaginationRepositoryMock(
+            pages: [makePage(recordIDs: [], nextCursor: nil, hasNext: false)],
+            reportShouldFail: true
+        )
+        let outputHandler = FeedOutputHandlerSpy()
+        let reactor = makeReactor(
+            feedRepository: feedRepository,
+            outputHandler: outputHandler
+        )
+        await loadInitialContent(of: reactor)
+
+        let reportFailed = expectation(description: "report failed")
+        outputHandler.onOutput = { output in
+            guard output == .reportFailed(.unknown) else { return }
+            reportFailed.fulfill()
+        }
+
+        reactor.action.onNext(.input(.reportConfirmed(recordId: 22)))
+
+        await fulfillment(of: [reportFailed], timeout: 1)
+        XCTAssertEqual(
+            outputHandler.outputs,
+            [.reportFailed(.unknown)]
+        )
+    }
 }
 
 private extension FeedReactorPaginationTests {
-    func makeReactor(feedRepository: FeedRepositoryProtocol) -> FeedReactor {
+    func makeReactor(
+        feedRepository: FeedRepositoryProtocol,
+        outputHandler: FeedOutputHandler
+    ) -> FeedReactor {
         FeedReactor(
             authUseCase: FeedPaginationAuthUseCaseMock(),
             groupUseCase: FeedPaginationGroupUseCaseMock(),
             feedUseCase: FeedUseCase(feedRepository: feedRepository),
-            router: FeedPaginationRouterMock()
+            router: FeedPaginationRouterMock(),
+            output: { [weak outputHandler] output in
+                outputHandler?.handle(output: output)
+            }
         )
+    }
+
+    func loadInitialContent(of reactor: FeedReactor) async {
+        let initialContentLoaded = expectation(description: "initial content loaded")
+        reactor.state
+            .filter {
+                $0.selectedGroup != nil
+                    && !$0.isFetchGroupLoading
+                    && !$0.isInitialFeedLoading
+            }
+            .take(1)
+            .subscribe(onNext: { _ in initialContentLoaded.fulfill() })
+            .disposed(by: disposeBag)
+
+        reactor.action.onNext(.viewDidLoad)
+        await fulfillment(of: [initialContentLoaded], timeout: 1)
     }
 
     func makePage(
@@ -163,12 +270,23 @@ private actor FeedPaginationRepositoryMock: FeedRepositoryProtocol {
         let size: Int
     }
 
+    struct ReportRequest: Equatable {
+        let groupId: Int
+        let recordId: Int
+    }
+
     private var pages: [FeedRecordPage]
+    private let reportShouldFail: Bool
     private(set) var requests: [Request] = []
     private(set) var activityCalendarRequests: [String] = []
+    private(set) var reportRequests: [ReportRequest] = []
 
-    init(pages: [FeedRecordPage]) {
+    init(
+        pages: [FeedRecordPage],
+        reportShouldFail: Bool = false
+    ) {
         self.pages = pages
+        self.reportShouldFail = reportShouldFail
     }
 
     func getRecords(
@@ -202,7 +320,12 @@ private actor FeedPaginationRepositoryMock: FeedRepositoryProtocol {
 
     func postRecord(_ request: FeedRecordCreateRequest) async throws {}
 
-    func postRecordReport(groupId: Int, recordId: Int) async throws {}
+    func postRecordReport(groupId: Int, recordId: Int) async throws {
+        reportRequests.append(.init(groupId: groupId, recordId: recordId))
+        if reportShouldFail {
+            throw FeedReportTestError.failed
+        }
+    }
 }
 
 private struct FeedPaginationAuthUseCaseMock: AuthUseCaseProtocol {
@@ -254,4 +377,19 @@ private struct FeedPaginationGroupUseCaseMock: GroupUseCaseProtocol {
 @MainActor
 private final class FeedPaginationRouterMock: FeedRouter {
     func route(from route: FeedRoute) {}
+}
+
+@MainActor
+private final class FeedOutputHandlerSpy: FeedOutputHandler {
+    private(set) var outputs: [FeedOutput] = []
+    var onOutput: ((FeedOutput) -> Void)?
+
+    func handle(output: FeedOutput) {
+        outputs.append(output)
+        onOutput?(output)
+    }
+}
+
+private enum FeedReportTestError: Error {
+    case failed
 }

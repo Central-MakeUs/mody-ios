@@ -11,13 +11,13 @@ import CoreCameraInterface
 import FeedInterface
 
 public struct FeedBuilder: FeedBuildable {
-    private let makeFeedReactor: (FeedRouter) -> FeedReactor
+    private let makeFeedReactor: (FeedRouter, FeedOutputHandler) -> FeedReactor
     private let makeFeedRecordReactor: (FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor
     private let cameraCaptureBuilder: CameraCaptureBuildable
     private let imageLoader: RemoteImageLoading
     
     public init(
-        makeFeedReactor: @escaping (FeedRouter) -> FeedReactor,
+        makeFeedReactor: @escaping (FeedRouter, FeedOutputHandler) -> FeedReactor,
         makeFeedRecordReactor: @escaping (FeedRecordRouter, FeedRecordType, FeedRecordOutputHandler) -> FeedRecordReactor,
         cameraCaptureBuilder: CameraCaptureBuildable,
         imageLoader: RemoteImageLoading
@@ -29,9 +29,12 @@ public struct FeedBuilder: FeedBuildable {
     }
 
     @MainActor
-    public func makeFeedViewController(router: FeedRouter) -> UIViewController {
+    public func makeFeedViewController(
+        router: FeedRouter,
+        outputHandler: FeedOutputHandler
+    ) -> UIViewController {
         return FeedViewController(
-            reactor: makeFeedReactor(router),
+            reactor: makeFeedReactor(router, outputHandler),
             imageLoader: imageLoader
         )
     }

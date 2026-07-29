@@ -9,6 +9,7 @@ public enum FeedInput {
     case refreshGroups
     case recordCreated
     case profileUpdated
+    case reportConfirmed(recordId: Int)
 }
 
 @MainActor

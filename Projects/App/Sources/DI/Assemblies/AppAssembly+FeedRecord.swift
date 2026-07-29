@@ -24,7 +24,9 @@ extension AppAssembly {
                     feedUseCase: feedUseCase,
                     imageUploadUseCase: imageUploadUseCase,
                     temporaryImageFileUseCase: temporaryImageFileUseCase,
-                    outputHandler: outputHandler
+                    output: { [weak outputHandler] output in
+                        outputHandler?.handle(output: output)
+                    }
                 )
             }
         }

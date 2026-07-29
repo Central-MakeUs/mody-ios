@@ -151,7 +151,9 @@ private extension FeedRecordReactorImageLifecycleTests {
             feedUseCase: FeedUseCase(feedRepository: dependencies.feedRepository),
             imageUploadUseCase: dependencies.imageUpload,
             temporaryImageFileUseCase: dependencies.temporaryFiles,
-            outputHandler: dependencies.output
+            output: { [weak output = dependencies.output] event in
+                output?.handle(output: event)
+            }
         )
     }
 

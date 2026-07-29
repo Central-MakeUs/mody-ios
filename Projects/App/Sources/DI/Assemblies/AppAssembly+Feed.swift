@@ -28,16 +28,21 @@ extension AppAssembly {
             return FeedUseCase(feedRepository: feedRepository)
         }
 
-        container.register(FeedReactor.self) { (resolver: Resolver, router: FeedRouter) in
+        container.register(FeedReactor.self) {
+            (resolver: Resolver, arguments: (FeedRouter, FeedOutputHandler)) in
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
             let feedUseCase: FeedUseCase = resolver.resolve()
+            let (router, outputHandler) = arguments
 
             return FeedReactor(
                 authUseCase: authUseCase,
                 groupUseCase: groupUseCase,
                 feedUseCase: feedUseCase,
-                router: router
+                router: router,
+                output: { [weak outputHandler] output in
+                    outputHandler?.handle(output: output)
+                }
             )
         }
         
@@ -47,8 +52,8 @@ extension AppAssembly {
             let imageLoader: RemoteImageLoading = resolver.resolve()
 
             return FeedBuilder(
-                makeFeedReactor: { router in
-                    resolver.resolve(argument: router)
+                makeFeedReactor: { router, outputHandler in
+                    resolver.resolve(argument: (router, outputHandler))
                 },
                 makeFeedRecordReactor: makeFeedRecordReactor,
                 cameraCaptureBuilder: cameraCaptureBuilder,
