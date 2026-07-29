@@ -1,0 +1,5 @@
+import {{ name }}Interface
+
+public struct {{ name }}Testing {
+    public init() {}
+}

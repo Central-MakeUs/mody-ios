@@ -1,0 +1,182 @@
+//
+//  SignInView.swift
+//  SignIn
+//
+//  Created by 김동준 on 6/25/26
+//
+
+import SwiftUI
+import Base
+import ComposableArchitecture
+import DesignSystem
+
+public struct SignInView: View {
+    @Bindable private var store: StoreOf<SignInFeature>
+    
+    public init(store: StoreOf<SignInFeature>) {
+        self.store = store
+    }
+    
+    public var body: some View {
+        signInBody
+            .onAppear { store.send(.onAppear) }
+            .mLoading(isPresent: store.isLoading)
+            .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
+                alertView
+            }
+            .alert("데모 로그인", isPresented: $store.isDemoLoginAlertPresented) {
+                SecureField("비밀번호", text: $store.demoLoginPassword)
+
+                Button("취소", role: .cancel) {
+                    store.send(.demoLoginCancelButtonTapped)
+                }
+
+                Button("로그인") {
+                    store.send(.demoLoginConfirmButtonTapped)
+                }
+            }
+    }
+}
+
+private extension SignInView {
+    @ViewBuilder
+    var alertView: some View {
+        if let alertCase = store.alertCase {
+            switch alertCase {
+            case let .error(networkError):
+                CommonErrorAlertView(networkError) {
+                    store.send(.alertAction(.dismiss))
+                }
+            }
+        }
+    }
+}
+
+private extension SignInView {
+    var signInBody: some View {
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+                Spacer()
+                    .frame(height: proxy.size.height * 0.28)
+                
+                titleSection
+                
+                Spacer()
+                
+                loginButtonSection
+                    .hPadding(24)
+                    .padding(.bottom, 62)
+            }
+            .greedyFrame()
+            .background(Color.systemWhite)
+        }
+    }
+}
+
+private extension SignInView {
+    var titleSection: some View {
+        VStack(spacing: 16) {
+            Image.imgModyAppIcon
+                .resizable()
+                .scaledToFit()
+                .frame(78, 78)
+            
+            titleText
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            store.send(.demoLoginTriggerAreaTapped)
+        }
+    }
+    
+    var titleText: some View {
+        MText(
+            "친구와 함께 만드는\n다이어트 습관",
+            style: .h1,
+            color: .gray10,
+            lineLimit: 2
+        ).background(alignment: .bottom) {
+            Image.imgSignUnderline
+                .offset(x: 0, y: -5)
+        }
+    }
+}
+
+private extension SignInView {
+    var loginButtonSection: some View {
+        VStack(spacing: 12) {
+            socialLoginButton(.kakao) {
+                store.send(.kakaoLoginButtonTapped)
+            }
+            
+            socialLoginButton(.apple) {
+                store.send(.appleLoginButtonTapped)
+            }
+        }
+    }
+    
+    func socialLoginButton(
+        _ type: SocialLoginButtonType,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            socialButtonContent(type)
+                .padding(.vertical, type.verticalPadding)
+                .greedyWidth()
+                .background(type.backgroundColor)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+    
+    func socialButtonContent(_ type: SocialLoginButtonType) -> some View {
+        HStack(spacing: 12) {
+            type.image
+            
+            MText(
+                type.title,
+                style: .b6,
+                color: type.foregroundColor
+            )
+        }
+    }
+}
+
+private enum SocialLoginButtonType {
+    case kakao
+    case apple
+    
+    var image: Image {
+        switch self {
+        case .kakao: .icKakao
+        case .apple: .icApple
+        }
+    }
+    
+    var title: String {
+        switch self {
+        case .kakao: "카카오로 시작하기"
+        case .apple: "Apple로 시작하기"
+        }
+    }
+    
+    var backgroundColor: Color {
+        switch self {
+        case .kakao: .kakaoBackground
+        case .apple: .systemBlack
+        }
+    }
+    
+    var foregroundColor: Color {
+        switch self {
+        case .kakao: .systemBlack
+        case .apple: .systemWhite
+        }
+    }
+
+    var verticalPadding: CGFloat {
+        switch self {
+        case .kakao: 13
+        case .apple: 15
+        }
+    }
+}

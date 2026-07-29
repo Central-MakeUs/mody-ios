@@ -1,0 +1,26 @@
+//
+//  AppAssembly+App.swift
+//  Mody
+//
+//  Created by 김동준 on 6/25/26
+//
+
+import Swinject
+import UIKit
+import MainInterface
+
+extension AppAssembly {
+    func assembleApp(in container: Container) {
+        container.register(AppCoordinator.self) { (resolver: Resolver, window: UIWindow) in
+            let mainBuilder: MainBuildable = resolver.resolve()
+
+            return AppCoordinator(
+                window: window,
+                makeRootCoordinator: { delegate in
+                    resolver.resolve(argument: delegate)
+                },
+                mainBuilder: mainBuilder
+            )
+        }
+    }
+}

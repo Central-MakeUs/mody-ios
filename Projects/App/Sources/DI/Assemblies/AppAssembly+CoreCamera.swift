@@ -1,0 +1,26 @@
+//
+//  AppAssembly+CoreCamera.swift
+//  Mody
+//
+//  Created by 김동준 on 7/20/26.
+//
+
+import CoreCamera
+import CoreCameraInterface
+import CoreModyImageInterface
+import Swinject
+
+extension AppAssembly {
+    func assembleCoreCamera(in container: Container) {
+        container.register(CameraPermissionInterface.self) { _ in
+            CameraPermissionService()
+        }
+        container.register(CameraCaptureBuildable.self) { resolver in
+            let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
+
+            return CameraCaptureBuilder(
+                temporaryImageFileUseCase: temporaryImageFileUseCase
+            )
+        }
+    }
+}

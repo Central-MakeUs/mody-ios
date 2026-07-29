@@ -1,0 +1,121 @@
+name: iOS CI/CD
+
+on:
+  push:
+    tags:
+      - "dev/**"
+      - "prod/**"
+      - "demo/**"
+      - "design/**"
+
+jobs:
+  cicd-start:
+    name: CI/CD Start
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate deployment tag
+        id: validate-tag
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: ci_scripts/github/pre-build/validate_deployment_tag.sh
+
+      - name: Define CI/CD environment
+        id: define-cicd-environment
+        run: ci_scripts/github/pre-build/define_cicd_environment.sh
+
+      - name: Send Slack start notification
+        if: steps.define-cicd-environment.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          ci_scripts/github/webhook/send_slack.sh \
+            --status started \
+            --message "CI/CD started" \
+            --step workflow-start
+
+      - name: Setup XCConfig
+        id: setup-xcconfig
+        if: steps.define-cicd-environment.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          API_BASE_URL_DEV: ${{ secrets.API_BASE_URL_DEV }}
+          API_BASE_URL_PROD: ${{ secrets.API_BASE_URL_PROD }}
+          KAKAO_NATIVE_APP_KEY_DEV: ${{ secrets.KAKAO_NATIVE_APP_KEY_DEV }}
+          KAKAO_NATIVE_APP_KEY_PROD: ${{ secrets.KAKAO_NATIVE_APP_KEY_PROD }}
+        run: ci_scripts/github/pre-build/setup_xcconfig.sh
+
+      - name: Setup Firebase
+        id: setup-firebase
+        if: steps.setup-xcconfig.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          FIREBASE_API_KEY_DEV: ${{ secrets.FIREBASE_API_KEY_DEV }}
+          FIREBASE_API_KEY_PROD: ${{ secrets.FIREBASE_API_KEY_PROD }}
+          FIREBASE_GOOGLE_APP_ID_DEV: ${{ secrets.FIREBASE_GOOGLE_APP_ID_DEV }}
+          FIREBASE_GOOGLE_APP_ID_PROD: ${{ secrets.FIREBASE_GOOGLE_APP_ID_PROD }}
+          FIREBASE_GCM_SENDER_ID_DEV: ${{ secrets.FIREBASE_GCM_SENDER_ID_DEV }}
+          FIREBASE_GCM_SENDER_ID_PROD: ${{ secrets.FIREBASE_GCM_SENDER_ID_PROD }}
+          FIREBASE_PROJECT_ID_DEV: ${{ secrets.FIREBASE_PROJECT_ID_DEV }}
+          FIREBASE_PROJECT_ID_PROD: ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
+          FIREBASE_STORAGE_BUCKET_DEV: ${{ secrets.FIREBASE_STORAGE_BUCKET_DEV }}
+          FIREBASE_STORAGE_BUCKET_PROD: ${{ secrets.FIREBASE_STORAGE_BUCKET_PROD }}
+          FIREBASE_BUNDLE_ID_DEV: ${{ secrets.FIREBASE_BUNDLE_ID_DEV }}
+          FIREBASE_BUNDLE_ID_PROD: ${{ secrets.FIREBASE_BUNDLE_ID_PROD }}
+        run: ci_scripts/github/pre-build/setup_firebase.sh
+
+      - name: Setup Tuist
+        id: setup-tuist
+        if: steps.setup-firebase.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ci_scripts/github/pre-build/setup_tuist.sh
+
+      - name: Setup Ruby
+        id: setup-ruby
+        if: steps.setup-tuist.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: ci_scripts/github/distribution/setup_ruby.sh
+
+      - name: Install iOS signing assets
+        id: install-ios-signing-assets
+        if: steps.setup-ruby.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          IOS_SIGNING_KEYCHAIN_PASSWORD: ${{ secrets.IOS_SIGNING_KEYCHAIN_PASSWORD }}
+          DEMO_IOS_ADHOC_PROFILE_BASE64: ${{ secrets.DEMO_IOS_ADHOC_PROFILE_BASE64 }}
+          DEV_IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.DEV_IOS_APPSTORE_PROFILE_BASE64 }}
+          PROD_IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.PROD_IOS_APPSTORE_PROFILE_BASE64 }}
+        run: ci_scripts/github/distribution/install_ios_signing_assets.sh
+
+      - name: Build and distribute app
+        id: build-and-distribute-app
+        if: steps.setup-ruby.outcome == 'success' && steps.install-ios-signing-assets.outcome == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_APP_ID_DEMO: ${{ secrets.FIREBASE_APP_ID_DEMO }}
+          FIREBASE_APP_ID_DESIGN: ${{ secrets.FIREBASE_APP_ID_DESIGN }}
+          FIREBASE_APP_ID_CHALLENGEDEMO: ${{ secrets.FIREBASE_APP_ID_CHALLENGEDEMO }}
+          FIREBASE_APP_ID_FEEDDEMO: ${{ secrets.FIREBASE_APP_ID_FEEDDEMO }}
+          FIREBASE_APP_ID_MYPAGEDEMO: ${{ secrets.FIREBASE_APP_ID_MYPAGEDEMO }}
+          FIREBASE_APP_ID_ONBOARDINGDEMO: ${{ secrets.FIREBASE_APP_ID_ONBOARDINGDEMO }}
+          FIREBASE_APP_ID_SIGNINDEMO: ${{ secrets.FIREBASE_APP_ID_SIGNINDEMO }}
+          FIREBASE_APP_ID_SIGNUPDONEDEMO: ${{ secrets.FIREBASE_APP_ID_SIGNUPDONEDEMO }}
+          FIREBASE_APP_ID_SPLASHDEMO: ${{ secrets.FIREBASE_APP_ID_SPLASHDEMO }}
+          FIREBASE_DISTRIBUTION_GROUPS: ${{ secrets.FIREBASE_DISTRIBUTION_GROUPS }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          APP_STORE_CONNECT_API_KEY_IS_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_IS_BASE64 }}
+        run: ci_scripts/github/distribution/build_app.sh

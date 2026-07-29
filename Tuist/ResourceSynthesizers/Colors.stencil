@@ -1,0 +1,52 @@
+import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+
+{% if catalogs %}
+// MARK: - SwiftUI Color Extension
+public extension Color {
+    private init(_ name: String) {
+        self.init(name, bundle: Bundle.module)
+    }
+
+    {% for catalog in catalogs %}
+    {% for asset in catalog.assets %}
+    {% if asset.type == "color" %}
+    static let {{asset.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = Self("{{asset.value}}")
+    {% endif %}
+    {% if asset.type == "group" %}
+    {% for item in asset.items %}
+    {% if item.type == "color" %}
+    static let {{item.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = Self("{{item.value}}")
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+}
+
+#if canImport(UIKit)
+// MARK: - UIKit UIColor Extension
+public extension UIColor {
+    private convenience init(_ name: String) {
+        self.init(named: name, in: Bundle.module, compatibleWith: nil)!
+    }
+
+    {% for catalog in catalogs %}
+    {% for asset in catalog.assets %}
+    {% if asset.type == "color" %}
+    static let {{asset.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = UIColor("{{asset.value}}")
+    {% endif %}
+    {% if asset.type == "group" %}
+    {% for item in asset.items %}
+    {% if item.type == "color" %}
+    static let {{item.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}} = UIColor("{{item.value}}")
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+}
+#endif
+{% endif %}
