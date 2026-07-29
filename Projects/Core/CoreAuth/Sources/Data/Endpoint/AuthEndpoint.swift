@@ -17,7 +17,7 @@ enum AuthEndpoint {
         CoreNetworkEndpoint(
             path: "api/v1/oauth/client/\(loginType.rawValue)",
             method: .GET,
-            queryParameters: ["accessToken": accessToken],
+            queryParameters: loginType == .iosTest ? [:] : ["accessToken": accessToken],
             requiresAuthorization: false
         )
     }
@@ -34,6 +34,13 @@ enum AuthEndpoint {
             path: "api/v1/auth/logout",
             method: .POST,
             bodyParameters: ["refreshToken": refreshToken]
+        )
+    }
+
+    static func deleteAccount() -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/mypage/me",
+            method: .DELETE
         )
     }
 }

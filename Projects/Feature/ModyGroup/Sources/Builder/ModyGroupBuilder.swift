@@ -12,10 +12,10 @@ import ModyGroupInterface
 import ComposableArchitecture
 
 public struct ModyGroupBuilder: ModyGroupBuildable {
-    private let makeModyGroupRootFeature: (ModyGroupRouter) -> ModyGroupRootFeature
+    private let makeModyGroupRootFeature: (ModyGroupRouter, ModyGroupOutputHandler?) -> ModyGroupRootFeature
 
     public init(
-        makeModyGroupRootFeature: @escaping (ModyGroupRouter) -> ModyGroupRootFeature
+        makeModyGroupRootFeature: @escaping (ModyGroupRouter, ModyGroupOutputHandler?) -> ModyGroupRootFeature
     ) {
         self.makeModyGroupRootFeature = makeModyGroupRootFeature
     }
@@ -25,7 +25,8 @@ public struct ModyGroupBuilder: ModyGroupBuildable {
         entryPoint: ModyGroupEntryPoint,
         showSignUpDoneContents: Bool,
         initialScreen: ModyGroupInitialScreen,
-        router: ModyGroupRouter
+        router: ModyGroupRouter,
+        outputHandler: ModyGroupOutputHandler?
     ) -> UIViewController {
         let view = ModyGroupRootView(
             store: .init(
@@ -35,7 +36,7 @@ public struct ModyGroupBuilder: ModyGroupBuildable {
                     initialScreen: initialScreen
                 )
             ) {
-                makeModyGroupRootFeature(router)
+                makeModyGroupRootFeature(router, outputHandler)
             }
         )
 

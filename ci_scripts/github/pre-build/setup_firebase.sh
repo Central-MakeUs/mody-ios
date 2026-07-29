@@ -192,15 +192,21 @@ case "$deployment_kind" in
     ;;
 esac
 
+firebase_file_environment=""
+
 case "$environment" in
-  DEV|PROD)
+  DEV)
+    firebase_file_environment="Dev"
+    ;;
+  PROD)
+    firebase_file_environment="Prod"
     ;;
   *)
     fail "environment must be DEV or PROD: ${environment:-empty}"
     ;;
 esac
 
-source_plist="${firebase_dir}/GoogleService-Info-${environment}.plist"
+source_plist="${firebase_dir}/GoogleService-Info-${firebase_file_environment}.plist"
 destination_plist="${firebase_dir}/GoogleService-Info.plist"
 
 if [[ "$dry_run" == true ]]; then

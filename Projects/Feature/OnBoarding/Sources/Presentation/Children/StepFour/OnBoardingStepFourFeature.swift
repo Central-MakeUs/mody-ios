@@ -6,6 +6,8 @@
 //
 
 import ComposableArchitecture
+import Base
+import CommonDomain
 import Foundation
 import Util
 
@@ -48,8 +50,10 @@ public struct OnBoardingStepFourFeature {
                 .map { dayOfWeek in
                     ExerciseSchedule(
                         dayOfWeek: dayOfWeek,
-                        date: exerciseSchedules.first { $0.dayOfWeek == dayOfWeek }?.date
-                            ?? defaultExerciseDate
+                        date: exerciseSchedules.date(
+                            for: dayOfWeek,
+                            default: defaultExerciseDate
+                        )
                     )
                 }
         }
@@ -118,7 +122,7 @@ public struct OnBoardingStepFourFeature {
                 state.expandedMeal = state.expandedMeal == meal ? nil : meal
                 return .none
             case let .mealHourTapped(meal, hour):
-                setMealHour(&state, meal: meal, hour: hour)
+                state.mealHours.setHour(hour, for: meal)
                 state.expandedMeal = nil
                 setMealScheduleRequests(&state)
                 return .none
@@ -128,19 +132,25 @@ public struct OnBoardingStepFourFeature {
                     state.exerciseSchedules.removeAll { $0.dayOfWeek == day }
                 } else {
                     state.selectedWeekdays.append(day)
-                    setExerciseDate(&state, day: day, date: state.defaultExerciseDate)
+                    state.exerciseSchedules.setDate(state.defaultExerciseDate, for: day)
                 }
                 setExerciseScheduleRequests(&state)
                 return .none
             case .exerciseScheduleTapped(let day):
                 state.timeSheetTarget = .exerciseDay(day)
-                state.timeSheetDate = exerciseDate(from: state, for: day)
+                state.timeSheetDate = state.exerciseSchedules.date(
+                    for: day,
+                    default: state.defaultExerciseDate
+                )
                 state.isTimeSheetPresented = true
                 return .none
             case .sameExerciseTimeTapped:
                 guard let firstDay = state.selectedWeekdays.sorted().first else { return .none }
                 state.timeSheetTarget = .allExerciseDays
-                state.timeSheetDate = exerciseDate(from: state, for: firstDay)
+                state.timeSheetDate = state.exerciseSchedules.date(
+                    for: firstDay,
+                    default: state.defaultExerciseDate
+                )
                 state.isTimeSheetPresented = true
                 return .none
             case .timeSheetConfirmTapped:
@@ -148,10 +158,10 @@ public struct OnBoardingStepFourFeature {
                 switch target {
                 case .allExerciseDays:
                     state.selectedWeekdays.forEach { day in
-                        setExerciseDate(&state, day: day, date: state.timeSheetDate)
+                        state.exerciseSchedules.setDate(state.timeSheetDate, for: day)
                     }
                 case .exerciseDay(let day):
-                    setExerciseDate(&state, day: day, date: state.timeSheetDate)
+                    state.exerciseSchedules.setDate(state.timeSheetDate, for: day)
                 }
                 state.isTimeSheetPresented = false
                 state.timeSheetTarget = nil
@@ -167,63 +177,26 @@ public struct OnBoardingStepFourFeature {
 
 private extension OnBoardingStepFourFeature {
     func setMealScheduleRequests(_ state: inout State) {
-        state.request.mealSchedules = makeMealScheduleRequests(from: state)
+        state.request.mealSchedules = MealScheduleRequest.makeMealScheduleRequests(
+            meals: state.meals,
+            skippedMeals: state.skippedMeals,
+            timeForMeal: { meal in
+                String.toHourMinString(
+                    hour: state.mealHours.hour(for: meal),
+                    minute: 0
+                )
+            }
+        )
     }
 
     func setExerciseScheduleRequests(_ state: inout State) {
-        state.request.exerciseSchedules = makeExerciseScheduleRequests(from: state)
-    }
-
-    func makeMealScheduleRequests(from state: State) -> [MealScheduleRequest] {
-        state.meals.map { meal in
-            let skipped = state.skippedMeals.contains(meal)
-
-            return MealScheduleRequest(
-                mealType: meal,
-                time: skipped ? nil : String.toHourMinString(
-                    hour: mealHour(from: state, for: meal),
-                    minute: 0
-                ),
-                skipped: skipped
-            )
-        }
-    }
-
-    func makeExerciseScheduleRequests(from state: State) -> [ExerciseScheduleRequest] {
-        state.selectedWeekdays
-            .sorted()
-            .map { dayOfWeek in
-                ExerciseScheduleRequest(
-                    dayOfWeek: dayOfWeek,
-                    time: exerciseDate(from: state, for: dayOfWeek)
-                        .toHourMinTimeString(calendar: state.calendar)
-                )
+        state.request.exerciseSchedules = ExerciseScheduleRequest.makeExerciseScheduleRequests(
+            selectedWeekdays: state.selectedWeekdays,
+            timeForDay: { dayOfWeek in
+                state.exerciseSchedules
+                    .date(for: dayOfWeek, default: state.defaultExerciseDate)
+                    .toHourMinTimeString(calendar: state.calendar)
             }
-    }
-}
-
-private extension OnBoardingStepFourFeature {
-    func mealHour(from state: State, for meal: MealType) -> Int {
-        state.mealHours.first { $0.mealType == meal }?.hour ?? meal.defaultHour
-    }
-
-    func setMealHour(_ state: inout State, meal: MealType, hour: Int) {
-        guard let index = state.mealHours.firstIndex(where: { $0.mealType == meal }) else {
-            state.mealHours.append(MealHour(mealType: meal, hour: hour))
-            return
-        }
-        state.mealHours[index].hour = hour
-    }
-
-    func exerciseDate(from state: State, for day: DayOfWeek) -> Date {
-        state.exerciseSchedules.first { $0.dayOfWeek == day }?.date ?? state.defaultExerciseDate
-    }
-
-    func setExerciseDate(_ state: inout State, day: DayOfWeek, date: Date) {
-        guard let index = state.exerciseSchedules.firstIndex(where: { $0.dayOfWeek == day }) else {
-            state.exerciseSchedules.append(ExerciseSchedule(dayOfWeek: day, date: date))
-            return
-        }
-        state.exerciseSchedules[index].date = date
+        )
     }
 }

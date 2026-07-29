@@ -7,18 +7,19 @@
 
 import Swinject
 import UIKit
+import MainInterface
 
 extension AppAssembly {
     func assembleApp(in container: Container) {
         container.register(AppCoordinator.self) { (resolver: Resolver, window: UIWindow) in
-            AppCoordinator(
+            let mainBuilder: MainBuildable = resolver.resolve()
+
+            return AppCoordinator(
                 window: window,
                 makeRootCoordinator: { delegate in
                     resolver.resolve(argument: delegate)
                 },
-                makeMainCoordinator: { delegate in
-                    resolver.resolve(argument: delegate)
-                }
+                mainBuilder: mainBuilder
             )
         }
     }

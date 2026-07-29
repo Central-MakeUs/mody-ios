@@ -43,7 +43,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
     moduleDependencies: [
         .App: [
             .module(.Root),
-            .module(.Main),
+            .module(.MicroFeature(.Main)),
             .module(.MicroFeature(.Splash)),
             .module(.MicroFeature(.SignIn)),
             .module(.MicroFeature(.OnBoarding)),
@@ -56,13 +56,21 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreNetwork)),
             .module(.MicroFeature(.CoreAuth)),
             .module(.MicroFeature(.CoreKakao)),
+            .module(.MicroFeature(.CoreCamera)),
+            .module(.MicroFeature(.CoreNotification)),
+            .module(.MicroFeature(.CoreModyImage)),
             
             .external(.FirebaseCore),
+            .external(.FirebaseMessaging),
             .external(.Swinject),
             
             .microFeature(.CoreNetwork),
             .microFeature(.CoreAuth),
-            .microFeature(.CoreKakao)
+            .microFeature(.CoreKakao),
+            .microFeature(.CoreCamera),
+            .microFeature(.CoreNotification),
+            .microFeature(.CoreModyImage),
+            .microFeature(.Main)
         ],
         .Root: [
             .microFeature(.Splash),
@@ -71,21 +79,15 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.ModyGroup),
             .module(.Base)
         ],
-        .Main: [
-            .microFeature(.Feed),
-            .microFeature(.Challenge),
-            .microFeature(.MyPage),
-            .microFeature(.ModyGroup),
-            .module(.Base),
-            .module(.CommonDomain),
-            .external(.SnapKit)
-        ],
         .DesignSystem: [
             .external(.SnapKit)
         ],
         .Base: [
+            .external(.ComposableArchitecture),
             .module(.DesignSystem),
-            .module(.ModyLogger)
+            .module(.ModyLogger),
+            .module(.CommonDomain),
+            .module(.Util)
         ]
     ],
     microFeatureDependencies: [
@@ -105,6 +107,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.ComposableArchitecture),
                 .module(.Base),
                 .module(.CommonDomain),
+                .microFeature(.FirebaseService),
                 .microFeature(.CoreAuth)
             ]
         ),
@@ -114,6 +117,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
+                .microFeature(.CoreCamera),
+                .microFeature(.CoreNotification),
                 .module(.Util)
             ]
         ),
@@ -124,6 +129,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .ModyGroup: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
                 .external(.ComposableArchitecture),
                 .module(.Base),
@@ -133,8 +141,44 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .Feed: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
-                .module(.Base)
+                .module(.Base),
+                .module(.CommonDomain),
+                .module(.Util),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreNetwork),
+                .microFeature(.CoreCamera),
+                .microFeature(.ModyGroup),
+                .external(.ReactorKit),
+                .external(.RxSwift),
+                .external(.RxCocoa),
+                .external(.RxRelay),
+                .microFeature(.CoreModyImage)
+            ],
+            demo: [
+                .module(.DesignSystem),
+                .module(.MicroFeature(.CoreCamera)),
+                .module(.MicroFeature(.CoreModyImage))
+            ]
+        ),
+        .Main: .init(
+            implementation: [
+                .microFeature(.Feed),
+                .microFeature(.Challenge),
+                .microFeature(.MyPage),
+                .microFeature(.ModyGroup),
+                .microFeature(.CoreNotification),
+                .module(.Base),
+                .module(.CommonDomain),
+                .module(.Util),
+                .external(.ComposableArchitecture),
+                .external(.SnapKit),
+                .external(.ReactorKit),
+                .external(.RxSwift),
+                .external(.RxCocoa)
             ]
         ),
         .Challenge: .init(
@@ -143,8 +187,25 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .MyPage: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
-                .module(.Base)
+                .external(.ComposableArchitecture),
+                .module(.Base),
+                .module(.CommonDomain),
+                .module(.Util),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreNetwork),
+                .microFeature(.CoreNotification),
+                .microFeature(.ModyGroup),
+                .microFeature(.CoreCamera),
+                .microFeature(.CoreModyImage)
+            ],
+            demo: [
+                .module(.CommonDomain),
+                .microFeature(.CoreAuth),
+                .module(.MicroFeature(.CoreModyImage))
             ]
         ),
         .CoreNetwork: .init(
@@ -182,6 +243,30 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreKakao),
                 .module(.ModyLogger)
+            ]
+        ),
+        .CoreNotification: .init(
+            implementation: [
+                .microFeature(.CoreKeyChainStorage),
+                .microFeature(.CoreNetwork)
+            ]
+        ),
+        .CoreCamera: .init(
+            interface: [
+                .microFeature(.CoreModyImage)
+            ],
+            implementation: [
+                .module(.DesignSystem),
+                .microFeature(.CoreModyImage),
+                .external(.SnapKit)
+            ]
+        ),
+        .CoreModyImage: .init(
+            implementation: [
+                .module(.CommonDomain),
+                .microFeature(.CoreNetwork),
+                .external(.Alamofire),
+                .external(.Nuke)
             ]
         )
     ]

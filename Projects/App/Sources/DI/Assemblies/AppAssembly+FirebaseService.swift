@@ -17,7 +17,12 @@ extension AppAssembly {
             FirebaseService(
                 remoteConfig: RemoteConfig.remoteConfig(),
                 defaultValues: [
-                    RemoteConfigKeys.challengeTabHideFlag.rawValue: NSNumber(value: false)
+                    RemoteConfigKeys.isPhaseOneFlag.rawValue: NSNumber(value: false),
+                    RemoteConfigKeys.forceUpdate.rawValue: NSNumber(value: false),
+                    RemoteConfigKeys.guestLogin.rawValue: NSNumber(value: false),
+                    RemoteConfigKeys.notice.rawValue: "{}" as NSString,
+                    RemoteConfigKeys.minimumSupportedVersion.rawValue: "1.0.0" as NSString,
+                    RemoteConfigKeys.appStoreURL.rawValue: "" as NSString
                 ]
             )
         }

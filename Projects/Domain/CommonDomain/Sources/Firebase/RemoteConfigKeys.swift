@@ -6,5 +6,10 @@
 //
 
 public enum RemoteConfigKeys: String {
-    case challengeTabHideFlag = "challenge_tab_hide_flag"
+    case isPhaseOneFlag = "is_phase_one_flag"
+    case forceUpdate = "force_update_flag"
+    case guestLogin = "guest_login_flag"
+    case notice = "notice_flag"
+    case minimumSupportedVersion = "minimum_supported_version"
+    case appStoreURL = "app_store_url"
 }

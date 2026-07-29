@@ -32,4 +32,8 @@ public struct AuthUseCase: AuthUseCaseProtocol {
     public func logout() async throws {
         try await authRepository.postLogout()
     }
+
+    public func deleteAccount() async throws {
+        try await authRepository.deleteAccount()
+    }
 }

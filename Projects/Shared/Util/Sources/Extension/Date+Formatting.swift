@@ -76,3 +76,25 @@ public extension Date {
         return (-2...2).map { (selectedMinute + $0 + 60) % 60 }
     }
 }
+
+public extension Date {
+    func relativeTimeString(to referenceDate: Date = .now) -> String {
+        let interval = max(Int(referenceDate.timeIntervalSince(self)), 0)
+        
+        if interval < 60 {
+            return "방금 전"
+        }
+        
+        let minutes = interval / 60
+        if minutes < 60 {
+            return "\(minutes)분 전"
+        }
+        
+        let hours = minutes / 60
+        if hours < 24 {
+            return "\(hours)시간 전"
+        }
+        
+        return "\(hours / 24)일 전"
+    }
+}

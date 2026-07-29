@@ -14,6 +14,6 @@ public protocol AuthUseCaseProtocol {
     ) async throws -> AuthSession
 
     func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo
-
     func logout() async throws
+    func deleteAccount() async throws
 }

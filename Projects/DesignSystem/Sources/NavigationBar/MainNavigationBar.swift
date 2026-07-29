@@ -9,14 +9,13 @@ import UIKit
 import SnapKit
 
 public final class MainNavigationBar: UIView {
-    public var onUsersTap: (() -> Void)?
     public var onAlarmTap: (() -> Void)?
 
     private let contentView = UIView()
     private let logoImageView = UIImageView()
     private let buttonStackView = UIStackView()
-    private let usersButton = UIButton(type: .system)
     private let alarmButton = UIButton(type: .system)
+    private let notificationBadgeView = UIView()
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -42,16 +41,20 @@ private extension MainNavigationBar {
         buttonStackView.distribution = .fill
         buttonStackView.spacing = 12
 
-        configureIconButton(usersButton, image: .icUsers, action: #selector(didTapUsersButton))
         configureIconButton(alarmButton, image: .icAlarm, action: #selector(didTapAlarmButton))
+
+        notificationBadgeView.backgroundColor = .systemError
+        notificationBadgeView.isHidden = true
+        notificationBadgeView.isUserInteractionEnabled = false
+        notificationBadgeView.layer.cornerRadius = 4
     }
 
     func setupLayout() {
         addSubview(contentView)
         contentView.addSubview(logoImageView)
         contentView.addSubview(buttonStackView)
-        buttonStackView.addArrangedSubview(usersButton)
         buttonStackView.addArrangedSubview(alarmButton)
+        alarmButton.addSubview(notificationBadgeView)
 
         contentView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(
@@ -68,10 +71,14 @@ private extension MainNavigationBar {
             $0.top.trailing.bottom.equalToSuperview()
         }
 
-        [usersButton, alarmButton].forEach {
-            $0.snp.makeConstraints {
-                $0.size.equalTo(24)
-            }
+        alarmButton.snp.makeConstraints {
+            $0.size.equalTo(24)
+        }
+
+        notificationBadgeView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(-4)
+            $0.trailing.equalToSuperview().offset(4)
+            $0.size.equalTo(8)
         }
     }
 
@@ -86,11 +93,13 @@ private extension MainNavigationBar {
         button.addTarget(self, action: action, for: .touchUpInside)
     }
 
-    @objc func didTapUsersButton() {
-        onUsersTap?()
-    }
-
     @objc func didTapAlarmButton() {
         onAlarmTap?()
+    }
+}
+
+public extension MainNavigationBar {
+    func setNotificationBadgeVisible(_ isVisible: Bool) {
+        notificationBadgeView.isHidden = !isVisible
     }
 }

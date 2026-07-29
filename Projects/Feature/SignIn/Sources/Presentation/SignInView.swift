@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import Base
 import ComposableArchitecture
 import DesignSystem
 
 public struct SignInView: View {
-    private let store: StoreOf<SignInFeature>
+    @Bindable private var store: StoreOf<SignInFeature>
     
     public init(store: StoreOf<SignInFeature>) {
         self.store = store
@@ -20,6 +21,34 @@ public struct SignInView: View {
         signInBody
             .onAppear { store.send(.onAppear) }
             .mLoading(isPresent: store.isLoading)
+            .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
+                alertView
+            }
+            .alert("데모 로그인", isPresented: $store.isDemoLoginAlertPresented) {
+                SecureField("비밀번호", text: $store.demoLoginPassword)
+
+                Button("취소", role: .cancel) {
+                    store.send(.demoLoginCancelButtonTapped)
+                }
+
+                Button("로그인") {
+                    store.send(.demoLoginConfirmButtonTapped)
+                }
+            }
+    }
+}
+
+private extension SignInView {
+    @ViewBuilder
+    var alertView: some View {
+        if let alertCase = store.alertCase {
+            switch alertCase {
+            case let .error(networkError):
+                CommonErrorAlertView(networkError) {
+                    store.send(.alertAction(.dismiss))
+                }
+            }
+        }
     }
 }
 
@@ -54,6 +83,10 @@ private extension SignInView {
             
             titleText
         }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            store.send(.demoLoginTriggerAreaTapped)
+        }
     }
     
     var titleText: some View {
@@ -62,7 +95,10 @@ private extension SignInView {
             style: .h1,
             color: .gray10,
             lineLimit: 2
-        )
+        ).background(alignment: .bottom) {
+            Image.imgSignUnderline
+                .offset(x: 0, y: -5)
+        }
     }
 }
 
@@ -125,7 +161,7 @@ private enum SocialLoginButtonType {
     
     var backgroundColor: Color {
         switch self {
-        case .kakao: .main0
+        case .kakao: .kakaoBackground
         case .apple: .systemBlack
         }
     }

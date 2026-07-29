@@ -11,7 +11,6 @@ public enum Module: Hashable {
     case CommonDomain
     case Base
     case DesignSystem
-    case Main
     case Root
     case App
     case MicroFeature(MicroFeatureModule)
@@ -31,7 +30,13 @@ public enum ExternalModule {
     case FirebaseCore
     case FirebaseAnalytics
     case FirebaseCrashlytics
+    case FirebaseMessaging
     case FirebaseRemoteConfig
+    case ReactorKit
+    case RxSwift
+    case RxCocoa
+    case RxRelay
+    case Nuke
 
     var name: String {
         switch self {
@@ -41,6 +46,9 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreModyImage
+    case CoreCamera
+    case CoreNotification
     case CoreKakao
     case ModyGroup
     case CoreAuth
@@ -51,6 +59,7 @@ public enum MicroFeatureModule {
     case MyPage
     case Challenge
     case Feed
+    case Main
     case OnBoarding
     case SignIn
     case Splash
@@ -78,6 +87,7 @@ public enum MicroFeatureModule {
         case .SignIn: "Projects/Feature/SignIn"
         case .OnBoarding: "Projects/Feature/OnBoarding"
         case .Feed: "Projects/Feature/Feed"
+        case .Main: "Projects/Feature/Main"
         case .Challenge: "Projects/Feature/Challenge"
         case .MyPage: "Projects/Feature/MyPage"
         case .SignUpDone: "Projects/Feature/SignUpDone"
@@ -87,6 +97,9 @@ public enum MicroFeatureModule {
         case .CoreAuth: "Projects/Core/CoreAuth"
         case .ModyGroup: "Projects/Feature/ModyGroup"
         case .CoreKakao: "Projects/Core/CoreKakao"
+        case .CoreNotification: "Projects/Core/CoreNotification"
+        case .CoreCamera: "Projects/Core/CoreCamera"
+        case .CoreModyImage: "Projects/Core/CoreModyImage"
         }
     }
 }

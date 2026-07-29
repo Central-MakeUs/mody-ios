@@ -8,6 +8,10 @@
 import CoreNetworkInterface
 
 enum GroupEndpoint {
+    static func getGroups() -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(path: "api/v1/groups")
+    }
+
     static func postCreate(request: GroupCreateRequest) -> CoreNetworkEndpoint {
         CoreNetworkEndpoint(
             path: "api/v1/groups",
@@ -21,6 +25,13 @@ enum GroupEndpoint {
             path: "api/v1/groups/join",
             method: .POST,
             bodyParameters: request
+        )
+    }
+
+    static func deleteGroup(groupId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/members/me",
+            method: .DELETE
         )
     }
 }

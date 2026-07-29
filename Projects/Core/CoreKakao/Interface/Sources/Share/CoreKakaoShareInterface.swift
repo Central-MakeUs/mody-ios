@@ -7,5 +7,5 @@
 
 public protocol CoreKakaoShareInterface {
     @MainActor
-    func shareCodeToKakao(code: String) async throws
+    func shareCodeToKakao(code: String, groupName: String) async throws
 }

@@ -7,31 +7,38 @@
 
 import Base
 import UIKit
+import MainInterface
 import FeedInterface
 import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
 import CommonDomain
 
-public final class MainCoordinator {
+public final class MainCoordinator: MainCoordinating {
     public let navigationController: UINavigationController
     public let tabBarController: MainTabBarController
-    public weak var delegate: MainCoordinatorDelegate?
+    weak var delegate: MainCoordinatorDelegate?
     weak var mainContainerViewController: MainContainerViewController?
+    weak var feedInputHandler: FeedInputHandler?
+    weak var myPageInputHandler: MyPageInputHandler?
 
-    private let feedBuilder: FeedBuildable
+    let feedBuilder: FeedBuildable
     private let challengeBuilder: ChallengeBuildable
-    private let myPageBuilder: MyPageBuildable
+    let myPageBuilder: MyPageBuildable
     let modyGroupBuilder: ModyGroupBuildable
+    private let mainContainerBuilder: MainContainerBuildable
+    let notificationBuilder: NotificationBuildable
 
-    public init(
+    init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
         tabBarController: MainTabBarController = MainTabBarController(),
         feedBuilder: FeedBuildable,
         challengeBuilder: ChallengeBuildable,
         myPageBuilder: MyPageBuildable,
         modyGroupBuilder: ModyGroupBuildable,
-        delegate: MainCoordinatorDelegate? = nil
+        mainContainerBuilder: MainContainerBuildable,
+        notificationBuilder: NotificationBuildable,
+        delegate: MainCoordinatorDelegate
     ) {
         self.navigationController = navigationController
         self.tabBarController = tabBarController
@@ -39,6 +46,8 @@ public final class MainCoordinator {
         self.challengeBuilder = challengeBuilder
         self.myPageBuilder = myPageBuilder
         self.modyGroupBuilder = modyGroupBuilder
+        self.mainContainerBuilder = mainContainerBuilder
+        self.notificationBuilder = notificationBuilder
         self.delegate = delegate
         navigationController.setNavigationBarHidden(true, animated: false)
         print("⭕ MainCoordinator init!")
@@ -50,16 +59,24 @@ public final class MainCoordinator {
 
     @MainActor
     public func start() {
-        let feedViewController = feedBuilder.makeFeedViewController(router: self)
+        let feedViewController = feedBuilder.makeFeedViewController(
+            router: self,
+            outputHandler: self
+        )
+        feedInputHandler = feedViewController as? FeedInputHandler
         let challengeViewController = challengeBuilder.makeChallengeViewController(router: self)
-        let myPageViewController = myPageBuilder.makeMyPageViewController(router: self)
+        let myPageViewController = myPageBuilder.makeMyPageViewController(
+            router: self,
+            outputHandler: self
+        )
+        myPageInputHandler = myPageViewController
 
-        let isChallengeHideFlag = TabBarManager.shared.isChallengeTabHidden
-        let viewControllers = isChallengeHideFlag
+        let isPhaseOne = PhaseManager.shared.isPhaseOne
+        let viewControllers = isPhaseOne
             ? [feedViewController, myPageViewController]
             : [feedViewController, challengeViewController, myPageViewController]
         
-        let tabs: [MainTab] = isChallengeHideFlag
+        let tabs: [MainTab] = isPhaseOne
             ? [.feed, .myPage]
             : [.feed, .challenge, .myPage]
         
@@ -69,16 +86,19 @@ public final class MainCoordinator {
             animated: false
         )
 
-        let mainContainerViewController = MainContainerViewController(
+        let mainContainerViewController = mainContainerBuilder.makeMainContainerViewController(
             tabBarController: tabBarController,
             tabs: tabs
         )
         self.mainContainerViewController = mainContainerViewController
-        mainContainerViewController.onSheetGroupParticipateTap = { [weak self] in
+        mainContainerViewController.onGroupParticipateTap = { [weak self] in
             self?.showGroupParticipate()
         }
-        mainContainerViewController.onSheetGroupCreateTap = { [weak self] in
+        mainContainerViewController.onGroupCreateTap = { [weak self] in
             self?.showGroupCreate(needBackButton: true)
+        }
+        mainContainerViewController.onAlarmTap = { [weak self] in
+            self?.showNotification()
         }
 
         navigationController.setViewControllers([mainContainerViewController], animated: false)

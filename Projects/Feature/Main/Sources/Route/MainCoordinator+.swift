@@ -17,12 +17,16 @@ extension MainCoordinator {
         showModyGroup(initialScreen: .create(needBackButton: needBackButton))
     }
 
-    func showModyGroup(initialScreen: ModyGroupInitialScreen) {
+    func showModyGroup(
+        entryPoint: ModyGroupEntryPoint = .main,
+        initialScreen: ModyGroupInitialScreen
+    ) {
         let viewController = modyGroupBuilder.makeModyGroupViewController(
-            entryPoint: .main,
+            entryPoint: entryPoint,
             showSignUpDoneContents: false,
             initialScreen: initialScreen,
-            router: self
+            router: self,
+            outputHandler: self
         )
 
         navigationController.pushViewController(viewController, animated: true)

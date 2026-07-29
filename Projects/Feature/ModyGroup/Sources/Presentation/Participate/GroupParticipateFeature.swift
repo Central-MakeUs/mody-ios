@@ -5,16 +5,18 @@
 //  Created by 김동준 on 6/26/26
 //
 
+import Base
 import ComposableArchitecture
 import CommonDomain
+import ModyGroupInterface
 
 @Reducer
 public struct GroupParticipateFeature {
-    private let groupUseCase: GroupUseCase
+    private let groupUseCase: GroupUseCaseProtocol
     
     @ObservableState
     public struct State: Equatable {
-        enum AlertCase: Equatable {
+        public enum AlertCase: Equatable {
             case error(NetworkError)
         }
         
@@ -36,6 +38,7 @@ public struct GroupParticipateFeature {
         var isLoading: Bool = false
         var joinError: JoinError?
         var alertCase: AlertCase?
+        var alertState = AlertFeature.State()
         
         var isParticipateButtonEnabled: Bool {
             inviteCode.count == 8 && !isLoading
@@ -57,6 +60,8 @@ public struct GroupParticipateFeature {
     
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
+        case alertAction(AlertFeature.Action)
+        case showAlert(State.AlertCase)
         case backButtonTapped
         case participateButtonTapped
         case createButtonTapped
@@ -64,7 +69,7 @@ public struct GroupParticipateFeature {
         case joinGroupFailure(NetworkError, code: String)
     }
     
-    public init(groupUseCase: GroupUseCase) {
+    public init(groupUseCase: GroupUseCaseProtocol) {
         self.groupUseCase = groupUseCase
     }
     
@@ -77,20 +82,32 @@ public struct GroupParticipateFeature {
                     return .none
                 }
             }
+
+        Scope(state: \.alertState, action: \.alertAction) {
+            AlertFeature()
+        }
         
         Reduce { state, action in
             switch action {
             case .binding:
                 return .none
+            case .alertAction(.dismiss):
+                state.alertCase = nil
+                return .none
+            case .alertAction:
+                return .none
+            case let .showAlert(alertCase):
+                state.isLoading = false
+                state.alertCase = alertCase
+                return .send(.alertAction(.present))
             case .participateButtonTapped:
                 guard state.isParticipateButtonEnabled else { return .none }
                 let inviteCode = state.inviteCode
-                let request = GroupJoinRequest(code: inviteCode)
                 state.isLoading = true
                 
                 return .run { send in
                     do {
-                        try await groupUseCase.joinGroup(request: request)
+                        try await groupUseCase.joinGroup(code: inviteCode)
                         await send(.joinGroupSuccessfully)
                     } catch let error as NetworkError {
                         await send(.joinGroupFailure(error, code: inviteCode))
@@ -106,20 +123,19 @@ public struct GroupParticipateFeature {
                 guard state.inviteCode == code else { return .none }
                 
                 guard case let .serverError(code, _, fallback) = error else {
-                    state.alertCase = .error(error)
-                    return .none
+                    return .send(.showAlert(.error(error)))
                 }
                 
                 switch code {
                 case ServerErrorCode.group301.code:
                     state.joinError = .notFound
+                    return .none
                 case ServerErrorCode.group304.code:
                     state.joinError = .groupLimitExceeded
+                    return .none
                 default:
-                    state.alertCase = .error(fallback)
-                }
-                return .none
-                
+                    return .send(.showAlert(.error(fallback)))
+                }                
             case .backButtonTapped:
                 return .none
             case .createButtonTapped:

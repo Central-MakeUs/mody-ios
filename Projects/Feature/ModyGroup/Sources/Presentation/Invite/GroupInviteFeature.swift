@@ -22,11 +22,13 @@ public struct GroupInviteFeature {
         }
 
         var inviteCode: String
+        var groupName: String
         var isLoading: Bool = false
         var isCodeCopied: Bool = false
 
-        public init(inviteCode: String = "") {
+        public init(inviteCode: String = "", groupName: String = "") {
             self.inviteCode = inviteCode
+            self.groupName = groupName
         }
     }
     
@@ -62,11 +64,15 @@ public struct GroupInviteFeature {
             case .shareButtonTapped:
                 guard !state.isLoading else { return .none }
                 let inviteCode = state.inviteCode
+                let groupName = state.groupName
 
                 state.isLoading = true
                 return .run { send in
                     do {
-                        try await shareGroupInviteUseCase.shareCodeToKakao(code: inviteCode)
+                        try await shareGroupInviteUseCase.shareCodeToKakao(
+                            code: inviteCode,
+                            groupName: groupName
+                        )
                     } catch {
                         debugPrint("ModyGroup invite share failed: \(error)")
                     }

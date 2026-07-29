@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Base
 import ComposableArchitecture
 import DesignSystem
 
@@ -22,7 +23,7 @@ public struct OnBoardingStepFourView: View {
                 isPresented: $store.isTimeSheetPresented,
                 onDismiss: { store.send(.timeSheetDismissed) }
             ) {
-                OnBoardingExerciseTimeSheet(
+                ReminderExerciseTimeSheet(
                     date: $store.timeSheetDate,
                     locale: store.locale,
                     calendar: store.calendar,
@@ -71,7 +72,7 @@ private extension OnBoardingStepFourView {
 
 private extension OnBoardingStepFourView {
     var mealSection: some View {
-        OnBoardingMealSection(
+        ReminderMealSection(
             meals: store.meals,
             mealHours: store.mealHours,
             skippedMeals: store.skippedMeals,
@@ -91,7 +92,7 @@ private extension OnBoardingStepFourView {
 
 private extension OnBoardingStepFourView {
     func exerciseSection(width: CGFloat) -> some View {
-        OnBoardingExerciseSection(
+        ReminderExerciseSection(
             width: width,
             weekdays: store.weekdays,
             selectedWeekdays: store.selectedWeekdays,

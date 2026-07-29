@@ -9,6 +9,8 @@ import ComposableArchitecture
 import SplashInterface
 import CommonDomain
 import CoreAuthInterface
+import Foundation
+import Base
 
 @Reducer
 public struct SplashFeature {
@@ -28,9 +30,24 @@ public struct SplashFeature {
 
     @ObservableState
     public struct State: Equatable {
-        public init() {}
+        public enum AlertCase: Equatable {
+            case error(NetworkError)
+            case forceUpdate
+            case minimumSupportedVersion
+            case notice(NoticePopupInfo)
+        }
+
+        public init() {
+            self.currentAppVersion = Bundle.main.object(
+                forInfoDictionaryKey: "CFBundleShortVersionString"
+            ) as? String ?? ""
+        }
         
         var isLoading = true
+        let currentAppVersion: String
+        var appStoreURLString = ""
+        var alertCase: AlertCase?
+        var alertState = AlertFeature.State(dismissOnScrimTap: false)
     }
     
     public enum Action {
@@ -40,16 +57,25 @@ public struct SplashFeature {
         case userInfoFetchFailed
         case setUpRemoteConfig
         case cachingRemoteConfig
+        case checkForceUpdate
+        case checkMinimumSupportedVersion
+        case checkNotice
+        case alertAction(AlertFeature.Action)
+        case showAlert(State.AlertCase)
+        case noticeConfirmButtonTapped
         case healthCheck
     }
     
     public var body: some ReducerOf<Self> {
+        Scope(state: \.alertState, action: \.alertAction) {
+            AlertFeature()
+        }
+
         Reduce { state, action in
             switch action {
             case .onAppear:
                 state.isLoading = true
                 return .run { send in
-                    try await Task.sleep(for: .seconds(1))
                     await send(.setUpRemoteConfig)
                 }
             case .setUpRemoteConfig:
@@ -58,18 +84,66 @@ public struct SplashFeature {
                     await send(.cachingRemoteConfig)
                 }
             case .cachingRemoteConfig:
-                let value = splashUseCase.getChallengeTabHideFlag(key: RemoteConfigKeys.challengeTabHideFlag.rawValue)
-                TabBarManager.shared.isChallengeTabHidden = value
-                return .send(.healthCheck)
+                let isPhaseOne = splashUseCase.getRemoteConfigBool(for: .isPhaseOneFlag)
+                PhaseManager.shared.isPhaseOne = isPhaseOne
+
+                return .send(.checkForceUpdate)
+            case .checkForceUpdate:
+                let needForceUpdate = splashUseCase.getRemoteConfigBool(for: .forceUpdate)
+
+                if needForceUpdate {
+                    state.appStoreURLString = splashUseCase.getRemoteConfigString(for: .appStoreURL)
+                    return .send(.showAlert(.forceUpdate))
+                }
+                
+                return .send(.checkMinimumSupportedVersion)
+            case .checkMinimumSupportedVersion:
+                let targetVersion = splashUseCase.getRemoteConfigString(for: .minimumSupportedVersion)
+                
+                let needsMinimumVersionUpdate = splashUseCase.needsMinimumVersionUpdate(
+                    currentVersion: state.currentAppVersion,
+                    targetVersion: targetVersion
+                )
+
+                if needsMinimumVersionUpdate {
+                    state.appStoreURLString = splashUseCase.getRemoteConfigString(for: .appStoreURL)
+                    return .send(.showAlert(.minimumSupportedVersion))
+                }
+                
+                return .send(.checkNotice)
+            case .checkNotice:
+                let noticePopupInfo = splashUseCase.getNoticePopupInfo()
+
+                guard let noticePopupInfo,
+                      !noticePopupInfo.isEmpty else {
+                    return .send(.healthCheck)
+                }
+
+                return .send(.showAlert(.notice(noticePopupInfo)))
+            case .alertAction:
+                return .none
+            case let .showAlert(alertCase):
+                state.isLoading = false
+                state.alertCase = alertCase
+                return .send(.alertAction(.present))
+            case .noticeConfirmButtonTapped:
+                guard case let .notice(noticePopupInfo) = state.alertCase,
+                      noticePopupInfo.skipPossible == true else {
+                    return .none
+                }
+
+                return .run { send in
+                    await send(.alertAction(.dismiss))
+                    await send(.healthCheck)
+                }
             case .healthCheck:
+                state.isLoading = true
                 return .run { send in
                     await send(getHealthCheck())
                 }
             case .serverHealthChecked(let isStable):
                 if !isStable {
-                    // TODO: Health 체크 실패 문구
-                    state.isLoading = false
-                    return .none
+                    return .send(.showAlert(.error(.unknown)))
                 }
                 
                 return .run { send in
@@ -110,7 +184,7 @@ private extension SplashFeature {
             let isStable = try await splashUseCase.getHealthCheck()
             return .serverHealthChecked(isStable)
         } catch {
-            return .serverHealthChecked(false)
+            return .showAlert(.error(error as? NetworkError ?? .unknown))
         }
     }
 
