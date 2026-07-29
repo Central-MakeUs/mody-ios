@@ -11,6 +11,7 @@ import DesignSystem
 import SwiftUI
 
 public struct MyPageView: View {
+    @Environment(\.openURL) private var openURL
     @Bindable private var store: StoreOf<MyPageFeature>
     private let imageLoader: RemoteImageLoading
 
@@ -72,20 +73,26 @@ private extension MyPageView {
         VStack(spacing: 0) {
             settingsRow(
                 title: "알림 설정",
-                action: .notificationSettingsButtonTapped,
+                action: { store.send(.notificationSettingsButtonTapped) },
                 hasDivider: true
             )
 
             settingsRow(
                 title: "그룹 설정",
-                action: .groupSettingsButtonTapped,
+                action: { store.send(.groupSettingsButtonTapped) },
+                hasDivider: true
+            )
+
+            settingsRow(
+                title: "문의 및 약관 확인",
+                action: { openSupportAndTermsURL() },
                 hasDivider: store.isPhaseOne ? false : true
             )
 
             if !store.isPhaseOne {
                 settingsRow(
                     title: "건강 데이터 연동 설정",
-                    action: .healthDataSettingsButtonTapped,
+                    action: { store.send(.healthDataSettingsButtonTapped) },
                     hasDivider: false
                 )
             }
@@ -94,11 +101,11 @@ private extension MyPageView {
 
     func settingsRow(
         title: String,
-        action: MyPageFeature.Action,
+        action: @escaping () -> Void,
         hasDivider: Bool
     ) -> some View {
         Button {
-            store.send(action)
+            action()
         } label: {
             HStack(spacing: 0) {
                 MText(
@@ -127,5 +134,13 @@ private extension MyPageView {
             }
             .contentShape(Rectangle())
         }
+    }
+
+    func openSupportAndTermsURL() {
+        guard let url = URL(string: "https://mody-support.vercel.app/") else {
+            return
+        }
+
+        openURL(url)
     }
 }
