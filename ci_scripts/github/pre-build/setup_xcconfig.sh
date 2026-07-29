@@ -80,7 +80,7 @@ EOF
 #include "./Shared.xcconfig"
 
 BUNDLE_IDENTIFIER = com.jagsim.mody-dev
-BUNDLE_NAME = Mody DEV
+BUNDLE_NAME = MODY DEV
 ENV = Dev
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEV
 BASE_URL = ${api_base_url_dev}
@@ -91,7 +91,7 @@ EOF
 #include "./Shared.xcconfig"
 
 BUNDLE_IDENTIFIER = com.jagsim.mody
-BUNDLE_NAME = Mody
+BUNDLE_NAME = MODY
 ENV = Prod
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = PROD
 BASE_URL = ${api_base_url_prod}
