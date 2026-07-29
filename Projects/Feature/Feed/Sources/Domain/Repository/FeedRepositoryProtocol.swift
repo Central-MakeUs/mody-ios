@@ -15,4 +15,5 @@ public protocol FeedRepositoryProtocol {
     ) async throws -> FeedRecordPage
 
     func postRecord(_ request: FeedRecordCreateRequest) async throws
+    func postRecordReport(groupId: Int, recordId: Int) async throws
 }

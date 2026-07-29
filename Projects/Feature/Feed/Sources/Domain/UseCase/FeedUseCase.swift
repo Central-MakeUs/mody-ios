@@ -90,6 +90,13 @@ public struct FeedUseCase {
         try await feedRepository.postRecord(request)
     }
 
+    public func reportRecord(groupId: Int, recordId: Int) async throws {
+        try await feedRepository.postRecordReport(
+            groupId: groupId,
+            recordId: recordId
+        )
+    }
+
     public func makeRecordCreationRequest(
         imageKey: String,
         recordType: FeedRecordType,

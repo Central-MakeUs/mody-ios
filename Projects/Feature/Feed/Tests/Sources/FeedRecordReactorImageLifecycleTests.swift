@@ -216,6 +216,8 @@ private final class FeedRepositoryMock: FeedRepositoryProtocol {
             throw createRecordError
         }
     }
+
+    func postRecordReport(groupId: Int, recordId: Int) async throws {}
 }
 
 private final class ImageUploadUseCaseMock: ImageUploadUseCaseProtocol {

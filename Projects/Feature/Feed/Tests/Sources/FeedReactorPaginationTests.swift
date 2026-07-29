@@ -201,6 +201,8 @@ private actor FeedPaginationRepositoryMock: FeedRepositoryProtocol {
     }
 
     func postRecord(_ request: FeedRecordCreateRequest) async throws {}
+
+    func postRecordReport(groupId: Int, recordId: Int) async throws {}
 }
 
 private struct FeedPaginationAuthUseCaseMock: AuthUseCaseProtocol {
