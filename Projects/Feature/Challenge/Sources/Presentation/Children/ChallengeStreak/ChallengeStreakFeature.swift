@@ -9,6 +9,8 @@ import ComposableArchitecture
 
 @Reducer
 public struct ChallengeStreakFeature {
+    private let challengeUseCase: ChallengeUseCase
+
     @ObservableState
     public struct State: Equatable {
         public init() {}
@@ -16,7 +18,9 @@ public struct ChallengeStreakFeature {
 
     public enum Action {}
 
-    public init() {}
+    public init(challengeUseCase: ChallengeUseCase) {
+        self.challengeUseCase = challengeUseCase
+    }
 
     public var body: some ReducerOf<Self> {
         EmptyReducer()

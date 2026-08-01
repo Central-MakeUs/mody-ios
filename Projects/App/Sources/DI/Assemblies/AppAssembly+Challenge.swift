@@ -8,11 +8,14 @@
 import Swinject
 import ChallengeInterface
 import Challenge
+import CoreNetworkInterface
 
 extension AppAssembly {
     func assembleChallengeFeature(in container: Container) {
-        container.register(ChallengeRepositoryProtocol.self) { _ in
-            ChallengeRepository()
+        container.register(ChallengeRepositoryProtocol.self) { resolver in
+            let network: CoreNetworkProtocol = resolver.resolve()
+
+            return ChallengeRepository(network: network)
         }
 
         container.register(ChallengeUseCase.self) { resolver in

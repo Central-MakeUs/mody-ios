@@ -11,4 +11,8 @@ public struct ChallengeUseCase {
     public init(repository: ChallengeRepositoryProtocol) {
         self.repository = repository
     }
+
+    public func fetchChallengeSummary(groupId: Int) async throws -> ChallengeSummary {
+        try await repository.getChallengeSummary(groupId: groupId)
+    }
 }

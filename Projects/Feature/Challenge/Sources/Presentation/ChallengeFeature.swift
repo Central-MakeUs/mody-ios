@@ -45,7 +45,7 @@ public struct ChallengeFeature {
         BindingReducer()
 
         Scope(state: \.challengeStreak, action: \.challengeStreak) {
-            ChallengeStreakFeature()
+            ChallengeStreakFeature(challengeUseCase: challengeUseCase)
         }
 
         Scope(state: \.challengeDetail, action: \.challengeDetail) {
