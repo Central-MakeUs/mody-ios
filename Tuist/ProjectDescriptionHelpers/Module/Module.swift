@@ -25,7 +25,6 @@ public enum ExternalModule {
     case KakaoSDKAuth
     case KakaoSDKCommon
     case KakaoSDKShare
-    case KakaoSDKTemplate
     case KakaoSDKUser
     case FirebaseCore
     case FirebaseAnalytics

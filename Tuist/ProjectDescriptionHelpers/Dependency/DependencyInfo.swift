@@ -229,7 +229,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.KakaoSDKAuth),
                 .external(.KakaoSDKCommon),
                 .external(.KakaoSDKShare),
-                .external(.KakaoSDKTemplate),
                 .external(.KakaoSDKUser)
             ]
         ),

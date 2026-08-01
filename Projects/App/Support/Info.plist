@@ -39,6 +39,8 @@
 	<false/>
 	<key>KAKAO_NATIVE_APP_KEY</key>
 	<string>$(KAKAO_NATIVE_APP_KEY)</string>
+	<key>KAKAO_SHARE_TEMPLATE_ID</key>
+	<string>$(KAKAO_SHARE_TEMPLATE_ID)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>kakaokompassauth</string>
