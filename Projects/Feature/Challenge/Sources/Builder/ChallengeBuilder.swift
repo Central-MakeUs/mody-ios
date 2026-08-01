@@ -8,15 +8,24 @@
 import UIKit
 import SwiftUI
 import ChallengeInterface
+import ComposableArchitecture
 
 public struct ChallengeBuilder: ChallengeBuildable {
-    public init() {}
+    private let makeChallengeFeature: (ChallengeRouter) -> ChallengeFeature
+
+    public init(
+        makeChallengeFeature: @escaping (ChallengeRouter) -> ChallengeFeature
+    ) {
+        self.makeChallengeFeature = makeChallengeFeature
+    }
 
     @MainActor
     public func makeChallengeViewController(router: ChallengeRouter) -> UIViewController {
-        let view = ChallengeView { [weak router] route in
-            router?.route(from: route)
-        }
+        let view = ChallengeView(
+            store: .init(initialState: .init()) {
+                makeChallengeFeature(router)
+            }
+        )
 
         return UIHostingController(rootView: view)
     }

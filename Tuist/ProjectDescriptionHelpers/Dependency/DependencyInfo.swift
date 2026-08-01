@@ -183,6 +183,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ),
         .Challenge: .init(
             implementation: [
+                .external(.ComposableArchitecture),
                 .module(.Base)
             ]
         ),

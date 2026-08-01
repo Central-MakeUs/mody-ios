@@ -6,25 +6,37 @@
 //
 
 import SwiftUI
-import ChallengeInterface
+import ComposableArchitecture
 
 public struct ChallengeView: View {
-    private let route: @MainActor (ChallengeRoute) -> Void
+    @Bindable private var store: StoreOf<ChallengeFeature>
 
-    public init(route: @escaping @MainActor (ChallengeRoute) -> Void) {
-        self.route = route
+    public init(store: StoreOf<ChallengeFeature>) {
+        self.store = store
     }
 
     public var body: some View {
+        challengeBody
+    }
+}
+
+private extension ChallengeView {
+    var challengeBody: some View {
         VStack(spacing: 0) {
-            Text("Hello, ChallengeView~")
-            Button {
-                route(.temp)
-            } label: {
-                Text("Temp 으로 가기")
-                    .padding()
-                    .background(.brown)
+            ChallengeTabBar(selection: $store.selectedTab)
+
+            TabView(selection: $store.selectedTab) {
+                ChallengeStreakView(
+                    store: store.scope(state: \.challengeStreak, action: \.challengeStreak)
+                )
+                .tag(ChallengeFeature.State.Tab.streak)
+
+                ChallengeDetailView(
+                    store: store.scope(state: \.challengeDetail, action: \.challengeDetail)
+                )
+                .tag(ChallengeFeature.State.Tab.challenge)
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
         }
     }
 }
