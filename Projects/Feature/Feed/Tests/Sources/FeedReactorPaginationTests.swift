@@ -77,9 +77,10 @@ final class FeedReactorPaginationTests: XCTestCase {
                 makePage(recordIDs: [6, 5], nextCursor: 5, hasNext: true)
             ]
         )
+        let outputHandler = FeedOutputHandlerSpy()
         let reactor = makeReactor(
             feedRepository: feedRepository,
-            outputHandler: FeedOutputHandlerSpy()
+            outputHandler: outputHandler
         )
         let todayDate = reactor.currentState.weekCalendarViewState.todayDate
 
@@ -97,6 +98,11 @@ final class FeedReactorPaginationTests: XCTestCase {
         await fulfillment(of: [initialPageLoaded], timeout: 1)
 
         let latestRecordMerged = expectation(description: "latest feed record merged")
+        let recordUpdated = expectation(description: "record update output sent")
+        outputHandler.onOutput = { output in
+            guard output == .recordUpdated else { return }
+            recordUpdated.fulfill()
+        }
         reactor.state
             .filter { state in
                 state.feedRecords.map(\.recordId) == [6, 5, 4]
@@ -109,7 +115,7 @@ final class FeedReactorPaginationTests: XCTestCase {
             .disposed(by: disposeBag)
 
         reactor.action.onNext(.input(.recordCreated))
-        await fulfillment(of: [latestRecordMerged], timeout: 1)
+        await fulfillment(of: [latestRecordMerged, recordUpdated], timeout: 1)
 
         let requests = await feedRepository.requests
         XCTAssertEqual(requests.map(\.cursor), [nil, nil])

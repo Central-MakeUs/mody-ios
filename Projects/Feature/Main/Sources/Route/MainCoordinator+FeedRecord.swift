@@ -26,12 +26,10 @@ extension MainCoordinator: FeedRecordOutputHandler {
             if let transitionCoordinator = navigationController.transitionCoordinator {
                 transitionCoordinator.animate(alongsideTransition: nil) { [weak self] _ in
                     self?.feedInputHandler?.handle(input: .recordCreated)
-                    self?.challengeInputHandler?.handle(input: .recordUpdated)
                 }
             } else {
                 Task { @MainActor [weak self] in
                     self?.feedInputHandler?.handle(input: .recordCreated)
-                    self?.challengeInputHandler?.handle(input: .recordUpdated)
                 }
             }
         }

@@ -33,6 +33,8 @@ extension MainCoordinator: FeedOutputHandler {
             challengeInputHandler?.handle(
                 input: .selectedGroupUpdated(group)
             )
+        case .recordUpdated:
+            challengeInputHandler?.handle(input: .recordUpdated)
         case let .reportConfirmationRequested(recordId):
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(

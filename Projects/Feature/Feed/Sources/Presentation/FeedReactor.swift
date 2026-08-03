@@ -207,7 +207,8 @@ public final class FeedReactor: Reactor {
                 fetchLatestFeedPage(
                     groupId: groupId,
                     date: currentState.weekCalendarViewState.selectedDate
-                )
+                ),
+                sendOutput(.recordUpdated)
             ])
         case .input(.profileUpdated):
             return fetchFirstFeedPage(
