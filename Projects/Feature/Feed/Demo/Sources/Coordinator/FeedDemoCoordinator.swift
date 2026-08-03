@@ -96,6 +96,8 @@ extension FeedDemoCoordinator: FeedRouter {
             )
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             navigationController.present(alert, animated: true)
+        case .routeToChallenge:
+            break
         case let .routeToRecord(recordType):
             let viewController = feedBuildable.makeFeedRecordViewController(
                 router: self,

@@ -79,6 +79,13 @@ final class MainContainerViewController: UIViewController, View {
             }
             .disposed(by: disposeBag)
     }
+
+    func selectTab(_ tab: MainTab) {
+        guard let index = tabs.firstIndex(of: tab) else { return }
+
+        mainTabBarController.selectTab(index)
+        customTabBarView.updateSelection(index: index)
+    }
 }
 
 private extension MainContainerViewController {
@@ -129,8 +136,7 @@ private extension MainContainerViewController {
         customTabBarView.onSelect = { [weak self] index in
             guard let self, tabs.indices.contains(index) else { return }
 
-            mainTabBarController.selectTab(index)
-            customTabBarView.updateSelection(index: index)
+            selectTab(tabs[index])
         }
     }
 }

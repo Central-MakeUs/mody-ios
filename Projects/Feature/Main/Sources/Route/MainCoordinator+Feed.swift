@@ -14,6 +14,8 @@ extension MainCoordinator: FeedRouter {
         switch route {
         case .addGroup:
             mainContainerViewController?.presentAddGroupAlert()
+        case .routeToChallenge:
+            mainContainerViewController?.selectTab(.challenge)
         case .routeToRecord(let recordType):
             let viewController = feedBuilder.makeFeedRecordViewController(
                 router: self,
