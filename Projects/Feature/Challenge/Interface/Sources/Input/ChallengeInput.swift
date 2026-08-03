@@ -9,6 +9,7 @@ import CommonDomain
 
 public enum ChallengeInput {
     case selectedGroupUpdated(GroupModel?)
+    case recordUpdated
 }
 
 @MainActor

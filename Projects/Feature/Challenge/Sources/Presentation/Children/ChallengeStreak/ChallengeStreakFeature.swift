@@ -25,6 +25,7 @@ public struct ChallengeStreakFeature {
     public enum Action {
         case setSelectedGroup(GroupModel?)
         case onAppear
+        case refreshChallengeSummary
         case fetchChallengeSummary
         case challengeSummaryFetched(groupID: Int, ChallengeSummary?)
         case showAlert(NetworkError)
@@ -38,6 +39,9 @@ public struct ChallengeStreakFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                return .send(.fetchChallengeSummary)
+            case .refreshChallengeSummary:
+                state.summary = nil
                 return .send(.fetchChallengeSummary)
             case let .setSelectedGroup(group):
                 state.selectedGroup = group

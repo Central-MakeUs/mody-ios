@@ -55,6 +55,8 @@ public struct ChallengeFeature {
             case let .input(.selectedGroupUpdated(group)):
                 state.selectedGroup = group
                 return .send(.challengeStreak(.setSelectedGroup(group)))
+            case .input(.recordUpdated):
+                return .send(.challengeStreak(.refreshChallengeSummary))
             case let .challengeStreak(.showAlert(error)):
                 return .run { [output] _ in
                     await output(.showAlert(error))
