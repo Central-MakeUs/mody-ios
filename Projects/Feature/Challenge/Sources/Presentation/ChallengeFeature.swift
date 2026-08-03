@@ -7,18 +7,22 @@
 
 import ComposableArchitecture
 import ChallengeInterface
+import CommonDomain
 
 @Reducer
 public struct ChallengeFeature {
     private let challengeUseCase: ChallengeUseCase
     private let router: @MainActor (ChallengeRoute) -> Void
+    private let output: @MainActor (ChallengeOutput) -> Void
 
     public init(
         challengeUseCase: ChallengeUseCase,
-        router: @escaping @MainActor (ChallengeRoute) -> Void
+        router: @escaping @MainActor (ChallengeRoute) -> Void,
+        output: @escaping @MainActor (ChallengeOutput) -> Void
     ) {
         self.challengeUseCase = challengeUseCase
         self.router = router
+        self.output = output
     }
 
     @ObservableState
@@ -29,6 +33,7 @@ public struct ChallengeFeature {
         }
 
         var selectedTab: Tab = .streak
+        var selectedGroup: GroupModel?
         var challengeStreak = ChallengeStreakFeature.State()
         var challengeDetail = ChallengeDetailFeature.State()
 
@@ -37,12 +42,29 @@ public struct ChallengeFeature {
 
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
+        case input(ChallengeInput)
         case challengeStreak(ChallengeStreakFeature.Action)
         case challengeDetail(ChallengeDetailFeature.Action)
     }
 
     public var body: some ReducerOf<Self> {
         BindingReducer()
+
+        Reduce { state, action in
+            switch action {
+            case let .input(.selectedGroupUpdated(group)):
+                state.selectedGroup = group
+                return .send(.challengeStreak(.setSelectedGroup(group)))
+            case let .challengeStreak(.showAlert(error)):
+                return .run { [output] _ in
+                    await output(.showAlert(error))
+                }
+            case .binding,
+                 .challengeStreak,
+                 .challengeDetail:
+                return .none
+            }
+        }
 
         Scope(state: \.challengeStreak, action: \.challengeStreak) {
             ChallengeStreakFeature(challengeUseCase: challengeUseCase)

@@ -29,6 +29,10 @@ extension MainCoordinator: FeedRouter {
 extension MainCoordinator: FeedOutputHandler {
     public func handle(output: FeedOutput) {
         switch output {
+        case let .selectedGroupUpdated(group):
+            challengeInputHandler?.handle(
+                input: .selectedGroupUpdated(group)
+            )
         case let .reportConfirmationRequested(recordId):
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(

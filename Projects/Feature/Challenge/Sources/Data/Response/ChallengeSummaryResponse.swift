@@ -8,6 +8,7 @@
 struct ChallengeSummaryResponse: Decodable, Equatable {
     let daysTogether: Int?
     let allMemberRecordedDays: Int?
+    let hasStartedStreak: Bool?
     let monthlyExerciseMinutes: Int?
     let monthlyCompletedChallengeCount: Int?
 }
@@ -17,6 +18,7 @@ extension ChallengeSummaryResponse {
         ChallengeSummary(
             daysTogether: daysTogether ?? 0,
             allMemberRecordedDays: allMemberRecordedDays ?? 0,
+            hasStartedStreak: hasStartedStreak ?? false,
             monthlyExerciseMinutes: monthlyExerciseMinutes ?? 0,
             monthlyCompletedChallengeCount: monthlyCompletedChallengeCount ?? 0
         )

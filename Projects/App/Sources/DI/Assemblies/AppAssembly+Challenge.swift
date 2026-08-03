@@ -24,18 +24,28 @@ extension AppAssembly {
             return ChallengeUseCase(repository: repository)
         }
 
-        container.register(ChallengeFeature.self) { (resolver: Resolver, router: ChallengeRouter) in
+        container.register(ChallengeFeature.self) { (
+            resolver: Resolver,
+            arguments: (ChallengeRouter, ChallengeOutputHandler)
+        ) in
+            let (router, outputHandler) = arguments
             let challengeUseCase: ChallengeUseCase = resolver.resolve()
 
-            return ChallengeFeature(challengeUseCase: challengeUseCase) { [weak router] route in
-                router?.route(from: route)
-            }
+            return ChallengeFeature(
+                challengeUseCase: challengeUseCase,
+                router: { [weak router] route in
+                    router?.route(from: route)
+                },
+                output: { [weak outputHandler] output in
+                    outputHandler?.handle(output: output)
+                }
+            )
         }
 
         container.register(ChallengeBuildable.self) { resolver in
             return ChallengeBuilder(
-                makeChallengeFeature: { router in
-                    resolver.resolve(argument: router)
+                makeChallengeFeature: { router, outputHandler in
+                    resolver.resolve(argument: (router, outputHandler))
                 }
             )
         }
