@@ -15,4 +15,12 @@ public struct ChallengeUseCase {
     public func fetchChallengeSummary(groupId: Int) async throws -> ChallengeSummary {
         try await repository.getChallengeSummary(groupId: groupId)
     }
+
+    public func fetchChallengeNudgeInfo(groupId: Int) async throws -> [ChallengeNudgeInfo] {
+        try await repository.getChallengeNudgeInfo(groupId: groupId)
+    }
+
+    public func nudgeMember(groupId: Int, memberId: Int) async throws {
+        try await repository.postChallengeNudge(groupId: groupId, memberId: memberId)
+    }
 }

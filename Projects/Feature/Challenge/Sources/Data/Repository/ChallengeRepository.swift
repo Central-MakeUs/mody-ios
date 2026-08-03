@@ -25,4 +25,23 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
 
         return result.toDomain()
     }
+
+    public func getChallengeNudgeInfo(groupId: Int) async throws -> [ChallengeNudgeInfo] {
+        let endpoint = ChallengeEndpoint.getChallengeNudgeInfo(groupId: groupId)
+        let response: CoreNetworkResponse<ChallengeNudgeInfoResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
+    }
+
+    public func postChallengeNudge(groupId: Int, memberId: Int) async throws {
+        let endpoint = ChallengeEndpoint.postChallengeNudge(
+            groupId: groupId,
+            memberId: memberId
+        )
+        let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
+    }
 }
