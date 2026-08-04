@@ -7,13 +7,19 @@
 
 import SwiftUI
 import ComposableArchitecture
+import CoreModyImageInterface
 import DesignSystem
 
 public struct ChallengeStreakView: View {
     private let store: StoreOf<ChallengeStreakFeature>
+    private let imageLoader: RemoteImageLoading
 
-    public init(store: StoreOf<ChallengeStreakFeature>) {
+    public init(
+        store: StoreOf<ChallengeStreakFeature>,
+        imageLoader: RemoteImageLoading
+    ) {
         self.store = store
+        self.imageLoader = imageLoader
     }
 
     public var body: some View {
@@ -37,6 +43,13 @@ private extension ChallengeStreakView {
                     monthlyExerciseMinutes: store.summary?.monthlyExerciseMinutes,
                     monthlyCompletedChallengeCount: store.summary?.monthlyCompletedChallengeCount
                 )
+
+                ChallengeStreakNudgeSection(
+                    nudgeInfos: store.nudgeInfos,
+                    imageLoader: imageLoader
+                ) { memberID in
+                    store.send(.nudgeButtonTapped(memberID: memberID))
+                }
             }
         }
         .scrollIndicators(.visible)

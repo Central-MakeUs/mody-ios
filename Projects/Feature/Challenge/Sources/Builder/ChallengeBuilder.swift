@@ -8,14 +8,18 @@
 import UIKit
 import ChallengeInterface
 import ComposableArchitecture
+import CoreModyImageInterface
 
 public struct ChallengeBuilder: ChallengeBuildable {
     private let makeChallengeFeature: (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature
+    private let imageLoader: RemoteImageLoading
 
     public init(
-        makeChallengeFeature: @escaping (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature
+        makeChallengeFeature: @escaping (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature,
+        imageLoader: RemoteImageLoading
     ) {
         self.makeChallengeFeature = makeChallengeFeature
+        self.imageLoader = imageLoader
     }
 
     @MainActor
@@ -27,6 +31,9 @@ public struct ChallengeBuilder: ChallengeBuildable {
             makeChallengeFeature(router, outputHandler)
         }
 
-        return ChallengeHostingController(store: store)
+        return ChallengeHostingController(
+            store: store,
+            imageLoader: imageLoader
+        )
     }
 }

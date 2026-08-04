@@ -87,7 +87,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.DesignSystem),
             .module(.ModyLogger),
             .module(.CommonDomain),
-            .module(.Util)
+            .module(.Util),
+            .microFeature(.CoreModyImage)
         ]
     ],
     microFeatureDependencies: [
@@ -189,7 +190,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.ComposableArchitecture),
                 .module(.Base),
                 .module(.CommonDomain),
-                .microFeature(.CoreNetwork)
+                .microFeature(.CoreNetwork),
+                .microFeature(.CoreModyImage)
             ]
         ),
         .MyPage: .init(

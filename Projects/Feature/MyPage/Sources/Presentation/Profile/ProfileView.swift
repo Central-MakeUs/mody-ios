@@ -74,11 +74,12 @@ private extension ProfileView {
                     Button {
                         store.send(.profileImageTapped)
                     } label: {
-                        ProfileAvatarView(
+                        RemoteAvatarView(
                             imageURL: store.profileImageURL,
                             localImage: store.selectedPhoto?.croppedPreviewImage,
                             defaultAvatar: store.defaultAvatar,
-                            size: .init(width: 100, height: 100),
+                            width: 100,
+                            height: 100,
                             hasStroke: true,
                             imageLoader: imageLoader
                         )

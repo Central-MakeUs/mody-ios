@@ -57,13 +57,9 @@ public struct ChallengeFeature {
                 return .send(.challengeStreak(.setSelectedGroup(group)))
             case .input(.recordUpdated):
                 return .send(.challengeStreak(.refreshChallengeSummary))
-            case let .challengeStreak(.showAlert(error)):
-                return .run { [output] _ in
-                    await output(.showAlert(error))
-                }
-            case .binding,
-                 .challengeStreak,
-                 .challengeDetail:
+            case .challengeStreak(let streakAction):
+                return handleStreakAction(&state, streakAction)
+            case .binding, .challengeDetail:
                 return .none
             }
         }
@@ -74,6 +70,29 @@ public struct ChallengeFeature {
 
         Scope(state: \.challengeDetail, action: \.challengeDetail) {
             ChallengeDetailFeature()
+        }
+    }
+}
+
+private extension ChallengeFeature {
+    func handleStreakAction(
+        _ state: inout State,
+        _ action: ChallengeStreakFeature.Action) -> Effect<Action> {
+        switch action {
+        case .nudgeStarted:
+            return .run { [output] _ in
+                await output(.nudgeStarted)
+            }
+        case .nudgeCompleted(let nickname):
+            return .run { [output] _ in
+                await output(.nudgeSucceeded(nickname: nickname))
+            }
+        case .showAlert(let error):
+            return .run { [output] _ in
+                await output(.showAlert(error))
+            }
+        default:
+            return .none
         }
     }
 }

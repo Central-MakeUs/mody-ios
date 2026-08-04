@@ -7,12 +7,18 @@
 
 import SwiftUI
 import ComposableArchitecture
+import CoreModyImageInterface
 
 public struct ChallengeView: View {
     @Bindable private var store: StoreOf<ChallengeFeature>
+    private let imageLoader: RemoteImageLoading
 
-    public init(store: StoreOf<ChallengeFeature>) {
+    public init(
+        store: StoreOf<ChallengeFeature>,
+        imageLoader: RemoteImageLoading
+    ) {
         self.store = store
+        self.imageLoader = imageLoader
     }
 
     public var body: some View {
@@ -27,7 +33,8 @@ private extension ChallengeView {
 
             TabView(selection: $store.selectedTab) {
                 ChallengeStreakView(
-                    store: store.scope(state: \.challengeStreak, action: \.challengeStreak)
+                    store: store.scope(state: \.challengeStreak, action: \.challengeStreak),
+                    imageLoader: imageLoader
                 )
                 .tag(ChallengeFeature.State.Tab.streak)
 
