@@ -1,0 +1,44 @@
+//
+//  ChallengeStreakView.swift
+//  Challenge
+//
+//  Created by 김동준 on 8/1/26.
+//
+
+import SwiftUI
+import ComposableArchitecture
+import DesignSystem
+
+public struct ChallengeStreakView: View {
+    private let store: StoreOf<ChallengeStreakFeature>
+
+    public init(store: StoreOf<ChallengeStreakFeature>) {
+        self.store = store
+    }
+
+    public var body: some View {
+        streakBody
+            .background(Color.gray00)
+            .onAppear { store.send(.onAppear) }
+    }
+}
+
+private extension ChallengeStreakView {
+    var streakBody: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ChallengeStreakStatusSection(
+                    allMemberRecordedDays: store.summary?.allMemberRecordedDays,
+                    hasStartedStreak: store.summary?.hasStartedStreak
+                )
+
+                ChallengeStreakSummarySection(
+                    daysTogether: store.summary?.daysTogether,
+                    monthlyExerciseMinutes: store.summary?.monthlyExerciseMinutes,
+                    monthlyCompletedChallengeCount: store.summary?.monthlyCompletedChallengeCount
+                )
+            }
+        }
+        .scrollIndicators(.visible)
+    }
+}

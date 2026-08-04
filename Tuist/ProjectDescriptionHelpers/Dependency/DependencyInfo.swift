@@ -182,8 +182,14 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .Challenge: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
-                .module(.Base)
+                .external(.ComposableArchitecture),
+                .module(.Base),
+                .module(.CommonDomain),
+                .microFeature(.CoreNetwork)
             ]
         ),
         .MyPage: .init(

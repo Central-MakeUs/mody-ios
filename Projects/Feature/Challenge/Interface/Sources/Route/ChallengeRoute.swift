@@ -5,9 +5,7 @@
 //  Created by 김동준 on 6/30/26
 //
 
-public enum ChallengeRoute: Equatable {
-    case temp
-}
+public enum ChallengeRoute: Equatable {}
 
 @MainActor
 public protocol ChallengeRouter: AnyObject {

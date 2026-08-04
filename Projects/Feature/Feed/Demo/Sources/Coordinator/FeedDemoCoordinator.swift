@@ -39,6 +39,9 @@ final class FeedDemoCoordinator: ObservableObject {
 extension FeedDemoCoordinator: FeedOutputHandler {
     func handle(output: FeedOutput) {
         switch output {
+        case .selectedGroupUpdated,
+             .recordUpdated:
+            break
         case let .reportConfirmationRequested(recordId):
             let alert = UIAlertController(
                 title: "게시물을 신고하시겠어요?",

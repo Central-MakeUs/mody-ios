@@ -20,6 +20,7 @@ public final class MainCoordinator: MainCoordinating {
     weak var delegate: MainCoordinatorDelegate?
     weak var mainContainerViewController: MainContainerViewController?
     weak var feedInputHandler: FeedInputHandler?
+    weak var challengeInputHandler: ChallengeInputHandler?
     weak var myPageInputHandler: MyPageInputHandler?
 
     let feedBuilder: FeedBuildable
@@ -64,7 +65,11 @@ public final class MainCoordinator: MainCoordinating {
             outputHandler: self
         )
         feedInputHandler = feedViewController as? FeedInputHandler
-        let challengeViewController = challengeBuilder.makeChallengeViewController(router: self)
+        let challengeViewController = challengeBuilder.makeChallengeViewController(
+            router: self,
+            outputHandler: self
+        )
+        challengeInputHandler = challengeViewController as? ChallengeInputHandler
         let myPageViewController = myPageBuilder.makeMyPageViewController(
             router: self,
             outputHandler: self

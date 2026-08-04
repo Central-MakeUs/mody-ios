@@ -77,9 +77,10 @@ final class FeedReactorPaginationTests: XCTestCase {
                 makePage(recordIDs: [6, 5], nextCursor: 5, hasNext: true)
             ]
         )
+        let outputHandler = FeedOutputHandlerSpy()
         let reactor = makeReactor(
             feedRepository: feedRepository,
-            outputHandler: FeedOutputHandlerSpy()
+            outputHandler: outputHandler
         )
         let todayDate = reactor.currentState.weekCalendarViewState.todayDate
 
@@ -97,6 +98,11 @@ final class FeedReactorPaginationTests: XCTestCase {
         await fulfillment(of: [initialPageLoaded], timeout: 1)
 
         let latestRecordMerged = expectation(description: "latest feed record merged")
+        let recordUpdated = expectation(description: "record update output sent")
+        outputHandler.onOutput = { output in
+            guard output == .recordUpdated else { return }
+            recordUpdated.fulfill()
+        }
         reactor.state
             .filter { state in
                 state.feedRecords.map(\.recordId) == [6, 5, 4]
@@ -109,7 +115,7 @@ final class FeedReactorPaginationTests: XCTestCase {
             .disposed(by: disposeBag)
 
         reactor.action.onNext(.input(.recordCreated))
-        await fulfillment(of: [latestRecordMerged], timeout: 1)
+        await fulfillment(of: [latestRecordMerged, recordUpdated], timeout: 1)
 
         let requests = await feedRepository.requests
         XCTAssertEqual(requests.map(\.cursor), [nil, nil])
@@ -118,6 +124,136 @@ final class FeedReactorPaginationTests: XCTestCase {
         XCTAssertEqual(reactor.currentState.nextFeedCursor, 4)
         XCTAssertTrue(reactor.currentState.hasNextFeedPage)
         XCTAssertFalse(reactor.currentState.isInitialFeedLoading)
+    }
+
+    func testInitialLoadEmitsSelectedGroupOnce() async {
+        let firstGroup = makeGroup(id: 1)
+        let secondGroup = makeGroup(id: 2)
+        let outputHandler = FeedOutputHandlerSpy()
+        let reactor = makeReactor(
+            feedRepository: FeedPaginationRepositoryMock(
+                pages: [makePage(recordIDs: [1], nextCursor: nil, hasNext: false)]
+            ),
+            groupUseCase: FeedGroupUseCaseSequenceMock(
+                responses: [[firstGroup, secondGroup]]
+            ),
+            outputHandler: outputHandler
+        )
+
+        await loadInitialContent(of: reactor)
+
+        XCTAssertEqual(reactor.currentState.selectedGroup, firstGroup)
+        XCTAssertEqual(
+            selectedGroupOutputs(in: outputHandler.outputs),
+            [.selectedGroupUpdated(firstGroup)]
+        )
+    }
+
+    func testSelectingDifferentGroupEmitsSelectedGroupOnce() async {
+        let firstGroup = makeGroup(id: 1)
+        let secondGroup = makeGroup(id: 2)
+        let outputHandler = FeedOutputHandlerSpy()
+        let reactor = makeReactor(
+            feedRepository: FeedPaginationRepositoryMock(
+                pages: [
+                    makePage(recordIDs: [1], nextCursor: nil, hasNext: false),
+                    makePage(recordIDs: [2], nextCursor: nil, hasNext: false)
+                ]
+            ),
+            groupUseCase: FeedGroupUseCaseSequenceMock(
+                responses: [[firstGroup, secondGroup]]
+            ),
+            outputHandler: outputHandler
+        )
+        await loadInitialContent(of: reactor)
+
+        let selectedGroupContentLoaded = expectation(
+            description: "selected group content loaded"
+        )
+        reactor.state
+            .filter {
+                $0.selectedGroup == secondGroup
+                    && $0.feedRecords.map(\.recordId) == [2]
+                    && !$0.isInitialFeedLoading
+            }
+            .take(1)
+            .subscribe(onNext: { _ in selectedGroupContentLoaded.fulfill() })
+            .disposed(by: disposeBag)
+
+        reactor.action.onNext(.didSelectGroup(secondGroup))
+        await fulfillment(of: [selectedGroupContentLoaded], timeout: 1)
+
+        XCTAssertEqual(
+            selectedGroupOutputs(in: outputHandler.outputs),
+            [
+                .selectedGroupUpdated(firstGroup),
+                .selectedGroupUpdated(secondGroup)
+            ]
+        )
+    }
+
+    func testRefreshGroupsAfterExternalDeletionUpdatesSelectedGroupOnce() async {
+        let firstGroup = makeGroup(id: 1)
+        let secondGroup = makeGroup(id: 2)
+        let outputHandler = FeedOutputHandlerSpy()
+        let reactor = makeReactor(
+            feedRepository: FeedPaginationRepositoryMock(
+                pages: [
+                    makePage(recordIDs: [1], nextCursor: nil, hasNext: false),
+                    makePage(recordIDs: [2], nextCursor: nil, hasNext: false)
+                ]
+            ),
+            groupUseCase: FeedGroupUseCaseSequenceMock(
+                responses: [
+                    [firstGroup, secondGroup],
+                    [secondGroup],
+                    []
+                ]
+            ),
+            outputHandler: outputHandler
+        )
+        await loadInitialContent(of: reactor)
+
+        let fallbackGroupContentLoaded = expectation(
+            description: "fallback group content loaded"
+        )
+        reactor.state
+            .filter {
+                $0.selectedGroup == secondGroup
+                    && $0.feedRecords.map(\.recordId) == [2]
+                    && !$0.isFetchGroupLoading
+                    && !$0.isInitialFeedLoading
+            }
+            .take(1)
+            .subscribe(onNext: { _ in fallbackGroupContentLoaded.fulfill() })
+            .disposed(by: disposeBag)
+
+        reactor.action.onNext(.input(.refreshGroups))
+        await fulfillment(of: [fallbackGroupContentLoaded], timeout: 1)
+
+        let emptyGroupStateLoaded = expectation(description: "empty group state loaded")
+        reactor.state
+            .filter {
+                $0.groups.isEmpty
+                    && $0.selectedGroup == nil
+                    && $0.feedRecords.isEmpty
+                    && !$0.isFetchGroupLoading
+            }
+            .take(1)
+            .subscribe(onNext: { _ in emptyGroupStateLoaded.fulfill() })
+            .disposed(by: disposeBag)
+
+        reactor.action.onNext(.input(.refreshGroups))
+        await fulfillment(of: [emptyGroupStateLoaded], timeout: 1)
+
+        XCTAssertEqual(
+            selectedGroupOutputs(in: outputHandler.outputs),
+            [
+                .selectedGroupUpdated(firstGroup),
+                .selectedGroupUpdated(secondGroup),
+                .selectedGroupUpdated(nil)
+            ]
+        )
     }
 
     func testReportMenuTapRequestsConfirmationWithoutCallingAPI() async {
@@ -164,10 +300,7 @@ final class FeedReactorPaginationTests: XCTestCase {
         reactor.action.onNext(.input(.reportConfirmed(recordId: 22)))
 
         await fulfillment(of: [reportSucceeded], timeout: 1)
-        XCTAssertEqual(
-            outputHandler.outputs,
-            [.reportSucceeded]
-        )
+        XCTAssertEqual(outputHandler.outputs.last, .reportSucceeded)
         let reportRequests = await feedRepository.reportRequests
         XCTAssertEqual(reportRequests, [.init(groupId: 1, recordId: 22)])
     }
@@ -193,21 +326,19 @@ final class FeedReactorPaginationTests: XCTestCase {
         reactor.action.onNext(.input(.reportConfirmed(recordId: 22)))
 
         await fulfillment(of: [reportFailed], timeout: 1)
-        XCTAssertEqual(
-            outputHandler.outputs,
-            [.reportFailed(.unknown)]
-        )
+        XCTAssertEqual(outputHandler.outputs.last, .reportFailed(.unknown))
     }
 }
 
 private extension FeedReactorPaginationTests {
     func makeReactor(
         feedRepository: FeedRepositoryProtocol,
+        groupUseCase: GroupUseCaseProtocol = FeedPaginationGroupUseCaseMock(),
         outputHandler: FeedOutputHandler
     ) -> FeedReactor {
         FeedReactor(
             authUseCase: FeedPaginationAuthUseCaseMock(),
-            groupUseCase: FeedPaginationGroupUseCaseMock(),
+            groupUseCase: groupUseCase,
             feedUseCase: FeedUseCase(feedRepository: feedRepository),
             router: FeedPaginationRouterMock(),
             output: { [weak outputHandler] output in
@@ -242,6 +373,25 @@ private extension FeedReactorPaginationTests {
             nextCursor: nextCursor,
             hasNext: hasNext
         )
+    }
+
+    func makeGroup(id: Int) -> GroupModel {
+        GroupModel(
+            groupId: id,
+            name: "테스트 그룹 \(id)",
+            code: "TEST\(id)",
+            memberCount: 1
+        )
+    }
+
+    func selectedGroupOutputs(in outputs: [FeedOutput]) -> [FeedOutput] {
+        outputs.filter { output in
+            if case .selectedGroupUpdated = output {
+                return true
+            }
+
+            return false
+        }
     }
 
     func makeRecord(recordID: Int) -> FeedRecord {
@@ -369,6 +519,27 @@ private struct FeedPaginationGroupUseCaseMock: GroupUseCaseProtocol {
                 memberCount: 1
             )
         ]
+    }
+
+    func exitGroup(groupId: Int) async throws {}
+}
+
+private actor FeedGroupUseCaseSequenceMock: GroupUseCaseProtocol {
+    private var responses: [[GroupModel]]
+
+    init(responses: [[GroupModel]]) {
+        self.responses = responses
+    }
+
+    func createGroup(name: String) async throws -> String {
+        "TEST"
+    }
+
+    func joinGroup(code: String) async throws {}
+
+    func getGroups() async throws -> [GroupModel] {
+        guard !responses.isEmpty else { return [] }
+        return responses.removeFirst()
     }
 
     func exitGroup(groupId: Int) async throws {}

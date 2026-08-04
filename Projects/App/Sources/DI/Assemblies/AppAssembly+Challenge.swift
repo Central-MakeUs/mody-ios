@@ -8,11 +8,46 @@
 import Swinject
 import ChallengeInterface
 import Challenge
+import CoreNetworkInterface
 
 extension AppAssembly {
     func assembleChallengeFeature(in container: Container) {
-        container.register(ChallengeBuildable.self) { _ in
-            return ChallengeBuilder()
+        container.register(ChallengeRepositoryProtocol.self) { resolver in
+            let network: CoreNetworkProtocol = resolver.resolve()
+
+            return ChallengeRepository(network: network)
+        }
+
+        container.register(ChallengeUseCase.self) { resolver in
+            let repository: ChallengeRepositoryProtocol = resolver.resolve()
+
+            return ChallengeUseCase(repository: repository)
+        }
+
+        container.register(ChallengeFeature.self) { (
+            resolver: Resolver,
+            arguments: (ChallengeRouter, ChallengeOutputHandler)
+        ) in
+            let (router, outputHandler) = arguments
+            let challengeUseCase: ChallengeUseCase = resolver.resolve()
+
+            return ChallengeFeature(
+                challengeUseCase: challengeUseCase,
+                router: { [weak router] route in
+                    router?.route(from: route)
+                },
+                output: { [weak outputHandler] output in
+                    outputHandler?.handle(output: output)
+                }
+            )
+        }
+
+        container.register(ChallengeBuildable.self) { resolver in
+            return ChallengeBuilder(
+                makeChallengeFeature: { router, outputHandler in
+                    resolver.resolve(argument: (router, outputHandler))
+                }
+            )
         }
     }
 }

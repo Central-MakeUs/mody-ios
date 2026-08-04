@@ -49,8 +49,7 @@ public final class FeedReactor: Reactor {
     
     public enum Mutation {
         case setFloatingActionButtonExpanded(Bool)
-        case setGroups([GroupModel])
-        case setSelectedGroup(GroupModel)
+        case setGroups([GroupModel], selectedGroup: GroupModel?)
         case setFetchGroupLoading(Bool)
         case setMyMemberId(Int?)
         case setInitialFeedLoading(Bool)
@@ -152,7 +151,7 @@ public final class FeedReactor: Reactor {
                 return .empty()
             }
             return .concat([
-                .just(.setSelectedGroup(group)),
+                setGroup(group, in: currentState.groups),
                 fetchSelectedGroupContent()
             ])
         case .didTapPreviousWeek:
@@ -208,7 +207,8 @@ public final class FeedReactor: Reactor {
                 fetchLatestFeedPage(
                     groupId: groupId,
                     date: currentState.weekCalendarViewState.selectedDate
-                )
+                ),
+                sendOutput(.recordUpdated)
             ])
         case .input(.profileUpdated):
             return fetchFirstFeedPage(
@@ -224,16 +224,9 @@ public final class FeedReactor: Reactor {
         switch mutation {
         case .setFloatingActionButtonExpanded(let isExpanded):
             newState.isFloatingActionButtonExpanded = isExpanded
-        case .setGroups(let groups):
+        case let .setGroups(groups, selectedGroup):
             newState.groups = groups
-            if let selectedGroup = newState.selectedGroup,
-               let refreshedSelectedGroup = groups.first(where: { $0.groupId == selectedGroup.groupId }) {
-                newState.selectedGroup = refreshedSelectedGroup
-            } else {
-                newState.selectedGroup = groups.first
-            }
-        case .setSelectedGroup(let group):
-            newState.selectedGroup = group
+            newState.selectedGroup = selectedGroup
         case .setFetchGroupLoading(let isLoading):
             newState.isFetchGroupLoading = isLoading
         case .setMyMemberId(let memberId):
@@ -282,8 +275,18 @@ public final class FeedReactor: Reactor {
 }
 
 private extension FeedReactor {
+    func setGroup(
+        _ selectedGroup: GroupModel?,
+        in groups: [GroupModel]
+    ) -> Observable<Mutation> {
+        .concat([
+            .just(.setGroups(groups, selectedGroup: selectedGroup)),
+            sendOutput(.selectedGroupUpdated(selectedGroup))
+        ])
+    }
+
     func sendOutput(_ output: FeedOutput) -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             self?.output(output)
             return nil
         }
@@ -295,7 +298,7 @@ private extension FeedReactor {
     ) -> Observable<Mutation> {
         withLoading(
             Mutation.setReportLoading,
-            operation: mutationObservable { [weak self] in
+            operation: asyncObservable { [weak self] in
                 guard let self else { return nil }
 
                 do {
@@ -395,7 +398,7 @@ private extension FeedReactor {
         groupId: Int,
         date: String
     ) -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             guard let self else { return nil }
 
             do {
@@ -420,7 +423,7 @@ private extension FeedReactor {
 
         return withLoading(
             Mutation.setNextPageLoading,
-            operation: mutationObservable { [weak self] in
+            operation: asyncObservable { [weak self] in
                 guard let self else { return nil }
 
                 let page = try? await self.feedUseCase.fetchNextFeedRecords(
@@ -441,7 +444,7 @@ private extension FeedReactor {
     ) -> Observable<Mutation> {
         let currentPage = currentState.feedPage
 
-        return mutationObservable { [weak self] in
+        return asyncObservable { [weak self] in
             guard let self else { return nil }
 
             let page = try? await self.feedUseCase.refreshLatestFeedRecords(
@@ -498,7 +501,7 @@ private extension FeedReactor {
     }
 
     func fetchActivityCalendar(groupId: Int, offset: Int) -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             guard let self else { return nil }
 
             guard let activityCalendar = try? await self.feedUseCase.fetchActivityCalendar(
@@ -576,19 +579,23 @@ private extension FeedReactor {
 
 private extension FeedReactor {
     func fetchGroups() -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] () -> [GroupModel]? in
             guard let self else { return nil }
+            return (try? await self.groupUseCase.getGroups()) ?? []
+        }
+        .flatMap { [weak self] groups in
+            guard let self else { return Observable<Mutation>.empty() }
 
-            do {
-                return .setGroups(try await self.groupUseCase.getGroups())
-            } catch {
-                return .setGroups([])
-            }
+            let selectedGroup = groups.first {
+                $0.groupId == self.currentState.selectedGroup?.groupId
+            } ?? groups.first
+
+            return self.setGroup(selectedGroup, in: groups)
         }
     }
 
     func fetchMyMemberId() -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             guard let self,
                   let userInfo = try? await self.authUseCase.getUserInfo(
                     needUpdateKeyChain: false
@@ -611,13 +618,13 @@ private extension FeedReactor {
         ])
     }
 
-    func mutationObservable(
-        _ operation: @escaping @MainActor () async -> Mutation?
-    ) -> Observable<Mutation> {
+    func asyncObservable<Element>(
+        _ operation: @escaping @MainActor () async -> Element?
+    ) -> Observable<Element> {
         Observable.create { observer in
             let task = Task { @MainActor in
-                if let mutation = await operation() {
-                    observer.onNext(mutation)
+                if let element = await operation() {
+                    observer.onNext(element)
                 }
                 observer.onCompleted()
             }
