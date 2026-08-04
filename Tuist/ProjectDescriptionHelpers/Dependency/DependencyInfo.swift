@@ -59,7 +59,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreCamera)),
             .module(.MicroFeature(.CoreNotification)),
             .module(.MicroFeature(.CoreModyImage)),
-            
+            .module(.MicroFeature(.CoreHealth)),
+
             .external(.FirebaseCore),
             .external(.FirebaseMessaging),
             .external(.Swinject),
@@ -70,6 +71,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreCamera),
             .microFeature(.CoreNotification),
             .microFeature(.CoreModyImage),
+            .microFeature(.CoreHealth),
             .microFeature(.Main)
         ],
         .Root: [
@@ -120,6 +122,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNotification),
+                .microFeature(.CoreHealth),
                 .module(.Util)
             ]
         ),
@@ -275,6 +278,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.Alamofire),
                 .external(.Nuke)
             ]
-        )
+        ),
+        .CoreHealth: .init()
     ]
 )
