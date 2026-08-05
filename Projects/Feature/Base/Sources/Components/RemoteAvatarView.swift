@@ -1,8 +1,8 @@
 //
-//  ProfileAvatarView.swift
-//  MyPage
+//  RemoteAvatarView.swift
+//  Base
 //
-//  Created by 김동준 on 7/16/26.
+//  Created by 김동준 on 8/3/26.
 //
 
 import CommonDomain
@@ -12,35 +12,38 @@ import Foundation
 import SwiftUI
 import UIKit
 
-struct ProfileAvatarView: View {
+public struct RemoteAvatarView: View {
     @State private var imagePhase: ImagePhase = .empty
 
-    let defaultAvatar: DefaultAvatar
-    let size: CGSize
-    let hasStroke: Bool
-    let imageLoader: RemoteImageLoading
+    private let imageLoader: RemoteImageLoading
     private let localImage: UIImage?
+    private let defaultAvatar: DefaultAvatar
+    private let width: CGFloat
+    private let height: CGFloat
+    private let hasStroke: Bool
     private let imageRequest: RemoteImageRequest?
 
-    init(
+    public init(
         imageURL: URL?,
         localImage: UIImage? = nil,
         defaultAvatar: DefaultAvatar,
-        size: CGSize = .init(width: 50, height: 50),
+        width: CGFloat,
+        height: CGFloat,
         hasStroke: Bool = false,
         imageLoader: RemoteImageLoading
     ) {
-        self.defaultAvatar = defaultAvatar
-        self.size = size
-        self.hasStroke = hasStroke
         self.imageLoader = imageLoader
         self.localImage = localImage
+        self.defaultAvatar = defaultAvatar
+        self.width = width
+        self.height = height
+        self.hasStroke = hasStroke
 
-        let maximumPixelSize = max(size.width, size.height) * UIScreen.main.scale
+        let maximumPixelSize = max(width, height) * UIScreen.main.scale
         if let imageURL, maximumPixelSize.isFinite, maximumPixelSize > 0 {
             self.imageRequest = RemoteImageRequest(
                 url: imageURL,
-                variantIdentifier: "my-page-profile",
+                variantIdentifier: "remote-avatar",
                 maximumPixelSize: Int(maximumPixelSize.rounded(.up))
             )
         } else {
@@ -48,7 +51,7 @@ struct ProfileAvatarView: View {
         }
     }
 
-    var body: some View {
+    public var body: some View {
         Group {
             if let localImage {
                 Image(uiImage: localImage)
@@ -62,7 +65,7 @@ struct ProfileAvatarView: View {
                         .scaledToFill()
 
                 case .empty, .loading:
-                    SkeletonView(width: size.width, height: size.height)
+                    SkeletonView(width: width, height: height)
                         .clipShape(Circle())
 
                 case .failure:
@@ -72,7 +75,7 @@ struct ProfileAvatarView: View {
                 defaultAvatarImage
             }
         }
-        .frame(width: size.width, height: size.height)
+        .frame(width: width, height: height)
         .clipShape(Circle())
         .overlay {
             if hasStroke {
@@ -87,35 +90,14 @@ struct ProfileAvatarView: View {
     }
 }
 
-private extension ProfileAvatarView {
+private extension RemoteAvatarView {
     var defaultAvatarImage: some View {
         defaultAvatar.image
             .resizable()
             .renderingMode(.original)
             .scaledToFill()
     }
-}
 
-private extension DefaultAvatar {
-    var image: Image {
-        switch self {
-        case .poutBlack:
-            Image.icModyAvatarPoutBlack
-        case .poutLight:
-            Image.icModyAvatarPoutLight
-        case .smileBlack:
-            Image.icModyAvatarSmileBlack
-        case .smileLight:
-            Image.icModyAvatarSmileLight
-        case .surpriseBlack:
-            Image.icModyAvatarSurpriseBlack
-        case .surpriseLight:
-            Image.icModyAvatarSurpriseLight
-        }
-    }
-}
-
-private extension ProfileAvatarView {
     enum ImagePhase {
         case empty
         case loading
@@ -141,12 +123,30 @@ private extension ProfileAvatarView {
             let image = try await imageLoader.loadImage(with: request)
             guard !Task.isCancelled else { return }
             imagePhase = .success(image)
-
         } catch is CancellationError {
             return
         } catch {
             guard !Task.isCancelled else { return }
             imagePhase = .failure
+        }
+    }
+}
+
+private extension DefaultAvatar {
+    var image: Image {
+        switch self {
+        case .poutBlack:
+            Image.icModyAvatarPoutBlack
+        case .poutLight:
+            Image.icModyAvatarPoutLight
+        case .smileBlack:
+            Image.icModyAvatarSmileBlack
+        case .smileLight:
+            Image.icModyAvatarSmileLight
+        case .surpriseBlack:
+            Image.icModyAvatarSurpriseBlack
+        case .surpriseLight:
+            Image.icModyAvatarSurpriseLight
         }
     }
 }

@@ -11,6 +11,8 @@ import SnapKit
 import CommonDomain
 
 final class FeedEmptyView: UIView {
+    var onNudgeTap: (() -> Void)?
+
     private let contentStackView = UIStackView()
     private let imageView = UIImageView()
     private let titleLabel = MUILabel(
@@ -29,6 +31,7 @@ final class FeedEmptyView: UIView {
         super.init(frame: frame)
         setupUI()
         setupLayout()
+        setupActions()
     }
 
     @available(*, unavailable)
@@ -85,5 +88,18 @@ private extension FeedEmptyView {
         imageView.snp.makeConstraints {
             $0.width.lessThanOrEqualToSuperview()
         }
+    }
+
+    func setupActions() {
+        nudgeButton.addTarget(
+            self,
+            action: #selector(nudgeButtonTapped),
+            for: .touchUpInside
+        )
+    }
+
+    @objc
+    func nudgeButtonTapped() {
+        onNudgeTap?()
     }
 }

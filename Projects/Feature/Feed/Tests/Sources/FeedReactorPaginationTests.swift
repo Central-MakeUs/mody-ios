@@ -328,19 +328,39 @@ final class FeedReactorPaginationTests: XCTestCase {
         await fulfillment(of: [reportFailed], timeout: 1)
         XCTAssertEqual(outputHandler.outputs.last, .reportFailed(.unknown))
     }
+
+    func testNudgeButtonTapRoutesToChallenge() async {
+        let router = FeedPaginationRouterMock()
+        let reactor = makeReactor(
+            feedRepository: FeedPaginationRepositoryMock(pages: []),
+            outputHandler: FeedOutputHandlerSpy(),
+            router: router
+        )
+        let challengeRouted = expectation(description: "challenge routed")
+        router.onRoute = { route in
+            guard route == .routeToChallenge else { return }
+            challengeRouted.fulfill()
+        }
+
+        reactor.action.onNext(.didTapNudgeButton)
+
+        await fulfillment(of: [challengeRouted], timeout: 1)
+        XCTAssertEqual(router.routes, [.routeToChallenge])
+    }
 }
 
 private extension FeedReactorPaginationTests {
     func makeReactor(
         feedRepository: FeedRepositoryProtocol,
         groupUseCase: GroupUseCaseProtocol = FeedPaginationGroupUseCaseMock(),
-        outputHandler: FeedOutputHandler
+        outputHandler: FeedOutputHandler,
+        router: FeedRouter? = nil
     ) -> FeedReactor {
         FeedReactor(
             authUseCase: FeedPaginationAuthUseCaseMock(),
             groupUseCase: groupUseCase,
             feedUseCase: FeedUseCase(feedRepository: feedRepository),
-            router: FeedPaginationRouterMock(),
+            router: router ?? FeedPaginationRouterMock(),
             output: { [weak outputHandler] output in
                 outputHandler?.handle(output: output)
             }
@@ -547,7 +567,13 @@ private actor FeedGroupUseCaseSequenceMock: GroupUseCaseProtocol {
 
 @MainActor
 private final class FeedPaginationRouterMock: FeedRouter {
-    func route(from route: FeedRoute) {}
+    private(set) var routes: [FeedRoute] = []
+    var onRoute: ((FeedRoute) -> Void)?
+
+    func route(from route: FeedRoute) {
+        routes.append(route)
+        onRoute?(route)
+    }
 }
 
 @MainActor

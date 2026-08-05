@@ -5,6 +5,7 @@
 //  Created by 김동준 on 7/17/26.
 //
 
+import Base
 import CommonDomain
 import CoreModyImageInterface
 import DesignSystem
@@ -39,9 +40,11 @@ private extension ProfileSection {
             SkeletonView(width: 50, height: 50)
                 .clipShape(Circle())
         } else {
-            ProfileAvatarView(
+            RemoteAvatarView(
                 imageURL: imageURL,
                 defaultAvatar: defaultAvatar,
+                width: 50,
+                height: 50,
                 imageLoader: imageLoader
             )
         }

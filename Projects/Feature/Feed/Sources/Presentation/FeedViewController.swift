@@ -217,6 +217,10 @@ private extension FeedViewController {
 
 private extension FeedViewController {
     func bindFeedList(_ reactor: FeedReactor) {
+        feedEmptyView.onNudgeTap = { [weak reactor] in
+            reactor?.action.onNext(.didTapNudgeButton)
+        }
+
         reactor.state
             .observe(on: MainScheduler.instance)
             .map { state in

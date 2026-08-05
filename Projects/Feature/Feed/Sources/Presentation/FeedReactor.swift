@@ -75,6 +75,7 @@ public final class FeedReactor: Reactor {
         case didTapExerciseRecordButton
         case didTapMealRecordButton
         case didTapAddGroup
+        case didTapNudgeButton
         case didSelectGroup(GroupModel)
 
         case didTapPreviousWeek
@@ -144,6 +145,11 @@ public final class FeedReactor: Reactor {
         case .didTapAddGroup:
             Task { @MainActor [weak router] in
                 router?.route(from: .addGroup)
+            }
+            return .empty()
+        case .didTapNudgeButton:
+            Task { @MainActor [weak router] in
+                router?.route(from: .routeToChallenge)
             }
             return .empty()
         case let .didSelectGroup(group):

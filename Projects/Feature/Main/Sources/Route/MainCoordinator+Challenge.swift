@@ -16,6 +16,15 @@ extension MainCoordinator: ChallengeRouter {
 extension MainCoordinator: ChallengeOutputHandler {
     public func handle(output: ChallengeOutput) {
         switch output {
+        case .nudgeStarted:
+            mainContainerViewController?.setLoading(true)
+        case let .nudgeSucceeded(nickname):
+            mainContainerViewController?.showAlert(
+                configuration: MainAlertConfiguration(
+                    title: "콕 찌르기 완료",
+                    contents: "\(nickname) 님을 콕 찔렀습니다!"
+                )
+            )
         case let .showAlert(error):
             let title: String
             let contents: String

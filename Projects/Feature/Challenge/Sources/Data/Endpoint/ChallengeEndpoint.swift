@@ -14,4 +14,18 @@ enum ChallengeEndpoint {
             method: .GET
         )
     }
+
+    static func getChallengeNudgeInfo(groupId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/nudges",
+            method: .GET
+        )
+    }
+
+    static func postChallengeNudge(groupId: Int, memberId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/nudges/\(memberId)",
+            method: .POST
+        )
+    }
 }

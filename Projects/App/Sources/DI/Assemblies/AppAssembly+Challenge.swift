@@ -8,6 +8,7 @@
 import Swinject
 import ChallengeInterface
 import Challenge
+import CoreModyImageInterface
 import CoreNetworkInterface
 
 extension AppAssembly {
@@ -43,10 +44,13 @@ extension AppAssembly {
         }
 
         container.register(ChallengeBuildable.self) { resolver in
+            let imageLoader: RemoteImageLoading = resolver.resolve()
+
             return ChallengeBuilder(
                 makeChallengeFeature: { router, outputHandler in
                     resolver.resolve(argument: (router, outputHandler))
-                }
+                },
+                imageLoader: imageLoader
             )
         }
     }

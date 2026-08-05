@@ -8,6 +8,8 @@
 import CommonDomain
 
 public enum ChallengeOutput: Equatable {
+    case nudgeStarted
+    case nudgeSucceeded(nickname: String)
     case showAlert(NetworkError)
 }
 

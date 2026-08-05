@@ -7,14 +7,23 @@
 
 import ChallengeInterface
 import ComposableArchitecture
+import CoreModyImageInterface
 import SwiftUI
 
 final class ChallengeHostingController: UIHostingController<ChallengeView>, ChallengeInputHandler {
     private let store: StoreOf<ChallengeFeature>
 
-    init(store: StoreOf<ChallengeFeature>) {
+    init(
+        store: StoreOf<ChallengeFeature>,
+        imageLoader: RemoteImageLoading
+    ) {
         self.store = store
-        super.init(rootView: ChallengeView(store: store))
+        super.init(
+            rootView: ChallengeView(
+                store: store,
+                imageLoader: imageLoader
+            )
+        )
     }
 
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
