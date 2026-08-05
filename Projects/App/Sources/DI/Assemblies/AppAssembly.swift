@@ -16,6 +16,7 @@ struct AppAssembly: Assembly {
         assembleCoreModyImage(in: container)
         assembleCoreCamera(in: container)
         assembleCoreNotification(in: container)
+        assembleCoreHealth(in: container)
         assembleFeature(in: container)
         assembleRoot(in: container)
         assembleMain(in: container)
