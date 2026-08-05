@@ -14,6 +14,12 @@ public struct ChallengeStreakFeature {
 
     @ObservableState
     public struct State: Equatable {
+        enum ContentState {
+            case loading
+            case empty
+            case content
+        }
+
         enum CancelID {
             case challengeSummary
             case challengeNudgeInfo
@@ -23,6 +29,11 @@ public struct ChallengeStreakFeature {
         var summary: ChallengeSummary?
         var nudgeInfos: [ChallengeNudgeInfo]?
         var isNudging = false
+
+        var contentState: ContentState {
+            guard let nudgeInfos else { return .loading }
+            return nudgeInfos.isEmpty ? .empty : .content
+        }
 
         public init() {}
     }
@@ -50,21 +61,31 @@ public struct ChallengeStreakFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return .merge(
-                    .send(.fetchChallengeSummary),
-                    .send(.fetchChallengeNudgeInfo)
-                )
+                switch state.contentState {
+                case .loading:
+                    return .send(.fetchChallengeNudgeInfo)
+                case .empty:
+                    return .none
+                case .content:
+                    return .send(.fetchChallengeSummary)
+                }
             case .refreshChallengeSummary:
                 state.summary = nil
+
+                guard state.nudgeInfos?.isEmpty == false else {
+                    return .none
+                }
+
                 return .send(.fetchChallengeSummary)
             case let .setSelectedGroup(group):
                 state.selectedGroup = group
                 state.summary = nil
                 state.nudgeInfos = nil
 
-                return .send(.onAppear)
+                return .send(.fetchChallengeNudgeInfo)
             case .fetchChallengeSummary:
                 guard let groupID = state.selectedGroup?.groupId,
+                      state.nudgeInfos?.isEmpty == false,
                       state.summary == nil else {
                     return .none
                 }
@@ -97,7 +118,7 @@ public struct ChallengeStreakFeature {
                 }
 
                 state.nudgeInfos = nudgeInfos
-                return .none
+                return nudgeInfos.isEmpty ? .none : .send(.fetchChallengeSummary)
             case let .nudgeButtonTapped(memberID):
                 guard !state.isNudging,
                       let groupID = state.selectedGroup?.groupId,

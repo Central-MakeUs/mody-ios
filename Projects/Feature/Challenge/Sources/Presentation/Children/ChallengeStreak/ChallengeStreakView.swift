@@ -30,7 +30,18 @@ public struct ChallengeStreakView: View {
 }
 
 private extension ChallengeStreakView {
+    @ViewBuilder
     var streakBody: some View {
+        switch store.contentState {
+        case .loading, .content:
+            streakContent
+        case .empty:
+            ChallengeStreakEmptyView()
+                .greedyFrame()
+        }
+    }
+
+    var streakContent: some View {
         ScrollView {
             VStack(spacing: 0) {
                 ChallengeStreakStatusSection(
