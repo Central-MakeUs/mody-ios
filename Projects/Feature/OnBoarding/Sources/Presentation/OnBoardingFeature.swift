@@ -9,9 +9,10 @@ import ComposableArchitecture
 import OnBoardingInterface
 import CommonDomain
 import Foundation
-import Util
 import CoreCameraInterface
 import CoreNotificationInterface
+import CoreHealthInterface
+import Util
 import Base
 
 @Reducer
@@ -19,17 +20,20 @@ public struct OnBoardingFeature {
     private let onBoardingUseCase: OnBoardingUseCase
     private let cameraPermission: CameraPermissionInterface
     private let notificationPermission: NotificationPermissionInterface
+    private let healthPermission: HealthPermissionInterface
     private let router: @MainActor (OnBoardingRoute) -> Void
 
     public init(
         onBoardingUseCase: OnBoardingUseCase,
         cameraPermission: CameraPermissionInterface,
         notificationPermission: NotificationPermissionInterface,
+        healthPermission: HealthPermissionInterface,
         router: @escaping @MainActor (OnBoardingRoute) -> Void
     ) {
         self.onBoardingUseCase = onBoardingUseCase
         self.cameraPermission = cameraPermission
         self.notificationPermission = notificationPermission
+        self.healthPermission = healthPermission
         self.router = router
     }
     
@@ -216,10 +220,15 @@ public struct OnBoardingFeature {
             case .requestPermissions:
                 guard !state.isPermissionRequesting else { return .none }
                 state.isPermissionRequesting = true
+                let includesHealthPermission = state.isHealthPermissionVisible
 
                 return .run { send in
                     _ = await notificationPermission.requestNotificationPermission()
                     _ = await cameraPermission.requestCameraPermission()
+                    if includesHealthPermission,
+                       await healthPermission.shouldShowHealthPermissionPrompt() {
+                        _ = await healthPermission.requestHealthPermission()
+                    }
                     await send(.permissionsRequestCompleted)
                 }
             case .permissionsRequestCompleted:
