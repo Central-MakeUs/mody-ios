@@ -28,4 +28,11 @@ enum ChallengeEndpoint {
             method: .POST
         )
     }
+    
+    static func getChallengeStepRankings(groupId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/step/rankings",
+            method: .GET
+        )
+    }
 }
