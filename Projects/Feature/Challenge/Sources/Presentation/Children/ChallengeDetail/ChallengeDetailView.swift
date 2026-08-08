@@ -7,13 +7,19 @@
 
 import SwiftUI
 import ComposableArchitecture
+import CoreModyImageInterface
 import DesignSystem
 
 public struct ChallengeDetailView: View {
     private let store: StoreOf<ChallengeDetailFeature>
+    private let imageLoader: RemoteImageLoading
 
-    public init(store: StoreOf<ChallengeDetailFeature>) {
+    public init(
+        store: StoreOf<ChallengeDetailFeature>,
+        imageLoader: RemoteImageLoading
+    ) {
         self.store = store
+        self.imageLoader = imageLoader
     }
 
     public var body: some View {
@@ -28,10 +34,26 @@ private extension ChallengeDetailView {
     var detailBody: some View {
         switch store.contentState {
         case .loading, .content:
-            Text("챌린지")
+            detailContent
         case .empty:
             ChallengeEmptyView(isStreakEmpty: false)
                 .greedyFrame()
         }
+    }
+
+    var detailContent: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ChallengeDetailGroupRequiredSection()
+
+                ChallengeDetailContributionRankingSection(
+                    rankings: store.rankings,
+                    imageLoader: imageLoader
+                )
+
+                ChallengeDetailGroupOptionalSection()
+            }
+        }
+        .scrollIndicators(.visible)
     }
 }
