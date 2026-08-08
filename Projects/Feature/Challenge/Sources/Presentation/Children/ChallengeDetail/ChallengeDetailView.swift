@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct ChallengeDetailView: View {
     private let store: StoreOf<ChallengeDetailFeature>
@@ -17,9 +18,20 @@ public struct ChallengeDetailView: View {
 
     public var body: some View {
         detailBody
+            .background(Color.gray00)
+            .onAppear { store.send(.onAppear) }
     }
-    
-    private var detailBody: some View {
-        Text("챌린지")
+}
+
+private extension ChallengeDetailView {
+    @ViewBuilder
+    var detailBody: some View {
+        switch store.contentState {
+        case .loading, .content:
+            Text("챌린지")
+        case .empty:
+            ChallengeEmptyView(isStreakEmpty: false)
+                .greedyFrame()
+        }
     }
 }

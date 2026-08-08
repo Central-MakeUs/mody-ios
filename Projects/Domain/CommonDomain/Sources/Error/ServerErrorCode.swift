@@ -8,11 +8,13 @@
 public enum ServerErrorCode {
     case group301
     case group304
+    case challenge303
     
     public var code: String {
         switch self {
         case .group301: "GROUP301"
         case .group304: "GROUP304"
+        case .challenge303: "CHALLENGE303"
         }
     }
 }
