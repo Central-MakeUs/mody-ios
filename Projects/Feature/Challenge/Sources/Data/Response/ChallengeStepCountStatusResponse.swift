@@ -53,6 +53,20 @@ private extension ChallengeStepCountStatusResponse {
             .withColonSeparatorInTime,
             .withFractionalSeconds
         ]
+        guard let koreanTimeZone = TimeZone(identifier: "Asia/Seoul") else {
+            return nil
+        }
+
+        formatter.timeZone = koreanTimeZone
+        if let date = formatter.date(from: value) {
+            return date
+        }
+
+        formatter.formatOptions = [
+            .withFullDate,
+            .withTime,
+            .withColonSeparatorInTime
+        ]
         return formatter.date(from: value)
     }
 }

@@ -15,11 +15,11 @@ public struct ChallengeStepCountStatus: Equatable {
     public let stepCountFetchFromAt: Date
 
     public init(
-        groupChallengeId: Int,
-        walkChallengeGroup: WalkChallengeRequiredGroup,
-        targetStepCount: Int,
-        currentStepCount: Int,
-        stepCountFetchFromAt: Date
+        groupChallengeId: Int = -1,
+        walkChallengeGroup: WalkChallengeRequiredGroup = .seoulDaegu,
+        targetStepCount: Int = 0,
+        currentStepCount: Int = 0,
+        stepCountFetchFromAt: Date = .now
     ) {
         self.groupChallengeId = groupChallengeId
         self.walkChallengeGroup = walkChallengeGroup

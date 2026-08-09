@@ -194,7 +194,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
-                .microFeature(.CoreModyImage)
+                .microFeature(.CoreModyImage),
+                .microFeature(.CoreHealth)
             ]
         ),
         .MyPage: .init(

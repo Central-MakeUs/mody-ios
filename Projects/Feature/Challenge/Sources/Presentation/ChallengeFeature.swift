@@ -8,19 +8,23 @@
 import ComposableArchitecture
 import ChallengeInterface
 import CommonDomain
+import CoreHealthInterface
 
 @Reducer
 public struct ChallengeFeature {
     private let challengeUseCase: ChallengeUseCase
+    private let healthUseCase: HealthUseCaseProtocol
     private let router: @MainActor (ChallengeRoute) -> Void
     private let output: @MainActor (ChallengeOutput) -> Void
 
     public init(
         challengeUseCase: ChallengeUseCase,
+        healthUseCase: HealthUseCaseProtocol,
         router: @escaping @MainActor (ChallengeRoute) -> Void,
         output: @escaping @MainActor (ChallengeOutput) -> Void
     ) {
         self.challengeUseCase = challengeUseCase
+        self.healthUseCase = healthUseCase
         self.router = router
         self.output = output
     }
@@ -43,6 +47,7 @@ public struct ChallengeFeature {
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
         case input(ChallengeInput)
+        case onDisappear
         case challengeStreak(ChallengeStreakFeature.Action)
         case challengeDetail(ChallengeDetailFeature.Action)
     }
@@ -52,6 +57,8 @@ public struct ChallengeFeature {
 
         Reduce { state, action in
             switch action {
+            case .onDisappear:
+                return .send(.challengeDetail(.onDisappear))
             case let .input(.selectedGroupUpdated(group)):
                 state.selectedGroup = group
                 return .merge(
@@ -74,7 +81,10 @@ public struct ChallengeFeature {
         }
 
         Scope(state: \.challengeDetail, action: \.challengeDetail) {
-            ChallengeDetailFeature(challengeUseCase: challengeUseCase)
+            ChallengeDetailFeature(
+                challengeUseCase: challengeUseCase,
+                healthUseCase: healthUseCase
+            )
         }
     }
 }

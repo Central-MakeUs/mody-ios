@@ -23,6 +23,7 @@ public struct ChallengeView: View {
 
     public var body: some View {
         challengeBody
+            .onDisappear { store.send(.onDisappear) }
     }
 }
 

@@ -7,10 +7,15 @@
 
 import ComposableArchitecture
 import CommonDomain
+import CoreHealthInterface
+import ModyLogger
+import Foundation
 
 @Reducer
 public struct ChallengeDetailFeature {
     private let challengeUseCase: ChallengeUseCase
+    private let healthUseCase: HealthUseCaseProtocol
+    @Dependency(\.continuousClock) private var clock
 
     @ObservableState
     public struct State: Equatable {
@@ -18,6 +23,12 @@ public struct ChallengeDetailFeature {
             case loading
             case empty
             case content
+        }
+
+        enum CancelID {
+            case myStepCountFetch
+            case myStepCountTimer
+            case stepChallengeStatus
         }
 
         var selectedGroup: GroupModel?
@@ -35,8 +46,11 @@ public struct ChallengeDetailFeature {
     public enum Action {
         case setSelectedGroup(GroupModel?)
         case onAppear
+        case onDisappear
         case fetchChallengeStepRankings
         case fetchStepChallengeStatus
+        case startMyStepCountTimer
+        case fetchMyStepCount
         case challengeStepRankingsFetched(groupID: Int, [ChallengeStepRanking])
         case stepChallengeStatusFetched(groupID: Int, ChallengeStepCountStatus)
         case changeChallengeButtonTapped
@@ -44,8 +58,12 @@ public struct ChallengeDetailFeature {
         case showAlert(NetworkError)
     }
 
-    public init(challengeUseCase: ChallengeUseCase) {
+    public init(
+        challengeUseCase: ChallengeUseCase,
+        healthUseCase: HealthUseCaseProtocol
+    ) {
         self.challengeUseCase = challengeUseCase
+        self.healthUseCase = healthUseCase
     }
 
     public var body: some ReducerOf<Self> {
@@ -56,7 +74,14 @@ public struct ChallengeDetailFeature {
                 state.rankings = nil
                 state.stepCountStatus = nil
 
-                return .send(.onAppear)
+                return .concatenate(
+                    .merge(
+                        .cancel(id: State.CancelID.myStepCountFetch),
+                        .cancel(id: State.CancelID.myStepCountTimer),
+                        .cancel(id: State.CancelID.stepChallengeStatus)
+                    ),
+                    .send(.onAppear)
+                )
             case .onAppear:
                 switch state.contentState {
                 case .loading:
@@ -70,6 +95,12 @@ public struct ChallengeDetailFeature {
                     // TODO: 이후 로직 추가
                     return .none
                 }
+            case .onDisappear:
+                return .merge(
+                    .cancel(id: State.CancelID.myStepCountFetch),
+                    .cancel(id: State.CancelID.myStepCountTimer),
+                    .cancel(id: State.CancelID.stepChallengeStatus)
+                )
             case .fetchChallengeStepRankings:
                 guard let groupID = state.selectedGroup?.groupId,
                       state.rankings == nil else {
@@ -88,6 +119,31 @@ public struct ChallengeDetailFeature {
                 return .run { send in
                     await send(fetchStepChallengeStatus(groupID: groupID))
                 }
+                .cancellable(id: State.CancelID.stepChallengeStatus, cancelInFlight: true)
+            case .startMyStepCountTimer:
+                return .run { [clock] send in
+                    for await _ in clock.timer(interval: .seconds(5)) {
+                        await send(.fetchMyStepCount)
+                    }
+                }
+                .cancellable(id: State.CancelID.myStepCountTimer, cancelInFlight: true)
+            case .fetchMyStepCount:
+                guard let startDate = state.stepCountStatus?.stepCountFetchFromAt else {
+                    return .none
+                }
+
+                return .run { _ in
+                    do {
+                        let stepCount = try await healthUseCase.getStepCount(
+                            from: startDate,
+                            to: Date.now
+                        )
+                        ModyLogger.debug("Challenge my step count: \(stepCount)")
+                    } catch {
+                        ModyLogger.debug("Challenge my step count fetch failed: \(error)")
+                    }
+                }
+                .cancellable(id: State.CancelID.myStepCountFetch, cancelInFlight: true)
             case let .challengeStepRankingsFetched(groupID, rankings):
                 guard state.selectedGroup?.groupId == groupID else {
                     return .none
@@ -101,7 +157,7 @@ public struct ChallengeDetailFeature {
                 }
 
                 state.stepCountStatus = status
-                return .none
+                return .send(.startMyStepCountTimer)
             case .showAlert:
                 return .none
             case .changeChallengeButtonTapped:
@@ -112,7 +168,11 @@ public struct ChallengeDetailFeature {
                       state.stepCountStatus != nil else { return .none }
                 
                 state.stepCountStatus = nil
-                return .send(.fetchStepChallengeStatus)
+                return .merge(
+                    .cancel(id: State.CancelID.myStepCountFetch),
+                    .cancel(id: State.CancelID.myStepCountTimer),
+                    .send(.fetchStepChallengeStatus)
+                )
             }
         }
     }
@@ -152,7 +212,7 @@ private extension ChallengeDetailFeature {
 
             switch code {
             case ServerErrorCode.challenge303.code:
-                return .challengeStepRankingsFetched(groupID: groupID, [])
+                return .stepChallengeStatusFetched(groupID: groupID, .init())
             default:
                 return .showAlert(fallback)
             }
