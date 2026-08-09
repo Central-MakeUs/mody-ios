@@ -11,17 +11,20 @@ import SwiftUI
 struct ChallengeDetailGroupRequiredSection: View {
     private let status: ChallengeStepCountStatus?
     private let groupName: String?
+    private let deviceWidth: CGFloat
     private let changeAction: () -> Void
     private let refreshAction: () -> Void
 
     init(
         status: ChallengeStepCountStatus?,
         groupName: String?,
+        deviceWidth: CGFloat,
         changeAction: @escaping () -> Void,
         refreshAction: @escaping () -> Void
     ) {
         self.status = status
         self.groupName = groupName
+        self.deviceWidth = deviceWidth
         self.changeAction = changeAction
         self.refreshAction = refreshAction
     }
@@ -36,8 +39,11 @@ struct ChallengeDetailGroupRequiredSection: View {
             .padding(.horizontal, 24)
             .padding(.top, 36)
 
-            ChallengeDetailGroupRequiredProgressGauge(status: status)
-                .padding(.top, 34)
+            ChallengeDetailGroupRequiredProgressGauge(
+                status: status,
+                deviceWidth: deviceWidth
+            )
+            .padding(.top, 34)
 
             ChallengeDetailGroupRequiredStepCountSection(
                 status: status,

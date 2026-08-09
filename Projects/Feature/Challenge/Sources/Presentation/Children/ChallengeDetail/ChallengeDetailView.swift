@@ -23,30 +23,33 @@ public struct ChallengeDetailView: View {
     }
 
     public var body: some View {
-        detailBody
-            .background(Color.gray00)
-            .onAppear { store.send(.onAppear) }
+        GeometryReader { proxy in
+            detailBody(deviceWidth: proxy.size.width)
+        }
+        .background(Color.gray00)
+        .onAppear { store.send(.onAppear) }
     }
 }
 
 private extension ChallengeDetailView {
     @ViewBuilder
-    var detailBody: some View {
+    func detailBody(deviceWidth: CGFloat) -> some View {
         switch store.contentState {
         case .loading, .content:
-            detailContent
+            detailContent(deviceWidth: deviceWidth)
         case .empty:
             ChallengeEmptyView(isStreakEmpty: false)
                 .greedyFrame()
         }
     }
 
-    var detailContent: some View {
+    func detailContent(deviceWidth: CGFloat) -> some View {
         ScrollView {
             VStack(spacing: 0) {
                 ChallengeDetailGroupRequiredSection(
                     status: groupRequiredStatus,
                     groupName: store.selectedGroup?.name,
+                    deviceWidth: deviceWidth,
                     changeAction: { store.send(.changeChallengeButtonTapped) },
                     refreshAction: { store.send(.refreshStepButtonTapped) }
                 )
