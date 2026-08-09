@@ -222,8 +222,6 @@ public struct ChallengeDetailFeature {
 private extension ChallengeDetailFeature {
     func fetchChallengeStepRankings(groupID: Int) async -> Action {
         do {
-            // MARK: 임시 딜레이 코드
-            try await Task.sleep(for: .seconds(5))
             let rankings = try await challengeUseCase.fetchChallengeStepRankings(groupId: groupID)
             return .challengeStepRankingsFetched(groupID: groupID, rankings)
         } catch {

@@ -6,7 +6,7 @@
 //
 
 public enum ChallengeRoute: Equatable {
-    case routeToChallengeChange
+    case routeToChallengeChange(groupId: Int)
 }
 
 @MainActor

@@ -70,7 +70,7 @@ public struct ChallengeFeature {
             case .challengeStreak(let streakAction):
                 return handleStreakAction(&state, streakAction)
             case .challengeDetail(let detailAction):
-                return handleDetailAction(detailAction)
+                return handleDetailAction(state, detailAction)
             case .binding:
                 return .none
             }
@@ -114,15 +114,22 @@ private extension ChallengeFeature {
 }
 
 private extension ChallengeFeature {
-    func handleDetailAction(_ action: ChallengeDetailFeature.Action) -> Effect<Action> {
+    func handleDetailAction(
+        _ state: State,
+        _ action: ChallengeDetailFeature.Action
+    ) -> Effect<Action> {
         switch action {
         case .showAlert(let error):
             return .run { [output] _ in
                 await output(.showAlert(error))
             }
         case .changeChallengeButtonTapped:
+            guard let groupId = state.selectedGroup?.groupId else {
+                return .none
+            }
+
             return .run { [router] _ in
-                await router(.routeToChallengeChange)
+                await router(.routeToChallengeChange(groupId: groupId))
             }
         default:
             return .none

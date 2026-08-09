@@ -32,14 +32,20 @@ public struct ChallengeChangeFeature {
         var isLoading = false
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
+        var changableChallengeList: [ChangableWalkChallengeModel] = []
+        let groupId: Int
 
-        public init() {}
+        public init(groupId: Int) {
+            self.groupId = groupId
+        }
     }
 
     public enum Action {
         case alertAction(AlertFeature.Action)
         case showAlert(State.AlertCase)
         case backButtonTapped
+        case onAppear
+        case changableChallengeListFetched([ChangableWalkChallengeModel])
     }
 
     public var body: some ReducerOf<Self> {
@@ -58,11 +64,34 @@ public struct ChallengeChangeFeature {
                 state.isLoading = false
                 state.alertCase = alertCase
                 return .send(.alertAction(.present))
+            case .onAppear:
+                state.isLoading = true
+                let groupId = state.groupId
+                return .run { send in
+                    await send(fetchChangableChallengeList(groupId: groupId))
+                }
+            case let .changableChallengeListFetched(challengeList):
+                state.isLoading = false
+                state.changableChallengeList = challengeList
+                return .none
             case .backButtonTapped:
                 return .run { [router] _ in
                     await router(.back)
                 }
             }
+        }
+    }
+}
+
+private extension ChallengeChangeFeature {
+    func fetchChangableChallengeList(groupId: Int) async -> Action {
+        do {
+            let challengeList = try await challengeUseCase.fetchChangableChallengeList(
+                groupId: groupId
+            )
+            return .changableChallengeListFetched(challengeList)
+        } catch {
+            return .showAlert(.error(error as? NetworkError ?? .unknown))
         }
     }
 }

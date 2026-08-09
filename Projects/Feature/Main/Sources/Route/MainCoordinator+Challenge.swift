@@ -12,8 +12,11 @@ import CommonDomain
 extension MainCoordinator: ChallengeRouter {
     public func route(from route: ChallengeRoute) {
         switch route {
-        case .routeToChallengeChange:
-            let viewController = challengeBuilder.makeChallengeChangeViewController(router: self)
+        case let .routeToChallengeChange(groupId):
+            let viewController = challengeBuilder.makeChallengeChangeViewController(
+                groupId: groupId,
+                router: self
+            )
             navigationController.pushViewController(viewController, animated: true)
         }
     }

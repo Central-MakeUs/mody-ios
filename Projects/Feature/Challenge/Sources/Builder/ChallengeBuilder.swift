@@ -43,9 +43,12 @@ public struct ChallengeBuilder: ChallengeBuildable {
 
     @MainActor
     public func makeChallengeChangeViewController(
+        groupId: Int,
         router: ChallengeChangeRouter
     ) -> UIViewController {
-        let store: StoreOf<ChallengeChangeFeature> = .init(initialState: .init()) {
+        let store: StoreOf<ChallengeChangeFeature> = .init(
+            initialState: .init(groupId: groupId)
+        ) {
             makeChallengeChangeFeature(router)
         }
 
