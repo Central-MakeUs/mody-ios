@@ -66,4 +66,19 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
 
         return result
     }
+
+    public func postRecordChallengeStepCount(
+        groupId: Int,
+        request: ChallengeStepCountRequest
+    ) async throws {
+        let endpoint = ChallengeEndpoint.putRecordChallengeStepCount(
+            groupId: groupId,
+            request: request
+        )
+        let response: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
+
+        guard response.isSuccess != false else {
+            throw NetworkError.invalidResponse
+        }
+    }
 }

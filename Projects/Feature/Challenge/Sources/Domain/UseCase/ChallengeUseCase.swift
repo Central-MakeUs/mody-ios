@@ -31,4 +31,8 @@ public struct ChallengeUseCase {
     public func fetchStepChallengeStatus(groupId: Int) async throws -> ChallengeStepCountStatus {
         try await repository.getStepChallengeStatus(groupId: groupId)
     }
+
+    public func updateChallengeStepCount(groupId: Int, request: ChallengeStepCountRequest) async throws {
+        try await repository.postRecordChallengeStepCount(groupId: groupId, request: request)
+    }
 }

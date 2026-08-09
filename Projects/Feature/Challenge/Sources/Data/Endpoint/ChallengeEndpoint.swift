@@ -42,4 +42,15 @@ enum ChallengeEndpoint {
             method: .GET
         )
     }
+
+    static func putRecordChallengeStepCount(
+        groupId: Int,
+        request: ChallengeStepCountRequest
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/step/records",
+            method: .PUT,
+            bodyParameters: request
+        )
+    }
 }
