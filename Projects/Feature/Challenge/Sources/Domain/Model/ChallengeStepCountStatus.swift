@@ -9,20 +9,20 @@ import Foundation
 
 public struct ChallengeStepCountStatus: Equatable {
     public let groupChallengeId: Int
-    public let title: WalkChallengeRequiredGroup
+    public let walkChallengeGroup: WalkChallengeRequiredGroup
     public let targetStepCount: Int
     public let currentStepCount: Int
     public let stepCountFetchFromAt: Date
 
     public init(
         groupChallengeId: Int,
-        title: WalkChallengeRequiredGroup,
+        walkChallengeGroup: WalkChallengeRequiredGroup,
         targetStepCount: Int,
         currentStepCount: Int,
         stepCountFetchFromAt: Date
     ) {
         self.groupChallengeId = groupChallengeId
-        self.title = title
+        self.walkChallengeGroup = walkChallengeGroup
         self.targetStepCount = targetStepCount
         self.currentStepCount = currentStepCount
         self.stepCountFetchFromAt = stepCountFetchFromAt

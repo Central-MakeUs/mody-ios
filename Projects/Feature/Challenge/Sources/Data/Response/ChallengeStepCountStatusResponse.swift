@@ -26,7 +26,7 @@ extension ChallengeStepCountStatusResponse {
 
         return ChallengeStepCountStatus(
             groupChallengeId: groupChallengeId ?? -1,
-            title: title,
+            walkChallengeGroup: title,
             targetStepCount: targetStepCount ?? 0,
             currentStepCount: currentStepCount ?? 0,
             stepCountFetchFromAt: stepCountFetchFromAt
