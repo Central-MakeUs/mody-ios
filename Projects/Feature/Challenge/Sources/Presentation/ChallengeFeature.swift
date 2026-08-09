@@ -120,6 +120,10 @@ private extension ChallengeFeature {
             return .run { [output] _ in
                 await output(.showAlert(error))
             }
+        case .changeChallengeButtonTapped:
+            return .run { [router] _ in
+                await router(.routeToChallengeChange)
+            }
         default:
             return .none
         }

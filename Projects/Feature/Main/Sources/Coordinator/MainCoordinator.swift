@@ -24,7 +24,7 @@ public final class MainCoordinator: MainCoordinating {
     weak var myPageInputHandler: MyPageInputHandler?
 
     let feedBuilder: FeedBuildable
-    private let challengeBuilder: ChallengeBuildable
+    let challengeBuilder: ChallengeBuildable
     let myPageBuilder: MyPageBuildable
     let modyGroupBuilder: ModyGroupBuildable
     private let mainContainerBuilder: MainContainerBuildable

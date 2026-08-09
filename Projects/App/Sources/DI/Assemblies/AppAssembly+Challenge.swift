@@ -46,12 +46,29 @@ extension AppAssembly {
             )
         }
 
+        container.register(ChallengeChangeFeature.self) { (
+            resolver: Resolver,
+            router: ChallengeChangeRouter
+        ) in
+            let challengeUseCase: ChallengeUseCase = resolver.resolve()
+
+            return ChallengeChangeFeature(
+                challengeUseCase: challengeUseCase,
+                router: { [weak router] route in
+                    router?.route(from: route)
+                }
+            )
+        }
+
         container.register(ChallengeBuildable.self) { resolver in
             let imageLoader: RemoteImageLoading = resolver.resolve()
 
             return ChallengeBuilder(
                 makeChallengeFeature: { router, outputHandler in
                     resolver.resolve(argument: (router, outputHandler))
+                },
+                makeChallengeChangeFeature: { router in
+                    resolver.resolve(argument: router)
                 },
                 imageLoader: imageLoader
             )
