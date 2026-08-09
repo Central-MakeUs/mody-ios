@@ -15,7 +15,8 @@ extension MainCoordinator: ChallengeRouter {
         case let .routeToChallengeChange(groupId):
             let viewController = challengeBuilder.makeChallengeChangeViewController(
                 groupId: groupId,
-                router: self
+                router: self,
+                outputHandler: self
             )
             navigationController.pushViewController(viewController, animated: true)
         }
@@ -62,6 +63,8 @@ extension MainCoordinator: ChallengeOutputHandler {
                     contents: contents
                 )
             )
+        case .stepChallengeChanged:
+            challengeInputHandler?.handle(input: .stepChallengeChanged)
         }
     }
 }

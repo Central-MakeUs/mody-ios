@@ -13,12 +13,12 @@ import SwiftUI
 
 public struct ChallengeBuilder: ChallengeBuildable {
     private let makeChallengeFeature: (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature
-    private let makeChallengeChangeFeature: (ChallengeChangeRouter) -> ChallengeChangeFeature
+    private let makeChallengeChangeFeature: (ChallengeChangeRouter, ChallengeOutputHandler) -> ChallengeChangeFeature
     private let imageLoader: RemoteImageLoading
 
     public init(
         makeChallengeFeature: @escaping (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature,
-        makeChallengeChangeFeature: @escaping (ChallengeChangeRouter) -> ChallengeChangeFeature,
+        makeChallengeChangeFeature: @escaping (ChallengeChangeRouter, ChallengeOutputHandler) -> ChallengeChangeFeature,
         imageLoader: RemoteImageLoading
     ) {
         self.makeChallengeFeature = makeChallengeFeature
@@ -44,12 +44,13 @@ public struct ChallengeBuilder: ChallengeBuildable {
     @MainActor
     public func makeChallengeChangeViewController(
         groupId: Int,
-        router: ChallengeChangeRouter
+        router: ChallengeChangeRouter,
+        outputHandler: ChallengeOutputHandler
     ) -> UIViewController {
         let store: StoreOf<ChallengeChangeFeature> = .init(
             initialState: .init(groupId: groupId)
         ) {
-            makeChallengeChangeFeature(router)
+            makeChallengeChangeFeature(router, outputHandler)
         }
 
         return UIHostingController(rootView: ChallengeChangeView(store: store))

@@ -17,6 +17,7 @@ public protocol ChallengeBuildable {
     @MainActor
     func makeChallengeChangeViewController(
         groupId: Int,
-        router: ChallengeChangeRouter
+        router: ChallengeChangeRouter,
+        outputHandler: ChallengeOutputHandler
     ) -> UIViewController
 }

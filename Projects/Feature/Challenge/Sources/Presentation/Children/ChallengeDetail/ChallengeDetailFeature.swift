@@ -51,6 +51,7 @@ public struct ChallengeDetailFeature {
 
     public enum Action {
         case setSelectedGroup(GroupModel?)
+        case stepChallengeChanged
         case onAppear
         case onDisappear
         case fetchChallengeStepRankings
@@ -63,6 +64,7 @@ public struct ChallengeDetailFeature {
         case changeChallengeButtonTapped
         case refreshStepButtonTapped
         case showAlert(NetworkError)
+        case refresh
     }
 
     public init(
@@ -78,6 +80,8 @@ public struct ChallengeDetailFeature {
             switch action {
             case let .setSelectedGroup(group):
                 state.selectedGroup = group
+                return .send(.refresh)
+            case .refresh:
                 state.rankings = nil
                 state.stepCountStatus = nil
                 state.currentStepCountFromHealthKit = nil
@@ -90,6 +94,8 @@ public struct ChallengeDetailFeature {
                     ),
                     .send(.onAppear)
                 )
+            case .stepChallengeChanged:
+                return .send(.refresh)
             case .onAppear:
                 switch state.contentState {
                 case .loading:
@@ -207,7 +213,6 @@ public struct ChallengeDetailFeature {
             case .showAlert:
                 return .none
             case .changeChallengeButtonTapped:
-                // TODO: 챌린지 변경 Implementation
                 return .none
             case .refreshStepButtonTapped:
                 guard let group = state.selectedGroup ,

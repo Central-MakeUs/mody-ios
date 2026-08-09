@@ -164,6 +164,36 @@ final class ChallengeTests: XCTestCase {
         XCTAssertEqual(endpoint.method, .GET)
     }
 
+    func testChangeStepChallengeForwardsGroupIdAndChallengeId() async throws {
+        let repository = ChallengeRepositorySpy()
+        let useCase = ChallengeUseCase(repository: repository)
+
+        try await useCase.changeStepChallenge(groupId: 12, challengeId: 34)
+
+        XCTAssertEqual(repository.changedGroupId, 12)
+        XCTAssertEqual(repository.changedChallengeId, 34)
+    }
+
+    func testPatchStepChallengeEndpointMatchesSwaggerContract() throws {
+        let request = StepChallengeChangeRequest(challengeId: 34)
+
+        let endpoint = ChallengeEndpoint.patchStepChallenge(
+            groupId: 12,
+            request: request
+        )
+
+        XCTAssertEqual(endpoint.path, "api/v1/groups/12/challenges/step/current")
+        XCTAssertEqual(endpoint.method, .PATCH)
+        XCTAssertEqual(endpoint.bodyParameters as? StepChallengeChangeRequest, request)
+
+        let encodedRequest = try JSONEncoder().encode(request)
+        let body = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encodedRequest) as? [String: Any]
+        )
+        XCTAssertEqual(body.count, 1)
+        XCTAssertEqual(body["challengeId"] as? Int, 34)
+    }
+
     func testUpdateChallengeStepCountForwardsRequestWithoutConversion() async throws {
         let repository = ChallengeRepositorySpy()
         let useCase = ChallengeUseCase(repository: repository)
@@ -210,6 +240,8 @@ private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
     var changableChallengeList: [ChangableWalkChallengeModel] = []
 
     private(set) var changableChallengeGroupId: Int?
+    private(set) var changedGroupId: Int?
+    private(set) var changedChallengeId: Int?
     private(set) var recordedGroupId: Int?
     private(set) var recordedRequest: ChallengeStepCountRequest?
 
@@ -236,6 +268,11 @@ private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
     func getChangableChallengeList(groupId: Int) async throws -> [ChangableWalkChallengeModel] {
         changableChallengeGroupId = groupId
         return changableChallengeList
+    }
+
+    func patchStepChallenge(groupId: Int, challengeId: Int) async throws {
+        changedGroupId = groupId
+        changedChallengeId = challengeId
     }
 
     func postRecordChallengeStepCount(

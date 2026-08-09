@@ -48,14 +48,18 @@ extension AppAssembly {
 
         container.register(ChallengeChangeFeature.self) { (
             resolver: Resolver,
-            router: ChallengeChangeRouter
+            arguments: (ChallengeChangeRouter, ChallengeOutputHandler)
         ) in
+            let (router, outputHandler) = arguments
             let challengeUseCase: ChallengeUseCase = resolver.resolve()
 
             return ChallengeChangeFeature(
                 challengeUseCase: challengeUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
+                },
+                output: { [weak outputHandler] output in
+                    outputHandler?.handle(output: output)
                 }
             )
         }
@@ -67,8 +71,8 @@ extension AppAssembly {
                 makeChallengeFeature: { router, outputHandler in
                     resolver.resolve(argument: (router, outputHandler))
                 },
-                makeChallengeChangeFeature: { router in
-                    resolver.resolve(argument: router)
+                makeChallengeChangeFeature: { router, outputHandler in
+                    resolver.resolve(argument: (router, outputHandler))
                 },
                 imageLoader: imageLoader
             )
