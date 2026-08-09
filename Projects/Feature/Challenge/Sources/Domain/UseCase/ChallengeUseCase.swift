@@ -35,4 +35,8 @@ public struct ChallengeUseCase {
     public func updateChallengeStepCount(groupId: Int, request: ChallengeStepCountRequest) async throws {
         try await repository.postRecordChallengeStepCount(groupId: groupId, request: request)
     }
+    
+    public func fetchChangableChallengeList(groupId: Int) async throws -> [ChangableWalkChallengeModel] {
+        try await repository.getChangableChallengeList(groupId: groupId)
+    }
 }

@@ -81,4 +81,15 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
             throw NetworkError.invalidResponse
         }
     }
+    
+    public func getChangableChallengeList(groupId: Int) async throws -> [ChangableWalkChallengeModel] {
+        let endpoint = ChallengeEndpoint.getChangableChallengeList(groupId: groupId)
+        let response: CoreNetworkResponse<ChangableWalkChallengeListResponse> = try await network.request(endpoint)
+
+        guard let result = response.result?.toDomain() else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result
+    }
 }
