@@ -36,7 +36,7 @@ private extension ChallengeStreakView {
         case .loading, .content:
             streakContent
         case .empty:
-            ChallengeStreakEmptyView()
+            ChallengeEmptyView(isStreakEmpty: true)
                 .greedyFrame()
         }
     }

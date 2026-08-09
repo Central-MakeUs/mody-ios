@@ -23,6 +23,7 @@ public struct ChallengeView: View {
 
     public var body: some View {
         challengeBody
+            .onDisappear { store.send(.onDisappear) }
     }
 }
 
@@ -39,7 +40,8 @@ private extension ChallengeView {
                 .tag(ChallengeFeature.State.Tab.streak)
 
                 ChallengeDetailView(
-                    store: store.scope(state: \.challengeDetail, action: \.challengeDetail)
+                    store: store.scope(state: \.challengeDetail, action: \.challengeDetail),
+                    imageLoader: imageLoader
                 )
                 .tag(ChallengeFeature.State.Tab.challenge)
             }

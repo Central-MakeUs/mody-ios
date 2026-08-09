@@ -44,4 +44,41 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
         )
         let _: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
     }
+    
+    public func getChallengeStepRankings(groupId: Int) async throws -> [ChallengeStepRanking] {
+        let endpoint = ChallengeEndpoint.getChallengeStepRankings(groupId: groupId)
+        let response: CoreNetworkResponse<ChallengeStepRankingResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
+    }
+
+    public func getStepChallengeStatus(groupId: Int) async throws -> ChallengeStepCountStatus {
+        let endpoint = ChallengeEndpoint.getStepChallengeStatus(groupId: groupId)
+        let response: CoreNetworkResponse<ChallengeStepCountStatusResponse> = try await network.request(endpoint)
+
+        guard let result = response.result?.toDomain() else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result
+    }
+
+    public func postRecordChallengeStepCount(
+        groupId: Int,
+        request: ChallengeStepCountRequest
+    ) async throws {
+        let endpoint = ChallengeEndpoint.putRecordChallengeStepCount(
+            groupId: groupId,
+            request: request
+        )
+        let response: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
+
+        guard response.isSuccess != false else {
+            throw NetworkError.invalidResponse
+        }
+    }
 }

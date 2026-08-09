@@ -45,6 +45,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreHealth
     case CoreModyImage
     case CoreCamera
     case CoreNotification
@@ -99,6 +100,7 @@ public enum MicroFeatureModule {
         case .CoreNotification: "Projects/Core/CoreNotification"
         case .CoreCamera: "Projects/Core/CoreCamera"
         case .CoreModyImage: "Projects/Core/CoreModyImage"
+        case .CoreHealth: "Projects/Core/CoreHealth"
         }
     }
 }

@@ -23,4 +23,16 @@ public struct ChallengeUseCase {
     public func nudgeMember(groupId: Int, memberId: Int) async throws {
         try await repository.postChallengeNudge(groupId: groupId, memberId: memberId)
     }
+    
+    public func fetchChallengeStepRankings(groupId: Int) async throws -> [ChallengeStepRanking] {
+        try await repository.getChallengeStepRankings(groupId: groupId)
+    }
+
+    public func fetchStepChallengeStatus(groupId: Int) async throws -> ChallengeStepCountStatus {
+        try await repository.getStepChallengeStatus(groupId: groupId)
+    }
+
+    public func updateChallengeStepCount(groupId: Int, request: ChallengeStepCountRequest) async throws {
+        try await repository.postRecordChallengeStepCount(groupId: groupId, request: request)
+    }
 }
