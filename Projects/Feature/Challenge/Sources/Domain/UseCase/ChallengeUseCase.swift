@@ -27,4 +27,8 @@ public struct ChallengeUseCase {
     public func fetchChallengeStepRankings(groupId: Int) async throws -> [ChallengeStepRanking] {
         try await repository.getChallengeStepRankings(groupId: groupId)
     }
+
+    public func fetchStepChallengeStatus(groupId: Int) async throws -> ChallengeStepCountStatus {
+        try await repository.getStepChallengeStatus(groupId: groupId)
+    }
 }

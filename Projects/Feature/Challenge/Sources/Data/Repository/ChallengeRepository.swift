@@ -55,4 +55,15 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
 
         return result.toDomain()
     }
+
+    public func getStepChallengeStatus(groupId: Int) async throws -> ChallengeStepCountStatus {
+        let endpoint = ChallengeEndpoint.getStepChallengeStatus(groupId: groupId)
+        let response: CoreNetworkResponse<ChallengeStepCountStatusResponse> = try await network.request(endpoint)
+
+        guard let result = response.result?.toDomain() else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result
+    }
 }

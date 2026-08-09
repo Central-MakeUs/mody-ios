@@ -10,4 +10,5 @@ public protocol ChallengeRepositoryProtocol {
     func getChallengeNudgeInfo(groupId: Int) async throws -> [ChallengeNudgeInfo]
     func postChallengeNudge(groupId: Int, memberId: Int) async throws
     func getChallengeStepRankings(groupId: Int) async throws -> [ChallengeStepRanking]
+    func getStepChallengeStatus(groupId: Int) async throws -> ChallengeStepCountStatus
 }
