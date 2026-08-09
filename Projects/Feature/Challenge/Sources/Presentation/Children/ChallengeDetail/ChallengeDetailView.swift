@@ -44,7 +44,12 @@ private extension ChallengeDetailView {
     var detailContent: some View {
         ScrollView {
             VStack(spacing: 0) {
-                ChallengeDetailGroupRequiredSection()
+                ChallengeDetailGroupRequiredSection(
+                    status: groupRequiredStatus,
+                    groupName: store.selectedGroup?.name,
+                    changeAction: { store.send(.changeChallengeButtonTapped) },
+                    refreshAction: { store.send(.refreshStepButtonTapped) }
+                )
 
                 ChallengeDetailContributionRankingSection(
                     rankings: store.rankings,
@@ -55,5 +60,10 @@ private extension ChallengeDetailView {
             }
         }
         .scrollIndicators(.visible)
+    }
+
+    var groupRequiredStatus: ChallengeStepCountStatus? {
+        guard store.rankings?.isEmpty == false else { return nil }
+        return store.stepCountStatus
     }
 }

@@ -9,15 +9,49 @@ import DesignSystem
 import SwiftUI
 
 struct ChallengeDetailGroupRequiredSection: View {
+    private let status: ChallengeStepCountStatus?
+    private let groupName: String?
+    private let changeAction: () -> Void
+    private let refreshAction: () -> Void
+
+    init(
+        status: ChallengeStepCountStatus?,
+        groupName: String?,
+        changeAction: @escaping () -> Void,
+        refreshAction: @escaping () -> Void
+    ) {
+        self.status = status
+        self.groupName = groupName
+        self.changeAction = changeAction
+        self.refreshAction = refreshAction
+    }
+
     var body: some View {
-        MText(
-            "그룹 필수 챌린지",
-            style: .b3,
-            color: .gray10,
-            alignment: .leading
-        )
-        .greedyWidth(.leading)
-        .padding(24)
+        VStack(spacing: 0) {
+            ChallengeDetailGroupRequiredTitleSection(
+                status: status,
+                groupName: groupName,
+                changeAction: changeAction
+            )
+            .padding(.horizontal, 24)
+            .padding(.top, 36)
+
+            ChallengeDetailGroupRequiredProgressGauge(status: status)
+                .padding(.top, 34)
+
+            ChallengeDetailGroupRequiredStepCountSection(
+                status: status,
+                refreshAction: refreshAction
+            )
+            .padding(.top, 16)
+
+            Color.gray2
+                .height(1)
+                .greedyWidth()
+                .hPadding(24)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
+        }
         .background(Color.systemWhite)
     }
 }

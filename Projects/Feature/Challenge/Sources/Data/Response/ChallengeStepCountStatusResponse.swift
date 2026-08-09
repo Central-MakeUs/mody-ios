@@ -43,6 +43,16 @@ private extension ChallengeStepCountStatusResponse {
         }
 
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: value) {
+            return date
+        }
+
+        formatter.formatOptions = [
+            .withFullDate,
+            .withTime,
+            .withColonSeparatorInTime,
+            .withFractionalSeconds
+        ]
         return formatter.date(from: value)
     }
 }
