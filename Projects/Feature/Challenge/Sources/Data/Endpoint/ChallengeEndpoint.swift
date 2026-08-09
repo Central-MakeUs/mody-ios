@@ -60,4 +60,15 @@ enum ChallengeEndpoint {
             method: .GET
         )
     }
+
+    static func patchStepChallenge(
+        groupId: Int,
+        request: StepChallengeChangeRequest
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/step/current",
+            method: .PATCH,
+            bodyParameters: request
+        )
+    }
 }

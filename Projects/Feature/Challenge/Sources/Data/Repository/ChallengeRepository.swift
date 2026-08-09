@@ -92,4 +92,17 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
 
         return result
     }
+
+    public func patchStepChallenge(groupId: Int, challengeId: Int) async throws {
+        let request = StepChallengeChangeRequest(challengeId: challengeId)
+        let endpoint = ChallengeEndpoint.patchStepChallenge(
+            groupId: groupId,
+            request: request
+        )
+        let response: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
+
+        guard response.isSuccess != false else {
+            throw NetworkError.invalidResponse
+        }
+    }
 }

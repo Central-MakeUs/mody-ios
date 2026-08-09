@@ -39,4 +39,11 @@ public struct ChallengeUseCase {
     public func fetchChangableChallengeList(groupId: Int) async throws -> [ChangableWalkChallengeModel] {
         try await repository.getChangableChallengeList(groupId: groupId)
     }
+
+    public func changeStepChallenge(groupId: Int, challengeId: Int) async throws {
+        try await repository.patchStepChallenge(
+            groupId: groupId,
+            challengeId: challengeId
+        )
+    }
 }
