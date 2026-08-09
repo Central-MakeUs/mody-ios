@@ -68,19 +68,21 @@ final class ChallengeTests: XCTestCase {
         XCTAssertNil(response.toDomain())
     }
 
-    func testUpdateChallengeStepCountUsesRecordedOnWithoutConversion() async throws {
+    func testUpdateChallengeStepCountForwardsRequestWithoutConversion() async throws {
         let repository = ChallengeRepositorySpy()
         let useCase = ChallengeUseCase(repository: repository)
-
-        try await useCase.updateChallengeStepCount(
-            groupId: 12,
+        let request = ChallengeStepCountRequest(
             recordedOn: "2026-08-09",
             stepCount: 3_456
         )
 
+        try await useCase.updateChallengeStepCount(
+            groupId: 12,
+            request: request
+        )
+
         XCTAssertEqual(repository.recordedGroupId, 12)
-        XCTAssertEqual(repository.recordedRequest?.recordedOn, "2026-08-09")
-        XCTAssertEqual(repository.recordedRequest?.stepCount, 3_456)
+        XCTAssertEqual(repository.recordedRequest, request)
     }
 
     func testPutRecordChallengeStepCountEndpointMatchesSwaggerContract() throws {

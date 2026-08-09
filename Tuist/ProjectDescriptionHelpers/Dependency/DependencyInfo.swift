@@ -193,6 +193,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.ComposableArchitecture),
                 .module(.Base),
                 .module(.CommonDomain),
+                .module(.Util),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreModyImage),
                 .microFeature(.CoreHealth)
