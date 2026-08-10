@@ -161,7 +161,7 @@ public struct ChallengeDetailFeature {
                 return .run { send in
                     do {
                         let now = Date.now
-                        ModyLogger.debug("Challenge my step \(startDate) ~ \(now)")
+                        ModyLogger.debug("Challenge Step 범위 \(startDate) ~ \(now)")
                         let stepCount = try await healthUseCase.getStepCount(
                             from: startDate,
                             to: now
@@ -182,7 +182,7 @@ public struct ChallengeDetailFeature {
                 state.currentStepCountFromHealthKit = stepCount
 
                 guard needStepCountUpdate else {
-                    ModyLogger.debug("Record Step Count Skip: \(stepCount)")
+                    ModyLogger.debug("Step Count Skip!!!!: \(stepCount)")
                     return .none
                 }
 
@@ -195,7 +195,7 @@ public struct ChallengeDetailFeature {
                         groupId: groupID,
                         request: request
                     )
-                    ModyLogger.debug("Challenge my step count: \(stepCount)")
+                    ModyLogger.debug("Step Count 등록: \(stepCount)")
                 }
             case let .challengeStepRankingsFetched(groupID, rankings):
                 guard state.selectedGroup?.groupId == groupID else {
