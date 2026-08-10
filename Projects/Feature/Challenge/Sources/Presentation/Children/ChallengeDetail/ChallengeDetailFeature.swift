@@ -35,6 +35,7 @@ public struct ChallengeDetailFeature {
         var selectedGroup: GroupModel?
         var rankings: [ChallengeStepRanking]?
         var stepCountStatus: ChallengeStepCountStatus?
+        var currentWeeklyChallengeList: [CurrentWeeklyChallenge]?
         var currentStepCountFromHealthKit: Int?
 
         var hasValidRankings: Bool {
@@ -55,11 +56,13 @@ public struct ChallengeDetailFeature {
         case onAppear
         case fetchChallengeStepRankings
         case fetchStepChallengeStatus
+        case fetchCurrentWeeklyChallenge
         case startMyStepCountTimer
         case fetchMyStepCount
         case updateChallengeStepCount(groupID: Int, stepCount: Int)
         case challengeStepRankingsFetched(groupID: Int, [ChallengeStepRanking])
         case stepChallengeStatusFetched(groupID: Int, ChallengeStepCountStatus)
+        case currentWeeklyChallengeListFetched(groupID: Int, [CurrentWeeklyChallenge])
         case changeChallengeButtonTapped
         case refreshStepButtonTapped
         case showAlert(NetworkError)
@@ -84,6 +87,7 @@ public struct ChallengeDetailFeature {
                 state.rankings = nil
                 state.stepCountStatus = nil
                 state.currentStepCountFromHealthKit = nil
+                state.currentWeeklyChallengeList = nil
 
                 return .concatenate(
                     .merge(
@@ -100,7 +104,8 @@ public struct ChallengeDetailFeature {
                 case .loading:
                     return .merge([
                         .send(.fetchChallengeStepRankings),
-                        .send(.fetchStepChallengeStatus)
+                        .send(.fetchStepChallengeStatus),
+                        .send(.fetchCurrentWeeklyChallenge)
                     ])
                 case .empty:
                     return .none
@@ -126,6 +131,15 @@ public struct ChallengeDetailFeature {
                     await send(fetchStepChallengeStatus(groupID: groupID))
                 }
                 .cancellable(id: State.CancelID.stepChallengeStatus, cancelInFlight: true)
+            case .fetchCurrentWeeklyChallenge:
+                guard let groupID = state.selectedGroup?.groupId,
+                      state.currentWeeklyChallengeList == nil else {
+                    return .none
+                }
+
+                return .run { send in
+                    await send(fetchCurrentWeeklyChallenge(groupID: groupID))
+                }
             case .startMyStepCountTimer:
                 guard state.hasValidRankings else {
                     return .none
@@ -202,6 +216,13 @@ public struct ChallengeDetailFeature {
 
                 state.stepCountStatus = status
                 return .none
+            case let .currentWeeklyChallengeListFetched(groupID, weeklyChallengeList):
+                guard state.selectedGroup?.groupId == groupID else {
+                    return .none
+                }
+
+                state.currentWeeklyChallengeList = weeklyChallengeList
+                return .none
             case .showAlert:
                 return .none
             case .changeChallengeButtonTapped:
@@ -252,6 +273,20 @@ private extension ChallengeDetailFeature {
             default:
                 return .showAlert(fallback)
             }
+        }
+    }
+
+    func fetchCurrentWeeklyChallenge(groupID: Int) async -> Action {
+        do {
+            let weeklyChallengeList = try await challengeUseCase.fetchCurrentWeeklyChallenge(
+                groupId: groupID
+            )
+            return .currentWeeklyChallengeListFetched(
+                groupID: groupID,
+                weeklyChallengeList
+            )
+        } catch {
+            return .showAlert(error as? NetworkError ?? .unknown)
         }
     }
 }
