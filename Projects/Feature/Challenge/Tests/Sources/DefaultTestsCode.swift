@@ -275,6 +275,10 @@ private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
         changedChallengeId = challengeId
     }
 
+    func getCurrentWeeklyChallenge(groupId: Int) async throws -> [CurrentWeeklyChallenge] {
+        fatalError("Not used in these tests")
+    }
+
     func postRecordChallengeStepCount(
         groupId: Int,
         request: ChallengeStepCountRequest

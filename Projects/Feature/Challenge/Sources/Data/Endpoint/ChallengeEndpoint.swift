@@ -71,4 +71,11 @@ enum ChallengeEndpoint {
             bodyParameters: request
         )
     }
+
+    static func getCurrentWeeklyChallenge(groupId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/weekly",
+            method: .GET
+        )
+    }
 }

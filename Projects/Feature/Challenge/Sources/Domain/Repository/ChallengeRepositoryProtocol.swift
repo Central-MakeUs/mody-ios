@@ -14,4 +14,5 @@ public protocol ChallengeRepositoryProtocol {
     func postRecordChallengeStepCount(groupId: Int, request: ChallengeStepCountRequest) async throws
     func getChangableChallengeList(groupId: Int) async throws -> [ChangableWalkChallengeModel]
     func patchStepChallenge(groupId: Int, challengeId: Int) async throws
+    func getCurrentWeeklyChallenge(groupId: Int) async throws -> [CurrentWeeklyChallenge]
 }
