@@ -47,7 +47,6 @@ public struct ChallengeFeature {
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
         case input(ChallengeInput)
-        case onDisappear
         case challengeStreak(ChallengeStreakFeature.Action)
         case challengeDetail(ChallengeDetailFeature.Action)
     }
@@ -57,8 +56,6 @@ public struct ChallengeFeature {
 
         Reduce { state, action in
             switch action {
-            case .onDisappear:
-                return .send(.challengeDetail(.onDisappear))
             case let .input(.selectedGroupUpdated(group)):
                 state.selectedGroup = group
                 return .merge(

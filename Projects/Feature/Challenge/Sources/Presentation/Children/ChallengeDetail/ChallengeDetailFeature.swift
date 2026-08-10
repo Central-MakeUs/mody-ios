@@ -53,7 +53,6 @@ public struct ChallengeDetailFeature {
         case setSelectedGroup(GroupModel?)
         case stepChallengeChanged
         case onAppear
-        case onDisappear
         case fetchChallengeStepRankings
         case fetchStepChallengeStatus
         case startMyStepCountTimer
@@ -106,15 +105,8 @@ public struct ChallengeDetailFeature {
                 case .empty:
                     return .none
                 case .content:
-                    // TODO: 이후 로직 추가
-                    return .none
+                    return .send(.startMyStepCountTimer)
                 }
-            case .onDisappear:
-                return .merge(
-                    .cancel(id: State.CancelID.myStepCountFetch),
-                    .cancel(id: State.CancelID.myStepCountTimer),
-                    .cancel(id: State.CancelID.stepChallengeStatus)
-                )
             case .fetchChallengeStepRankings:
                 guard let groupID = state.selectedGroup?.groupId,
                       state.rankings == nil else {
@@ -135,8 +127,7 @@ public struct ChallengeDetailFeature {
                 }
                 .cancellable(id: State.CancelID.stepChallengeStatus, cancelInFlight: true)
             case .startMyStepCountTimer:
-                guard state.hasValidRankings,
-                      state.stepCountStatus != nil else {
+                guard state.hasValidRankings else {
                     return .none
                 }
 
@@ -156,6 +147,7 @@ public struct ChallengeDetailFeature {
                 return .run { send in
                     do {
                         let now = Date.now
+                        ModyLogger.debug("Challenge my step \(startDate) ~ \(now)")
                         let stepCount = try await healthUseCase.getStepCount(
                             from: startDate,
                             to: now
