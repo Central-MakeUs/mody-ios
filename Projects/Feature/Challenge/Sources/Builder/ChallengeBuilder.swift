@@ -14,15 +14,18 @@ import SwiftUI
 public struct ChallengeBuilder: ChallengeBuildable {
     private let makeChallengeFeature: (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature
     private let makeChallengeChangeFeature: (ChallengeChangeRouter, ChallengeOutputHandler) -> ChallengeChangeFeature
+    private let makeChallengeWeeklyDetailFeature: (ChallengeWeeklyDetailRouter) -> ChallengeWeeklyDetailFeature
     private let imageLoader: RemoteImageLoading
 
     public init(
         makeChallengeFeature: @escaping (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature,
         makeChallengeChangeFeature: @escaping (ChallengeChangeRouter, ChallengeOutputHandler) -> ChallengeChangeFeature,
+        makeChallengeWeeklyDetailFeature: @escaping (ChallengeWeeklyDetailRouter) -> ChallengeWeeklyDetailFeature,
         imageLoader: RemoteImageLoading
     ) {
         self.makeChallengeFeature = makeChallengeFeature
         self.makeChallengeChangeFeature = makeChallengeChangeFeature
+        self.makeChallengeWeeklyDetailFeature = makeChallengeWeeklyDetailFeature
         self.imageLoader = imageLoader
     }
 
@@ -54,5 +57,25 @@ public struct ChallengeBuilder: ChallengeBuildable {
         }
 
         return UIHostingController(rootView: ChallengeChangeView(store: store))
+    }
+
+    @MainActor
+    public func makeChallengeWeeklyDetailViewController(
+        groupId: Int,
+        groupChallengeId: Int,
+        router: ChallengeWeeklyDetailRouter
+    ) -> UIViewController {
+        let store: StoreOf<ChallengeWeeklyDetailFeature> = .init(
+            initialState: .init(
+                groupId: groupId,
+                groupChallengeId: groupChallengeId
+            )
+        ) {
+            makeChallengeWeeklyDetailFeature(router)
+        }
+
+        return UIHostingController(
+            rootView: ChallengeWeeklyDetailView(store: store)
+        )
     }
 }

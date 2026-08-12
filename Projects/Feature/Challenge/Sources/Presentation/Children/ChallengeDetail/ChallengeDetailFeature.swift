@@ -64,6 +64,7 @@ public struct ChallengeDetailFeature {
         case stepChallengeStatusFetched(groupID: Int, ChallengeStepCountStatus)
         case currentWeeklyChallengeListFetched(groupID: Int, [CurrentWeeklyChallenge])
         case changeChallengeButtonTapped
+        case weeklyChallengeTapped(groupChallengeId: Int)
         case refreshStepButtonTapped
         case showAlert(NetworkError)
         case refresh
@@ -226,6 +227,8 @@ public struct ChallengeDetailFeature {
             case .showAlert:
                 return .none
             case .changeChallengeButtonTapped:
+                return .none
+            case .weeklyChallengeTapped:
                 return .none
             case .refreshStepButtonTapped:
                 guard let group = state.selectedGroup ,

@@ -64,6 +64,20 @@ extension AppAssembly {
             )
         }
 
+        container.register(ChallengeWeeklyDetailFeature.self) { (
+            resolver: Resolver,
+            router: ChallengeWeeklyDetailRouter
+        ) in
+            let challengeUseCase: ChallengeUseCase = resolver.resolve()
+
+            return ChallengeWeeklyDetailFeature(
+                challengeUseCase: challengeUseCase,
+                router: { [weak router] route in
+                    router?.route(from: route)
+                }
+            )
+        }
+
         container.register(ChallengeBuildable.self) { resolver in
             let imageLoader: RemoteImageLoading = resolver.resolve()
 
@@ -73,6 +87,9 @@ extension AppAssembly {
                 },
                 makeChallengeChangeFeature: { router, outputHandler in
                     resolver.resolve(argument: (router, outputHandler))
+                },
+                makeChallengeWeeklyDetailFeature: { router in
+                    resolver.resolve(argument: router)
                 },
                 imageLoader: imageLoader
             )

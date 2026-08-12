@@ -19,6 +19,13 @@ extension MainCoordinator: ChallengeRouter {
                 outputHandler: self
             )
             navigationController.pushViewController(viewController, animated: true)
+        case let .routeToWeeklyDetail(groupId, groupChallengeId):
+            let viewController = challengeBuilder.makeChallengeWeeklyDetailViewController(
+                groupId: groupId,
+                groupChallengeId: groupChallengeId,
+                router: self
+            )
+            navigationController.pushViewController(viewController, animated: true)
         }
     }
 }
@@ -26,6 +33,16 @@ extension MainCoordinator: ChallengeRouter {
 @MainActor
 extension MainCoordinator: ChallengeChangeRouter {
     public func route(from route: ChallengeChangeRoute) {
+        switch route {
+        case .back:
+            navigationController.popViewController(animated: true)
+        }
+    }
+}
+
+@MainActor
+extension MainCoordinator: ChallengeWeeklyDetailRouter {
+    public func route(from route: ChallengeWeeklyDetailRoute) {
         switch route {
         case .back:
             navigationController.popViewController(animated: true)

@@ -20,4 +20,11 @@ public protocol ChallengeBuildable {
         router: ChallengeChangeRouter,
         outputHandler: ChallengeOutputHandler
     ) -> UIViewController
+
+    @MainActor
+    func makeChallengeWeeklyDetailViewController(
+        groupId: Int,
+        groupChallengeId: Int,
+        router: ChallengeWeeklyDetailRouter
+    ) -> UIViewController
 }
