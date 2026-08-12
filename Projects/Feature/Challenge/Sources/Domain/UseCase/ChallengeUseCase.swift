@@ -54,4 +54,8 @@ public struct ChallengeUseCase {
     public func fetchWeeklyChallengeDetail(challengeId: Int) async throws -> WeeklyChallengeDetail {
         try await repository.getWeeklyChallengeDetail(challengeId: challengeId)
     }
+
+    public func fetchWeeklyChallengeProofs(groupId: Int, groupChallengeId: Int) async throws -> [WeeklyChallengeImageInfo] {
+        try await repository.getWeeklyChallengeProofs(groupId: groupId, groupChallengeId: groupChallengeId)
+    }
 }

@@ -85,4 +85,14 @@ enum ChallengeEndpoint {
             method: .GET
         )
     }
+
+    static func getWeeklyChallengeProofs(
+        groupId: Int,
+        groupChallengeId: Int
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/weekly-challenges/\(groupChallengeId)/proofs",
+            method: .GET
+        )
+    }
 }

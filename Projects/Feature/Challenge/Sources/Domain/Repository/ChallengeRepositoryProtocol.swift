@@ -16,4 +16,5 @@ public protocol ChallengeRepositoryProtocol {
     func patchStepChallenge(groupId: Int, challengeId: Int) async throws
     func getCurrentWeeklyChallenge(groupId: Int) async throws -> [CurrentWeeklyChallenge]
     func getWeeklyChallengeDetail(challengeId: Int) async throws -> WeeklyChallengeDetail
+    func getWeeklyChallengeProofs(groupId: Int, groupChallengeId: Int) async throws -> [WeeklyChallengeImageInfo]
 }
