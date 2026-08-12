@@ -47,7 +47,6 @@ public struct ChallengeFeature {
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
         case input(ChallengeInput)
-        case onDisappear
         case challengeStreak(ChallengeStreakFeature.Action)
         case challengeDetail(ChallengeDetailFeature.Action)
     }
@@ -57,8 +56,6 @@ public struct ChallengeFeature {
 
         Reduce { state, action in
             switch action {
-            case .onDisappear:
-                return .send(.challengeDetail(.onDisappear))
             case let .input(.selectedGroupUpdated(group)):
                 state.selectedGroup = group
                 return .merge(
@@ -67,10 +64,12 @@ public struct ChallengeFeature {
                 )
             case .input(.recordUpdated):
                 return .send(.challengeStreak(.refreshChallengeSummary))
+            case .input(.stepChallengeChanged):
+                return .send(.challengeDetail(.stepChallengeChanged))
             case .challengeStreak(let streakAction):
                 return handleStreakAction(&state, streakAction)
             case .challengeDetail(let detailAction):
-                return handleDetailAction(detailAction)
+                return handleDetailAction(state, detailAction)
             case .binding:
                 return .none
             }
@@ -114,11 +113,22 @@ private extension ChallengeFeature {
 }
 
 private extension ChallengeFeature {
-    func handleDetailAction(_ action: ChallengeDetailFeature.Action) -> Effect<Action> {
+    func handleDetailAction(
+        _ state: State,
+        _ action: ChallengeDetailFeature.Action
+    ) -> Effect<Action> {
         switch action {
         case .showAlert(let error):
             return .run { [output] _ in
                 await output(.showAlert(error))
+            }
+        case .changeChallengeButtonTapped:
+            guard let groupId = state.selectedGroup?.groupId else {
+                return .none
+            }
+
+            return .run { [router] _ in
+                await router(.routeToChallengeChange(groupId: groupId))
             }
         default:
             return .none

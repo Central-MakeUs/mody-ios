@@ -59,7 +59,10 @@ private extension ChallengeDetailView {
                     imageLoader: imageLoader
                 )
 
-                ChallengeDetailGroupOptionalSection()
+                ChallengeDetailGroupOptionalSection(
+                    challengeList: store.currentWeeklyChallengeList,
+                    imageLoader: imageLoader
+                )
             }
         }
         .scrollIndicators(.visible)

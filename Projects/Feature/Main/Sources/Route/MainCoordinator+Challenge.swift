@@ -8,8 +8,29 @@
 import ChallengeInterface
 import CommonDomain
 
+@MainActor
 extension MainCoordinator: ChallengeRouter {
-    public func route(from _: ChallengeRoute) {}
+    public func route(from route: ChallengeRoute) {
+        switch route {
+        case let .routeToChallengeChange(groupId):
+            let viewController = challengeBuilder.makeChallengeChangeViewController(
+                groupId: groupId,
+                router: self,
+                outputHandler: self
+            )
+            navigationController.pushViewController(viewController, animated: true)
+        }
+    }
+}
+
+@MainActor
+extension MainCoordinator: ChallengeChangeRouter {
+    public func route(from route: ChallengeChangeRoute) {
+        switch route {
+        case .back:
+            navigationController.popViewController(animated: true)
+        }
+    }
 }
 
 @MainActor
@@ -42,6 +63,8 @@ extension MainCoordinator: ChallengeOutputHandler {
                     contents: contents
                 )
             )
+        case .stepChallengeChanged:
+            challengeInputHandler?.handle(input: .stepChallengeChanged)
         }
     }
 }

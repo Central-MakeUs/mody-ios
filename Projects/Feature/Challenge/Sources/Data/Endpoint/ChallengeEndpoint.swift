@@ -53,4 +53,29 @@ enum ChallengeEndpoint {
             bodyParameters: request
         )
     }
+    
+    static func getChangableChallengeList(groupId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/step/options",
+            method: .GET
+        )
+    }
+
+    static func patchStepChallenge(
+        groupId: Int,
+        request: StepChallengeChangeRequest
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/step/current",
+            method: .PATCH,
+            bodyParameters: request
+        )
+    }
+
+    static func getCurrentWeeklyChallenge(groupId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/challenges/weekly",
+            method: .GET
+        )
+    }
 }

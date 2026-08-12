@@ -35,6 +35,7 @@ public struct ChallengeDetailFeature {
         var selectedGroup: GroupModel?
         var rankings: [ChallengeStepRanking]?
         var stepCountStatus: ChallengeStepCountStatus?
+        var currentWeeklyChallengeList: [CurrentWeeklyChallenge]?
         var currentStepCountFromHealthKit: Int?
 
         var hasValidRankings: Bool {
@@ -51,18 +52,21 @@ public struct ChallengeDetailFeature {
 
     public enum Action {
         case setSelectedGroup(GroupModel?)
+        case stepChallengeChanged
         case onAppear
-        case onDisappear
         case fetchChallengeStepRankings
         case fetchStepChallengeStatus
+        case fetchCurrentWeeklyChallenge
         case startMyStepCountTimer
         case fetchMyStepCount
         case updateChallengeStepCount(groupID: Int, stepCount: Int)
         case challengeStepRankingsFetched(groupID: Int, [ChallengeStepRanking])
         case stepChallengeStatusFetched(groupID: Int, ChallengeStepCountStatus)
+        case currentWeeklyChallengeListFetched(groupID: Int, [CurrentWeeklyChallenge])
         case changeChallengeButtonTapped
         case refreshStepButtonTapped
         case showAlert(NetworkError)
+        case refresh
     }
 
     public init(
@@ -78,9 +82,12 @@ public struct ChallengeDetailFeature {
             switch action {
             case let .setSelectedGroup(group):
                 state.selectedGroup = group
+                return .send(.refresh)
+            case .refresh:
                 state.rankings = nil
                 state.stepCountStatus = nil
                 state.currentStepCountFromHealthKit = nil
+                state.currentWeeklyChallengeList = nil
 
                 return .concatenate(
                     .merge(
@@ -90,25 +97,21 @@ public struct ChallengeDetailFeature {
                     ),
                     .send(.onAppear)
                 )
+            case .stepChallengeChanged:
+                return .send(.refresh)
             case .onAppear:
                 switch state.contentState {
                 case .loading:
                     return .merge([
                         .send(.fetchChallengeStepRankings),
-                        .send(.fetchStepChallengeStatus)
+                        .send(.fetchStepChallengeStatus),
+                        .send(.fetchCurrentWeeklyChallenge)
                     ])
                 case .empty:
                     return .none
                 case .content:
-                    // TODO: 이후 로직 추가
-                    return .none
+                    return .send(.startMyStepCountTimer)
                 }
-            case .onDisappear:
-                return .merge(
-                    .cancel(id: State.CancelID.myStepCountFetch),
-                    .cancel(id: State.CancelID.myStepCountTimer),
-                    .cancel(id: State.CancelID.stepChallengeStatus)
-                )
             case .fetchChallengeStepRankings:
                 guard let groupID = state.selectedGroup?.groupId,
                       state.rankings == nil else {
@@ -128,9 +131,17 @@ public struct ChallengeDetailFeature {
                     await send(fetchStepChallengeStatus(groupID: groupID))
                 }
                 .cancellable(id: State.CancelID.stepChallengeStatus, cancelInFlight: true)
+            case .fetchCurrentWeeklyChallenge:
+                guard let groupID = state.selectedGroup?.groupId,
+                      state.currentWeeklyChallengeList == nil else {
+                    return .none
+                }
+
+                return .run { send in
+                    await send(fetchCurrentWeeklyChallenge(groupID: groupID))
+                }
             case .startMyStepCountTimer:
-                guard state.hasValidRankings,
-                      state.stepCountStatus != nil else {
+                guard state.hasValidRankings else {
                     return .none
                 }
 
@@ -150,6 +161,7 @@ public struct ChallengeDetailFeature {
                 return .run { send in
                     do {
                         let now = Date.now
+                        ModyLogger.debug("Challenge Step 범위 \(startDate) ~ \(now)")
                         let stepCount = try await healthUseCase.getStepCount(
                             from: startDate,
                             to: now
@@ -170,7 +182,7 @@ public struct ChallengeDetailFeature {
                 state.currentStepCountFromHealthKit = stepCount
 
                 guard needStepCountUpdate else {
-                    ModyLogger.debug("Record Step Count Skip: \(stepCount)")
+                    ModyLogger.debug("Step Count Skip!!!!: \(stepCount)")
                     return .none
                 }
 
@@ -183,7 +195,7 @@ public struct ChallengeDetailFeature {
                         groupId: groupID,
                         request: request
                     )
-                    ModyLogger.debug("Challenge my step count: \(stepCount)")
+                    ModyLogger.debug("Step Count 등록: \(stepCount)")
                 }
             case let .challengeStepRankingsFetched(groupID, rankings):
                 guard state.selectedGroup?.groupId == groupID else {
@@ -204,10 +216,16 @@ public struct ChallengeDetailFeature {
 
                 state.stepCountStatus = status
                 return .none
+            case let .currentWeeklyChallengeListFetched(groupID, weeklyChallengeList):
+                guard state.selectedGroup?.groupId == groupID else {
+                    return .none
+                }
+
+                state.currentWeeklyChallengeList = weeklyChallengeList
+                return .none
             case .showAlert:
                 return .none
             case .changeChallengeButtonTapped:
-                // TODO: 챌린지 변경 Implementation
                 return .none
             case .refreshStepButtonTapped:
                 guard let group = state.selectedGroup ,
@@ -222,8 +240,6 @@ public struct ChallengeDetailFeature {
 private extension ChallengeDetailFeature {
     func fetchChallengeStepRankings(groupID: Int) async -> Action {
         do {
-            // MARK: 임시 딜레이 코드
-            try await Task.sleep(for: .seconds(5))
             let rankings = try await challengeUseCase.fetchChallengeStepRankings(groupId: groupID)
             return .challengeStepRankingsFetched(groupID: groupID, rankings)
         } catch {
@@ -257,6 +273,20 @@ private extension ChallengeDetailFeature {
             default:
                 return .showAlert(fallback)
             }
+        }
+    }
+
+    func fetchCurrentWeeklyChallenge(groupID: Int) async -> Action {
+        do {
+            let weeklyChallengeList = try await challengeUseCase.fetchCurrentWeeklyChallenge(
+                groupId: groupID
+            )
+            return .currentWeeklyChallengeListFetched(
+                groupID: groupID,
+                weeklyChallengeList
+            )
+        } catch {
+            return .showAlert(error as? NetworkError ?? .unknown)
         }
     }
 }
