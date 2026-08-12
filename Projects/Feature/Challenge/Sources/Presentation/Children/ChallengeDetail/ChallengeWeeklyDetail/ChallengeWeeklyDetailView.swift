@@ -20,6 +20,7 @@ struct ChallengeWeeklyDetailView: View {
     var body: some View {
         challengeWeeklyDetailBody
             .background(Color.systemWhite)
+            .onAppear { store.send(.onAppear) }
             .mLoading(isPresent: store.isLoading)
             .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
                 alertView

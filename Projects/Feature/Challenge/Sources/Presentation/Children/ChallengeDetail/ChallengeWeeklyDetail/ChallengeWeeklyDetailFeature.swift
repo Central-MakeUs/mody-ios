@@ -9,16 +9,20 @@ import Base
 import ChallengeInterface
 import CommonDomain
 import ComposableArchitecture
+import CoreAuthInterface
 
 @Reducer
 public struct ChallengeWeeklyDetailFeature {
+    private let authUseCase: AuthUseCaseProtocol
     private let challengeUseCase: ChallengeUseCase
     private let router: @MainActor (ChallengeWeeklyDetailRoute) -> Void
 
     public init(
+        authUseCase: AuthUseCaseProtocol,
         challengeUseCase: ChallengeUseCase,
         router: @escaping @MainActor (ChallengeWeeklyDetailRoute) -> Void
     ) {
+        self.authUseCase = authUseCase
         self.challengeUseCase = challengeUseCase
         self.router = router
     }
@@ -32,6 +36,7 @@ public struct ChallengeWeeklyDetailFeature {
         var isLoading = false
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
+        var myMemberId: Int?
         let groupId: Int
         let groupChallengeId: Int
 
@@ -45,6 +50,8 @@ public struct ChallengeWeeklyDetailFeature {
         case alertAction(AlertFeature.Action)
         case showAlert(State.AlertCase)
         case backButtonTapped
+        case onAppear
+        case myMemberIdFetched(Int)
     }
 
     public var body: some ReducerOf<Self> {
@@ -63,11 +70,35 @@ public struct ChallengeWeeklyDetailFeature {
                 state.isLoading = false
                 state.alertCase = alertCase
                 return .send(.alertAction(.present))
+            case .onAppear:
+                guard state.myMemberId == nil else {
+                    return .none
+                }
+
+                state.isLoading = true
+                return .run { send in
+                    await send(fetchMyMemberId())
+                }
+            case let .myMemberIdFetched(memberId):
+                state.isLoading = false
+                state.myMemberId = memberId
+                return .none
             case .backButtonTapped:
                 return .run { [router] _ in
                     await router(.back)
                 }
             }
+        }
+    }
+}
+
+private extension ChallengeWeeklyDetailFeature {
+    func fetchMyMemberId() async -> Action {
+        do {
+            let userInfo = try await authUseCase.getUserInfo(needUpdateKeyChain: false)
+            return .myMemberIdFetched(userInfo.memberId)
+        } catch {
+            return .showAlert(.error(error as? NetworkError ?? .unknown))
         }
     }
 }

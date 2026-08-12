@@ -8,6 +8,7 @@
 import Swinject
 import ChallengeInterface
 import Challenge
+import CoreAuthInterface
 import CoreHealthInterface
 import CoreModyImageInterface
 import CoreNetworkInterface
@@ -68,9 +69,11 @@ extension AppAssembly {
             resolver: Resolver,
             router: ChallengeWeeklyDetailRouter
         ) in
+            let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let challengeUseCase: ChallengeUseCase = resolver.resolve()
 
             return ChallengeWeeklyDetailFeature(
+                authUseCase: authUseCase,
                 challengeUseCase: challengeUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
