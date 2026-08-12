@@ -234,16 +234,70 @@ final class ChallengeTests: XCTestCase {
         XCTAssertEqual(body["recordedOn"] as? String, "2026-08-09")
         XCTAssertEqual(body["stepCount"] as? Int, 3_456)
     }
+
+    func testWeeklyChallengeDetailResponseMapsSwaggerContract() throws {
+        let response = try JSONDecoder().decode(
+            WeeklyChallengeDetailResponse.self,
+            from: Data(
+                """
+                {
+                  "challengeId": 34,
+                  "title": "하루 물 2L 마시기",
+                  "description": "일주일 동안 매일 물 2L를 마셔요.",
+                  "remainingDays": 3
+                }
+                """.utf8
+            )
+        )
+
+        let detail = response.toDomain()
+
+        XCTAssertEqual(detail.challengeId, 34)
+        XCTAssertEqual(detail.title, "하루 물 2L 마시기")
+        XCTAssertEqual(detail.description, "일주일 동안 매일 물 2L를 마셔요.")
+        XCTAssertEqual(detail.remainingDays, 3)
+    }
+
+    func testFetchWeeklyChallengeDetailForwardsChallengeId() async throws {
+        let repository = ChallengeRepositorySpy()
+        let useCase = ChallengeUseCase(repository: repository)
+        let expected = WeeklyChallengeDetail(
+            challengeId: 34,
+            title: "하루 물 2L 마시기",
+            description: "일주일 동안 매일 물 2L를 마셔요.",
+            remainingDays: 3
+        )
+        repository.weeklyChallengeDetail = expected
+
+        let result = try await useCase.fetchWeeklyChallengeDetail(challengeId: 34)
+
+        XCTAssertEqual(repository.weeklyChallengeDetailId, 34)
+        XCTAssertEqual(result, expected)
+    }
+
+    func testGetWeeklyChallengeDetailEndpointMatchesSwaggerContract() {
+        let endpoint = ChallengeEndpoint.getWeeklyChallengeDetail(challengeId: 34)
+
+        XCTAssertEqual(endpoint.path, "api/v1/weekly-challenges/34")
+        XCTAssertEqual(endpoint.method, .GET)
+    }
 }
 
 private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
     var changableChallengeList: [ChangableWalkChallengeModel] = []
+    var weeklyChallengeDetail = WeeklyChallengeDetail(
+        challengeId: -1,
+        title: "",
+        description: "",
+        remainingDays: 0
+    )
 
     private(set) var changableChallengeGroupId: Int?
     private(set) var changedGroupId: Int?
     private(set) var changedChallengeId: Int?
     private(set) var recordedGroupId: Int?
     private(set) var recordedRequest: ChallengeStepCountRequest?
+    private(set) var weeklyChallengeDetailId: Int?
 
     func getChallengeSummary(groupId: Int) async throws -> ChallengeSummary {
         fatalError("Not used in these tests")
@@ -277,6 +331,11 @@ private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
 
     func getCurrentWeeklyChallenge(groupId: Int) async throws -> [CurrentWeeklyChallenge] {
         fatalError("Not used in these tests")
+    }
+
+    func getWeeklyChallengeDetail(challengeId: Int) async throws -> WeeklyChallengeDetail {
+        weeklyChallengeDetailId = challengeId
+        return weeklyChallengeDetail
     }
 
     func postRecordChallengeStepCount(

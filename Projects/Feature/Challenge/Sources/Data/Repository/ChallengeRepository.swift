@@ -116,4 +116,15 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
 
         return result.toDomain()
     }
+
+    public func getWeeklyChallengeDetail(challengeId: Int) async throws -> WeeklyChallengeDetail {
+        let endpoint = ChallengeEndpoint.getWeeklyChallengeDetail(challengeId: challengeId)
+        let response: CoreNetworkResponse<WeeklyChallengeDetailResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
+    }
 }
