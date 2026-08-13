@@ -11,13 +11,16 @@ import SwiftUI
 struct ChallengeDetailGroupOptionalRowItemTitleView: View {
     private let remainingDays: Int?
     private let title: String?
+    private let isComplete: Bool
 
     init(
         remainingDays: Int?,
-        title: String?
+        title: String?,
+        isComplete: Bool
     ) {
         self.remainingDays = remainingDays
         self.title = title
+        self.isComplete = isComplete
     }
 
     var body: some View {
@@ -39,19 +42,30 @@ private extension ChallengeDetailGroupOptionalRowItemTitleView {
     @ViewBuilder
     var remainingDaysContent: some View {
         if let remainingDays {
-            MText(
-                "D-\(remainingDays)",
-                style: .c2,
-                color: .systemWhite
+            chipView(
+                isComplete: isComplete,
+                remainingDays: remainingDays
             )
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(Color.gray9)
-            .clipShape(Capsule())
         } else {
             SkeletonView(width: 41, height: 24)
                 .clipShape(Capsule())
         }
+    }
+    
+    func chipView(isComplete: Bool, remainingDays: Int) -> some View {
+        let title: String = isComplete ? "완료" : "D-\(remainingDays)"
+        let textColor: Color = isComplete ? Color.gray10 : Color.systemWhite
+        let backgroundColor: Color = isComplete ? Color.main : Color.gray9
+        
+        return MText(
+            title,
+            style: .c2,
+            color: textColor
+        )
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2)
+        .background(backgroundColor)
+        .clipShape(Capsule())
     }
 
     @ViewBuilder

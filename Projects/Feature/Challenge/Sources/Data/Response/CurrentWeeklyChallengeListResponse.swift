@@ -16,6 +16,7 @@ private struct CurrentWeeklyChallengeResponse: Decodable, Equatable {
     private let participantCount: Int?
     private let randomParticipantNickname: String?
     private let participants: [CurrentWeeklyChallengeParticipantResponse]?
+    private let isComplete: Bool?
 
     func toDomain() -> CurrentWeeklyChallenge {
         CurrentWeeklyChallenge(
@@ -24,7 +25,8 @@ private struct CurrentWeeklyChallengeResponse: Decodable, Equatable {
             remainingDays: remainingDays ?? 0,
             participantCount: participantCount ?? 0,
             randomParticipantNickname: randomParticipantNickname ?? "",
-            participants: (participants ?? []).map { $0.toDomain() }
+            participants: (participants ?? []).map { $0.toDomain() },
+            isComplete: isComplete ?? false
         )
     }
 }
