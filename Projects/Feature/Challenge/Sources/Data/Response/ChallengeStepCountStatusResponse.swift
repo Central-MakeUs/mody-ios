@@ -13,6 +13,7 @@ struct ChallengeStepCountStatusResponse: Decodable, Equatable {
     private let targetStepCount: Int?
     private let currentStepCount: Int?
     private let stepCountFetchFromAt: String?
+    private let challengeStatus: String?
 }
 
 extension ChallengeStepCountStatusResponse {
@@ -29,7 +30,8 @@ extension ChallengeStepCountStatusResponse {
             walkChallengeGroup: title,
             targetStepCount: targetStepCount ?? 0,
             currentStepCount: currentStepCount ?? 0,
-            stepCountFetchFromAt: stepCountFetchFromAt
+            stepCountFetchFromAt: stepCountFetchFromAt,
+            isComplete: challengeStatus == "COMPLETED"
         )
     }
 }
