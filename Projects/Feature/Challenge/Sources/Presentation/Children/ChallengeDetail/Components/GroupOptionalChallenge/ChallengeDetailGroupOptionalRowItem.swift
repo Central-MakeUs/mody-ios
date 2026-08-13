@@ -32,7 +32,8 @@ struct ChallengeDetailGroupOptionalRowItem: View {
             VStack(spacing: 20) {
                 ChallengeDetailGroupOptionalRowItemTitleView(
                     remainingDays: challenge?.remainingDays,
-                    title: challenge?.title
+                    title: challenge?.title,
+                    isComplete: challenge?.isComplete ?? false
                 )
                 ChallengeDetailGroupOptionalRowItemContentsView(
                     challenge: challenge,

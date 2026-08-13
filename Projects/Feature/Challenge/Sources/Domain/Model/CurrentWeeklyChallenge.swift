@@ -13,6 +13,7 @@ public struct CurrentWeeklyChallenge: Equatable {
     public let participantCount: Int
     public let randomParticipantNickname: String
     public let participants: [CurrentWeeklyChallengeParticipant]
+    public let isComplete: Bool
 
     public init(
         groupChallengeId: Int,
@@ -21,7 +22,8 @@ public struct CurrentWeeklyChallenge: Equatable {
         remainingDays: Int,
         participantCount: Int,
         randomParticipantNickname: String,
-        participants: [CurrentWeeklyChallengeParticipant]
+        participants: [CurrentWeeklyChallengeParticipant],
+        isComplete: Bool
     ) {
         self.groupChallengeId = groupChallengeId
         self.challengeId = challengeId
@@ -30,5 +32,6 @@ public struct CurrentWeeklyChallenge: Equatable {
         self.participantCount = participantCount
         self.randomParticipantNickname = randomParticipantNickname
         self.participants = participants
+        self.isComplete = isComplete
     }
 }

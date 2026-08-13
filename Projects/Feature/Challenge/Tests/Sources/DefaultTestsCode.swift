@@ -22,7 +22,8 @@ final class ChallengeTests: XCTestCase {
                   "title": "서울-인천",
                   "targetStepCount": 100000,
                   "currentStepCount": 25000,
-                  "stepCountFetchFromAt": "2026-08-08T07:01:10Z"
+                  "stepCountFetchFromAt": "2026-08-08T07:01:10Z",
+                  "challengeStatus": "COMPLETED"
                 }
                 """.utf8
             )
@@ -35,6 +36,24 @@ final class ChallengeTests: XCTestCase {
         XCTAssertEqual(challenge.targetStepCount, 100000)
         XCTAssertEqual(challenge.currentStepCount, 25000)
         XCTAssertEqual(challenge.stepCountFetchFromAt.timeIntervalSince1970, 1_786_172_470)
+        XCTAssertTrue(challenge.isComplete)
+    }
+
+    func testChallengeStepCountStatusResponseMapsNonCompletedStatusToFalse() throws {
+        let response = try JSONDecoder().decode(
+            ChallengeStepCountStatusResponse.self,
+            from: Data(
+                """
+                {
+                  "title": "서울-인천",
+                  "stepCountFetchFromAt": "2026-08-08T07:01:10Z",
+                  "challengeStatus": "IN_PROGRESS"
+                }
+                """.utf8
+            )
+        )
+
+        XCTAssertFalse(try XCTUnwrap(response.toDomain()).isComplete)
     }
 
     func testChallengeStepCountStatusResponseMapsUnknownTitleToNil() throws {
