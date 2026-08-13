@@ -141,7 +141,8 @@ public struct ChallengeDetailFeature {
                     await send(fetchCurrentWeeklyChallenge(groupID: groupID))
                 }
             case .startMyStepCountTimer:
-                guard state.hasValidRankings else {
+                guard state.hasValidRankings,
+                      state.stepCountStatus?.isComplete != true else {
                     return .none
                 }
 
@@ -156,6 +157,10 @@ public struct ChallengeDetailFeature {
                       let groupID = state.selectedGroup?.groupId,
                       let startDate = state.stepCountStatus?.stepCountFetchFromAt else {
                     return .none
+                }
+                
+                if let isCompleteGroup = state.stepCountStatus?.isComplete {
+                    if isCompleteGroup { return .cancel(id: State.CancelID.myStepCountTimer) }
                 }
 
                 return .run { send in
@@ -215,7 +220,9 @@ public struct ChallengeDetailFeature {
                 }
 
                 state.stepCountStatus = status
-                return .none
+                guard status.isComplete else { return .none }
+
+                return .cancel(id: State.CancelID.myStepCountTimer)
             case let .currentWeeklyChallengeListFetched(groupID, weeklyChallengeList):
                 guard state.selectedGroup?.groupId == groupID else {
                     return .none
