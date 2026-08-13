@@ -64,7 +64,7 @@ public struct ChallengeDetailFeature {
         case stepChallengeStatusFetched(groupID: Int, ChallengeStepCountStatus)
         case currentWeeklyChallengeListFetched(groupID: Int, [CurrentWeeklyChallenge])
         case changeChallengeButtonTapped
-        case weeklyChallengeTapped(groupChallengeId: Int)
+        case weeklyChallengeTapped(challengeId: Int, groupChallengeId: Int)
         case refreshStepButtonTapped
         case showAlert(NetworkError)
         case refresh

@@ -37,11 +37,15 @@ public struct ChallengeWeeklyDetailFeature {
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
         var myMemberId: Int?
+        var weeklyChallengeDetail: WeeklyChallengeDetail?
+        var weeklyChallengeImageInfos: [WeeklyChallengeImageInfo]?
         let groupId: Int
+        let challengeId: Int
         let groupChallengeId: Int
 
-        public init(groupId: Int, groupChallengeId: Int) {
+        public init(groupId: Int, challengeId: Int, groupChallengeId: Int) {
             self.groupId = groupId
+            self.challengeId = challengeId
             self.groupChallengeId = groupChallengeId
         }
     }
@@ -51,7 +55,11 @@ public struct ChallengeWeeklyDetailFeature {
         case showAlert(State.AlertCase)
         case backButtonTapped
         case onAppear
-        case myMemberIdFetched(Int)
+        case initialDataFetched(
+            memberId: Int,
+            detail: WeeklyChallengeDetail,
+            imageInfos: [WeeklyChallengeImageInfo]
+        )
     }
 
     public var body: some ReducerOf<Self> {
@@ -71,17 +79,34 @@ public struct ChallengeWeeklyDetailFeature {
                 state.alertCase = alertCase
                 return .send(.alertAction(.present))
             case .onAppear:
-                guard state.myMemberId == nil else {
+                guard state.myMemberId == nil,
+                      state.weeklyChallengeDetail == nil,
+                      state.weeklyChallengeImageInfos == nil else {
                     return .none
                 }
 
                 state.isLoading = true
+                let groupId = state.groupId
+                let challengeId = state.challengeId
+                let groupChallengeId = state.groupChallengeId
+
                 return .run { send in
-                    await send(fetchMyMemberId())
+                    do {
+                        try await fetchInitialData(
+                            send: send,
+                            groupId: groupId,
+                            challengeId: challengeId,
+                            groupChallengeId: groupChallengeId
+                        )
+                    } catch {
+                        await send(.showAlert(.error(error as? NetworkError ?? .unknown)))
+                    }
                 }
-            case let .myMemberIdFetched(memberId):
+            case let .initialDataFetched(memberId, detail, imageInfos):
                 state.isLoading = false
                 state.myMemberId = memberId
+                state.weeklyChallengeDetail = detail
+                state.weeklyChallengeImageInfos = imageInfos
                 return .none
             case .backButtonTapped:
                 return .run { [router] _ in
@@ -93,12 +118,51 @@ public struct ChallengeWeeklyDetailFeature {
 }
 
 private extension ChallengeWeeklyDetailFeature {
-    func fetchMyMemberId() async -> Action {
-        do {
-            let userInfo = try await authUseCase.getUserInfo(needUpdateKeyChain: false)
-            return .myMemberIdFetched(userInfo.memberId)
-        } catch {
-            return .showAlert(.error(error as? NetworkError ?? .unknown))
+    func fetchInitialData(
+        send: Send<Action>,
+        groupId: Int,
+        challengeId: Int,
+        groupChallengeId: Int
+    ) async throws {
+        var memberId: Int?
+        var detail: WeeklyChallengeDetail?
+        var imageInfos: [WeeklyChallengeImageInfo]?
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask { [authUseCase] in
+                let userInfo = try await authUseCase.getUserInfo(needUpdateKeyChain: false)
+                memberId = userInfo.memberId
+            }
+            group.addTask { [challengeUseCase] in
+                detail = try await challengeUseCase.fetchWeeklyChallengeDetail(
+                    challengeId: challengeId
+                )
+            }
+            group.addTask { [challengeUseCase] in
+                imageInfos = try await challengeUseCase.fetchWeeklyChallengeProofs(
+                    groupId: groupId,
+                    groupChallengeId: groupChallengeId
+                )
+            }
+
+            do {
+                for try await _ in group {}
+            } catch {
+                group.cancelAll()
+                throw error
+            }
+
+            guard let memberId,
+                  let detail,
+                  let imageInfos else {
+                throw NetworkError.invalidResponse
+            }
+
+            await send(.initialDataFetched(
+                memberId: memberId,
+                detail: detail,
+                imageInfos: imageInfos
+            ))
         }
     }
 }

@@ -19,9 +19,10 @@ extension MainCoordinator: ChallengeRouter {
                 outputHandler: self
             )
             navigationController.pushViewController(viewController, animated: true)
-        case let .routeToWeeklyDetail(groupId, groupChallengeId):
+        case let .routeToWeeklyDetail(groupId, challengeId, groupChallengeId):
             let viewController = challengeBuilder.makeChallengeWeeklyDetailViewController(
                 groupId: groupId,
+                challengeId: challengeId,
                 groupChallengeId: groupChallengeId,
                 router: self
             )

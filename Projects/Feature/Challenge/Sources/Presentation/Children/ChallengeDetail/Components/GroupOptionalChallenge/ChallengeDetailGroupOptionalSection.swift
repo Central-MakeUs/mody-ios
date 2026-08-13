@@ -12,12 +12,12 @@ import SwiftUI
 struct ChallengeDetailGroupOptionalSection: View {
     private let challengeList: [CurrentWeeklyChallenge]?
     private let imageLoader: RemoteImageLoading
-    private let onChallengeTap: (Int) -> Void
+    private let onChallengeTap: (Int, Int) -> Void
 
     init(
         challengeList: [CurrentWeeklyChallenge]?,
         imageLoader: RemoteImageLoading,
-        onChallengeTap: @escaping (Int) -> Void
+        onChallengeTap: @escaping (Int, Int) -> Void
     ) {
         self.challengeList = challengeList
         self.imageLoader = imageLoader

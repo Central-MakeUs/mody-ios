@@ -258,6 +258,34 @@ final class ChallengeTests: XCTestCase {
         XCTAssertEqual(detail.remainingDays, 3)
     }
 
+    func testCurrentWeeklyChallengeListResponseMapsChallengeIds() throws {
+        let response = try JSONDecoder().decode(
+            CurrentWeeklyChallengeListResponse.self,
+            from: Data(
+                """
+                {
+                  "challenges": [
+                    {
+                      "groupChallengeId": 34,
+                      "challengeId": 56,
+                      "title": "하루 물 2L 마시기",
+                      "remainingDays": 3,
+                      "participantCount": 0,
+                      "randomParticipantNickname": "",
+                      "participants": []
+                    }
+                  ]
+                }
+                """.utf8
+            )
+        )
+
+        let challenge = try XCTUnwrap(response.toDomain().first)
+
+        XCTAssertEqual(challenge.groupChallengeId, 34)
+        XCTAssertEqual(challenge.challengeId, 56)
+    }
+
     func testFetchWeeklyChallengeDetailForwardsChallengeId() async throws {
         let repository = ChallengeRepositorySpy()
         let useCase = ChallengeUseCase(repository: repository)

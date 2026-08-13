@@ -130,10 +130,13 @@ private extension ChallengeFeature {
             return .run { [router] _ in
                 await router(.routeToChallengeChange(groupId: groupId))
             }
-        case let .weeklyChallengeTapped(groupChallengeId):
+        case let .weeklyChallengeTapped(challengeId, groupChallengeId):
             guard let groupId = state.selectedGroup?.groupId,
                   state.challengeDetail.currentWeeklyChallengeList?.contains(
-                    where: { $0.groupChallengeId == groupChallengeId }
+                    where: {
+                        $0.challengeId == challengeId &&
+                        $0.groupChallengeId == groupChallengeId
+                    }
                   ) == true else {
                 return .none
             }
@@ -142,6 +145,7 @@ private extension ChallengeFeature {
                 await router(
                     .routeToWeeklyDetail(
                         groupId: groupId,
+                        challengeId: challengeId,
                         groupChallengeId: groupChallengeId
                     )
                 )

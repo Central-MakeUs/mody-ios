@@ -24,6 +24,7 @@ public protocol ChallengeBuildable {
     @MainActor
     func makeChallengeWeeklyDetailViewController(
         groupId: Int,
+        challengeId: Int,
         groupChallengeId: Int,
         router: ChallengeWeeklyDetailRouter
     ) -> UIViewController

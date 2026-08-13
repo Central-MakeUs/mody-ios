@@ -62,12 +62,14 @@ public struct ChallengeBuilder: ChallengeBuildable {
     @MainActor
     public func makeChallengeWeeklyDetailViewController(
         groupId: Int,
+        challengeId: Int,
         groupChallengeId: Int,
         router: ChallengeWeeklyDetailRouter
     ) -> UIViewController {
         let store: StoreOf<ChallengeWeeklyDetailFeature> = .init(
             initialState: .init(
                 groupId: groupId,
+                challengeId: challengeId,
                 groupChallengeId: groupChallengeId
             )
         ) {
