@@ -31,6 +31,7 @@ struct ProfileCameraCaptureView: UIViewControllerRepresentable {
         cameraCaptureBuilder.makeCameraViewController(
             source: source,
             isCropEnabled: false,
+            cropSize: nil,
             onComplete: onComplete,
             onCancel: onCancel
         )

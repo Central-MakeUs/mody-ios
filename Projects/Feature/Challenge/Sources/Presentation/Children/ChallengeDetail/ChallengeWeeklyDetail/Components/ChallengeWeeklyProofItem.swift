@@ -14,37 +14,23 @@ import SwiftUI
 
 struct ChallengeWeeklyProofItem: View {
     private let proof: WeeklyChallengeImageInfo
-    private let isEditable: Bool
     private let itemSize: CGFloat
     private let imageLoader: RemoteImageLoading
-    private let onTap: () -> Void
 
     init(
         proof: WeeklyChallengeImageInfo,
-        isEditable: Bool,
         itemSize: CGFloat,
-        imageLoader: RemoteImageLoading,
-        onTap: @escaping () -> Void
+        imageLoader: RemoteImageLoading
     ) {
         self.proof = proof
-        self.isEditable = isEditable
         self.itemSize = itemSize
         self.imageLoader = imageLoader
-        self.onTap = onTap
     }
 
     var body: some View {
-        Group {
-            if isEditable {
-                Button(action: onTap) {
-                    proofContents
-                }
-            } else {
-                proofContents
-            }
-        }
-        .frame(width: itemSize, height: itemSize)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        proofContents
+            .frame(width: itemSize, height: itemSize)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 

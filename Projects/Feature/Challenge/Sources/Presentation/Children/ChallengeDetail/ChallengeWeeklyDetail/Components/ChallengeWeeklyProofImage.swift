@@ -49,7 +49,7 @@ struct ChallengeWeeklyProofImage: View {
             self.imageRequest = RemoteImageRequest(
                 url: imageURL,
                 variantIdentifier: "challenge-weekly-proof-grid",
-                maximumPixelSize: Int(maximumPixelSize.rounded(.up)),
+                maximumPixelSize: RemoteImageRequest.maximumAllowedPixelSize,
                 processing: .aspectFill(
                     pixelSize: pixelSize,
                     normalizedCrop: cropInfo

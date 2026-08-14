@@ -12,28 +12,22 @@ import SwiftUI
 struct ChallengeWeeklyProofGrid: View {
     private let itemSize: CGFloat
     private let proofs: [WeeklyChallengeImageInfo]
-    private let myMemberId: Int
     private let showsAuthenticationItem: Bool
     private let imageLoader: RemoteImageLoading
     private let onAuthenticationTap: () -> Void
-    private let onProofTap: (Int) -> Void
 
     init(
         itemSize: CGFloat,
         proofs: [WeeklyChallengeImageInfo],
-        myMemberId: Int,
         showsAuthenticationItem: Bool,
         imageLoader: RemoteImageLoading,
-        onAuthenticationTap: @escaping () -> Void,
-        onProofTap: @escaping (Int) -> Void
+        onAuthenticationTap: @escaping () -> Void
     ) {
         self.itemSize = itemSize
         self.proofs = proofs
-        self.myMemberId = myMemberId
         self.showsAuthenticationItem = showsAuthenticationItem
         self.imageLoader = imageLoader
         self.onAuthenticationTap = onAuthenticationTap
-        self.onProofTap = onProofTap
     }
 
     var body: some View {
@@ -51,10 +45,8 @@ struct ChallengeWeeklyProofGrid: View {
             ForEach(proofs, id: \.proofId) { proof in
                 ChallengeWeeklyProofItem(
                     proof: proof,
-                    isEditable: proof.memberId == myMemberId,
                     itemSize: itemSize,
-                    imageLoader: imageLoader,
-                    onTap: { onProofTap(proof.proofId) }
+                    imageLoader: imageLoader
                 )
             }
         }
