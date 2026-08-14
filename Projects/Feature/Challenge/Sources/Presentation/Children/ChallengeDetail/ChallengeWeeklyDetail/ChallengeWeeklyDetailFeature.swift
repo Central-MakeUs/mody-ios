@@ -43,6 +43,17 @@ public struct ChallengeWeeklyDetailFeature {
         let challengeId: Int
         let groupChallengeId: Int
 
+        var showsAuthenticationItem: Bool {
+            guard let myMemberId,
+                  let weeklyChallengeImageInfos else {
+                return false
+            }
+
+            return !weeklyChallengeImageInfos.contains {
+                $0.memberId == myMemberId
+            }
+        }
+
         public init(groupId: Int, challengeId: Int, groupChallengeId: Int) {
             self.groupId = groupId
             self.challengeId = challengeId
@@ -55,6 +66,9 @@ public struct ChallengeWeeklyDetailFeature {
         case showAlert(State.AlertCase)
         case backButtonTapped
         case onAppear
+        case authenticationButtonTapped
+        case proofTapped(proofId: Int)
+        case snsShareButtonTapped
         case initialDataFetched(
             memberId: Int,
             detail: WeeklyChallengeDetail,
@@ -107,6 +121,26 @@ public struct ChallengeWeeklyDetailFeature {
                 state.myMemberId = memberId
                 state.weeklyChallengeDetail = detail
                 state.weeklyChallengeImageInfos = imageInfos
+                return .none
+            case .authenticationButtonTapped:
+                guard state.showsAuthenticationItem else {
+                    return .none
+                }
+
+                // TODO: CoreCamera 인증 흐름을 연결
+                return .none
+            case let .proofTapped(proofId):
+                guard let myMemberId = state.myMemberId,
+                      state.weeklyChallengeImageInfos?.contains(where: {
+                          $0.proofId == proofId && $0.memberId == myMemberId
+                      }) == true else {
+                    return .none
+                }
+
+                // TODO: 내 인증 사진 수정용 CoreCamera 흐름 연결
+                return .none
+            case .snsShareButtonTapped:
+                // TODO: SNS 공유 기능을 연결
                 return .none
             case .backButtonTapped:
                 return .run { [router] _ in

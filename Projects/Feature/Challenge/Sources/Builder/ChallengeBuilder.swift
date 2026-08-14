@@ -77,7 +77,10 @@ public struct ChallengeBuilder: ChallengeBuildable {
         }
 
         return UIHostingController(
-            rootView: ChallengeWeeklyDetailView(store: store)
+            rootView: ChallengeWeeklyDetailView(
+                store: store,
+                imageLoader: imageLoader
+            )
         )
     }
 }
