@@ -66,6 +66,8 @@ public struct ChallengeFeature {
                 return .send(.challengeStreak(.refreshChallengeSummary))
             case .input(.stepChallengeChanged):
                 return .send(.challengeDetail(.stepChallengeChanged))
+            case .input(.weeklyChallengeProofCreated):
+                return .send(.challengeDetail(.refreshCurrentWeeklyChallenge))
             case .challengeStreak(let streakAction):
                 return handleStreakAction(&state, streakAction)
             case .challengeDetail(let detailAction):

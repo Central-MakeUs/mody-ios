@@ -26,6 +26,7 @@ public protocol ChallengeBuildable {
         groupId: Int,
         challengeId: Int,
         groupChallengeId: Int,
-        router: ChallengeWeeklyDetailRouter
+        router: ChallengeWeeklyDetailRouter,
+        outputHandler: ChallengeOutputHandler
     ) -> UIViewController
 }

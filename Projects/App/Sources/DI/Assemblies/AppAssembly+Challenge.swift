@@ -9,6 +9,7 @@ import Swinject
 import ChallengeInterface
 import Challenge
 import CoreAuthInterface
+import CoreCameraInterface
 import CoreHealthInterface
 import CoreModyImageInterface
 import CoreNetworkInterface
@@ -67,22 +68,31 @@ extension AppAssembly {
 
         container.register(ChallengeWeeklyDetailFeature.self) { (
             resolver: Resolver,
-            router: ChallengeWeeklyDetailRouter
+            arguments: (ChallengeWeeklyDetailRouter, ChallengeOutputHandler)
         ) in
+            let (router, outputHandler) = arguments
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let challengeUseCase: ChallengeUseCase = resolver.resolve()
+            let imageUploadUseCase: ImageUploadUseCaseProtocol = resolver.resolve()
+            let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
 
             return ChallengeWeeklyDetailFeature(
                 authUseCase: authUseCase,
                 challengeUseCase: challengeUseCase,
+                imageUploadUseCase: imageUploadUseCase,
+                temporaryImageFileUseCase: temporaryImageFileUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
+                },
+                output: { [weak outputHandler] output in
+                    outputHandler?.handle(output: output)
                 }
             )
         }
 
         container.register(ChallengeBuildable.self) { resolver in
             let imageLoader: RemoteImageLoading = resolver.resolve()
+            let cameraCaptureBuilder: CameraCaptureBuildable = resolver.resolve()
 
             return ChallengeBuilder(
                 makeChallengeFeature: { router, outputHandler in
@@ -91,10 +101,11 @@ extension AppAssembly {
                 makeChallengeChangeFeature: { router, outputHandler in
                     resolver.resolve(argument: (router, outputHandler))
                 },
-                makeChallengeWeeklyDetailFeature: { router in
-                    resolver.resolve(argument: router)
+                makeChallengeWeeklyDetailFeature: { router, outputHandler in
+                    resolver.resolve(argument: (router, outputHandler))
                 },
-                imageLoader: imageLoader
+                imageLoader: imageLoader,
+                cameraCaptureBuilder: cameraCaptureBuilder
             )
         }
     }

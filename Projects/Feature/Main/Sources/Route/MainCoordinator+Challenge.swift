@@ -24,7 +24,8 @@ extension MainCoordinator: ChallengeRouter {
                 groupId: groupId,
                 challengeId: challengeId,
                 groupChallengeId: groupChallengeId,
-                router: self
+                router: self,
+                outputHandler: self
             )
             navigationController.pushViewController(viewController, animated: true)
         }
@@ -83,6 +84,8 @@ extension MainCoordinator: ChallengeOutputHandler {
             )
         case .stepChallengeChanged:
             challengeInputHandler?.handle(input: .stepChallengeChanged)
+        case .weeklyChallengeProofCreated:
+            challengeInputHandler?.handle(input: .weeklyChallengeProofCreated)
         }
     }
 }

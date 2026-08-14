@@ -57,6 +57,7 @@ public struct ChallengeDetailFeature {
         case fetchChallengeStepRankings
         case fetchStepChallengeStatus
         case fetchCurrentWeeklyChallenge
+        case refreshCurrentWeeklyChallenge
         case startMyStepCountTimer
         case fetchMyStepCount
         case updateChallengeStepCount(groupID: Int, stepCount: Int)
@@ -137,6 +138,16 @@ public struct ChallengeDetailFeature {
                       state.currentWeeklyChallengeList == nil else {
                     return .none
                 }
+
+                return .run { send in
+                    await send(fetchCurrentWeeklyChallenge(groupID: groupID))
+                }
+            case .refreshCurrentWeeklyChallenge:
+                guard let groupID = state.selectedGroup?.groupId else {
+                    return .none
+                }
+                
+                state.currentWeeklyChallengeList = nil
 
                 return .run { send in
                     await send(fetchCurrentWeeklyChallenge(groupID: groupID))

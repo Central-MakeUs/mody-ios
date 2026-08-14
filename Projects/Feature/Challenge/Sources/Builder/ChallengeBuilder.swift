@@ -8,25 +8,29 @@
 import UIKit
 import ChallengeInterface
 import ComposableArchitecture
+import CoreCameraInterface
 import CoreModyImageInterface
 import SwiftUI
 
 public struct ChallengeBuilder: ChallengeBuildable {
     private let makeChallengeFeature: (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature
     private let makeChallengeChangeFeature: (ChallengeChangeRouter, ChallengeOutputHandler) -> ChallengeChangeFeature
-    private let makeChallengeWeeklyDetailFeature: (ChallengeWeeklyDetailRouter) -> ChallengeWeeklyDetailFeature
+    private let makeChallengeWeeklyDetailFeature: (ChallengeWeeklyDetailRouter, ChallengeOutputHandler) -> ChallengeWeeklyDetailFeature
     private let imageLoader: RemoteImageLoading
+    private let cameraCaptureBuilder: CameraCaptureBuildable
 
     public init(
         makeChallengeFeature: @escaping (ChallengeRouter, ChallengeOutputHandler) -> ChallengeFeature,
         makeChallengeChangeFeature: @escaping (ChallengeChangeRouter, ChallengeOutputHandler) -> ChallengeChangeFeature,
-        makeChallengeWeeklyDetailFeature: @escaping (ChallengeWeeklyDetailRouter) -> ChallengeWeeklyDetailFeature,
-        imageLoader: RemoteImageLoading
+        makeChallengeWeeklyDetailFeature: @escaping (ChallengeWeeklyDetailRouter, ChallengeOutputHandler) -> ChallengeWeeklyDetailFeature,
+        imageLoader: RemoteImageLoading,
+        cameraCaptureBuilder: CameraCaptureBuildable
     ) {
         self.makeChallengeFeature = makeChallengeFeature
         self.makeChallengeChangeFeature = makeChallengeChangeFeature
         self.makeChallengeWeeklyDetailFeature = makeChallengeWeeklyDetailFeature
         self.imageLoader = imageLoader
+        self.cameraCaptureBuilder = cameraCaptureBuilder
     }
 
     @MainActor
@@ -64,7 +68,8 @@ public struct ChallengeBuilder: ChallengeBuildable {
         groupId: Int,
         challengeId: Int,
         groupChallengeId: Int,
-        router: ChallengeWeeklyDetailRouter
+        router: ChallengeWeeklyDetailRouter,
+        outputHandler: ChallengeOutputHandler
     ) -> UIViewController {
         let store: StoreOf<ChallengeWeeklyDetailFeature> = .init(
             initialState: .init(
@@ -73,13 +78,14 @@ public struct ChallengeBuilder: ChallengeBuildable {
                 groupChallengeId: groupChallengeId
             )
         ) {
-            makeChallengeWeeklyDetailFeature(router)
+            makeChallengeWeeklyDetailFeature(router, outputHandler)
         }
 
         return UIHostingController(
             rootView: ChallengeWeeklyDetailView(
                 store: store,
-                imageLoader: imageLoader
+                imageLoader: imageLoader,
+                cameraCaptureBuilder: cameraCaptureBuilder
             )
         )
     }
