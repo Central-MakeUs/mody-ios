@@ -95,4 +95,16 @@ enum ChallengeEndpoint {
             method: .GET
         )
     }
+
+    static func postWeeklyChallengeProof(
+        groupId: Int,
+        groupChallengeId: Int,
+        body: WeeklyChallengeProofCreateBody
+    ) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/groups/\(groupId)/weekly-challenges/\(groupChallengeId)/proofs",
+            method: .POST,
+            bodyParameters: body
+        )
+    }
 }

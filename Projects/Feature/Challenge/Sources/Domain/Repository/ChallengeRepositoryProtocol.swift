@@ -17,4 +17,9 @@ public protocol ChallengeRepositoryProtocol {
     func getCurrentWeeklyChallenge(groupId: Int) async throws -> [CurrentWeeklyChallenge]
     func getWeeklyChallengeDetail(challengeId: Int) async throws -> WeeklyChallengeDetail
     func getWeeklyChallengeProofs(groupId: Int, groupChallengeId: Int) async throws -> [WeeklyChallengeImageInfo]
+    func postWeeklyChallengeProof(
+        groupId: Int,
+        groupChallengeId: Int,
+        request: WeeklyChallengeProofCreateRequest
+    ) async throws
 }
