@@ -477,6 +477,14 @@ private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
         return weeklyChallengeProofs
     }
 
+    func postWeeklyChallengeProof(
+        groupId: Int,
+        groupChallengeId: Int,
+        request: WeeklyChallengeProofCreateRequest
+    ) async throws {
+        fatalError("Not used in these tests")
+    }
+
     func postRecordChallengeStepCount(
         groupId: Int,
         request: ChallengeStepCountRequest
