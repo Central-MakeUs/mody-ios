@@ -150,20 +150,10 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
         groupChallengeId: Int,
         request: WeeklyChallengeProofCreateRequest
     ) async throws {
-        let cropRegion = request.imageCropRegion
-        let body = WeeklyChallengeProofCreateBody(
-            imageKey: request.imageKey,
-            imageCropRegion: WeeklyChallengeProofImageCropRegionBody(
-                x: cropRegion.x,
-                y: cropRegion.y,
-                width: cropRegion.width,
-                height: cropRegion.height
-            )
-        )
         let endpoint = ChallengeEndpoint.postWeeklyChallengeProof(
             groupId: groupId,
             groupChallengeId: groupChallengeId,
-            body: body
+            request: request
         )
         let response: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
 

@@ -5,7 +5,7 @@
 //  Created by 김동준 on 8/14/26.
 //
 
-public struct WeeklyChallengeProofCreateRequest: Equatable {
+public struct WeeklyChallengeProofCreateRequest: Encodable, Equatable {
     public let imageKey: String
     public let imageCropRegion: WeeklyChallengeProofImageCropRegionRequest
 
@@ -18,7 +18,7 @@ public struct WeeklyChallengeProofCreateRequest: Equatable {
     }
 }
 
-public struct WeeklyChallengeProofImageCropRegionRequest: Equatable {
+public struct WeeklyChallengeProofImageCropRegionRequest: Encodable, Equatable {
     public let x: Double
     public let y: Double
     public let width: Double
