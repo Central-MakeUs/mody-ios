@@ -11,20 +11,20 @@ import UIKit
 
 struct ChallengeWeeklyCameraCaptureView: UIViewControllerRepresentable {
     private let source: CameraCaptureSource
-    private let cropSize: CGSize
+    private let cropAspectRatio: CGSize
     private let cameraCaptureBuilder: CameraCaptureBuildable
     private let onComplete: (CameraCaptureResult) -> Void
     private let onCancel: () -> Void
 
     init(
         source: CameraCaptureSource,
-        cropSize: CGSize,
+        cropAspectRatio: CGSize,
         cameraCaptureBuilder: CameraCaptureBuildable,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
         self.source = source
-        self.cropSize = cropSize
+        self.cropAspectRatio = cropAspectRatio
         self.cameraCaptureBuilder = cameraCaptureBuilder
         self.onComplete = onComplete
         self.onCancel = onCancel
@@ -34,7 +34,7 @@ struct ChallengeWeeklyCameraCaptureView: UIViewControllerRepresentable {
         cameraCaptureBuilder.makeCameraViewController(
             source: source,
             isCropEnabled: true,
-            cropSize: cropSize,
+            cropAspectRatio: cropAspectRatio,
             onComplete: onComplete,
             onCancel: onCancel
         )

@@ -61,7 +61,7 @@ struct ChallengeWeeklyDetailView: View {
                 if let source = store.photoCaptureSource {
                     ChallengeWeeklyCameraCaptureView(
                         source: source,
-                        cropSize: CGSize(width: itemSize, height: itemSize),
+                        cropAspectRatio: CGSize(width: 1, height: 1),
                         cameraCaptureBuilder: cameraCaptureBuilder,
                         onComplete: { store.send(.photoCaptureCompleted($0)) },
                         onCancel: { store.send(.photoCaptureCancelled) }
