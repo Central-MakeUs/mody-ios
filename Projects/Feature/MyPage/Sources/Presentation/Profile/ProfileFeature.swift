@@ -96,7 +96,6 @@ public struct ProfileFeature {
         case backButtonTapped
         case saveButtonTapped
         case profileImageTapped
-        case photoPresentationDismissed
         case cameraSourceTapped
         case gallerySourceTapped
         case photoCaptureCompleted(CameraCaptureResult)
@@ -165,16 +164,13 @@ public struct ProfileFeature {
                 guard !state.isLoading else { return .none }
                 state.isPhotoFlowPresented = true
                 return .none
-            case .photoPresentationDismissed:
-                state.isPhotoFlowPresented = false
-                state.isCameraPresented = false
-                state.photoCaptureSource = nil
-                return .none
             case .cameraSourceTapped:
+                state.isPhotoFlowPresented = false
                 state.photoCaptureSource = .camera
                 state.isCameraPresented = true
                 return .none
             case .gallerySourceTapped:
+                state.isPhotoFlowPresented = false
                 state.photoCaptureSource = .photoLibrary
                 state.isCameraPresented = true
                 return .none

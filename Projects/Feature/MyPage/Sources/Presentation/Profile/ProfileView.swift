@@ -36,10 +36,7 @@ public struct ProfileView: View {
             .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
                 alertView
             }
-            .sheet(
-                isPresented: $store.isPhotoFlowPresented,
-                onDismiss: { store.send(.photoPresentationDismissed) }
-            ) {
+            .sheet(isPresented: $store.isPhotoFlowPresented) {
                 MPhotoSourceSheetView(
                     onCameraTap: { store.send(.cameraSourceTapped) },
                     onGalleryTap: { store.send(.gallerySourceTapped) }
