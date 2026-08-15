@@ -13,6 +13,7 @@ public enum ChallengeOutput: Equatable {
     case showAlert(NetworkError)
     case stepChallengeChanged
     case weeklyChallengeProofCreated
+    case shareWeeklyChallengeImageURL(String)
 }
 
 @MainActor

@@ -42,6 +42,7 @@ public struct ChallengeWeeklyDetailFeature {
     @ObservableState
     public struct State: Equatable {
         public enum AlertCase: Equatable {
+            case incompleteChallenge
             case error(NetworkError)
         }
 
@@ -69,6 +70,10 @@ public struct ChallengeWeeklyDetailFeature {
             }
         }
 
+        var isShareButtonDisabled: Bool {
+            isLoading || weeklyChallengeImageInfos?.isEmpty != false
+        }
+
         public init(groupId: Int, challengeId: Int, groupChallengeId: Int) {
             self.groupId = groupId
             self.challengeId = challengeId
@@ -89,6 +94,7 @@ public struct ChallengeWeeklyDetailFeature {
         case photoCaptureCancelled
         case weeklyChallengeProofCreated([WeeklyChallengeImageInfo])
         case snsShareButtonTapped
+        case weeklyChallengeShareFinished(String)
         case initialDataFetched(
             memberId: Int,
             detail: WeeklyChallengeDetail,
@@ -194,8 +200,35 @@ public struct ChallengeWeeklyDetailFeature {
                     await output(.weeklyChallengeProofCreated)
                 }
             case .snsShareButtonTapped:
-                // TODO: SNS 공유 기능을 연결
-                return .none
+                guard !state.isShareButtonDisabled else { return .none }
+
+                state.isLoading = true
+                let groupId = state.groupId
+                let groupChallengeId = state.groupChallengeId
+
+                return .run { send in
+                    do {
+                        let share = try await challengeUseCase.shareWeeklyChallenge(
+                            groupId: groupId,
+                            groupChallengeId: groupChallengeId
+                        )
+                        await send(.weeklyChallengeShareFinished(share.imageUrl))
+                    } catch {
+                        let networkError = error as? NetworkError ?? .unknown
+
+                        if case let .serverError(code, _, _) = networkError,
+                           code == ServerErrorCode.challenge306.code {
+                            await send(.showAlert(.incompleteChallenge))
+                        } else {
+                            await send(.showAlert(.error(networkError)))
+                        }
+                    }
+                }
+            case .weeklyChallengeShareFinished(let imageUrl):
+                state.isLoading = false
+                return .run { [output] send in
+                    await output(.shareWeeklyChallengeImageURL(imageUrl))
+                }
             case .backButtonTapped:
                 return .run { [router] _ in
                     await router(.back)

@@ -175,6 +175,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.MyPage),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreNotification),
+                .microFeature(.CoreModyImage),
                 .module(.Base),
                 .module(.CommonDomain),
                 .module(.Util),
