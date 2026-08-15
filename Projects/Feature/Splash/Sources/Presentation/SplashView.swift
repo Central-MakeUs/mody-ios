@@ -35,6 +35,7 @@ public struct SplashView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onAppear {
                 DeviceSizeManager.shared.update(
+                    maxWidth: proxy.size.width,
                     bottomSafeAreaInset: proxy.safeAreaInsets.bottom
                 )
             }
