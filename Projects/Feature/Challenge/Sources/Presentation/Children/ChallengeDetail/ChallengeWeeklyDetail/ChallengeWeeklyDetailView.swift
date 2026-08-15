@@ -6,23 +6,28 @@
 //
 
 import Base
+import CommonDomain
 import ComposableArchitecture
+import CoreCameraInterface
 import CoreModyImageInterface
 import DesignSystem
 import SwiftUI
 
 struct ChallengeWeeklyDetailView: View {
-    private let store: StoreOf<ChallengeWeeklyDetailFeature>
+    @Bindable private var store: StoreOf<ChallengeWeeklyDetailFeature>
     private let imageLoader: RemoteImageLoading
+    private let cameraCaptureBuilder: CameraCaptureBuildable
     private let horizontalPadding: CGFloat = 24
     private let gridSpacing: CGFloat = 10
 
     init(
         store: StoreOf<ChallengeWeeklyDetailFeature>,
-        imageLoader: RemoteImageLoading
+        imageLoader: RemoteImageLoading,
+        cameraCaptureBuilder: CameraCaptureBuildable
     ) {
         self.store = store
         self.imageLoader = imageLoader
+        self.cameraCaptureBuilder = cameraCaptureBuilder
     }
 
     var body: some View {
@@ -37,19 +42,44 @@ struct ChallengeWeeklyDetailView: View {
             .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
                 alertView
             }
+            .sheet(isPresented: $store.isPhotoSourceSheetPresented) {
+                MPhotoSourceSheetView(
+                    onCameraTap: { store.send(.cameraSourceTapped) },
+                    onGalleryTap: { store.send(.gallerySourceTapped) }
+                )
+                .presentationDetents([
+                    .height(max(
+                        0,
+                        200 - DeviceSizeManager.shared.bottomSafeAreaInset
+                    ))
+                ])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(36)
+                .background(Color.systemWhite)
+            }
+            .fullScreenCover(isPresented: $store.isCameraPresented) {
+                if let source = store.photoCaptureSource {
+                    ChallengeWeeklyCameraCaptureView(
+                        source: source,
+                        cropSize: CGSize(width: itemSize, height: itemSize),
+                        cameraCaptureBuilder: cameraCaptureBuilder,
+                        onComplete: { store.send(.photoCaptureCompleted($0)) },
+                        onCancel: { store.send(.photoCaptureCancelled) }
+                    )
+                    .ignoresSafeArea()
+                }
+            }
     }
 }
 
 private extension ChallengeWeeklyDetailView {
     var challengeWeeklyDetailBody: some View {
-        GeometryReader { proxy in
-            let contentWidth = proxy.size.width - (horizontalPadding * 2)
-            let itemSize = max(
-                (contentWidth - gridSpacing) / 2,
-                0
-            )
-            challengeWeeklyDetailContents(itemSize: itemSize)
-        }
+        challengeWeeklyDetailContents(itemSize: itemSize)
+    }
+
+    var itemSize: CGFloat {
+        let contentWidth = DeviceSizeManager.shared.maxWidth - (horizontalPadding * 2)
+        return max((contentWidth - gridSpacing) / 2, 0)
     }
 
     func challengeWeeklyDetailContents(itemSize: CGFloat) -> some View {
@@ -61,7 +91,7 @@ private extension ChallengeWeeklyDetailView {
 
             if let detail = store.weeklyChallengeDetail,
                let proofs = store.weeklyChallengeImageInfos,
-               let myMemberId = store.myMemberId {
+               store.myMemberId != nil {
                 ScrollView {
                     VStack(spacing: 12) {
                         ChallengeWeeklyDetailHeader(detail: detail)
@@ -69,14 +99,10 @@ private extension ChallengeWeeklyDetailView {
                         ChallengeWeeklyProofGrid(
                             itemSize: itemSize,
                             proofs: proofs,
-                            myMemberId: myMemberId,
                             showsAuthenticationItem: store.showsAuthenticationItem,
                             imageLoader: imageLoader,
                             onAuthenticationTap: {
                                 store.send(.authenticationButtonTapped)
-                            },
-                            onProofTap: { proofId in
-                                store.send(.proofTapped(proofId: proofId))
                             }
                         )
                     }
