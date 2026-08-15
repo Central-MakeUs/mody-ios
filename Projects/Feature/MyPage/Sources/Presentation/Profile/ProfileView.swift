@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Base
+import CommonDomain
 import ComposableArchitecture
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -43,22 +44,24 @@ public struct ProfileView: View {
                     onCameraTap: { store.send(.cameraSourceTapped) },
                     onGalleryTap: { store.send(.gallerySourceTapped) }
                 )
-                .presentationDetents([.height(200)])
+                .presentationDetents([
+                    .height(max(0, 200 - DeviceSizeManager.shared.bottomSafeAreaInset))
+                ])
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(36)
-                .fullScreenCover(
-                    isPresented: $store.isCameraPresented,
-                    onDismiss: { store.send(.photoCaptureCancelled) }
-                ) {
-                    if let source = store.photoCaptureSource {
-                        ProfileCameraCaptureView(
-                            source: source,
-                            cameraCaptureBuilder: cameraCaptureBuilder,
-                            onComplete: { store.send(.photoCaptureCompleted($0)) },
-                            onCancel: { store.send(.photoCaptureCancelled) }
-                        )
-                        .ignoresSafeArea()
-                    }
+            }
+            .fullScreenCover(
+                isPresented: $store.isCameraPresented,
+                onDismiss: { store.send(.photoCaptureCancelled) }
+            ) {
+                if let source = store.photoCaptureSource {
+                    ProfileCameraCaptureView(
+                        source: source,
+                        cameraCaptureBuilder: cameraCaptureBuilder,
+                        onComplete: { store.send(.photoCaptureCompleted($0)) },
+                        onCancel: { store.send(.photoCaptureCancelled) }
+                    )
+                    .ignoresSafeArea()
                 }
             }
     }
