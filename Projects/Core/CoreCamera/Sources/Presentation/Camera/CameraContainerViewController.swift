@@ -37,14 +37,14 @@ final class CameraContainerViewController: UIViewController {
     init(
         initialSource: CameraCaptureSource,
         isCropEnabled: Bool = true,
-        cropSize: CGSize? = nil,
+        cropAspectRatio: CGSize? = nil,
         capturedPhotoProcessor: CameraCapturedPhotoProcessor,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
         self.initialSource = initialSource
         self.isCropEnabled = isCropEnabled
-        self.roiOverlayView = ROIOverlayView(selectionSize: cropSize)
+        self.roiOverlayView = ROIOverlayView(selectionAspectRatio: cropAspectRatio)
         self.capturedPhotoProcessor = capturedPhotoProcessor
         self.onComplete = onComplete
         self.onCancel = onCancel

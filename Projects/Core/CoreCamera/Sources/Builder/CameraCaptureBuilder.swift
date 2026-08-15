@@ -20,7 +20,7 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
     public func makeCameraViewController(
         source: CameraCaptureSource,
         isCropEnabled: Bool,
-        cropSize: CGSize?,
+        cropAspectRatio: CGSize?,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController {
@@ -32,7 +32,7 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
         return CameraContainerViewController(
             initialSource: source,
             isCropEnabled: isCropEnabled,
-            cropSize: cropSize,
+            cropAspectRatio: cropAspectRatio,
             capturedPhotoProcessor: capturedPhotoProcessor,
             onComplete: onComplete,
             onCancel: onCancel
