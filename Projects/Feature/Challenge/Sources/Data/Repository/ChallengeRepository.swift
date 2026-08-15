@@ -161,4 +161,21 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
             throw NetworkError.invalidResponse
         }
     }
+
+    public func postWeeklyChallengeShare(
+        groupId: Int,
+        groupChallengeId: Int
+    ) async throws -> WeeklyChallengeShare {
+        let endpoint = ChallengeEndpoint.postWeeklyChallengeShare(
+            groupId: groupId,
+            groupChallengeId: groupChallengeId
+        )
+        let response: CoreNetworkResponse<WeeklyChallengeShareResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
+    }
 }
