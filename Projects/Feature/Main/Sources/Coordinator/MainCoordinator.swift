@@ -13,6 +13,7 @@ import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
 import CommonDomain
+import CoreModyImageInterface
 
 public final class MainCoordinator: MainCoordinating {
     public let navigationController: UINavigationController
@@ -29,6 +30,7 @@ public final class MainCoordinator: MainCoordinating {
     let modyGroupBuilder: ModyGroupBuildable
     private let mainContainerBuilder: MainContainerBuildable
     let notificationBuilder: NotificationBuildable
+    let imageLoader: RemoteImageLoading
 
     init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
@@ -39,6 +41,7 @@ public final class MainCoordinator: MainCoordinating {
         modyGroupBuilder: ModyGroupBuildable,
         mainContainerBuilder: MainContainerBuildable,
         notificationBuilder: NotificationBuildable,
+        imageLoader: RemoteImageLoading,
         delegate: MainCoordinatorDelegate
     ) {
         self.navigationController = navigationController
@@ -49,6 +52,7 @@ public final class MainCoordinator: MainCoordinating {
         self.modyGroupBuilder = modyGroupBuilder
         self.mainContainerBuilder = mainContainerBuilder
         self.notificationBuilder = notificationBuilder
+        self.imageLoader = imageLoader
         self.delegate = delegate
         navigationController.setNavigationBarHidden(true, animated: false)
         print("⭕ MainCoordinator init!")

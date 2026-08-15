@@ -7,6 +7,7 @@
 
 import ChallengeInterface
 import CoreNotificationInterface
+import CoreModyImageInterface
 import FeedInterface
 import MainInterface
 import ModyGroupInterface
@@ -18,6 +19,7 @@ public struct MainBuilder: MainBuildable {
     private let myPageBuilder: MyPageBuildable
     private let modyGroupBuilder: ModyGroupBuildable
     private let notificationUseCase: NotificationUseCaseProtocol
+    private let imageLoader: RemoteImageLoading
     private let makeMainReactor: () -> MainReactor
 
     public init(
@@ -26,6 +28,7 @@ public struct MainBuilder: MainBuildable {
         myPageBuilder: MyPageBuildable,
         modyGroupBuilder: ModyGroupBuildable,
         notificationUseCase: NotificationUseCaseProtocol,
+        imageLoader: RemoteImageLoading,
         makeMainReactor: @escaping () -> MainReactor
     ) {
         self.feedBuilder = feedBuilder
@@ -33,6 +36,7 @@ public struct MainBuilder: MainBuildable {
         self.myPageBuilder = myPageBuilder
         self.modyGroupBuilder = modyGroupBuilder
         self.notificationUseCase = notificationUseCase
+        self.imageLoader = imageLoader
         self.makeMainReactor = makeMainReactor
     }
 
@@ -48,6 +52,7 @@ public struct MainBuilder: MainBuildable {
             modyGroupBuilder: modyGroupBuilder,
             mainContainerBuilder: mainContainerBuilder,
             notificationBuilder: notificationBuilder,
+            imageLoader: imageLoader,
             delegate: delegate
         )
     }

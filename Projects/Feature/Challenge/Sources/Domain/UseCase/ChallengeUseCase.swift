@@ -70,4 +70,14 @@ public struct ChallengeUseCase {
             request: request
         )
     }
+
+    public func shareWeeklyChallenge(
+        groupId: Int,
+        groupChallengeId: Int
+    ) async throws -> WeeklyChallengeShare {
+        try await repository.postWeeklyChallengeShare(
+            groupId: groupId,
+            groupChallengeId: groupChallengeId
+        )
+    }
 }

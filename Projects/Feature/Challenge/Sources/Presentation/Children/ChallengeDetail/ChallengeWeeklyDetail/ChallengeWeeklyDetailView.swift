@@ -113,7 +113,8 @@ private extension ChallengeWeeklyDetailView {
 
                 MButton(
                     "SNS에 공유하기",
-                    style: .black,
+                    style: store.isShareButtonDisabled ? .gray : .black,
+                    isDisabled: store.isShareButtonDisabled,
                     horizontalPadding: 0,
                     verticalPadding: 13,
                     maxWidth: .infinity
@@ -132,6 +133,14 @@ private extension ChallengeWeeklyDetailView {
     var alertView: some View {
         if let alertCase = store.alertCase {
             switch alertCase {
+            case .incompleteChallenge:
+                MAlertContentView(
+                    title: "알림",
+                    contents: "공유 기능은 챌린지를 완료한 뒤 가능합니다.",
+                    trailingButton: MAlertButton("확인") {
+                        store.send(.alertAction(.dismiss))
+                    }
+                )
             case let .error(networkError):
                 CommonErrorAlertView(networkError) {
                     store.send(.alertAction(.dismiss))
