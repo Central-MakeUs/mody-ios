@@ -12,13 +12,16 @@ import SwiftUI
 struct ChallengeDetailGroupOptionalSection: View {
     private let challengeList: [CurrentWeeklyChallenge]?
     private let imageLoader: RemoteImageLoading
+    private let onChallengeTap: (Int, Int) -> Void
 
     init(
         challengeList: [CurrentWeeklyChallenge]?,
-        imageLoader: RemoteImageLoading
+        imageLoader: RemoteImageLoading,
+        onChallengeTap: @escaping (Int, Int) -> Void
     ) {
         self.challengeList = challengeList
         self.imageLoader = imageLoader
+        self.onChallengeTap = onChallengeTap
     }
 
     var body: some View {
@@ -40,14 +43,16 @@ private extension ChallengeDetailGroupOptionalSection {
                 ForEach(challengeList, id: \.groupChallengeId) { challenge in
                     ChallengeDetailGroupOptionalRowItem(
                         challenge: challenge,
-                        imageLoader: imageLoader
+                        imageLoader: imageLoader,
+                        onTap: onChallengeTap
                     )
                 }
             } else {
                 ForEach(0..<4, id: \.self) { _ in
                     ChallengeDetailGroupOptionalRowItem(
                         challenge: nil,
-                        imageLoader: imageLoader
+                        imageLoader: imageLoader,
+                        onTap: onChallengeTap
                     )
                 }
             }

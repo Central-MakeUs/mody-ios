@@ -11,6 +11,7 @@ public enum ChallengeInput {
     case selectedGroupUpdated(GroupModel?)
     case recordUpdated
     case stepChallengeChanged
+    case weeklyChallengeProofCreated
 }
 
 @MainActor

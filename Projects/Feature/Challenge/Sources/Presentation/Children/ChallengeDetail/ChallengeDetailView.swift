@@ -61,7 +61,13 @@ private extension ChallengeDetailView {
 
                 ChallengeDetailGroupOptionalSection(
                     challengeList: store.currentWeeklyChallengeList,
-                    imageLoader: imageLoader
+                    imageLoader: imageLoader,
+                    onChallengeTap: { challengeId, groupChallengeId in
+                        store.send(.weeklyChallengeTapped(
+                            challengeId: challengeId,
+                            groupChallengeId: groupChallengeId
+                        ))
+                    }
                 )
             }
         }

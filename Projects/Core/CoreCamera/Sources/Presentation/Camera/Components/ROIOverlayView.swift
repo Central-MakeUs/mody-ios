@@ -11,6 +11,7 @@ import UIKit
 final class ROIOverlayView: UIView {
     private let horizontalInset: CGFloat = 24
     private let selectionHeight: CGFloat = 200
+    private let selectionSize: CGSize?
     
     var selectionFrame: CGRect {
         currentSelectionFrame
@@ -28,8 +29,9 @@ final class ROIOverlayView: UIView {
         updateLayers()
     }
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(selectionSize: CGSize?) {
+        self.selectionSize = selectionSize
+        super.init(frame: .zero)
         setupUI()
     }
 
@@ -86,6 +88,18 @@ private extension ROIOverlayView {
 
     func defaultSelectionFrame() -> CGRect {
         let selectableFrame = effectiveSelectableFrame()
+        if let selectionSize {
+            let width = min(selectionSize.width, selectableFrame.width)
+            let height = min(selectionSize.height, selectableFrame.height)
+
+            return CGRect(
+                x: selectableFrame.midX - (width / 2),
+                y: selectableFrame.midY - (height / 2),
+                width: width,
+                height: height
+            )
+        }
+
         let horizontalMargin = min(horizontalInset, selectableFrame.width / 2)
         let width = max(0, selectableFrame.width - (horizontalMargin * 2))
         let height = min(selectionHeight, selectableFrame.height)

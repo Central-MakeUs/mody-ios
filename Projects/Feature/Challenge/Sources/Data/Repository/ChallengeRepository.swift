@@ -116,4 +116,49 @@ public struct ChallengeRepository: ChallengeRepositoryProtocol {
 
         return result.toDomain()
     }
+
+    public func getWeeklyChallengeDetail(challengeId: Int) async throws -> WeeklyChallengeDetail {
+        let endpoint = ChallengeEndpoint.getWeeklyChallengeDetail(challengeId: challengeId)
+        let response: CoreNetworkResponse<WeeklyChallengeDetailResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
+    }
+
+    public func getWeeklyChallengeProofs(
+        groupId: Int,
+        groupChallengeId: Int
+    ) async throws -> [WeeklyChallengeImageInfo] {
+        let endpoint = ChallengeEndpoint.getWeeklyChallengeProofs(
+            groupId: groupId,
+            groupChallengeId: groupChallengeId
+        )
+        let response: CoreNetworkResponse<WeeklyChallengeProofListResponse> = try await network.request(endpoint)
+
+        guard let result = response.result else {
+            throw NetworkError.invalidResponse
+        }
+
+        return result.toDomain()
+    }
+
+    public func postWeeklyChallengeProof(
+        groupId: Int,
+        groupChallengeId: Int,
+        request: WeeklyChallengeProofCreateRequest
+    ) async throws {
+        let endpoint = ChallengeEndpoint.postWeeklyChallengeProof(
+            groupId: groupId,
+            groupChallengeId: groupChallengeId,
+            request: request
+        )
+        let response: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(endpoint)
+
+        guard response.isSuccess != false else {
+            throw NetworkError.invalidResponse
+        }
+    }
 }

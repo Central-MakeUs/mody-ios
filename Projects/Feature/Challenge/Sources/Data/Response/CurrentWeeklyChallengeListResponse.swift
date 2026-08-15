@@ -11,6 +11,7 @@ struct CurrentWeeklyChallengeListResponse: Decodable, Equatable {
 
 private struct CurrentWeeklyChallengeResponse: Decodable, Equatable {
     private let groupChallengeId: Int?
+    private let challengeId: Int?
     private let title: String?
     private let remainingDays: Int?
     private let participantCount: Int?
@@ -21,6 +22,7 @@ private struct CurrentWeeklyChallengeResponse: Decodable, Equatable {
     func toDomain() -> CurrentWeeklyChallenge {
         CurrentWeeklyChallenge(
             groupChallengeId: groupChallengeId ?? -1,
+            challengeId: challengeId ?? -1,
             title: title ?? "",
             remainingDays: remainingDays ?? 0,
             participantCount: participantCount ?? 0,

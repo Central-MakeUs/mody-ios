@@ -1,27 +1,30 @@
 //
-//  ProfileCameraCaptureView.swift
-//  MyPage
+//  ChallengeWeeklyCameraCaptureView.swift
+//  Challenge
 //
-//  Created by 김동준 on 7/26/26.
+//  Created by 김동준 on 8/14/26.
 //
 
 import CoreCameraInterface
 import SwiftUI
 import UIKit
 
-struct ProfileCameraCaptureView: UIViewControllerRepresentable {
+struct ChallengeWeeklyCameraCaptureView: UIViewControllerRepresentable {
     private let source: CameraCaptureSource
+    private let cropSize: CGSize
     private let cameraCaptureBuilder: CameraCaptureBuildable
     private let onComplete: (CameraCaptureResult) -> Void
     private let onCancel: () -> Void
 
     init(
         source: CameraCaptureSource,
+        cropSize: CGSize,
         cameraCaptureBuilder: CameraCaptureBuildable,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
         self.source = source
+        self.cropSize = cropSize
         self.cameraCaptureBuilder = cameraCaptureBuilder
         self.onComplete = onComplete
         self.onCancel = onCancel
@@ -30,8 +33,8 @@ struct ProfileCameraCaptureView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
         cameraCaptureBuilder.makeCameraViewController(
             source: source,
-            isCropEnabled: false,
-            cropSize: nil,
+            isCropEnabled: true,
+            cropSize: cropSize,
             onComplete: onComplete,
             onCancel: onCancel
         )

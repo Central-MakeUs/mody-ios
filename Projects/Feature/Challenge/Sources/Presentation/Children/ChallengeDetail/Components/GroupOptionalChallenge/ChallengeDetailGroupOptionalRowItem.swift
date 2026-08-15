@@ -12,18 +12,22 @@ import SwiftUI
 struct ChallengeDetailGroupOptionalRowItem: View {
     private let challenge: CurrentWeeklyChallenge?
     private let imageLoader: RemoteImageLoading
+    private let onTap: (Int, Int) -> Void
 
     init(
         challenge: CurrentWeeklyChallenge?,
-        imageLoader: RemoteImageLoading
+        imageLoader: RemoteImageLoading,
+        onTap: @escaping (Int, Int) -> Void
     ) {
         self.challenge = challenge
         self.imageLoader = imageLoader
+        self.onTap = onTap
     }
 
     var body: some View {
         Button {
-            // TODO: Implement
+            guard let challenge else { return }
+            onTap(challenge.challengeId, challenge.groupChallengeId)
         } label: {
             VStack(spacing: 20) {
                 ChallengeDetailGroupOptionalRowItemTitleView(

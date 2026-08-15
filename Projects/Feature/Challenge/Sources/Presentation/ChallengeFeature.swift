@@ -66,6 +66,8 @@ public struct ChallengeFeature {
                 return .send(.challengeStreak(.refreshChallengeSummary))
             case .input(.stepChallengeChanged):
                 return .send(.challengeDetail(.stepChallengeChanged))
+            case .input(.weeklyChallengeProofCreated):
+                return .send(.challengeDetail(.refreshCurrentWeeklyChallenge))
             case .challengeStreak(let streakAction):
                 return handleStreakAction(&state, streakAction)
             case .challengeDetail(let detailAction):
@@ -129,6 +131,26 @@ private extension ChallengeFeature {
 
             return .run { [router] _ in
                 await router(.routeToChallengeChange(groupId: groupId))
+            }
+        case let .weeklyChallengeTapped(challengeId, groupChallengeId):
+            guard let groupId = state.selectedGroup?.groupId,
+                  state.challengeDetail.currentWeeklyChallengeList?.contains(
+                    where: {
+                        $0.challengeId == challengeId &&
+                        $0.groupChallengeId == groupChallengeId
+                    }
+                  ) == true else {
+                return .none
+            }
+
+            return .run { [router] _ in
+                await router(
+                    .routeToWeeklyDetail(
+                        groupId: groupId,
+                        challengeId: challengeId,
+                        groupChallengeId: groupChallengeId
+                    )
+                )
             }
         default:
             return .none

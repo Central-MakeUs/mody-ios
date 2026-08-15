@@ -12,6 +12,7 @@ public enum ChallengeOutput: Equatable {
     case nudgeSucceeded(nickname: String)
     case showAlert(NetworkError)
     case stepChallengeChanged
+    case weeklyChallengeProofCreated
 }
 
 @MainActor

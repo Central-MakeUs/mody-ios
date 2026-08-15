@@ -253,16 +253,181 @@ final class ChallengeTests: XCTestCase {
         XCTAssertEqual(body["recordedOn"] as? String, "2026-08-09")
         XCTAssertEqual(body["stepCount"] as? Int, 3_456)
     }
+
+    func testWeeklyChallengeDetailResponseMapsSwaggerContract() throws {
+        let response = try JSONDecoder().decode(
+            WeeklyChallengeDetailResponse.self,
+            from: Data(
+                """
+                {
+                  "challengeId": 34,
+                  "title": "하루 물 2L 마시기",
+                  "description": "일주일 동안 매일 물 2L를 마셔요.",
+                  "remainingDays": 3
+                }
+                """.utf8
+            )
+        )
+
+        let detail = response.toDomain()
+
+        XCTAssertEqual(detail.challengeId, 34)
+        XCTAssertEqual(detail.title, "하루 물 2L 마시기")
+        XCTAssertEqual(detail.description, "일주일 동안 매일 물 2L를 마셔요.")
+        XCTAssertEqual(detail.remainingDays, 3)
+    }
+
+    func testCurrentWeeklyChallengeListResponseMapsChallengeIds() throws {
+        let response = try JSONDecoder().decode(
+            CurrentWeeklyChallengeListResponse.self,
+            from: Data(
+                """
+                {
+                  "challenges": [
+                    {
+                      "groupChallengeId": 34,
+                      "challengeId": 56,
+                      "title": "하루 물 2L 마시기",
+                      "remainingDays": 3,
+                      "participantCount": 0,
+                      "randomParticipantNickname": "",
+                      "participants": []
+                    }
+                  ]
+                }
+                """.utf8
+            )
+        )
+
+        let challenge = try XCTUnwrap(response.toDomain().first)
+
+        XCTAssertEqual(challenge.groupChallengeId, 34)
+        XCTAssertEqual(challenge.challengeId, 56)
+    }
+
+    func testFetchWeeklyChallengeDetailForwardsChallengeId() async throws {
+        let repository = ChallengeRepositorySpy()
+        let useCase = ChallengeUseCase(repository: repository)
+        let expected = WeeklyChallengeDetail(
+            challengeId: 34,
+            title: "하루 물 2L 마시기",
+            description: "일주일 동안 매일 물 2L를 마셔요.",
+            remainingDays: 3
+        )
+        repository.weeklyChallengeDetail = expected
+
+        let result = try await useCase.fetchWeeklyChallengeDetail(challengeId: 34)
+
+        XCTAssertEqual(repository.weeklyChallengeDetailId, 34)
+        XCTAssertEqual(result, expected)
+    }
+
+    func testGetWeeklyChallengeDetailEndpointMatchesSwaggerContract() {
+        let endpoint = ChallengeEndpoint.getWeeklyChallengeDetail(challengeId: 34)
+
+        XCTAssertEqual(endpoint.path, "api/v1/weekly-challenges/34")
+        XCTAssertEqual(endpoint.method, .GET)
+    }
+
+    func testWeeklyChallengeProofListResponseMapsSwaggerContract() throws {
+        let response = try JSONDecoder().decode(
+            WeeklyChallengeProofListResponse.self,
+            from: Data(
+                """
+                {
+                  "proofs": [
+                    {
+                      "proofId": 56,
+                      "imageUrl": "https://example.com/proofs/56.jpg",
+                      "imageCropRegion": {
+                        "x": 0.1,
+                        "y": 0.2,
+                        "width": 0.7,
+                        "height": 0.6
+                      },
+                      "memberId": 78,
+                      "nickname": "모디",
+                      "profileImageUrl": "https://example.com/profiles/78.jpg"
+                    }
+                  ]
+                }
+                """.utf8
+            )
+        )
+
+        let proofs = response.toDomain()
+        let proof = try XCTUnwrap(proofs.first)
+        let cropRegion = try XCTUnwrap(proof.imageCropRegion)
+
+        XCTAssertEqual(proofs.count, 1)
+        XCTAssertEqual(proof.proofId, 56)
+        XCTAssertEqual(proof.imageUrl, "https://example.com/proofs/56.jpg")
+        XCTAssertEqual(cropRegion.x, 0.1)
+        XCTAssertEqual(cropRegion.y, 0.2)
+        XCTAssertEqual(cropRegion.width, 0.7)
+        XCTAssertEqual(cropRegion.height, 0.6)
+        XCTAssertEqual(proof.memberId, 78)
+        XCTAssertEqual(proof.nickname, "모디")
+        XCTAssertEqual(proof.profileImageUrl, "https://example.com/profiles/78.jpg")
+    }
+
+    func testFetchWeeklyChallengeProofsForwardsIdsAndReturnsList() async throws {
+        let repository = ChallengeRepositorySpy()
+        let useCase = ChallengeUseCase(repository: repository)
+        let expected = WeeklyChallengeImageInfo(
+            proofId: 56,
+            imageUrl: "https://example.com/proofs/56.jpg",
+            imageCropRegion: WeeklyChallengeImageCropRegion(
+                x: 0.1,
+                y: 0.2,
+                width: 0.7,
+                height: 0.6
+            ),
+            memberId: 78,
+            nickname: "모디",
+            profileImageUrl: "https://example.com/profiles/78.jpg"
+        )
+        repository.weeklyChallengeProofs = [expected]
+
+        let result = try await useCase.fetchWeeklyChallengeProofs(
+            groupId: 12,
+            groupChallengeId: 34
+        )
+
+        XCTAssertEqual(repository.weeklyChallengeProofsGroupId, 12)
+        XCTAssertEqual(repository.weeklyChallengeProofsGroupChallengeId, 34)
+        XCTAssertEqual(result, [expected])
+    }
+
+    func testGetWeeklyChallengeProofsEndpointMatchesSwaggerContract() {
+        let endpoint = ChallengeEndpoint.getWeeklyChallengeProofs(
+            groupId: 12,
+            groupChallengeId: 34
+        )
+
+        XCTAssertEqual(endpoint.path, "api/v1/groups/12/weekly-challenges/34/proofs")
+        XCTAssertEqual(endpoint.method, .GET)
+    }
 }
 
 private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
     var changableChallengeList: [ChangableWalkChallengeModel] = []
+    var weeklyChallengeProofs: [WeeklyChallengeImageInfo] = []
+    var weeklyChallengeDetail = WeeklyChallengeDetail(
+        challengeId: -1,
+        title: "",
+        description: "",
+        remainingDays: 0
+    )
 
     private(set) var changableChallengeGroupId: Int?
     private(set) var changedGroupId: Int?
     private(set) var changedChallengeId: Int?
     private(set) var recordedGroupId: Int?
     private(set) var recordedRequest: ChallengeStepCountRequest?
+    private(set) var weeklyChallengeDetailId: Int?
+    private(set) var weeklyChallengeProofsGroupId: Int?
+    private(set) var weeklyChallengeProofsGroupChallengeId: Int?
 
     func getChallengeSummary(groupId: Int) async throws -> ChallengeSummary {
         fatalError("Not used in these tests")
@@ -295,6 +460,28 @@ private final class ChallengeRepositorySpy: ChallengeRepositoryProtocol {
     }
 
     func getCurrentWeeklyChallenge(groupId: Int) async throws -> [CurrentWeeklyChallenge] {
+        fatalError("Not used in these tests")
+    }
+
+    func getWeeklyChallengeDetail(challengeId: Int) async throws -> WeeklyChallengeDetail {
+        weeklyChallengeDetailId = challengeId
+        return weeklyChallengeDetail
+    }
+
+    func getWeeklyChallengeProofs(
+        groupId: Int,
+        groupChallengeId: Int
+    ) async throws -> [WeeklyChallengeImageInfo] {
+        weeklyChallengeProofsGroupId = groupId
+        weeklyChallengeProofsGroupChallengeId = groupChallengeId
+        return weeklyChallengeProofs
+    }
+
+    func postWeeklyChallengeProof(
+        groupId: Int,
+        groupChallengeId: Int,
+        request: WeeklyChallengeProofCreateRequest
+    ) async throws {
         fatalError("Not used in these tests")
     }
 

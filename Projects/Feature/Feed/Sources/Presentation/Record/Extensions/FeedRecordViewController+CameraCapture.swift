@@ -15,6 +15,7 @@ extension FeedRecordViewController {
         let cameraContainerViewController = cameraCaptureBuilder.makeCameraViewController(
             source: source,
             isCropEnabled: true,
+            cropSize: nil,
             onComplete: { [weak self] result in
                 self?.dismissCameraCapture {
                     self?.reactor?.action.onNext(.didCompletePhotoCapture(result))

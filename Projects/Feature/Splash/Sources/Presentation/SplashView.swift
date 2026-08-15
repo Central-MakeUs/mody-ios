@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Base
+import CommonDomain
 import ComposableArchitecture
 import DesignSystem
 
@@ -28,7 +29,16 @@ public struct SplashView: View {
     }
     
     private var splashBody: some View {
-        VStack(spacing: 0) {
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onAppear {
+                DeviceSizeManager.shared.update(
+                    maxWidth: proxy.size.width,
+                    bottomSafeAreaInset: proxy.safeAreaInsets.bottom
+                )
+            }
         }
     }
 }

@@ -57,6 +57,7 @@ public struct ChallengeDetailFeature {
         case fetchChallengeStepRankings
         case fetchStepChallengeStatus
         case fetchCurrentWeeklyChallenge
+        case refreshCurrentWeeklyChallenge
         case startMyStepCountTimer
         case fetchMyStepCount
         case updateChallengeStepCount(groupID: Int, stepCount: Int)
@@ -64,6 +65,7 @@ public struct ChallengeDetailFeature {
         case stepChallengeStatusFetched(groupID: Int, ChallengeStepCountStatus)
         case currentWeeklyChallengeListFetched(groupID: Int, [CurrentWeeklyChallenge])
         case changeChallengeButtonTapped
+        case weeklyChallengeTapped(challengeId: Int, groupChallengeId: Int)
         case refreshStepButtonTapped
         case showAlert(NetworkError)
         case refresh
@@ -136,6 +138,16 @@ public struct ChallengeDetailFeature {
                       state.currentWeeklyChallengeList == nil else {
                     return .none
                 }
+
+                return .run { send in
+                    await send(fetchCurrentWeeklyChallenge(groupID: groupID))
+                }
+            case .refreshCurrentWeeklyChallenge:
+                guard let groupID = state.selectedGroup?.groupId else {
+                    return .none
+                }
+                
+                state.currentWeeklyChallengeList = nil
 
                 return .run { send in
                     await send(fetchCurrentWeeklyChallenge(groupID: groupID))
@@ -233,6 +245,8 @@ public struct ChallengeDetailFeature {
             case .showAlert:
                 return .none
             case .changeChallengeButtonTapped:
+                return .none
+            case .weeklyChallengeTapped:
                 return .none
             case .refreshStepButtonTapped:
                 guard let group = state.selectedGroup ,
