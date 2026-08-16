@@ -6,13 +6,13 @@
 //
 
 import ComposableArchitecture
+import CommonDomain
 import DesignSystem
 import SwiftUI
 
 struct WeightRecordView: View {
     @Bindable private var store: StoreOf<WeightRecordFeature>
     @FocusState private var isDateFieldFocused: Bool
-    @FocusState private var isCurrentWeightFieldFocused: Bool
 
     init(store: StoreOf<WeightRecordFeature>) {
         self.store = store
@@ -38,7 +38,9 @@ struct WeightRecordView: View {
 
             Spacer()
         }
-        .presentationDetents([.height(333)])
+        .presentationDetents([
+            .height(max(0, 483 - DeviceSizeManager.shared.bottomSafeAreaInset))
+        ])
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(36)
         .background(Color.systemWhite)
@@ -48,45 +50,65 @@ struct WeightRecordView: View {
 private extension WeightRecordView {
     var inputSection: some View {
         VStack(spacing: 16) {
-            inputField(
-                title: "날짜",
-                text: $store.dateText,
-                keyboardType: .decimalPad,
-                focus: $isDateFieldFocused
-            )
+            dateInputField
 
-            inputField(
-                title: "현재 체중",
-                text: $store.currentWeightText,
-                keyboardType: .decimalPad,
-                focus: $isCurrentWeightFieldFocused
-            )
+            weightPicker
         }
         .padding(.horizontal, 24)
     }
 
-    func inputField(
-        title: String,
-        text: Binding<String>,
-        keyboardType: UIKeyboardType,
-        focus: FocusState<Bool>.Binding
-    ) -> some View {
+    var dateInputField: some View {
         VStack(alignment: .leading, spacing: 12) {
             MText(
-                title,
+                "날짜",
                 style: .b7,
                 color: .gray8,
                 alignment: .leading
             )
 
             MTextField(
-                text,
+                $store.dateText,
                 placeholder: "",
                 hasStroke: true,
-                strokeColor: focus.wrappedValue && !text.wrappedValue.isEmpty ? .main : .gray2,
-                keyboardType: keyboardType,
-                focus: focus
+                strokeColor: isDateFieldFocused && !store.dateText.isEmpty ? .main : .gray2,
+                keyboardType: .decimalPad,
+                focus: $isDateFieldFocused
             )
+        }
+    }
+
+    var weightPicker: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            MText(
+                "현재 체중",
+                style: .b7,
+                color: .gray8,
+                alignment: .leading
+            )
+
+            HStack(spacing: 4) {
+                Picker("", selection: $store.currentWeightKg) {
+                    ForEach(store.selectableWeights, id: \.self) { weight in
+                        MText(
+                            "\(weight)",
+                            style: .b1,
+                            color: .gray10
+                        )
+                        .tag(weight)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .labelsHidden()
+                .frame(width: 80, height: 180)
+                .clipped()
+
+                MText(
+                    "kg",
+                    style: .b7,
+                    color: .gray4
+                )
+            }
+            .frame(maxWidth: .infinity)
         }
     }
 }

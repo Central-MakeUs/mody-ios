@@ -14,20 +14,23 @@ public struct WeightRecordFeature {
     @ObservableState
     public struct State: Equatable {
         var dateText: String
-        var currentWeightText: String
+        let selectableWeights: ClosedRange<Int>
+        var currentWeightKg: Int
 
         public init(currentWeight: Double) {
             let now = Date()
-            let currentWeightText = String(currentWeight)
+            let selectableWeights = 20...150
 
             self.dateText = now.toString(format: .custom("yyyy.MM.dd"))
-            self.currentWeightText = currentWeightText.hasSuffix(".0")
-                ? String(currentWeightText.dropLast(2))
-                : currentWeightText
+            self.selectableWeights = selectableWeights
+            self.currentWeightKg = min(
+                max(Int(currentWeight.rounded()), selectableWeights.lowerBound),
+                selectableWeights.upperBound
+            )
         }
 
-        var currentWeight: Double? {
-            Double(currentWeightText)
+        var currentWeight: Double {
+            Double(currentWeightKg)
         }
 
         var recordedOn: String? {
@@ -37,7 +40,7 @@ public struct WeightRecordFeature {
         }
 
         var isRecordButtonDisabled: Bool {
-            !isDateFormatValid || currentWeight == nil
+            !isDateFormatValid
         }
 
         private var isDateFormatValid: Bool {
