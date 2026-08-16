@@ -178,9 +178,17 @@ public struct ChallengeDetailFeature {
                 return .run { send in
                     do {
                         let now = Date.now
-                        ModyLogger.debug("Challenge Step 범위 \(startDate) ~ \(now)")
+                        let stepCountStartDate = Date.koreanCalendar.isDate(
+                            startDate,
+                            inSameDayAs: now
+                        ) ? startDate : now.startOfDay()
+                        ModyLogger.debug(
+                            "Challenge Step 범위(KST) "
+                            + "\(stepCountStartDate.toString(format: .custom("yyyy-MM-dd HH:mm:ss Z"))) ~ "
+                            + "\(now.toString(format: .custom("yyyy-MM-dd HH:mm:ss Z")))"
+                        )
                         let stepCount = try await healthUseCase.getStepCount(
-                            from: startDate,
+                            from: stepCountStartDate,
                             to: now
                         )
                         await send(.updateChallengeStepCount(groupID: groupID, stepCount: stepCount))
