@@ -29,21 +29,17 @@ struct FeedGroupSelectSheetView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            ScrollView {
-                VStack(spacing: 8) {
-                    ForEach(groupList, id: \.groupId) { group in
-                        groupRow(group)
-                    }
+            VStack(spacing: 8) {
+                ForEach(groupList, id: \.groupId) { group in
+                    groupRow(group)
                 }
             }
-            .scrollIndicators(.hidden)
 
-            addGroupButton
+            bottomContent
                 .padding(.bottom, 40)
         }
         .padding(.horizontal, 24)
         .padding(.top, 36)
-        .frame(maxHeight: .infinity)
         .background(Color.systemWhite)
         .ignoresSafeArea(.container, edges: .bottom)
     }
@@ -122,17 +118,29 @@ private extension FeedGroupSelectSheetView {
         groupList.count < 4
     }
 
+    @ViewBuilder
+    var bottomContent: some View {
+        if canAddGroup {
+            addGroupButton
+        } else {
+            MText(
+                "참여 가능한 최대 그룹 수에 도달했어요",
+                style: .c2,
+                color: .gray6
+            )
+        }
+    }
+
     var addGroupButton: some View {
         MButton(
             "그룹 추가하기",
-            style: canAddGroup ? .primary : .gray,
-            isDisabled: !canAddGroup,
+            style: .primary,
             horizontalPadding: 0,
             verticalPadding: 13,
             maxWidth: .infinity,
             trailingIcon: Image.icPlus,
             trailingIconSize: .init(width: 18, height: 18),
-            trailingIconColor: canAddGroup ? .gray10 : .gray5,
+            trailingIconColor: .gray10,
             action: onAddGroupTap
         )
     }
