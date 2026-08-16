@@ -13,6 +13,9 @@ public enum FeedOutput: Equatable {
     case reportConfirmationRequested(recordId: Int)
     case reportSucceeded
     case reportFailed(NetworkError)
+    case deleteConfirmationRequested(recordId: Int)
+    case deleteSucceeded
+    case deleteFailed(NetworkError)
 }
 
 @MainActor

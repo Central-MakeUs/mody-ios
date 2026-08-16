@@ -57,4 +57,11 @@ enum FeedEndpoint {
             method: .POST
         )
     }
+
+    static func deleteRecord(recordId: Int) -> CoreNetworkEndpoint {
+        CoreNetworkEndpoint(
+            path: "api/v1/records/\(recordId)",
+            method: .DELETE
+        )
+    }
 }

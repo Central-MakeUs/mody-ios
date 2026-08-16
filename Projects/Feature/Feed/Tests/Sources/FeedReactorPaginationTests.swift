@@ -496,6 +496,8 @@ private actor FeedPaginationRepositoryMock: FeedRepositoryProtocol {
             throw FeedReportTestError.failed
         }
     }
+
+    func deleteRecord(recordId: Int) async throws {}
 }
 
 private struct FeedPaginationAuthUseCaseMock: AuthUseCaseProtocol {

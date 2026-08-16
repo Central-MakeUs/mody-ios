@@ -38,7 +38,7 @@ public final class FeedReactor: Reactor {
         )
         var isInitialFeedLoading = false
         var isNextPageLoading = false
-        var isReportLoading = false
+        var isRecordMenuLoading = false
         var feedRecords: [FeedRecord] { feedPage.records }
         var nextFeedCursor: Int? { feedPage.nextCursor }
         var hasNextFeedPage: Bool { feedPage.hasNext }
@@ -54,7 +54,7 @@ public final class FeedReactor: Reactor {
         case setMyMemberId(Int?)
         case setInitialFeedLoading(Bool)
         case setNextPageLoading(Bool)
-        case setReportLoading(Bool)
+        case setRecordMenuLoading(Bool)
         case setFeedPage(FeedRecordPage)
         case resetFeedRecords
 
@@ -83,6 +83,7 @@ public final class FeedReactor: Reactor {
         case didTapCalendarDate(FeedWeekCalendarModel)
         case didReachFeedListBottom
         case didTapRecordMenu(FeedRecordMenu, recordId: Int)
+        case deleteRecordSucceeded
         
         case didTapRecordButton(FeedRecordType)
     }
@@ -131,11 +132,25 @@ public final class FeedReactor: Reactor {
         case .input(.refreshGroups):
             return fetchGroupsWithLoading()
         case let .input(.reportConfirmed(recordId)):
-            guard !currentState.isReportLoading else { return .empty() }
+            guard !currentState.isRecordMenuLoading else { return .empty() }
             guard let groupId = currentState.selectedGroup?.groupId else {
                 return sendOutput(.reportFailed(.invalidResponse))
             }
             return reportRecord(groupId: groupId, recordId: recordId)
+        case let .input(.deleteConfirmed(recordId)):
+            guard !currentState.isRecordMenuLoading else { return .empty() }
+            guard currentState.selectedGroup != nil else {
+                return sendOutput(.deleteFailed(.invalidResponse))
+            }
+            return deleteRecord(recordId: recordId)
+        case .deleteRecordSucceeded:
+            return .concat([
+                fetchFirstFeedPage(
+                    groupId: currentState.selectedGroup?.groupId,
+                    date: currentState.weekCalendarViewState.selectedDate
+                ),
+                sendOutput(.deleteSucceeded)
+            ])
         case .didTapDimmedOverlay,
              .didTapExerciseRecordButton,
              .didTapMealRecordButton:
@@ -196,6 +211,8 @@ public final class FeedReactor: Reactor {
             )
         case let .didTapRecordMenu(.report, recordId):
             return sendOutput(.reportConfirmationRequested(recordId: recordId))
+        case let .didTapRecordMenu(.delete, recordId):
+            return sendOutput(.deleteConfirmationRequested(recordId: recordId))
         case .didTapRecordButton(let recordType):
             return .concat([
                 .just(.setFloatingActionButtonExpanded(false)),
@@ -241,8 +258,8 @@ public final class FeedReactor: Reactor {
             newState.isInitialFeedLoading = isLoading
         case .setNextPageLoading(let isLoading):
             newState.isNextPageLoading = isLoading
-        case .setReportLoading(let isLoading):
-            newState.isReportLoading = isLoading
+        case .setRecordMenuLoading(let isLoading):
+            newState.isRecordMenuLoading = isLoading
         case .setFeedPage(let page):
             newState.feedPage = page
         case .resetFeedRecords:
@@ -303,7 +320,7 @@ private extension FeedReactor {
         recordId: Int
     ) -> Observable<Mutation> {
         withLoading(
-            Mutation.setReportLoading,
+            Mutation.setRecordMenuLoading,
             operation: asyncObservable { [weak self] in
                 guard let self else { return nil }
 
@@ -315,6 +332,24 @@ private extension FeedReactor {
                     self.output(.reportSucceeded)
                 } catch {
                     self.output(.reportFailed(error as? NetworkError ?? .unknown))
+                }
+
+                return nil
+            }
+        )
+    }
+
+    func deleteRecord(recordId: Int) -> Observable<Mutation> {
+        withLoading(
+            Mutation.setRecordMenuLoading,
+            operation: asyncObservable { [weak self] in
+                guard let self else { return nil }
+
+                do {
+                    try await self.feedUseCase.removeRecord(recordId: recordId)
+                    self.action.onNext(.deleteRecordSucceeded)
+                } catch {
+                    self.output(.deleteFailed(error as? NetworkError ?? .unknown))
                 }
 
                 return nil

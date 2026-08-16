@@ -76,6 +76,10 @@ actor FeedDemoMockRepository: FeedRepositoryProtocol {
     }
 
     func postRecordReport(groupId: Int, recordId: Int) async throws {}
+
+    func deleteRecord(recordId: Int) async throws {
+        records.removeAll { $0.recordId == recordId }
+    }
 }
 
 private extension FeedDemoMockRepository {

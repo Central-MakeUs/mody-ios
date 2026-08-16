@@ -146,6 +146,10 @@ public struct FeedUseCase {
             )
         }
     }
+    
+    public func removeRecord(recordId: Int) async throws {
+        try await feedRepository.deleteRecord(recordId: recordId)
+    }
 }
 
 private extension FeedUseCase {
