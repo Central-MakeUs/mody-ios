@@ -69,12 +69,22 @@ private extension WeightRecordView {
             MTextField(
                 $store.dateText,
                 placeholder: "",
+                cursorColor: .main,
                 hasStroke: true,
-                strokeColor: isDateFieldFocused && !store.dateText.isEmpty ? .main : .gray2,
+                strokeColor: dateFieldStrokeColor,
+                hasClearButton: !store.dateText.isEmpty,
+                errorMessage: "날짜 형식이 맞지 않아요",
+                isValid: store.isDateFormatValid,
                 keyboardType: .decimalPad,
                 focus: $isDateFieldFocused
             )
         }
+    }
+
+    var dateFieldStrokeColor: Color {
+        guard store.isDateFormatValid else { return .systemError }
+
+        return isDateFieldFocused ? .main : .gray2
     }
 
     var weightPicker: some View {

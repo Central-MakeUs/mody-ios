@@ -43,7 +43,7 @@ public struct WeightRecordFeature {
             !isDateFormatValid
         }
 
-        private var isDateFormatValid: Bool {
+        var isDateFormatValid: Bool {
             let components = dateText.split(
                 separator: ".",
                 omittingEmptySubsequences: false
