@@ -68,6 +68,9 @@ public struct ChallengeFeature {
                 return .send(.challengeDetail(.stepChallengeChanged))
             case .input(.weeklyChallengeProofCreated):
                 return .send(.challengeDetail(.refreshCurrentWeeklyChallenge))
+            case .input(.challengeDetailRequested):
+                state.selectedTab = .challenge
+                return .none
             case .challengeStreak(let streakAction):
                 return handleStreakAction(&state, streakAction)
             case .challengeDetail(let detailAction):

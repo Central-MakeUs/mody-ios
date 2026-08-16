@@ -12,6 +12,7 @@ public enum ChallengeInput {
     case recordUpdated
     case stepChallengeChanged
     case weeklyChallengeProofCreated
+    case challengeDetailRequested
 }
 
 @MainActor
