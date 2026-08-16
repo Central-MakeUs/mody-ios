@@ -172,6 +172,7 @@ private extension ChallengeDetailContributionRankingItem {
                     color: .gray7
                 )
             }
+            .contentTransition(.numericText(value: Double(ranking.stepCount)))
         } else {
             SkeletonView(width: skeletonWidth, height: 22)
         }

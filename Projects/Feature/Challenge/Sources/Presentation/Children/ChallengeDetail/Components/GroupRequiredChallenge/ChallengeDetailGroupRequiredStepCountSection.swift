@@ -82,6 +82,8 @@ private extension ChallengeDetailGroupRequiredStepCountSection {
                 .font(ModyTypography.c1.token.swiftUIFont)
         )
         .foregroundStyle(Color.main0)
+        .contentTransition(.numericText(value: Double(stepCount)))
+        .animation(.easeInOut(duration: 0.22), value: stepCount)
     }
 
     func targetStepCountText(_ stepCount: Int) -> some View {
