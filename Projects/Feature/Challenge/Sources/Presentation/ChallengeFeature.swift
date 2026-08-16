@@ -100,7 +100,7 @@ private extension ChallengeFeature {
             return .run { [output] _ in
                 await output(.nudgeStarted)
             }
-        case .nudgeCompleted(let nickname):
+        case let .nudgeCompleted(_, _, nickname):
             return .run { [output] _ in
                 await output(.nudgeSucceeded(nickname: nickname))
             }

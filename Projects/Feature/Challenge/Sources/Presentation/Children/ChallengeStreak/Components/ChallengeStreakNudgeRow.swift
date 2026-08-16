@@ -16,6 +16,7 @@ struct ChallengeStreakNudgeRow: View {
     private let nickname: String?
     private let profileImageURL: String?
     private let recordedToday: Bool?
+    private let buttonStatus: ChallengeNudgeButtonStatus?
     private let imageLoader: RemoteImageLoading
     private let onNudgeButtonTapped: () -> Void
 
@@ -23,12 +24,14 @@ struct ChallengeStreakNudgeRow: View {
         nickname: String?,
         profileImageURL: String?,
         recordedToday: Bool?,
+        buttonStatus: ChallengeNudgeButtonStatus?,
         imageLoader: RemoteImageLoading,
         onNudgeButtonTapped: @escaping () -> Void
     ) {
         self.nickname = nickname
         self.profileImageURL = profileImageURL
         self.recordedToday = recordedToday
+        self.buttonStatus = buttonStatus
         self.imageLoader = imageLoader
         self.onNudgeButtonTapped = onNudgeButtonTapped
     }
@@ -100,11 +103,14 @@ private extension ChallengeStreakNudgeRow {
 
     @ViewBuilder
     var actionButton: some View {
-        if let recordedToday {
-            if recordedToday {
-                completedButton
-            } else {
+        if let buttonStatus {
+            switch buttonStatus {
+            case .available:
                 nudgeButton
+            case .nudged:
+                disabledButton(title: "찌르기 완료")
+            case .recorded:
+                disabledButton(title: "기록 완료")
             }
         } else {
             SkeletonView(width: 88, height: 34)
@@ -131,15 +137,14 @@ private extension ChallengeStreakNudgeRow {
         }
     }
 
-    var completedButton: some View {
+    func disabledButton(title: String) -> some View {
         Button(action: onNudgeButtonTapped) {
             MText(
-                "기록 완료",
+                title,
                 style: .c1,
                 color: .systemWhite
             )
-            .vPadding(7)
-            .hPadding(18)
+            .frame(width: 88, height: 34)
             .background(Color.gray3)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }

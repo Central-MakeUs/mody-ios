@@ -14,6 +14,7 @@ private struct ChallengeNudgeMemberResponse: Decodable, Equatable {
     let nickname: String?
     let profileImageUrl: String?
     let recordedToday: Bool?
+    let buttonStatus: String?
 }
 
 extension ChallengeNudgeInfoResponse {
@@ -23,7 +24,9 @@ extension ChallengeNudgeInfoResponse {
                 memberId: member.memberId ?? -1,
                 nickname: member.nickname ?? "",
                 profileImageUrl: member.profileImageUrl ?? "",
-                recordedToday: member.recordedToday ?? false
+                recordedToday: member.recordedToday ?? false,
+                buttonStatus: ChallengeNudgeButtonStatus(rawValue: member.buttonStatus ?? "")
+                    ?? (member.recordedToday == true ? .recorded : .nudged)
             )
         }
     }
