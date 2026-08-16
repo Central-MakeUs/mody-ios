@@ -191,14 +191,16 @@ private extension FeedUseCase {
         from region: CGRect
     ) -> FeedRecordImageCropRegionRequest {
         FeedRecordImageCropRegionRequest(
-            x: clampedNormalizedValue(Double(region.origin.x)),
-            y: clampedNormalizedValue(Double(region.origin.y)),
-            width: clampedNormalizedValue(Double(region.width)),
-            height: clampedNormalizedValue(Double(region.height))
+            x: normalizedCropValue(Double(region.origin.x)),
+            y: normalizedCropValue(Double(region.origin.y)),
+            width: normalizedCropValue(Double(region.width)),
+            height: normalizedCropValue(Double(region.height))
         )
     }
 
-    func clampedNormalizedValue(_ value: Double) -> Double {
-        min(max(value, 0), 1)
+    func normalizedCropValue(_ value: Double) -> Double {
+        let decimalScale = 100_000_000_000_000_000.0
+        let clampedValue = min(max(value, 0), 1)
+        return (clampedValue * decimalScale).rounded() / decimalScale
     }
 }
