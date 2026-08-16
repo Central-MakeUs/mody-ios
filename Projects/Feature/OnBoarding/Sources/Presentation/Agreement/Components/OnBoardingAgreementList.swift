@@ -47,7 +47,7 @@ struct OnBoardingAgreementList: View {
             allAgreementButton
                 .padding(.bottom, 24)
             
-            VStack(spacing: 16) {
+            VStack(spacing: 12) {
                 OnBoardingAgreementRow(
                     title: "개인정보처리방침 (필수)",
                     isAccepted: isPrivacyPolicyAccepted,
@@ -62,7 +62,7 @@ struct OnBoardingAgreementList: View {
                     onDetailTapped: onTermsOfServiceDetailTapped
                 )
             }
-            .hPadding(14)
+            .padding(.leading, 12)
         }
     }
 }
@@ -72,12 +72,12 @@ private extension OnBoardingAgreementList {
         Button {
             onAllAgreementTapped()
         } label: {
-            HStack(spacing: 0) {
+            HStack(spacing: 8) {
                 Image.icCheck
                     .resizable()
                     .renderingMode(.template)
                     .frame(width: 24, height: 24)
-                    .foregroundStyle(isAllAccepted ? Color.gray10 : Color.gray3)
+                    .foregroundStyle(isAllAccepted ? Color.main0 : Color.gray4)
                 
                 MText(
                     "전체 동의",
@@ -85,10 +85,10 @@ private extension OnBoardingAgreementList {
                     color: .gray10
                 )
             }
-            .padding(14)
+            .padding(12)
             .greedyWidth(.leading)
         }
-        .background(Color.main)
+        .background(isAllAccepted ? Color.main4 : Color.gray1)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

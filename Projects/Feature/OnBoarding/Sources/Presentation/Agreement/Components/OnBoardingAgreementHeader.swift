@@ -19,7 +19,7 @@ struct OnBoardingAgreementHeader: View {
             )
 
             MText(
-                "MODY를 시작하려면 약관 동의가 필요해요",
+                "MODY를 시작하려면 약관 동의가 필요해요.",
                 style: .b7,
                 color: .gray6,
                 alignment: .leading

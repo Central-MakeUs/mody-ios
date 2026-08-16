@@ -33,13 +33,13 @@ struct OnBoardingAgreementRow: View {
                     Image.icCheck
                         .resizable()
                         .renderingMode(.template)
-                        .foregroundStyle(isAccepted ? Color.gray10 : Color.gray3)
+                        .foregroundStyle(isAccepted ? Color.main0 : Color.gray4)
                         .frame(width: 24, height: 24)
 
                     MText(
                         title,
                         style: .b7,
-                        color: .gray10,
+                        color: .gray7,
                         alignment: .leading
                     )
 
