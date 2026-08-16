@@ -32,6 +32,10 @@ public final class FeedViewController: UIViewController, View {
         collectionView.showsVerticalScrollIndicator = true
         return collectionView
     }()
+    private lazy var menuDismissTapGestureRecognizer = UITapGestureRecognizer(
+        target: self,
+        action: #selector(didTapOutsideRecordMenu)
+    )
     var feedListViewState = FeedListViewState(
         records: [],
         isInitialLoading: false,
@@ -304,6 +308,9 @@ private extension FeedViewController {
 private extension FeedViewController {
     func setupUI() {
         view.backgroundColor = .systemWhite
+        menuDismissTapGestureRecognizer.cancelsTouchesInView = false
+        menuDismissTapGestureRecognizer.delegate = self
+        view.addGestureRecognizer(menuDismissTapGestureRecognizer)
         groupHeaderView.backgroundColor = .systemWhite
         dimmedControl.backgroundColor = .systemBlack.withAlphaComponent(0.6)
         feedEmptyView.isHidden = true
@@ -326,6 +333,17 @@ private extension FeedViewController {
         expandedButtonStackView.axis = .vertical
         expandedButtonStackView.alignment = .trailing
         expandedButtonStackView.spacing = 10
+    }
+
+    @objc func didTapOutsideRecordMenu() {
+        dismissVisibleRecordMenus()
+    }
+
+    func dismissVisibleRecordMenus(except excludedCell: FeedRecordCardCell? = nil) {
+        feedCollectionView.visibleCells
+            .compactMap { $0 as? FeedRecordCardCell }
+            .filter { $0 !== excludedCell }
+            .forEach { $0.dismissMenu() }
     }
     
     func setupLayout() {
@@ -381,5 +399,37 @@ private extension FeedViewController {
             $0.top.equalTo(weekCalendarView.snp.bottom)
             $0.leading.trailing.bottom.equalToSuperview()
         }
+    }
+}
+
+extension FeedViewController: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldReceive touch: UITouch
+    ) -> Bool {
+        guard gestureRecognizer === menuDismissTapGestureRecognizer,
+              let touchedView = touch.view,
+              let recordCell = recordCardCell(containing: touchedView),
+              recordCell.containsMenuInteraction(touchedView) else {
+            return true
+        }
+
+        dismissVisibleRecordMenus(except: recordCell)
+        return false
+    }
+}
+
+private extension FeedViewController {
+    func recordCardCell(containing view: UIView) -> FeedRecordCardCell? {
+        var currentView: UIView? = view
+
+        while let candidateView = currentView {
+            if let recordCell = candidateView as? FeedRecordCardCell {
+                return recordCell
+            }
+            currentView = candidateView.superview
+        }
+
+        return nil
     }
 }

@@ -90,8 +90,15 @@ final class FeedRecordCardCell: UICollectionViewCell {
         secondValueLabel.text = viewState.secondInfoValue
     }
 
-    private func dismissMenu() {
+    func dismissMenu() {
         menuView.isHidden = true
+    }
+
+    func containsMenuInteraction(_ view: UIView) -> Bool {
+        view === moreButton
+            || view.isDescendant(of: moreButton)
+            || view === menuView
+            || view.isDescendant(of: menuView)
     }
 }
 
