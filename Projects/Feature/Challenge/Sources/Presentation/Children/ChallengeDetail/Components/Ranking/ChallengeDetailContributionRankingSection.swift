@@ -76,6 +76,7 @@ private extension ChallengeDetailContributionRankingSection {
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.22), value: rankings)
     }
 }
 

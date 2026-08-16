@@ -215,12 +215,19 @@ public struct ChallengeDetailFeature {
                     recordedOn: Date.now.toString(format: .yyyyMMdd),
                     stepCount: stepCount
                 )
-                return .run { _ in
-                    try? await challengeUseCase.updateChallengeStepCount(
-                        groupId: groupID,
-                        request: request
-                    )
-                    ModyLogger.debug("Step Count 등록: \(stepCount)")
+                return .run { send in
+                    do {
+                        try await challengeUseCase.updateChallengeStepCount(
+                            groupId: groupID,
+                            request: request
+                        )
+                        ModyLogger.debug("Step Count 등록: \(stepCount)")
+
+                        await send(fetchChallengeStepRankings(groupID: groupID))
+                        await send(fetchStepChallengeStatus(groupID: groupID))
+                    } catch {
+                        ModyLogger.debug("Challenge step count update failed: \(error)")
+                    }
                 }
             case let .challengeStepRankingsFetched(groupID, rankings):
                 guard state.selectedGroup?.groupId == groupID else {
