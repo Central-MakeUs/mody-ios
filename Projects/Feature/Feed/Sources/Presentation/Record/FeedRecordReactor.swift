@@ -11,6 +11,7 @@ import CoreCameraInterface
 import CoreModyImageInterface
 import FeedInterface
 import ReactorKit
+import Util
 
 public final class FeedRecordReactor: Reactor {
     public let initialState: State
@@ -104,7 +105,7 @@ public final class FeedRecordReactor: Reactor {
         self.output = output
         self.initialState = State(
             recordType: recordType,
-            mealTime: Self.makeInitialMealTime()
+            mealTime: Date()
         )
     }
 
@@ -183,17 +184,6 @@ public final class FeedRecordReactor: Reactor {
 }
 
 private extension FeedRecordReactor {
-    static func makeInitialMealTime() -> Date {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
-        return calendar.date(
-            bySettingHour: 9,
-            minute: 0,
-            second: 0,
-            of: Date()
-        ) ?? Date()
-    }
-
     func routeToBack() -> Observable<Mutation> {
         return .deferred { [weak router] in
             Task { @MainActor in
@@ -226,6 +216,7 @@ private extension FeedRecordReactor {
                         imageKey: imageKey,
                         recordType: state.recordType,
                         mealTime: state.mealTime,
+                        calendar: Date.koreanCalendar,
                         mealMenu: state.mealMenu,
                         exerciseType: state.selectedExerciseType,
                         customExerciseName: state.customExerciseName,
