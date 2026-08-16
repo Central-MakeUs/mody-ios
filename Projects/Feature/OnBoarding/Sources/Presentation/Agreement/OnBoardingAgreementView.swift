@@ -53,7 +53,7 @@ struct OnBoardingAgreementView: View {
                     onPrivacyPolicyDetailTapped: onPrivacyPolicyDetailTapped,
                     onTermsOfServiceDetailTapped: onTermsOfServiceDetailTapped
                 )
-                .padding(.top, 29)
+                .padding(.top, 36)
             }
             .padding(.horizontal, 24)
             .padding(.top, 72)
