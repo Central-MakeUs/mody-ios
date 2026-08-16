@@ -61,17 +61,38 @@ extension FeedDemoCoordinator: FeedOutputHandler {
                 message: "검토 및 처리는 최대 7일까지 걸릴 수 있어요."
             )
         case let .reportFailed(error):
-            let title: String
-            let message: String
-            if case let .serverError(_, _, fallback) = error {
-                title = fallback.title
-                message = fallback.message
-            } else {
-                title = error.title
-                message = error.message
-            }
-            presentReportResultAlert(title: title, message: message)
+            presentErrorAlert(error)
+        case let .deleteConfirmationRequested(recordId):
+            let alert = UIAlertController(
+                title: "게시물을 삭제하시겠어요?",
+                message: "한 번 삭제한 게시물은 복구할 수 없어요.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+            alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                self?.feedInputHandler?.handle(
+                    input: .deleteConfirmed(recordId: recordId)
+                )
+            })
+            navigationController.present(alert, animated: true)
+        case .deleteSucceeded:
+            break
+        case let .deleteFailed(error):
+            presentErrorAlert(error)
         }
+    }
+
+    private func presentErrorAlert(_ error: NetworkError) {
+        let title: String
+        let message: String
+        if case let .serverError(_, _, fallback) = error {
+            title = fallback.title
+            message = fallback.message
+        } else {
+            title = error.title
+            message = error.message
+        }
+        presentReportResultAlert(title: title, message: message)
     }
 
     private func presentReportResultAlert(title: String, message: String) {

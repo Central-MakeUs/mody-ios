@@ -240,4 +240,6 @@ private final class FeedUseCaseRepositorySpy: FeedRepositoryProtocol {
         reportedGroupID = groupId
         reportedRecordID = recordId
     }
+
+    func deleteRecord(recordId: Int) async throws {}
 }

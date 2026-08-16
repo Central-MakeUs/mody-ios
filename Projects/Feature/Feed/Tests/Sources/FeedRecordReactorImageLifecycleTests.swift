@@ -220,6 +220,8 @@ private final class FeedRepositoryMock: FeedRepositoryProtocol {
     }
 
     func postRecordReport(groupId: Int, recordId: Int) async throws {}
+
+    func deleteRecord(recordId: Int) async throws {}
 }
 
 private final class ImageUploadUseCaseMock: ImageUploadUseCaseProtocol {

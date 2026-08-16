@@ -9,36 +9,24 @@ import XCTest
 @testable import Feed
 
 final class FeedRecordCardViewStateTests: XCTestCase {
-    func testPhaseOneShowsReportMenuForAnotherMembersRecord() {
+    func testShowsReportMenuForAnotherMembersRecord() {
         let viewState = FeedRecordCardViewState(
             record: makeRecord(memberId: 2),
-            myMemberId: 1,
-            isPhaseOne: true
+            myMemberId: 1
         )
 
         XCTAssertTrue(viewState.showsMoreButton)
         XCTAssertEqual(viewState.menus, [.report])
     }
 
-    func testPhaseOneHidesMoreButtonForMyRecord() {
+    func testShowsDeleteMenuForMyRecord() {
         let viewState = FeedRecordCardViewState(
             record: makeRecord(memberId: 1),
-            myMemberId: 1,
-            isPhaseOne: true
-        )
-
-        XCTAssertFalse(viewState.showsMoreButton)
-        XCTAssertTrue(viewState.menus.isEmpty)
-    }
-
-    func testPhaseTwoKeepsMoreButtonVisibleForFutureActions() {
-        let viewState = FeedRecordCardViewState(
-            record: makeRecord(memberId: 1),
-            myMemberId: 1,
-            isPhaseOne: false
+            myMemberId: 1
         )
 
         XCTAssertTrue(viewState.showsMoreButton)
+        XCTAssertEqual(viewState.menus, [.delete])
     }
 }
 
