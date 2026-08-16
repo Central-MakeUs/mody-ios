@@ -15,6 +15,7 @@ import DesignSystem
 
 public struct ProfileView: View {
     @Bindable private var store: StoreOf<ProfileFeature>
+    @FocusState private var isNameFieldFocused: Bool
     private let imageLoader: RemoteImageLoading
     private let cameraCaptureBuilder: CameraCaptureBuildable
 
@@ -90,7 +91,8 @@ private extension ProfileView {
                         name: $store.name,
                         displayedBirthDate: store.displayedBirthDate,
                         maxNameCount: store.maxNameCount,
-                        isNameValid: store.isNameValid
+                        isNameValid: store.isNameValid,
+                        isNameFieldFocused: $isNameFieldFocused
                     )
                     .padding(.top, 28)
                     .padding(.horizontal, 24)
@@ -150,6 +152,7 @@ private extension ProfileView {
 
     var arrowLeftButton: some View {
         Button {
+            isNameFieldFocused = false
             store.send(.backButtonTapped)
         } label: {
             Image.icLeftArrow
@@ -167,6 +170,20 @@ private extension ProfileView {
     var alertView: some View {
         if let alertCase = store.alertCase {
             switch alertCase {
+            case .unsavedChanges:
+                MAlertContentView(
+                    title: "변경사항이 저장되지 않았어요!",
+                    contents: "지금 나가면 변경한 내용이 사라집니다.",
+                    leadingButton: MAlertButton(
+                        "계속 수정",
+                        style: .gray
+                    ) {
+                        store.send(.continueEditingButtonTapped)
+                    },
+                    trailingButton: MAlertButton("저장 안 함") {
+                        store.send(.discardChangesButtonTapped)
+                    }
+                )
             case .deleteConfirmation:
                 MAlertContentView(
                     title: "정말 모디를 떠나실건가요?",

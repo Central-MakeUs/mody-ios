@@ -10,22 +10,24 @@ import SwiftUI
 
 struct ProfileForm: View {
     @Binding private var name: String
-    @FocusState private var isNameFieldFocused: Bool
 
     private let displayedBirthDate: String
     private let maxNameCount: Int
     private let isNameValid: Bool?
+    private let isNameFieldFocused: FocusState<Bool>.Binding
 
     init(
         name: Binding<String>,
         displayedBirthDate: String,
         maxNameCount: Int,
-        isNameValid: Bool?
+        isNameValid: Bool?,
+        isNameFieldFocused: FocusState<Bool>.Binding
     ) {
         self._name = name
         self.displayedBirthDate = displayedBirthDate
         self.maxNameCount = maxNameCount
         self.isNameValid = isNameValid
+        self.isNameFieldFocused = isNameFieldFocused
     }
 
     var body: some View {
@@ -44,7 +46,7 @@ struct ProfileForm: View {
                     errorMessage: "14자 이내로 적어주세요",
                     maxCount: maxNameCount,
                     isValid: isNameValid,
-                    focus: $isNameFieldFocused
+                    focus: isNameFieldFocused
                 )
             }
 
@@ -72,7 +74,7 @@ private extension ProfileForm {
     var nameFieldStrokeColor: Color {
         guard isNameValid != false else { return .systemError }
 
-        return isNameFieldFocused ? .main : .gray2
+        return isNameFieldFocused.wrappedValue ? .main : .gray2
     }
 
     func fieldTitle(_ title: String) -> some View {
