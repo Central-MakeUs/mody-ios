@@ -133,7 +133,6 @@ public struct MyPageFeature {
                     let weightRecordSheet = state.weightRecordSheet,
                     let recordedOn = weightRecordSheet.recordedOn
                 else {
-                    state.weightRecordSheet = nil
                     return .none
                 }
 
