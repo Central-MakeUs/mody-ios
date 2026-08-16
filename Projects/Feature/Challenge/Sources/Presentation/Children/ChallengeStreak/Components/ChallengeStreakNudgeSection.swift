@@ -35,6 +35,7 @@ struct ChallengeStreakNudgeSection: View {
                             nickname: info.nickname,
                             profileImageURL: info.profileImageUrl,
                             recordedToday: info.recordedToday,
+                            buttonStatus: info.buttonStatus,
                             imageLoader: imageLoader
                         ) {
                             onNudgeButtonTapped(info.memberId)
@@ -46,6 +47,7 @@ struct ChallengeStreakNudgeSection: View {
                             nickname: nil,
                             profileImageURL: nil,
                             recordedToday: nil,
+                            buttonStatus: nil,
                             imageLoader: imageLoader,
                             onNudgeButtonTapped: {}
                         )

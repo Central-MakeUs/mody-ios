@@ -48,7 +48,7 @@ public struct ChallengeStreakFeature {
         case challengeNudgeInfoFetched(groupID: Int, [ChallengeNudgeInfo])
         case nudgeButtonTapped(memberID: Int)
         case nudgeStarted
-        case nudgeCompleted(nickname: String)
+        case nudgeCompleted(groupID: Int, memberID: Int, nickname: String)
         case nudgeFailed(NetworkError)
         case showAlert(NetworkError)
     }
@@ -123,7 +123,7 @@ public struct ChallengeStreakFeature {
                 guard !state.isNudging,
                       let groupID = state.selectedGroup?.groupId,
                       let nudgeInfo = state.nudgeInfos?.first(where: { $0.memberId == memberID }),
-                      !nudgeInfo.recordedToday else {
+                      nudgeInfo.buttonStatus == .available else {
                     return .none
                 }
 
@@ -142,8 +142,22 @@ public struct ChallengeStreakFeature {
                 )
             case .nudgeStarted:
                 return .none
-            case .nudgeCompleted:
+            case let .nudgeCompleted(groupID, memberID, _):
                 state.isNudging = false
+
+                guard state.selectedGroup?.groupId == groupID,
+                      let index = state.nudgeInfos?.firstIndex(where: { $0.memberId == memberID }),
+                      let nudgeInfo = state.nudgeInfos?[index] else {
+                    return .none
+                }
+
+                state.nudgeInfos?[index] = ChallengeNudgeInfo(
+                    memberId: nudgeInfo.memberId,
+                    nickname: nudgeInfo.nickname,
+                    profileImageUrl: nudgeInfo.profileImageUrl,
+                    recordedToday: nudgeInfo.recordedToday,
+                    buttonStatus: .nudged
+                )
                 return .none
             case let .nudgeFailed(error):
                 state.isNudging = false
@@ -185,7 +199,11 @@ private extension ChallengeStreakFeature {
                 memberId: memberID
             )
 
-            return .nudgeCompleted(nickname: nickname)
+            return .nudgeCompleted(
+                groupID: groupID,
+                memberID: memberID,
+                nickname: nickname
+            )
         } catch {
             return .nudgeFailed(error as? NetworkError ?? .unknown)
         }
