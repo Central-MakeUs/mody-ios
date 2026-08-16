@@ -16,17 +16,17 @@ public enum WalkChallengeRequiredGroup: String, Equatable {
     var title: String {
         switch self {
         case .seoulIncheon:
-            return "인천까지 걸어가기 챌린지"
+            return "서울에서 인천까지"
         case .seoulCheonan:
-            return "천안까지 걸어가기 챌린지"
+            return "서울에서 천안까지"
         case .seoulDaejeon:
-            return "대전까지 걸어가기 챌린지"
+            return "서울에서 대전까지"
         case .seoulDaegu:
-            return "대구까지 걸어가기 챌린지"
+            return "서울에서 대구까지"
         case .seoulBusan:
-            return "부산까지 걸어가기 챌린지"
+            return "서울에서 부산까지"
         case .seoulJeju:
-            return "제주까지 걸어가기 챌린지"
+            return "서울에서 제주까지"
         }
     }
 }
