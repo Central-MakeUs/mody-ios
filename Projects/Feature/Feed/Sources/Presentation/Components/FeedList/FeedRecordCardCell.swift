@@ -132,7 +132,7 @@ private extension FeedRecordCardCell {
 
         arrowButton.setImage(.icRightArrow.withRenderingMode(.alwaysTemplate), for: .normal)
         arrowButton.tintColor = .systemWhite
-        arrowButton.isHidden = PhaseManager.shared.isPhaseOne
+        arrowButton.isHidden = true // Phase 2.0 에서는 Hide 처리
     }
 
     func setupLayout() {
