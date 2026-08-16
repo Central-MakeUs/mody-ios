@@ -33,17 +33,33 @@ extension FeedViewController {
                 }
             )
         )
+        viewController.safeAreaRegions = []
         viewController.view.backgroundColor = .systemWhite
         viewController.modalPresentationStyle = .pageSheet
 
         if let sheetPresentationController = viewController.sheetPresentationController {
             let identifier = UISheetPresentationController.Detent.Identifier("groupSelect")
-            let totalHeight: CGFloat = 407
-            let bottomInset = view.window?.safeAreaInsets.bottom ?? view.safeAreaInsets.bottom
 
             sheetPresentationController.detents = [
-                .custom(identifier: identifier) { _ in
-                    max(0, totalHeight - bottomInset)
+                .custom(identifier: identifier) { [weak self, weak viewController] context in
+                    guard let self, let viewController else { return 0 }
+
+                    let fittingWidth = viewController.view.bounds.width > 0
+                        ? viewController.view.bounds.width
+                        : view.bounds.width
+                    let contentHeight = viewController.sizeThatFits(
+                        in: .init(
+                            width: fittingWidth,
+                            height: .greatestFiniteMagnitude
+                        )
+                    ).height
+                    return min(
+                        max(
+                            0,
+                            contentHeight - DeviceSizeManager.shared.bottomSafeAreaInset
+                        ),
+                        context.maximumDetentValue
+                    )
                 }
             ]
             sheetPresentationController.prefersGrabberVisible = true
