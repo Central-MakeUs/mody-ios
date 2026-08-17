@@ -8,6 +8,7 @@
 import ComposableArchitecture
 import SplashInterface
 import CommonDomain
+import CoreAnalyticsInterface
 import CoreAuthInterface
 import Foundation
 import Base
@@ -16,15 +17,18 @@ import Base
 public struct SplashFeature {
     private let splashUseCase: SplashUseCase
     private let authUseCase: AuthUseCaseProtocol
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (SplashRoute) -> Void
     
     public init(
         splashUseCase: SplashUseCase,
         authUseCase: AuthUseCaseProtocol,
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (SplashRoute) -> Void
     ) {
         self.splashUseCase = splashUseCase
         self.authUseCase = authUseCase
+        self.analyticsUseCase = analyticsUseCase
         self.router = router
     }
 
@@ -153,7 +157,8 @@ public struct SplashFeature {
                 state.isLoading = false
                 let destination = makeNavigationDestination(from: userInfo)
 
-                return .run { [router] _ in
+                return .run { [analyticsUseCase, router] _ in
+                    analyticsUseCase.setUserID(String(userInfo.memberId))
                     await router(destination)
                 }
             case .userInfoFetchFailed:

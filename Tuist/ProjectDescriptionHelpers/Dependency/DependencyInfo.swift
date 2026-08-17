@@ -104,7 +104,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreKeyChainStorage),
                 .module(.CommonDomain),
-                .microFeature(.CoreAuth)
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .SignIn: .init(
@@ -113,7 +114,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .microFeature(.FirebaseService),
-                .microFeature(.CoreAuth)
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .OnBoarding: .init(
@@ -125,6 +127,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNotification),
                 .microFeature(.CoreHealth),
+                .microFeature(.CoreAnalytics),
                 .module(.Util)
             ]
         ),

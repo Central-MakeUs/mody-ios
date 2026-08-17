@@ -6,5 +6,5 @@
 //
 
 public protocol OnBoardingRepositoryProtocol {
-    func postSetupOnBoardingProfileInfo(request: OnBoardingProfileRequest) async throws
+    func postSetupOnBoardingProfileInfo(request: OnBoardingProfileRequest) async throws -> Int
 }
