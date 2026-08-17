@@ -39,7 +39,6 @@ struct NotificationFeature {
         var isLoading = false
         var isLoadingNextPage = false
         var didLoad = false
-        let isPhaseOne: Bool = PhaseManager.shared.isPhaseOne
 
         var isNotificationEmpty: Bool {
             didLoad && !isLoading && notifications.isEmpty
@@ -90,16 +89,10 @@ struct NotificationFeature {
                 state.nextCursor = page.nextCursor
                 state.hasNext = page.hasNext
 
-                let notifications = state.isPhaseOne
-                    ? page.notifications.filter {
-                        $0.type == .exerciseReminder || $0.type == .mealReminder
-                    }
-                    : page.notifications
-
                 if state.notifications.isEmpty {
-                    state.notifications = notifications
+                    state.notifications = page.notifications
                 } else {
-                    state.notifications.append(contentsOf: notifications)
+                    state.notifications.append(contentsOf: page.notifications)
                 }
 
                 return .none

@@ -12,7 +12,6 @@ import FeedInterface
 import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
-import CommonDomain
 import CoreModyImageInterface
 
 public final class MainCoordinator: MainCoordinating {
@@ -80,14 +79,8 @@ public final class MainCoordinator: MainCoordinating {
         )
         myPageInputHandler = myPageViewController
 
-        let isPhaseOne = PhaseManager.shared.isPhaseOne
-        let viewControllers = isPhaseOne
-            ? [feedViewController, myPageViewController]
-            : [feedViewController, challengeViewController, myPageViewController]
-        
-        let tabs: [MainTab] = isPhaseOne
-            ? [.feed, .myPage]
-            : [.feed, .challenge, .myPage]
+        let viewControllers = [feedViewController, challengeViewController, myPageViewController]
+        let tabs: [MainTab] = [.feed, .challenge, .myPage]
         
         tabBarController.setTabs(
             tabs: tabs,

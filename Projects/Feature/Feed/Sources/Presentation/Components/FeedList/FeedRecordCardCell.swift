@@ -9,7 +9,6 @@ import CoreModyImageInterface
 import UIKit
 import DesignSystem
 import SnapKit
-import CommonDomain
 
 final class FeedRecordCardCell: UICollectionViewCell {
     static let reuseIdentifier = "FeedRecordCardCell"
@@ -139,7 +138,7 @@ private extension FeedRecordCardCell {
 
         arrowButton.setImage(.icRightArrow.withRenderingMode(.alwaysTemplate), for: .normal)
         arrowButton.tintColor = .systemWhite
-        arrowButton.isHidden = true // Phase 2.0 에서는 Hide 처리
+        arrowButton.isHidden = true // Phase 3.0 에서 보일 예정
     }
 
     func setupLayout() {

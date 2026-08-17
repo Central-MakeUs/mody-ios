@@ -6,7 +6,6 @@
 //
 
 public enum RemoteConfigKeys: String {
-    case isPhaseOneFlag = "is_phase_one_flag"
     case forceUpdate = "force_update_flag"
     case guestLogin = "guest_login_flag"
     case notice = "notice_flag"

@@ -56,7 +56,6 @@ public struct SplashFeature {
         case userInfoFetched(UserInfo)
         case userInfoFetchFailed
         case setUpRemoteConfig
-        case cachingRemoteConfig
         case checkForceUpdate
         case checkMinimumSupportedVersion
         case checkNotice
@@ -81,13 +80,8 @@ public struct SplashFeature {
             case .setUpRemoteConfig:
                 return .run { send in
                     await splashUseCase.fetchAndActivate()
-                    await send(.cachingRemoteConfig)
+                    await send(.checkForceUpdate)
                 }
-            case .cachingRemoteConfig:
-                let isPhaseOne = splashUseCase.getRemoteConfigBool(for: .isPhaseOneFlag)
-                PhaseManager.shared.isPhaseOne = isPhaseOne
-
-                return .send(.checkForceUpdate)
             case .checkForceUpdate:
                 let needForceUpdate = splashUseCase.getRemoteConfigBool(for: .forceUpdate)
 

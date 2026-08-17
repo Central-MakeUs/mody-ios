@@ -8,7 +8,6 @@
 import UIKit
 import DesignSystem
 import SnapKit
-import CommonDomain
 
 final class FeedEmptyView: UIView {
     var onNudgeTap: (() -> Void)?
@@ -62,10 +61,6 @@ private extension FeedEmptyView {
         configuration.background.cornerRadius = 8
         configuration.contentInsets = .init(top: 9, leading: 8, bottom: 9, trailing: 8)
         nudgeButton.configuration = configuration
-
-        let isPhaseOne = PhaseManager.shared.isPhaseOne
-        descriptionLabel.isHidden = isPhaseOne
-        nudgeButton.isHidden = isPhaseOne
     }
 
     func setupLayout() {
