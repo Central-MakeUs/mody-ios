@@ -50,7 +50,6 @@ public struct NotificationSettingsFeature {
         let locale = Date.koreanLocale
         let timeZone = Date.koreanTimeZone
         let calendar: Calendar
-        let isPhaseOne: Bool
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
         var isLoading = false
@@ -130,7 +129,6 @@ public struct NotificationSettingsFeature {
             let calendar = Date.koreanCalendar
 
             self.calendar = calendar
-            self.isPhaseOne = PhaseManager.shared.isPhaseOne
             self.timeSheetDate = Date.fixedDateForHourMinTime(
                 hour: 9,
                 minute: 0,

@@ -86,16 +86,14 @@ private extension MyPageView {
             settingsRow(
                 title: "문의 및 약관 확인",
                 action: { openSupportAndTermsURL() },
-                hasDivider: store.isPhaseOne ? false : true
+                hasDivider: true
             )
 
-            if !store.isPhaseOne {
-                settingsRow(
-                    title: "건강 데이터 연동 설정",
-                    action: { store.send(.healthDataSettingsButtonTapped) },
-                    hasDivider: false
-                )
-            }
+            settingsRow(
+                title: "건강 데이터 연동 설정",
+                action: { store.send(.healthDataSettingsButtonTapped) },
+                hasDivider: false
+            )
         }
     }
 

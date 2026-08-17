@@ -81,7 +81,6 @@ public struct OnBoardingFeature {
         var stepFour: OnBoardingStepFourFeature.State = .init()
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
-        let isHealthPermissionVisible: Bool
 
         var isPrivacyPolicyAccepted = false
         var isTermsOfServiceAccepted = false
@@ -121,9 +120,7 @@ public struct OnBoardingFeature {
             }
         }
 
-        public init(isPhaseOne: Bool = PhaseManager.shared.isPhaseOne) {
-            self.isHealthPermissionVisible = !isPhaseOne
-        }
+        public init() {}
     }
     
     public enum Action {
@@ -228,13 +225,11 @@ public struct OnBoardingFeature {
             case .requestPermissions:
                 guard !state.isPermissionRequesting else { return .none }
                 state.isPermissionRequesting = true
-                let includesHealthPermission = state.isHealthPermissionVisible
 
                 return .run { send in
                     _ = await notificationPermission.requestNotificationPermission()
                     _ = await cameraPermission.requestCameraPermission()
-                    if includesHealthPermission,
-                       await healthPermission.shouldShowHealthPermissionPrompt() {
+                    if await healthPermission.shouldShowHealthPermissionPrompt() {
                         _ = await healthPermission.requestHealthPermission()
                     }
                     await send(.permissionsRequestCompleted)
