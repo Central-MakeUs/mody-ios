@@ -60,6 +60,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreNotification)),
             .module(.MicroFeature(.CoreModyImage)),
             .module(.MicroFeature(.CoreHealth)),
+            .module(.MicroFeature(.CoreAnalytics)),
 
             .external(.FirebaseCore),
             .external(.FirebaseMessaging),
@@ -72,6 +73,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreNotification),
             .microFeature(.CoreModyImage),
             .microFeature(.CoreHealth),
+            .microFeature(.CoreAnalytics),
             .microFeature(.Main)
         ],
         .Root: [
@@ -286,6 +288,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .CoreHealth: .init(),
-        .CoreAnalytics: .init()
+        .CoreAnalytics: .init(
+            implementation: [
+                .external(.AmplitudeSwift)
+            ]
+        )
     ]
 )
