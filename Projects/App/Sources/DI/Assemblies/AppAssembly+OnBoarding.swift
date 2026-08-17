@@ -11,6 +11,7 @@ import OnBoarding
 import CoreCameraInterface
 import CoreNetworkInterface
 import CoreNotificationInterface
+import CoreHealthInterface
 
 extension AppAssembly {
     func assembleOnBoardingFeature(in container: Container) {
@@ -30,11 +31,13 @@ extension AppAssembly {
             let onBoardingUseCase: OnBoardingUseCase = resolver.resolve()
             let cameraPermission: CameraPermissionInterface = resolver.resolve()
             let notificationPermission: NotificationPermissionInterface = resolver.resolve()
+            let healthPermission: HealthPermissionInterface = resolver.resolve()
 
             return OnBoardingFeature(
                 onBoardingUseCase: onBoardingUseCase,
                 cameraPermission: cameraPermission,
-                notificationPermission: notificationPermission
+                notificationPermission: notificationPermission,
+                healthPermission: healthPermission
             ) { [weak router] route in
                 router?.route(from: route)
             }

@@ -101,6 +101,7 @@ public struct FeedUseCase {
         imageKey: String,
         recordType: FeedRecordType,
         mealTime: Date,
+        calendar: Calendar,
         mealMenu: String,
         exerciseType: FeedExerciseType?,
         customExerciseName: String,
@@ -119,7 +120,6 @@ public struct FeedUseCase {
 
         switch recordType {
         case .meal:
-            let calendar = Self.koreanCalendar()
             let hour = calendar.component(.hour, from: mealTime)
             let minute = calendar.component(.minute, from: mealTime)
 
@@ -145,6 +145,10 @@ public struct FeedUseCase {
                 imageCropRegion: imageCropRegion
             )
         }
+    }
+    
+    public func removeRecord(recordId: Int) async throws {
+        try await feedRepository.deleteRecord(recordId: recordId)
     }
 }
 
@@ -187,21 +191,16 @@ private extension FeedUseCase {
         from region: CGRect
     ) -> FeedRecordImageCropRegionRequest {
         FeedRecordImageCropRegionRequest(
-            x: clampedNormalizedValue(Double(region.origin.x)),
-            y: clampedNormalizedValue(Double(region.origin.y)),
-            width: clampedNormalizedValue(Double(region.width)),
-            height: clampedNormalizedValue(Double(region.height))
+            x: normalizedCropValue(Double(region.origin.x)),
+            y: normalizedCropValue(Double(region.origin.y)),
+            width: normalizedCropValue(Double(region.width)),
+            height: normalizedCropValue(Double(region.height))
         )
     }
 
-    func clampedNormalizedValue(_ value: Double) -> Double {
-        min(max(value, 0), 1)
-    }
-
-    static func koreanCalendar() -> Calendar {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.locale = Locale(identifier: "ko_KR")
-        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
-        return calendar
+    func normalizedCropValue(_ value: Double) -> Double {
+        let decimalScale = 100_000_000_000_000_000.0
+        let clampedValue = min(max(value, 0), 1)
+        return (clampedValue * decimalScale).rounded() / decimalScale
     }
 }

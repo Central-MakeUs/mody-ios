@@ -25,7 +25,6 @@ public enum ExternalModule {
     case KakaoSDKAuth
     case KakaoSDKCommon
     case KakaoSDKShare
-    case KakaoSDKTemplate
     case KakaoSDKUser
     case FirebaseCore
     case FirebaseAnalytics
@@ -46,6 +45,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreHealth
     case CoreModyImage
     case CoreCamera
     case CoreNotification
@@ -100,6 +100,7 @@ public enum MicroFeatureModule {
         case .CoreNotification: "Projects/Core/CoreNotification"
         case .CoreCamera: "Projects/Core/CoreCamera"
         case .CoreModyImage: "Projects/Core/CoreModyImage"
+        case .CoreHealth: "Projects/Core/CoreHealth"
         }
     }
 }

@@ -21,6 +21,12 @@ final class FeedGroupButton: UIButton {
         color: .gray10,
         alignment: .left
     )
+    private let groupTypeLabel = MUILabel(
+        text: "그룹",
+        style: .c2,
+        color: .gray5,
+        alignment: .left
+    )
     private let skeletonView = UISkeletonView(width: 80, height: 28)
     private let arrowImageView = UIImageView()
 
@@ -40,6 +46,7 @@ extension FeedGroupButton {
     func configure(title: String?, isLoading: Bool) {
         groupTitleLabel.text = title
         groupTitleLabel.isHidden = isLoading
+        groupTypeLabel.isHidden = isLoading || title == nil
         skeletonView.isHidden = !isLoading
 
         if isLoading {
@@ -65,6 +72,7 @@ private extension FeedGroupButton {
     func setupLayout() {
         addSubview(contentStackView)
         contentStackView.addArrangedSubview(groupTitleLabel)
+        contentStackView.addArrangedSubview(groupTypeLabel)
         contentStackView.addArrangedSubview(skeletonView)
         contentStackView.addArrangedSubview(arrowImageView)
 

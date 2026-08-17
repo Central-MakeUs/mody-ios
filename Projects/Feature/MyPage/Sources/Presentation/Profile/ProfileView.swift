@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Base
+import CommonDomain
 import ComposableArchitecture
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -14,6 +15,7 @@ import DesignSystem
 
 public struct ProfileView: View {
     @Bindable private var store: StoreOf<ProfileFeature>
+    @FocusState private var isNameFieldFocused: Bool
     private let imageLoader: RemoteImageLoading
     private let cameraCaptureBuilder: CameraCaptureBuildable
 
@@ -35,30 +37,29 @@ public struct ProfileView: View {
             .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
                 alertView
             }
-            .sheet(
-                isPresented: $store.isPhotoFlowPresented,
-                onDismiss: { store.send(.photoPresentationDismissed) }
-            ) {
+            .sheet(isPresented: $store.isPhotoFlowPresented) {
                 MPhotoSourceSheetView(
                     onCameraTap: { store.send(.cameraSourceTapped) },
                     onGalleryTap: { store.send(.gallerySourceTapped) }
                 )
-                .presentationDetents([.height(200)])
+                .presentationDetents([
+                    .height(max(0, 200 - DeviceSizeManager.shared.bottomSafeAreaInset))
+                ])
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(36)
-                .fullScreenCover(
-                    isPresented: $store.isCameraPresented,
-                    onDismiss: { store.send(.photoCaptureCancelled) }
-                ) {
-                    if let source = store.photoCaptureSource {
-                        ProfileCameraCaptureView(
-                            source: source,
-                            cameraCaptureBuilder: cameraCaptureBuilder,
-                            onComplete: { store.send(.photoCaptureCompleted($0)) },
-                            onCancel: { store.send(.photoCaptureCancelled) }
-                        )
-                        .ignoresSafeArea()
-                    }
+            }
+            .fullScreenCover(
+                isPresented: $store.isCameraPresented,
+                onDismiss: { store.send(.photoCaptureCancelled) }
+            ) {
+                if let source = store.photoCaptureSource {
+                    ProfileCameraCaptureView(
+                        source: source,
+                        cameraCaptureBuilder: cameraCaptureBuilder,
+                        onComplete: { store.send(.photoCaptureCompleted($0)) },
+                        onCancel: { store.send(.photoCaptureCancelled) }
+                    )
+                    .ignoresSafeArea()
                 }
             }
     }
@@ -74,11 +75,12 @@ private extension ProfileView {
                     Button {
                         store.send(.profileImageTapped)
                     } label: {
-                        ProfileAvatarView(
+                        RemoteAvatarView(
                             imageURL: store.profileImageURL,
                             localImage: store.selectedPhoto?.croppedPreviewImage,
                             defaultAvatar: store.defaultAvatar,
-                            size: .init(width: 100, height: 100),
+                            width: 100,
+                            height: 100,
                             hasStroke: true,
                             imageLoader: imageLoader
                         )
@@ -89,7 +91,8 @@ private extension ProfileView {
                         name: $store.name,
                         displayedBirthDate: store.displayedBirthDate,
                         maxNameCount: store.maxNameCount,
-                        isNameValid: store.isNameValid
+                        isNameValid: store.isNameValid,
+                        isNameFieldFocused: $isNameFieldFocused
                     )
                     .padding(.top, 28)
                     .padding(.horizontal, 24)
@@ -149,6 +152,7 @@ private extension ProfileView {
 
     var arrowLeftButton: some View {
         Button {
+            isNameFieldFocused = false
             store.send(.backButtonTapped)
         } label: {
             Image.icLeftArrow
@@ -166,6 +170,20 @@ private extension ProfileView {
     var alertView: some View {
         if let alertCase = store.alertCase {
             switch alertCase {
+            case .unsavedChanges:
+                MAlertContentView(
+                    title: "변경사항이 저장되지 않았어요!",
+                    contents: "지금 나가면 변경한 내용이 사라집니다.",
+                    leadingButton: MAlertButton(
+                        "계속 수정",
+                        style: .gray
+                    ) {
+                        store.send(.continueEditingButtonTapped)
+                    },
+                    trailingButton: MAlertButton("저장 안 함") {
+                        store.send(.discardChangesButtonTapped)
+                    }
+                )
             case .deleteConfirmation:
                 MAlertContentView(
                     title: "정말 모디를 떠나실건가요?",

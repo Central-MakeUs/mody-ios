@@ -7,4 +7,5 @@
 
 public enum FeedRecordMenu: Equatable {
     case report
+    case delete
 }

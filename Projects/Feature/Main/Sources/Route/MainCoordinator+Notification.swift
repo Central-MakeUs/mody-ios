@@ -5,6 +5,7 @@
 //  Created by 김동준 on 7/24/26.
 //
 
+import ChallengeInterface
 import FeedInterface
 
 @MainActor
@@ -20,18 +21,33 @@ extension MainCoordinator {
         switch route {
         case .back:
             navigationController.popViewController(animated: true)
-        case let .record(recordType):
-            navigationController.popViewController(animated: true)
-
-            guard let transitionCoordinator = navigationController.transitionCoordinator else {
-                self.route(from: FeedRoute.routeToRecord(recordType))
-                return
+        case .feed:
+            popNotification { [weak self] in
+                self?.mainContainerViewController?.selectTab(.feed)
             }
-
-            transitionCoordinator.animate(alongsideTransition: nil) { [weak self] context in
-                guard !context.isCancelled else { return }
+        case .challenge:
+            popNotification { [weak self] in
+                self?.challengeInputHandler?.handle(input: .challengeDetailRequested)
+                self?.mainContainerViewController?.selectTab(.challenge)
+            }
+        case let .record(recordType):
+            popNotification { [weak self] in
                 self?.route(from: FeedRoute.routeToRecord(recordType))
             }
+        }
+    }
+
+    private func popNotification(completion: @escaping () -> Void) {
+        navigationController.popViewController(animated: true)
+
+        guard let transitionCoordinator = navigationController.transitionCoordinator else {
+            completion()
+            return
+        }
+
+        transitionCoordinator.animate(alongsideTransition: nil) { context in
+            guard !context.isCancelled else { return }
+            completion()
         }
     }
 }

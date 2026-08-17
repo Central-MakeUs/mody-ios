@@ -5,8 +5,6 @@
 //  Created by 김동준 on 7/21/26
 //
 
-import CommonDomain
-
 struct FeedRecordCardViewState: Equatable {
     let recordId: Int
     let nickname: String
@@ -25,8 +23,7 @@ struct FeedRecordCardViewState: Equatable {
 
     init(
         record: FeedRecord,
-        myMemberId: Int?,
-        isPhaseOne: Bool = PhaseManager.shared.isPhaseOne
+        myMemberId: Int?
     ) {
         let isMine = record.memberId == myMemberId
 
@@ -36,8 +33,8 @@ struct FeedRecordCardViewState: Equatable {
         streakText = "\(record.recordingStreakDays)일차"
         isStreakChipHidden = record.recordingStreakDays <= 0
         self.isMine = isMine
-        showsMoreButton = !isPhaseOne || !isMine
-        menus = isMine ? [] : [.report]
+        showsMoreButton = true
+        menus = isMine ? [.delete] : [.report]
         imageUrl = record.imageUrl
         imageCropRegion = record.imageCropRegion
 

@@ -76,6 +76,7 @@ final class FeedUseCaseTests: XCTestCase {
             imageKey: "meal-image-key",
             recordType: .meal,
             mealTime: mealTime,
+            calendar: makeKoreanCalendar(),
             mealMenu: "  닭가슴살 샐러드 \n",
             exerciseType: nil,
             customExerciseName: "",
@@ -115,6 +116,7 @@ final class FeedUseCaseTests: XCTestCase {
             imageKey: "exercise-image-key",
             recordType: .exercise,
             mealTime: Date(),
+            calendar: makeKoreanCalendar(),
             mealMenu: "",
             exerciseType: .custom,
             customExerciseName: "  계단 오르기  ",
@@ -190,8 +192,7 @@ private extension FeedUseCaseTests {
     }
 
     func makeKoreanDate(hour: Int, minute: Int) -> Date {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
+        let calendar = makeKoreanCalendar()
         return calendar.date(
             from: DateComponents(
                 year: 2026,
@@ -201,6 +202,12 @@ private extension FeedUseCaseTests {
                 minute: minute
             )
         ) ?? Date()
+    }
+
+    func makeKoreanCalendar() -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
+        return calendar
     }
 }
 
@@ -240,4 +247,6 @@ private final class FeedUseCaseRepositorySpy: FeedRepositoryProtocol {
         reportedGroupID = groupId
         reportedRecordID = recordId
     }
+
+    func deleteRecord(recordId: Int) async throws {}
 }

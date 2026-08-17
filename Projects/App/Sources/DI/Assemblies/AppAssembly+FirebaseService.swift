@@ -17,7 +17,6 @@ extension AppAssembly {
             FirebaseService(
                 remoteConfig: RemoteConfig.remoteConfig(),
                 defaultValues: [
-                    RemoteConfigKeys.isPhaseOneFlag.rawValue: NSNumber(value: false),
                     RemoteConfigKeys.forceUpdate.rawValue: NSNumber(value: false),
                     RemoteConfigKeys.guestLogin.rawValue: NSNumber(value: false),
                     RemoteConfigKeys.notice.rawValue: "{}" as NSString,

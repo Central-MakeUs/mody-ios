@@ -90,4 +90,14 @@ public struct FeedRepository: FeedRepositoryProtocol {
             throw NetworkError.invalidResponse
         }
     }
+
+    public func deleteRecord(recordId: Int) async throws {
+        let response: CoreNetworkResponse<CoreNetworkEmptyResponse> = try await network.request(
+            FeedEndpoint.deleteRecord(recordId: recordId)
+        )
+
+        guard response.isSuccess != false else {
+            throw NetworkError.invalidResponse
+        }
+    }
 }

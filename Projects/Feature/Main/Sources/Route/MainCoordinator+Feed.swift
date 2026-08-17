@@ -14,6 +14,8 @@ extension MainCoordinator: FeedRouter {
         switch route {
         case .addGroup:
             mainContainerViewController?.presentAddGroupAlert()
+        case .routeToChallenge:
+            mainContainerViewController?.selectTab(.challenge)
         case .routeToRecord(let recordType):
             let viewController = feedBuilder.makeFeedRecordViewController(
                 router: self,
@@ -29,6 +31,12 @@ extension MainCoordinator: FeedRouter {
 extension MainCoordinator: FeedOutputHandler {
     public func handle(output: FeedOutput) {
         switch output {
+        case let .selectedGroupUpdated(group):
+            challengeInputHandler?.handle(
+                input: .selectedGroupUpdated(group)
+            )
+        case .recordUpdated:
+            challengeInputHandler?.handle(input: .recordUpdated)
         case let .reportConfirmationRequested(recordId):
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(
@@ -53,22 +61,48 @@ extension MainCoordinator: FeedOutputHandler {
                 )
             )
         case let .reportFailed(error):
-            let title: String
-            let contents: String
-            if case let .serverError(_, _, fallback) = error {
-                title = fallback.title
-                contents = fallback.message
-            } else {
-                title = error.title
-                contents = error.message
-            }
-
+            showFeedErrorAlert(error)
+        case let .deleteConfirmationRequested(recordId):
             mainContainerViewController?.showAlert(
                 configuration: MainAlertConfiguration(
-                    title: title,
-                    contents: contents
+                    title: "게시물을 삭제하시겠어요?",
+                    contents: "한 번 삭제한 게시물은 복구할 수 없어요.",
+                    leadingButton: MAlertButton("취소", style: .gray),
+                    trailingButton: MAlertButton("삭제") { [weak self] in
+                        guard let self else { return }
+                        self.mainContainerViewController?.setLoading(true)
+                        self.feedInputHandler?.handle(
+                            input: .deleteConfirmed(recordId: recordId)
+                        )
+                    },
+                    dismissOnBackgroundTap: false
                 )
             )
+        case .deleteSucceeded:
+            mainContainerViewController?.setLoading(false)
+        case let .deleteFailed(error):
+            showFeedErrorAlert(error)
         }
+    }
+}
+
+private extension MainCoordinator {
+    func showFeedErrorAlert(_ error: NetworkError) {
+        let title: String
+        let contents: String
+        if case let .serverError(_, _, fallback) = error {
+            title = fallback.title
+            contents = fallback.message
+        } else {
+            title = error.title
+            contents = error.message
+        }
+
+        mainContainerViewController?.showAlert(
+            configuration: MainAlertConfiguration(
+                title: title,
+                contents: contents
+            )
+        )
     }
 }

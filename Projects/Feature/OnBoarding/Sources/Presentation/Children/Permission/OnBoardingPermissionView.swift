@@ -9,8 +9,6 @@ import DesignSystem
 import SwiftUI
 
 struct OnBoardingPermissionView: View {
-    let isHealthPermissionVisible: Bool
-
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -48,13 +46,11 @@ private extension OnBoardingPermissionView {
                 description: "갤러리에서 식단·운동 사진을 바로 불러오기"
             )
 
-            if isHealthPermissionVisible {
-                OnBoardingPermissionRow(
-                    icon: Image.icExercise,
-                    title: "건강 정보 (선택)",
-                    description: "걸음 수 챌린지"
-                )
-            }
+            OnBoardingPermissionRow(
+                icon: Image.icExercise,
+                title: "건강 정보 (선택)",
+                description: "걸음 수 챌린지"
+            )
         }
     }
 }

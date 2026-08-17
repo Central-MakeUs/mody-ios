@@ -42,7 +42,13 @@ public struct ProfileFeature {
 
     @ObservableState
     public struct State {
+        struct OriginalState {
+            let name: String
+            let profileImageURL: URL?
+        }
+
         public enum AlertCase: Equatable {
+            case unsavedChanges
             case deleteConfirmation
             case deleteCompleted
             case error(NetworkError)
@@ -61,6 +67,7 @@ public struct ProfileFeature {
         var selectedPhoto: CameraCaptureResult?
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
+        var originalState: OriginalState?
 
         var isNameTooLong: Bool {
             name.count > maxNameCount
@@ -73,6 +80,14 @@ public struct ProfileFeature {
 
         var isSaveButtonEnabled: Bool {
             isNameValid == true && !birthDate.isEmpty && !isLoading
+        }
+
+        var hasUnsavedChanges: Bool {
+            guard let originalState else { return false }
+
+            return name != originalState.name
+                || profileImageURL != originalState.profileImageURL
+                || selectedPhoto != nil
         }
 
         var displayedBirthDate: String {
@@ -94,9 +109,11 @@ public struct ProfileFeature {
         case showAlert(State.AlertCase)
         case onAppear
         case backButtonTapped
+        case leaveProfile
+        case continueEditingButtonTapped
+        case discardChangesButtonTapped
         case saveButtonTapped
         case profileImageTapped
-        case photoPresentationDismissed
         case cameraSourceTapped
         case gallerySourceTapped
         case photoCaptureCompleted(CameraCaptureResult)
@@ -145,10 +162,20 @@ public struct ProfileFeature {
                 state.socialLoginType = profile.socialLoginType
                 state.name = profile.name
                 state.birthDate = profile.birthDate
+                state.originalState = State.OriginalState(
+                    name: profile.name,
+                    profileImageURL: state.profileImageURL
+                )
                 return .none
             case let .profileFetchFailed(error):
                 return .send(.showAlert(.error(error)))
             case .backButtonTapped:
+                guard !state.hasUnsavedChanges else {
+                    return .send(.showAlert(.unsavedChanges))
+                }
+
+                return .send(.leaveProfile)
+            case .leaveProfile:
                 let selectedPhotoURL = state.selectedPhoto?.originalFile.fileURL
                 state.selectedPhoto = nil
                 state.isPhotoFlowPresented = false
@@ -161,20 +188,24 @@ public struct ProfileFeature {
                 return .run { [router] _ in
                     await router(.back)
                 }
+            case .continueEditingButtonTapped:
+                return .send(.alertAction(.dismiss))
+            case .discardChangesButtonTapped:
+                return .concatenate(
+                    .send(.alertAction(.dismiss)),
+                    .send(.leaveProfile)
+                )
             case .profileImageTapped:
                 guard !state.isLoading else { return .none }
                 state.isPhotoFlowPresented = true
                 return .none
-            case .photoPresentationDismissed:
-                state.isPhotoFlowPresented = false
-                state.isCameraPresented = false
-                state.photoCaptureSource = nil
-                return .none
             case .cameraSourceTapped:
+                state.isPhotoFlowPresented = false
                 state.photoCaptureSource = .camera
                 state.isCameraPresented = true
                 return .none
             case .gallerySourceTapped:
+                state.isPhotoFlowPresented = false
                 state.photoCaptureSource = .photoLibrary
                 state.isCameraPresented = true
                 return .none
@@ -216,7 +247,7 @@ public struct ProfileFeature {
                 state.selectedPhoto = nil
                 return .run { [output] send in
                     await output(.profileUpdated)
-                    await send(.backButtonTapped)
+                    await send(.leaveProfile)
                 }
             case let .profileUpdateFailed(error):
                 return .send(.showAlert(.error(error)))

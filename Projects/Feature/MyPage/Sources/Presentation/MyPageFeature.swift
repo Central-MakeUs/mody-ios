@@ -38,7 +38,6 @@ public struct MyPageFeature {
         var isLoading = false
         var isProfileRefreshing = false
         var isAllFetched = false
-        let isPhaseOne = PhaseManager.shared.isPhaseOne
         @Presents var weightRecordSheet: WeightRecordFeature.State?
 
         public init(defaultAvatar: DefaultAvatar = .random()) {
@@ -131,13 +130,12 @@ public struct MyPageFeature {
 
                 guard
                     let weightRecordSheet = state.weightRecordSheet,
-                    let recordedOn = weightRecordSheet.recordedOn,
-                    let weightKg = weightRecordSheet.currentWeight
+                    let recordedOn = weightRecordSheet.recordedOn
                 else {
-                    state.weightRecordSheet = nil
                     return .none
                 }
 
+                let weightKg = weightRecordSheet.currentWeight
                 state.isLoading = true
                 state.weightRecordSheet = nil
 
