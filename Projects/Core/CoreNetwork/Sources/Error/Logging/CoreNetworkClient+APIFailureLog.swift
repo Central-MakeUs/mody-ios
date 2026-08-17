@@ -37,16 +37,26 @@ extension CoreNetworkClient {
         endpoint: CoreNetworkEndpoint,
         networkError: NetworkError
     ) -> AmplitudeLogEvent {
-        AmplitudeLogEvent(
+        var properties: [String: Any] = [
+            "http_method": endpoint.method.rawValue,
+            "endpoint": analyticsEndpoint(endpoint.path),
+            "network_error": String(describing: networkError)
+        ]
+
+#if DEV
+        properties["headers"] = compactJSONString(headers(endpoint: endpoint))
+        properties["query_parameters"] = compactJSONString(endpoint.queryParameters)
+        properties["request_body"] = compactJSONString(jsonObject(endpoint.bodyParameters))
+#else
+        properties["query_parameters"] = compactJSONString(endpoint.queryParameters.keys.sorted())
+        properties["request_body"] = compactJSONString(
+            jsonKeyPaths(jsonObject(endpoint.bodyParameters))
+        )
+#endif
+
+        return AmplitudeLogEvent(
             name: "api_error",
-            properties: [
-                "http_method": endpoint.method.rawValue,
-                "endpoint": endpoint.path,
-                "headers": compactJSONString(headers(endpoint: endpoint)),
-                "query_parameters": compactJSONString(endpoint.queryParameters),
-                "request_body": compactJSONString(jsonObject(endpoint.bodyParameters)),
-                "network_error": String(describing: networkError)
-            ]
+            properties: properties
         )
     }
 }
@@ -105,6 +115,50 @@ private extension CoreNetworkClient {
         }
 
         return jsonString
+    }
+
+    func analyticsEndpoint(_ path: String) -> String {
+#if DEV
+        return path
+#else
+        return path
+            .split(separator: "/", omittingEmptySubsequences: false)
+            .map { component in
+                isIdentifierPathComponent(String(component)) ? ":id" : String(component)
+            }
+            .joined(separator: "/")
+#endif
+    }
+
+    func isIdentifierPathComponent(_ component: String) -> Bool {
+        !component.isEmpty && (
+            component.allSatisfy(\.isNumber)
+                || UUID(uuidString: component) != nil
+        )
+    }
+
+    func jsonKeyPaths(_ value: Any, prefix: String? = nil) -> [String] {
+        if let object = value as? [String: Any] {
+            return object.keys.sorted().flatMap { key in
+                let path = prefix.map { "\($0).\(key)" } ?? key
+                guard let child = object[key] else { return [path] }
+
+                let nestedPaths = jsonKeyPaths(child, prefix: path)
+
+                return nestedPaths.isEmpty ? [path] : nestedPaths
+            }
+        }
+
+        if let array = value as? [Any] {
+            guard let prefix else { return [] }
+
+            let arrayPath = "\(prefix)[]"
+            let nestedPaths = array.flatMap { jsonKeyPaths($0, prefix: arrayPath) }
+
+            return nestedPaths.isEmpty ? [arrayPath] : Array(Set(nestedPaths)).sorted()
+        }
+
+        return prefix.map { [$0] } ?? []
     }
 
     func maskedJSONValue(_ value: Any, key: String? = nil) -> Any {

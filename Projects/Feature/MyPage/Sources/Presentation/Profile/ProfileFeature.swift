@@ -8,6 +8,7 @@
 import ComposableArchitecture
 import Base
 import CommonDomain
+import CoreAnalyticsInterface
 import CoreAuthInterface
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -17,6 +18,7 @@ import ModyLogger
 
 @Reducer
 public struct ProfileFeature {
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let authUseCase: AuthUseCaseProtocol
     private let myPageUseCase: MyPageUseCase
     private let imageUploadUseCase: ImageUploadUseCaseProtocol
@@ -25,6 +27,7 @@ public struct ProfileFeature {
     private let output: @MainActor (MyPageOutput) -> Void
 
     public init(
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         authUseCase: AuthUseCaseProtocol,
         myPageUseCase: MyPageUseCase,
         imageUploadUseCase: ImageUploadUseCaseProtocol,
@@ -32,6 +35,7 @@ public struct ProfileFeature {
         router: @escaping @MainActor (MyPageProfileRoute) -> Void,
         output: @escaping @MainActor (MyPageOutput) -> Void
     ) {
+        self.analyticsUseCase = analyticsUseCase
         self.authUseCase = authUseCase
         self.myPageUseCase = myPageUseCase
         self.imageUploadUseCase = imageUploadUseCase
@@ -259,6 +263,7 @@ public struct ProfileFeature {
                     await send(logout())
                 }
             case .logoutSuccessfully:
+                analyticsUseCase.setUserID(nil)
                 state.isLoading = false
                 return .send(.routeToSignIn)
             case let .logoutFailed(error):
@@ -278,6 +283,7 @@ public struct ProfileFeature {
                     }
                 )
             case .deleteAccountSuccessfully:
+                analyticsUseCase.setUserID(nil)
                 return .send(.showAlert(.deleteCompleted))
             case let .deleteAccountFailed(error):
                 return .send(.showAlert(.error(error)))

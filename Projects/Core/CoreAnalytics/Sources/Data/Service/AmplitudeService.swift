@@ -23,7 +23,15 @@ public final class AmplitudeService {
     }
 
     func setUserID(_ userID: String?) {
-        amplitude?.setUserId(userId: userID)
+        guard let amplitude else { return }
+
+        guard let userID else {
+            amplitude.reset()
+            amplitude.setDeviceId(deviceId: UUID().uuidString)
+            return
+        }
+
+        amplitude.setUserId(userId: userID)
     }
 
     func log(_ event: AmplitudeLogEvent) {
