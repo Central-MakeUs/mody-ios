@@ -228,7 +228,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             implementation: [
                 .external(.Alamofire),
                 .module(.CommonDomain),
-                .module(.ModyLogger)
+                .module(.ModyLogger),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .FirebaseService: .init(
@@ -284,6 +285,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.Nuke)
             ]
         ),
-        .CoreHealth: .init()
+        .CoreHealth: .init(),
+        .CoreAnalytics: .init()
     ]
 )
