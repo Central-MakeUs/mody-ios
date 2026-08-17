@@ -9,9 +9,10 @@ import ComposableArchitecture
 import OnBoardingInterface
 import CommonDomain
 import Foundation
-import Util
 import CoreCameraInterface
 import CoreNotificationInterface
+import CoreHealthInterface
+import Util
 import Base
 
 @Reducer
@@ -19,17 +20,20 @@ public struct OnBoardingFeature {
     private let onBoardingUseCase: OnBoardingUseCase
     private let cameraPermission: CameraPermissionInterface
     private let notificationPermission: NotificationPermissionInterface
+    private let healthPermission: HealthPermissionInterface
     private let router: @MainActor (OnBoardingRoute) -> Void
 
     public init(
         onBoardingUseCase: OnBoardingUseCase,
         cameraPermission: CameraPermissionInterface,
         notificationPermission: NotificationPermissionInterface,
+        healthPermission: HealthPermissionInterface,
         router: @escaping @MainActor (OnBoardingRoute) -> Void
     ) {
         self.onBoardingUseCase = onBoardingUseCase
         self.cameraPermission = cameraPermission
         self.notificationPermission = notificationPermission
+        self.healthPermission = healthPermission
         self.router = router
     }
     
@@ -73,7 +77,6 @@ public struct OnBoardingFeature {
         var stepFour: OnBoardingStepFourFeature.State = .init()
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
-        let isHealthPermissionVisible: Bool
 
         var isPrivacyPolicyAccepted = false
         var isTermsOfServiceAccepted = false
@@ -113,9 +116,7 @@ public struct OnBoardingFeature {
             }
         }
 
-        public init(isPhaseOne: Bool = PhaseManager.shared.isPhaseOne) {
-            self.isHealthPermissionVisible = !isPhaseOne
-        }
+        public init() {}
     }
     
     public enum Action {
@@ -220,6 +221,9 @@ public struct OnBoardingFeature {
                 return .run { send in
                     _ = await notificationPermission.requestNotificationPermission()
                     _ = await cameraPermission.requestCameraPermission()
+                    if await healthPermission.shouldShowHealthPermissionPrompt() {
+                        _ = await healthPermission.requestHealthPermission()
+                    }
                     await send(.permissionsRequestCompleted)
                 }
             case .permissionsRequestCompleted:

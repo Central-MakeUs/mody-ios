@@ -86,7 +86,7 @@ private extension FeedRecordMenuView {
         button.setAttributedTitle(
             ModyTypography.c1.token.attributedString(
                 menu.title,
-                color: .gray10,
+                color: menu.titleColor,
                 alignment: .center
             ),
             for: .normal
@@ -109,6 +109,17 @@ private extension FeedRecordMenu {
         switch self {
         case .report:
             return "신고"
+        case .delete:
+            return "삭제"
+        }
+    }
+
+    var titleColor: UIColor {
+        switch self {
+        case .report:
+            return .gray10
+        case .delete:
+            return .systemError
         }
     }
 }

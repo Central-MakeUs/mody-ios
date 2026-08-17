@@ -6,7 +6,8 @@
 //
 
 public enum ChallengeRoute: Equatable {
-    case temp
+    case routeToChallengeChange(groupId: Int)
+    case routeToWeeklyDetail(groupId: Int, challengeId: Int, groupChallengeId: Int)
 }
 
 @MainActor

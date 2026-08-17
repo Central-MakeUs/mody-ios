@@ -9,7 +9,6 @@ import CoreModyImageInterface
 import UIKit
 import DesignSystem
 import SnapKit
-import CommonDomain
 
 final class FeedRecordCardCell: UICollectionViewCell {
     static let reuseIdentifier = "FeedRecordCardCell"
@@ -90,8 +89,15 @@ final class FeedRecordCardCell: UICollectionViewCell {
         secondValueLabel.text = viewState.secondInfoValue
     }
 
-    private func dismissMenu() {
+    func dismissMenu() {
         menuView.isHidden = true
+    }
+
+    func containsMenuInteraction(_ view: UIView) -> Bool {
+        view === moreButton
+            || view.isDescendant(of: moreButton)
+            || view === menuView
+            || view.isDescendant(of: menuView)
     }
 }
 
@@ -132,7 +138,7 @@ private extension FeedRecordCardCell {
 
         arrowButton.setImage(.icRightArrow.withRenderingMode(.alwaysTemplate), for: .normal)
         arrowButton.tintColor = .systemWhite
-        arrowButton.isHidden = PhaseManager.shared.isPhaseOne
+        arrowButton.isHidden = true // Phase 3.0 에서 보일 예정
     }
 
     func setupLayout() {

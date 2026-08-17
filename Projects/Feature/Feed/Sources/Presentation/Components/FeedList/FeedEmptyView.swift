@@ -8,9 +8,10 @@
 import UIKit
 import DesignSystem
 import SnapKit
-import CommonDomain
 
 final class FeedEmptyView: UIView {
+    var onNudgeTap: (() -> Void)?
+
     private let contentStackView = UIStackView()
     private let imageView = UIImageView()
     private let titleLabel = MUILabel(
@@ -29,6 +30,7 @@ final class FeedEmptyView: UIView {
         super.init(frame: frame)
         setupUI()
         setupLayout()
+        setupActions()
     }
 
     @available(*, unavailable)
@@ -59,10 +61,6 @@ private extension FeedEmptyView {
         configuration.background.cornerRadius = 8
         configuration.contentInsets = .init(top: 9, leading: 8, bottom: 9, trailing: 8)
         nudgeButton.configuration = configuration
-
-        let isPhaseOne = PhaseManager.shared.isPhaseOne
-        descriptionLabel.isHidden = isPhaseOne
-        nudgeButton.isHidden = isPhaseOne
     }
 
     func setupLayout() {
@@ -85,5 +83,18 @@ private extension FeedEmptyView {
         imageView.snp.makeConstraints {
             $0.width.lessThanOrEqualToSuperview()
         }
+    }
+
+    func setupActions() {
+        nudgeButton.addTarget(
+            self,
+            action: #selector(nudgeButtonTapped),
+            for: .touchUpInside
+        )
+    }
+
+    @objc
+    func nudgeButtonTapped() {
+        onNudgeTap?()
     }
 }

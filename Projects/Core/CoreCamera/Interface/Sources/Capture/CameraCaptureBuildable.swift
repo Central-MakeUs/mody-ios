@@ -12,6 +12,7 @@ public protocol CameraCaptureBuildable {
     func makeCameraViewController(
         source: CameraCaptureSource,
         isCropEnabled: Bool,
+        cropAspectRatio: CGSize?,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController

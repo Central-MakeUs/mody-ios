@@ -9,5 +9,24 @@ import UIKit
 
 public protocol ChallengeBuildable {
     @MainActor
-    func makeChallengeViewController(router: ChallengeRouter) -> UIViewController
+    func makeChallengeViewController(
+        router: ChallengeRouter,
+        outputHandler: ChallengeOutputHandler
+    ) -> UIViewController
+
+    @MainActor
+    func makeChallengeChangeViewController(
+        groupId: Int,
+        router: ChallengeChangeRouter,
+        outputHandler: ChallengeOutputHandler
+    ) -> UIViewController
+
+    @MainActor
+    func makeChallengeWeeklyDetailViewController(
+        groupId: Int,
+        challengeId: Int,
+        groupChallengeId: Int,
+        router: ChallengeWeeklyDetailRouter,
+        outputHandler: ChallengeOutputHandler
+    ) -> UIViewController
 }

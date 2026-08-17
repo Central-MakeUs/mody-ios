@@ -13,6 +13,7 @@ import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
 import CoreNotificationInterface
+import CoreModyImageInterface
 
 extension AppAssembly {
     func assembleMain(in container: Container) {
@@ -28,6 +29,7 @@ extension AppAssembly {
             let myPageBuilder: MyPageBuildable = resolver.resolve()
             let modyGroupBuilder: ModyGroupBuildable = resolver.resolve()
             let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
+            let imageLoader: RemoteImageLoading = resolver.resolve()
 
             return MainBuilder(
                 feedBuilder: feedBuilder,
@@ -35,6 +37,7 @@ extension AppAssembly {
                 myPageBuilder: myPageBuilder,
                 modyGroupBuilder: modyGroupBuilder,
                 notificationUseCase: notificationUseCase,
+                imageLoader: imageLoader,
                 makeMainReactor: {
                     resolver.resolve()
                 }

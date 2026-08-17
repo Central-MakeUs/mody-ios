@@ -38,7 +38,7 @@ public final class FeedReactor: Reactor {
         )
         var isInitialFeedLoading = false
         var isNextPageLoading = false
-        var isReportLoading = false
+        var isRecordMenuLoading = false
         var feedRecords: [FeedRecord] { feedPage.records }
         var nextFeedCursor: Int? { feedPage.nextCursor }
         var hasNextFeedPage: Bool { feedPage.hasNext }
@@ -49,13 +49,12 @@ public final class FeedReactor: Reactor {
     
     public enum Mutation {
         case setFloatingActionButtonExpanded(Bool)
-        case setGroups([GroupModel])
-        case setSelectedGroup(GroupModel)
+        case setGroups([GroupModel], selectedGroup: GroupModel?)
         case setFetchGroupLoading(Bool)
         case setMyMemberId(Int?)
         case setInitialFeedLoading(Bool)
         case setNextPageLoading(Bool)
-        case setReportLoading(Bool)
+        case setRecordMenuLoading(Bool)
         case setFeedPage(FeedRecordPage)
         case resetFeedRecords
 
@@ -76,6 +75,7 @@ public final class FeedReactor: Reactor {
         case didTapExerciseRecordButton
         case didTapMealRecordButton
         case didTapAddGroup
+        case didTapNudgeButton
         case didSelectGroup(GroupModel)
 
         case didTapPreviousWeek
@@ -83,6 +83,7 @@ public final class FeedReactor: Reactor {
         case didTapCalendarDate(FeedWeekCalendarModel)
         case didReachFeedListBottom
         case didTapRecordMenu(FeedRecordMenu, recordId: Int)
+        case deleteRecordSucceeded
         
         case didTapRecordButton(FeedRecordType)
     }
@@ -131,11 +132,25 @@ public final class FeedReactor: Reactor {
         case .input(.refreshGroups):
             return fetchGroupsWithLoading()
         case let .input(.reportConfirmed(recordId)):
-            guard !currentState.isReportLoading else { return .empty() }
+            guard !currentState.isRecordMenuLoading else { return .empty() }
             guard let groupId = currentState.selectedGroup?.groupId else {
                 return sendOutput(.reportFailed(.invalidResponse))
             }
             return reportRecord(groupId: groupId, recordId: recordId)
+        case let .input(.deleteConfirmed(recordId)):
+            guard !currentState.isRecordMenuLoading else { return .empty() }
+            guard currentState.selectedGroup != nil else {
+                return sendOutput(.deleteFailed(.invalidResponse))
+            }
+            return deleteRecord(recordId: recordId)
+        case .deleteRecordSucceeded:
+            return .concat([
+                fetchFirstFeedPage(
+                    groupId: currentState.selectedGroup?.groupId,
+                    date: currentState.weekCalendarViewState.selectedDate
+                ),
+                sendOutput(.deleteSucceeded)
+            ])
         case .didTapDimmedOverlay,
              .didTapExerciseRecordButton,
              .didTapMealRecordButton:
@@ -147,12 +162,17 @@ public final class FeedReactor: Reactor {
                 router?.route(from: .addGroup)
             }
             return .empty()
+        case .didTapNudgeButton:
+            Task { @MainActor [weak router] in
+                router?.route(from: .routeToChallenge)
+            }
+            return .empty()
         case let .didSelectGroup(group):
             guard currentState.groups.contains(where: { $0.groupId == group.groupId }) else {
                 return .empty()
             }
             return .concat([
-                .just(.setSelectedGroup(group)),
+                setGroup(group, in: currentState.groups),
                 fetchSelectedGroupContent()
             ])
         case .didTapPreviousWeek:
@@ -191,6 +211,8 @@ public final class FeedReactor: Reactor {
             )
         case let .didTapRecordMenu(.report, recordId):
             return sendOutput(.reportConfirmationRequested(recordId: recordId))
+        case let .didTapRecordMenu(.delete, recordId):
+            return sendOutput(.deleteConfirmationRequested(recordId: recordId))
         case .didTapRecordButton(let recordType):
             return .concat([
                 .just(.setFloatingActionButtonExpanded(false)),
@@ -208,7 +230,8 @@ public final class FeedReactor: Reactor {
                 fetchLatestFeedPage(
                     groupId: groupId,
                     date: currentState.weekCalendarViewState.selectedDate
-                )
+                ),
+                sendOutput(.recordUpdated)
             ])
         case .input(.profileUpdated):
             return fetchFirstFeedPage(
@@ -224,16 +247,9 @@ public final class FeedReactor: Reactor {
         switch mutation {
         case .setFloatingActionButtonExpanded(let isExpanded):
             newState.isFloatingActionButtonExpanded = isExpanded
-        case .setGroups(let groups):
+        case let .setGroups(groups, selectedGroup):
             newState.groups = groups
-            if let selectedGroup = newState.selectedGroup,
-               let refreshedSelectedGroup = groups.first(where: { $0.groupId == selectedGroup.groupId }) {
-                newState.selectedGroup = refreshedSelectedGroup
-            } else {
-                newState.selectedGroup = groups.first
-            }
-        case .setSelectedGroup(let group):
-            newState.selectedGroup = group
+            newState.selectedGroup = selectedGroup
         case .setFetchGroupLoading(let isLoading):
             newState.isFetchGroupLoading = isLoading
         case .setMyMemberId(let memberId):
@@ -242,8 +258,8 @@ public final class FeedReactor: Reactor {
             newState.isInitialFeedLoading = isLoading
         case .setNextPageLoading(let isLoading):
             newState.isNextPageLoading = isLoading
-        case .setReportLoading(let isLoading):
-            newState.isReportLoading = isLoading
+        case .setRecordMenuLoading(let isLoading):
+            newState.isRecordMenuLoading = isLoading
         case .setFeedPage(let page):
             newState.feedPage = page
         case .resetFeedRecords:
@@ -282,8 +298,18 @@ public final class FeedReactor: Reactor {
 }
 
 private extension FeedReactor {
+    func setGroup(
+        _ selectedGroup: GroupModel?,
+        in groups: [GroupModel]
+    ) -> Observable<Mutation> {
+        .concat([
+            .just(.setGroups(groups, selectedGroup: selectedGroup)),
+            sendOutput(.selectedGroupUpdated(selectedGroup))
+        ])
+    }
+
     func sendOutput(_ output: FeedOutput) -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             self?.output(output)
             return nil
         }
@@ -294,8 +320,8 @@ private extension FeedReactor {
         recordId: Int
     ) -> Observable<Mutation> {
         withLoading(
-            Mutation.setReportLoading,
-            operation: mutationObservable { [weak self] in
+            Mutation.setRecordMenuLoading,
+            operation: asyncObservable { [weak self] in
                 guard let self else { return nil }
 
                 do {
@@ -306,6 +332,24 @@ private extension FeedReactor {
                     self.output(.reportSucceeded)
                 } catch {
                     self.output(.reportFailed(error as? NetworkError ?? .unknown))
+                }
+
+                return nil
+            }
+        )
+    }
+
+    func deleteRecord(recordId: Int) -> Observable<Mutation> {
+        withLoading(
+            Mutation.setRecordMenuLoading,
+            operation: asyncObservable { [weak self] in
+                guard let self else { return nil }
+
+                do {
+                    try await self.feedUseCase.removeRecord(recordId: recordId)
+                    self.action.onNext(.deleteRecordSucceeded)
+                } catch {
+                    self.output(.deleteFailed(error as? NetworkError ?? .unknown))
                 }
 
                 return nil
@@ -395,7 +439,7 @@ private extension FeedReactor {
         groupId: Int,
         date: String
     ) -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             guard let self else { return nil }
 
             do {
@@ -420,7 +464,7 @@ private extension FeedReactor {
 
         return withLoading(
             Mutation.setNextPageLoading,
-            operation: mutationObservable { [weak self] in
+            operation: asyncObservable { [weak self] in
                 guard let self else { return nil }
 
                 let page = try? await self.feedUseCase.fetchNextFeedRecords(
@@ -441,7 +485,7 @@ private extension FeedReactor {
     ) -> Observable<Mutation> {
         let currentPage = currentState.feedPage
 
-        return mutationObservable { [weak self] in
+        return asyncObservable { [weak self] in
             guard let self else { return nil }
 
             let page = try? await self.feedUseCase.refreshLatestFeedRecords(
@@ -498,7 +542,7 @@ private extension FeedReactor {
     }
 
     func fetchActivityCalendar(groupId: Int, offset: Int) -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             guard let self else { return nil }
 
             guard let activityCalendar = try? await self.feedUseCase.fetchActivityCalendar(
@@ -576,19 +620,23 @@ private extension FeedReactor {
 
 private extension FeedReactor {
     func fetchGroups() -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] () -> [GroupModel]? in
             guard let self else { return nil }
+            return (try? await self.groupUseCase.getGroups()) ?? []
+        }
+        .flatMap { [weak self] groups in
+            guard let self else { return Observable<Mutation>.empty() }
 
-            do {
-                return .setGroups(try await self.groupUseCase.getGroups())
-            } catch {
-                return .setGroups([])
-            }
+            let selectedGroup = groups.first {
+                $0.groupId == self.currentState.selectedGroup?.groupId
+            } ?? groups.first
+
+            return self.setGroup(selectedGroup, in: groups)
         }
     }
 
     func fetchMyMemberId() -> Observable<Mutation> {
-        mutationObservable { [weak self] in
+        asyncObservable { [weak self] in
             guard let self,
                   let userInfo = try? await self.authUseCase.getUserInfo(
                     needUpdateKeyChain: false
@@ -611,13 +659,13 @@ private extension FeedReactor {
         ])
     }
 
-    func mutationObservable(
-        _ operation: @escaping @MainActor () async -> Mutation?
-    ) -> Observable<Mutation> {
+    func asyncObservable<Element>(
+        _ operation: @escaping @MainActor () async -> Element?
+    ) -> Observable<Element> {
         Observable.create { observer in
             let task = Task { @MainActor in
-                if let mutation = await operation() {
-                    observer.onNext(mutation)
+                if let element = await operation() {
+                    observer.onNext(element)
                 }
                 observer.onCompleted()
             }

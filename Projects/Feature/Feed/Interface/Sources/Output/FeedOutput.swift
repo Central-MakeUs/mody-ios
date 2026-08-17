@@ -8,9 +8,14 @@
 import CommonDomain
 
 public enum FeedOutput: Equatable {
+    case selectedGroupUpdated(GroupModel?)
+    case recordUpdated
     case reportConfirmationRequested(recordId: Int)
     case reportSucceeded
     case reportFailed(NetworkError)
+    case deleteConfirmationRequested(recordId: Int)
+    case deleteSucceeded
+    case deleteFailed(NetworkError)
 }
 
 @MainActor

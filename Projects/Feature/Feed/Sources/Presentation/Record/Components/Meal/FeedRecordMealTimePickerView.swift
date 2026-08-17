@@ -6,14 +6,14 @@
 //
 
 import SwiftUI
+import Util
 
 struct FeedRecordMealTimePickerView: View {
     @State private var date: Date
 
     private let onDateChanged: (Date) -> Void
-    private let locale = Locale(identifier: "ko_KR")
-    private let calendar = Calendar(identifier: .gregorian)
-    private let timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
+    private let locale = Date.koreanLocale
+    private let calendar = Date.koreanCalendar
 
     init(
         date: Date,
@@ -33,7 +33,7 @@ struct FeedRecordMealTimePickerView: View {
         .labelsHidden()
         .environment(\.locale, locale)
         .environment(\.calendar, calendar)
-        .environment(\.timeZone, timeZone)
+        .environment(\.timeZone, calendar.timeZone)
         .frame(height: 145)
         .clipped()
         .onChange(of: date) { _, newValue in

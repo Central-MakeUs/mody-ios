@@ -27,7 +27,7 @@ final class CameraContainerViewController: UIViewController {
     let closeButton = UIButton(type: .system)
     let bottomCameraShutterView = BottomCameraShutterView()
     let photoConfirmationContainerView = PhotoConfirmationContainerView()
-    let roiOverlayView = ROIOverlayView()
+    let roiOverlayView: ROIOverlayView
 
     var capturedPhoto: CameraCapturedPhoto?
     var photoLibraryLoadProgress: Progress?
@@ -37,12 +37,14 @@ final class CameraContainerViewController: UIViewController {
     init(
         initialSource: CameraCaptureSource,
         isCropEnabled: Bool = true,
+        cropAspectRatio: CGSize? = nil,
         capturedPhotoProcessor: CameraCapturedPhotoProcessor,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
         self.initialSource = initialSource
         self.isCropEnabled = isCropEnabled
+        self.roiOverlayView = ROIOverlayView(selectionAspectRatio: cropAspectRatio)
         self.capturedPhotoProcessor = capturedPhotoProcessor
         self.onComplete = onComplete
         self.onCancel = onCancel

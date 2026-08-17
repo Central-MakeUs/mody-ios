@@ -11,6 +11,8 @@ import UIKit
 final class ROIOverlayView: UIView {
     private let horizontalInset: CGFloat = 24
     private let selectionHeight: CGFloat = 200
+    private let borderWidth: CGFloat = 4
+    private let selectionAspectRatio: CGSize?
     
     var selectionFrame: CGRect {
         currentSelectionFrame
@@ -28,8 +30,9 @@ final class ROIOverlayView: UIView {
         updateLayers()
     }
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(selectionAspectRatio: CGSize?) {
+        self.selectionAspectRatio = selectionAspectRatio
+        super.init(frame: .zero)
         setupUI()
     }
 
@@ -62,7 +65,7 @@ private extension ROIOverlayView {
 
         borderLayer.fillColor = UIColor.clear.cgColor
         borderLayer.strokeColor = UIColor.main.cgColor
-        borderLayer.lineWidth = 4
+        borderLayer.lineWidth = borderWidth
         borderLayer.lineDashPattern = [8, 8]
         layer.addSublayer(borderLayer)
 
@@ -85,16 +88,22 @@ private extension ROIOverlayView {
     }
 
     func defaultSelectionFrame() -> CGRect {
-        let selectableFrame = effectiveSelectableFrame()
-        let horizontalMargin = min(horizontalInset, selectableFrame.width / 2)
-        let width = max(0, selectableFrame.width - (horizontalMargin * 2))
-        let height = min(selectionHeight, selectableFrame.height)
+        let selectableFrame = borderSafeSelectableFrame()
+        let aspectRatio = selectionAspectRatio ?? defaultAspectRatio(
+            in: effectiveSelectableFrame()
+        )
 
-        return CGRect(
-            x: selectableFrame.minX + horizontalMargin,
-            y: selectableFrame.minY + max(0, (selectableFrame.height - height) / 2),
-            width: width,
-            height: height
+        return ROISelectionFrameCalculator.maximumFrame(
+            aspectRatio: aspectRatio,
+            in: selectableFrame
+        )
+    }
+
+    func defaultAspectRatio(in selectableFrame: CGRect) -> CGSize {
+        let horizontalMargin = min(horizontalInset, selectableFrame.width / 2)
+        return CGSize(
+            width: max(0, selectableFrame.width - (horizontalMargin * 2)),
+            height: min(selectionHeight, selectableFrame.height)
         )
     }
 
@@ -110,7 +119,7 @@ private extension ROIOverlayView {
     }
 
     func constrainedFrame(_ frame: CGRect) -> CGRect {
-        let selectableFrame = effectiveSelectableFrame()
+        let selectableFrame = borderSafeSelectableFrame()
         let width = min(frame.width, selectableFrame.width)
         let height = min(frame.height, selectableFrame.height)
 
@@ -126,6 +135,18 @@ private extension ROIOverlayView {
             width: width,
             height: height
         )
+    }
+
+    func borderSafeSelectableFrame() -> CGRect {
+        let selectableFrame = effectiveSelectableFrame()
+        let borderInset = max(
+            0,
+            min(
+                borderWidth / 2,
+                min(selectableFrame.width, selectableFrame.height) / 2
+            )
+        )
+        return selectableFrame.insetBy(dx: borderInset, dy: borderInset)
     }
 
     @objc func didPan(_ recognizer: UIPanGestureRecognizer) {

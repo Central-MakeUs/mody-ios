@@ -12,7 +12,7 @@ import FeedInterface
 import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
-import CommonDomain
+import CoreModyImageInterface
 
 public final class MainCoordinator: MainCoordinating {
     public let navigationController: UINavigationController
@@ -20,14 +20,16 @@ public final class MainCoordinator: MainCoordinating {
     weak var delegate: MainCoordinatorDelegate?
     weak var mainContainerViewController: MainContainerViewController?
     weak var feedInputHandler: FeedInputHandler?
+    weak var challengeInputHandler: ChallengeInputHandler?
     weak var myPageInputHandler: MyPageInputHandler?
 
     let feedBuilder: FeedBuildable
-    private let challengeBuilder: ChallengeBuildable
+    let challengeBuilder: ChallengeBuildable
     let myPageBuilder: MyPageBuildable
     let modyGroupBuilder: ModyGroupBuildable
     private let mainContainerBuilder: MainContainerBuildable
     let notificationBuilder: NotificationBuildable
+    let imageLoader: RemoteImageLoading
 
     init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
@@ -38,6 +40,7 @@ public final class MainCoordinator: MainCoordinating {
         modyGroupBuilder: ModyGroupBuildable,
         mainContainerBuilder: MainContainerBuildable,
         notificationBuilder: NotificationBuildable,
+        imageLoader: RemoteImageLoading,
         delegate: MainCoordinatorDelegate
     ) {
         self.navigationController = navigationController
@@ -48,6 +51,7 @@ public final class MainCoordinator: MainCoordinating {
         self.modyGroupBuilder = modyGroupBuilder
         self.mainContainerBuilder = mainContainerBuilder
         self.notificationBuilder = notificationBuilder
+        self.imageLoader = imageLoader
         self.delegate = delegate
         navigationController.setNavigationBarHidden(true, animated: false)
         print("⭕ MainCoordinator init!")
@@ -64,21 +68,19 @@ public final class MainCoordinator: MainCoordinating {
             outputHandler: self
         )
         feedInputHandler = feedViewController as? FeedInputHandler
-        let challengeViewController = challengeBuilder.makeChallengeViewController(router: self)
+        let challengeViewController = challengeBuilder.makeChallengeViewController(
+            router: self,
+            outputHandler: self
+        )
+        challengeInputHandler = challengeViewController as? ChallengeInputHandler
         let myPageViewController = myPageBuilder.makeMyPageViewController(
             router: self,
             outputHandler: self
         )
         myPageInputHandler = myPageViewController
 
-        let isPhaseOne = PhaseManager.shared.isPhaseOne
-        let viewControllers = isPhaseOne
-            ? [feedViewController, myPageViewController]
-            : [feedViewController, challengeViewController, myPageViewController]
-        
-        let tabs: [MainTab] = isPhaseOne
-            ? [.feed, .myPage]
-            : [.feed, .challenge, .myPage]
+        let viewControllers = [feedViewController, challengeViewController, myPageViewController]
+        let tabs: [MainTab] = [.feed, .challenge, .myPage]
         
         tabBarController.setTabs(
             tabs: tabs,

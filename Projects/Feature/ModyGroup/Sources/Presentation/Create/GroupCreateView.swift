@@ -102,7 +102,7 @@ private extension GroupCreateView {
             Text("친구들과 함께할 그룹의 이름이에요.\n")
                 .font(ModyTypography.b7.token.swiftUIFont)
                 .foregroundStyle(Color.gray6)
-            + Text("최대 12명")
+            + Text("최대 8명")
                 .font(ModyTypography.b5.token.swiftUIFont)
                 .foregroundStyle(Color.main0)
             + Text("까지 초대할 수 있어요!")

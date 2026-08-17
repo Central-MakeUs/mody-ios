@@ -106,7 +106,7 @@ private extension OnBoardingView {
         case .four:
             OnBoardingStepFourView(store: store.scope(state: \.stepFour, action: \.stepFour))
         case .permission:
-            OnBoardingPermissionView(isHealthPermissionVisible: store.isHealthPermissionVisible)
+            OnBoardingPermissionView()
         }
     }
 }

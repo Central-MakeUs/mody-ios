@@ -7,6 +7,7 @@
 
 public enum FeedRoute: Equatable {
     case addGroup
+    case routeToChallenge
     case routeToRecord(FeedRecordType)
 }
 

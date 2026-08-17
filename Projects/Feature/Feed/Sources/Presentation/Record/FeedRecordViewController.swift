@@ -240,6 +240,7 @@ private extension FeedRecordViewController {
             to: recordView.finishButtonContainerView,
             sizesToContent: true
         )
+        hostingController.safeAreaRegions = .container
         finishButtonHostingController = hostingController
     }
 }

@@ -59,7 +59,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreCamera)),
             .module(.MicroFeature(.CoreNotification)),
             .module(.MicroFeature(.CoreModyImage)),
-            
+            .module(.MicroFeature(.CoreHealth)),
+
             .external(.FirebaseCore),
             .external(.FirebaseMessaging),
             .external(.Swinject),
@@ -70,6 +71,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreCamera),
             .microFeature(.CoreNotification),
             .microFeature(.CoreModyImage),
+            .microFeature(.CoreHealth),
             .microFeature(.Main)
         ],
         .Root: [
@@ -87,7 +89,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.DesignSystem),
             .module(.ModyLogger),
             .module(.CommonDomain),
-            .module(.Util)
+            .module(.Util),
+            .microFeature(.CoreModyImage)
         ]
     ],
     microFeatureDependencies: [
@@ -119,6 +122,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNotification),
+                .microFeature(.CoreHealth),
                 .module(.Util)
             ]
         ),
@@ -171,6 +175,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.MyPage),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreNotification),
+                .microFeature(.CoreModyImage),
                 .module(.Base),
                 .module(.CommonDomain),
                 .module(.Util),
@@ -182,8 +187,19 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ]
         ),
         .Challenge: .init(
+            interface: [
+                .module(.CommonDomain)
+            ],
             implementation: [
-                .module(.Base)
+                .external(.ComposableArchitecture),
+                .module(.Base),
+                .module(.CommonDomain),
+                .module(.Util),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreCamera),
+                .microFeature(.CoreNetwork),
+                .microFeature(.CoreModyImage),
+                .microFeature(.CoreHealth)
             ]
         ),
         .MyPage: .init(
@@ -229,7 +245,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.KakaoSDKAuth),
                 .external(.KakaoSDKCommon),
                 .external(.KakaoSDKShare),
-                .external(.KakaoSDKTemplate),
                 .external(.KakaoSDKUser)
             ]
         ),
@@ -268,6 +283,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.Alamofire),
                 .external(.Nuke)
             ]
-        )
+        ),
+        .CoreHealth: .init()
     ]
 )

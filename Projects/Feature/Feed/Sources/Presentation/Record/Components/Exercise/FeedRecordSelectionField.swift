@@ -74,6 +74,8 @@ private extension FeedRecordSelectionField {
         customTextField.font = ModyTypography.b4.token.uiFont
         customTextField.textColor = .gray10
         customTextField.tintColor = .main
+        customTextField.returnKeyType = .default
+        customTextField.delegate = self
         customTextField.attributedPlaceholder = ModyTypography.b4.token.attributedString(
             "직접 입력",
             color: .gray4,
@@ -143,5 +145,12 @@ private extension FeedRecordSelectionField {
             && !(customTextField.text ?? "").isEmpty
         let borderColor: UIColor = hasFocusedText ? .main : .gray2
         layer.borderColor = borderColor.cgColor
+    }
+}
+
+extension FeedRecordSelectionField: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
