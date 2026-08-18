@@ -82,7 +82,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.Base)
         ],
         .DesignSystem: [
-            .external(.SnapKit)
+            .external(.SnapKit),
+            .external(.Lottie)
         ],
         .Base: [
             .external(.ComposableArchitecture),

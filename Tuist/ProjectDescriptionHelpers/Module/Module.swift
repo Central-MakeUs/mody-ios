@@ -36,6 +36,7 @@ public enum ExternalModule {
     case RxCocoa
     case RxRelay
     case Nuke
+    case Lottie
 
     var name: String {
         switch self {

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MLoadingModifier: ViewModifier {
-    let isPresent: Bool
+    private let isPresent: Bool
 
     init(isPresent: Bool) {
         self.isPresent = isPresent
@@ -29,14 +29,10 @@ struct MLoadingModifier: ViewModifier {
     }
 }
 
-// TODO: Lottie 나오면 수정
 public struct MLoadingIndicatorView: View {
     public init() {}
 
     public var body: some View {
-        ProgressView()
-            .progressViewStyle(.circular)
-            .tint(.gray)
-            .scaleEffect(1.2)
+        MLottieView(.modyLoading)
     }
 }
