@@ -6,6 +6,7 @@
 //
 
 import CoreNetwork
+import CoreAnalyticsInterface
 import CoreKeyChainStorage
 import CoreKeyChainStorageInterface
 import CoreNetworkInterface
@@ -20,6 +21,7 @@ extension AppAssembly {
 
         container.register(CoreNetworkProtocol.self) { resolver in
             let tokenStorage: CoreTokenStorage = resolver.resolve()
+            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return CoreNetworkClient(
                 tokenStore: tokenStorage,
@@ -27,7 +29,8 @@ extension AppAssembly {
                     path: "api/v1/auth/reissue",
                     method: .POST,
                     requiresAuthorization: false
-                )
+                ),
+                analyticsUseCase: analyticsUseCase
             )
         }
         .inObjectScope(.container)

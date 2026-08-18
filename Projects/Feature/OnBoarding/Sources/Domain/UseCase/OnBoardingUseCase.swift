@@ -12,7 +12,7 @@ public struct OnBoardingUseCase {
         self.onBoardingRepository = onBoardingRepository
     }
 
-    public func setupOnBoardingProfileInfo(request: OnBoardingProfileRequest) async throws {
+    public func setupOnBoardingProfileInfo(request: OnBoardingProfileRequest) async throws -> Int {
         try await onBoardingRepository.postSetupOnBoardingProfileInfo(request: request)
     }
 }

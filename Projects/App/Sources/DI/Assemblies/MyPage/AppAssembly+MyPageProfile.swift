@@ -6,6 +6,7 @@
 //
 
 import Swinject
+import CoreAnalyticsInterface
 import CoreAuthInterface
 import CoreModyImageInterface
 import MyPageInterface
@@ -18,12 +19,14 @@ extension AppAssembly {
             arguments: (MyPageProfileRouter, MyPageOutputHandler)
         ) in
             let (router, outputHandler) = arguments
+            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let myPageUseCase: MyPageUseCase = resolver.resolve()
             let imageUploadUseCase: ImageUploadUseCaseProtocol = resolver.resolve()
             let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
 
             return ProfileFeature(
+                analyticsUseCase: analyticsUseCase,
                 authUseCase: authUseCase,
                 myPageUseCase: myPageUseCase,
                 imageUploadUseCase: imageUploadUseCase,

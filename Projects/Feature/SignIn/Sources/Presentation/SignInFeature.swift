@@ -8,6 +8,7 @@
 import ComposableArchitecture
 import Base
 import CommonDomain
+import CoreAnalyticsInterface
 import CoreAuthInterface
 import SignInInterface
 import ModyLogger
@@ -17,17 +18,20 @@ public struct SignInFeature {
     private let signInUseCase: SignInUseCase
     private let socialLoginUseCase: SocialLoginInterface
     private let authUseCase: AuthUseCaseProtocol
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (SignInRoute) -> Void
     
     public init(
         signInUseCase: SignInUseCase,
         socialLoginUseCase: SocialLoginInterface,
         authUseCase: AuthUseCaseProtocol,
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (SignInRoute) -> Void
     ) {
         self.signInUseCase = signInUseCase
         self.socialLoginUseCase = socialLoginUseCase
         self.authUseCase = authUseCase
+        self.analyticsUseCase = analyticsUseCase
         self.router = router
     }
 
@@ -134,7 +138,8 @@ public struct SignInFeature {
                 let destination = makeNavigationDestination(from: session)
                 state.navigationDestination = destination
 
-                return .run { [router] _ in
+                return .run { [analyticsUseCase, router] _ in
+                    analyticsUseCase.setUserID(String(session.id))
                     await router(destination)
                 }
             case let .kakaoLoginError(error),

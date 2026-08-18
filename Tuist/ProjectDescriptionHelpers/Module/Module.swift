@@ -36,6 +36,8 @@ public enum ExternalModule {
     case RxCocoa
     case RxRelay
     case Nuke
+    case AmplitudeSwift
+    case Lottie
 
     var name: String {
         switch self {
@@ -45,6 +47,7 @@ public enum ExternalModule {
 }
 
 public enum MicroFeatureModule {
+    case CoreAnalytics
     case CoreHealth
     case CoreModyImage
     case CoreCamera
@@ -101,6 +104,7 @@ public enum MicroFeatureModule {
         case .CoreCamera: "Projects/Core/CoreCamera"
         case .CoreModyImage: "Projects/Core/CoreModyImage"
         case .CoreHealth: "Projects/Core/CoreHealth"
+        case .CoreAnalytics: "Projects/Core/CoreAnalytics"
         }
     }
 }
