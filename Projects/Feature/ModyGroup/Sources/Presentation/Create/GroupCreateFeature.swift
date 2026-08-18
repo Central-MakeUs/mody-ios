@@ -86,7 +86,10 @@ public struct GroupCreateFeature {
 
                 return .run { send in
                     do {
-                        let code = try await groupUseCase.createGroup(name: groupName)
+                        async let createGroupCode = groupUseCase.createGroup(name: groupName)
+
+                        try await Task.sleep(for: .seconds(2.5))
+                        let code = try await createGroupCode
                         await send(.createGroupSuccessfully(code: code, groupName: groupName))
                     } catch {
                         await send(.showAlert(.error(error as? NetworkError ?? .unknown)))

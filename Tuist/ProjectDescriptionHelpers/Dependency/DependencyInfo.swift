@@ -84,7 +84,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.Base)
         ],
         .DesignSystem: [
-            .external(.SnapKit)
+            .external(.SnapKit),
+            .external(.Lottie)
         ],
         .Base: [
             .external(.ComposableArchitecture),
@@ -222,7 +223,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNotification),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreCamera),
-                .microFeature(.CoreModyImage)
+                .microFeature(.CoreModyImage),
+                .microFeature(.CoreHealth)
             ],
             demo: [
                 .module(.CommonDomain),

@@ -22,7 +22,11 @@ public struct GroupCreateView: View {
         creationBody
             .background(Color.systemWhite)
             .navigationBarBackButtonHidden()
-            .mLoading(isPresent: store.isLoading)
+            .overlay {
+                if store.isLoading {
+                    GroupCreateLoadingOverlay()
+                }
+            }
             .mAlert(store.scope(state: \.alertState, action: \.alertAction)) {
                 alertView
             }
