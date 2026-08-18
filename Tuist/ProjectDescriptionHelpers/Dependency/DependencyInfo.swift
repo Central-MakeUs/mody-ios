@@ -216,7 +216,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNotification),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreCamera),
-                .microFeature(.CoreModyImage)
+                .microFeature(.CoreModyImage),
+                .microFeature(.CoreHealth)
             ],
             demo: [
                 .module(.CommonDomain),
