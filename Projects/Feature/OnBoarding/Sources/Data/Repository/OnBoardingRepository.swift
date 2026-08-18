@@ -15,14 +15,16 @@ public struct OnBoardingRepository: OnBoardingRepositoryProtocol {
         self.network = network
     }
 
-    public func postSetupOnBoardingProfileInfo(request: OnBoardingProfileRequest) async throws {
+    public func postSetupOnBoardingProfileInfo(request: OnBoardingProfileRequest) async throws -> Int {
         let endpoint = OnBoardingEndpoint.postProfile(request: request)
         let response: CoreNetworkResponse<OnBoardingProfileResponse> = try await network.request(
             endpoint
         )
 
-        guard response.result != nil else {
+        guard let memberID = response.result?.memberId else {
             throw NetworkError.invalidResponse
         }
+
+        return memberID
     }
 }

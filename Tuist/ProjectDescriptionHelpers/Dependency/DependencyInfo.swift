@@ -60,6 +60,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreNotification)),
             .module(.MicroFeature(.CoreModyImage)),
             .module(.MicroFeature(.CoreHealth)),
+            .module(.MicroFeature(.CoreAnalytics)),
 
             .external(.FirebaseCore),
             .external(.FirebaseMessaging),
@@ -72,6 +73,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreNotification),
             .microFeature(.CoreModyImage),
             .microFeature(.CoreHealth),
+            .microFeature(.CoreAnalytics),
             .microFeature(.Main)
         ],
         .Root: [
@@ -103,7 +105,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreKeyChainStorage),
                 .module(.CommonDomain),
-                .microFeature(.CoreAuth)
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .SignIn: .init(
@@ -112,7 +115,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .microFeature(.FirebaseService),
-                .microFeature(.CoreAuth)
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .OnBoarding: .init(
@@ -124,6 +128,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNotification),
                 .microFeature(.CoreHealth),
+                .microFeature(.CoreAnalytics),
                 .module(.Util)
             ]
         ),
@@ -212,6 +217,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .module(.Util),
+                .microFeature(.CoreAnalytics),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreNotification),
@@ -230,13 +236,13 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             implementation: [
                 .external(.Alamofire),
                 .module(.CommonDomain),
-                .module(.ModyLogger)
+                .module(.ModyLogger),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .FirebaseService: .init(
             implementation: [
                 .external(.FirebaseCore),
-                .external(.FirebaseAnalytics),
                 .external(.FirebaseCrashlytics),
                 .external(.FirebaseRemoteConfig),
                 .module(.ModyLogger)
@@ -286,6 +292,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.Nuke)
             ]
         ),
-        .CoreHealth: .init()
+        .CoreHealth: .init(),
+        .CoreAnalytics: .init(
+            implementation: [
+                .external(.AmplitudeSwift)
+            ]
+        )
     ]
 )
