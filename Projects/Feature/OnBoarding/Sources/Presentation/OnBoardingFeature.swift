@@ -9,6 +9,7 @@ import ComposableArchitecture
 import OnBoardingInterface
 import CommonDomain
 import Foundation
+import CoreAnalyticsInterface
 import CoreCameraInterface
 import CoreNotificationInterface
 import CoreHealthInterface
@@ -21,6 +22,7 @@ public struct OnBoardingFeature {
     private let cameraPermission: CameraPermissionInterface
     private let notificationPermission: NotificationPermissionInterface
     private let healthPermission: HealthPermissionInterface
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (OnBoardingRoute) -> Void
 
     public init(
@@ -28,12 +30,14 @@ public struct OnBoardingFeature {
         cameraPermission: CameraPermissionInterface,
         notificationPermission: NotificationPermissionInterface,
         healthPermission: HealthPermissionInterface,
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (OnBoardingRoute) -> Void
     ) {
         self.onBoardingUseCase = onBoardingUseCase
         self.cameraPermission = cameraPermission
         self.notificationPermission = notificationPermission
         self.healthPermission = healthPermission
+        self.analyticsUseCase = analyticsUseCase
         self.router = router
     }
     
@@ -133,7 +137,7 @@ public struct OnBoardingFeature {
         case stepThree(OnBoardingStepThreeFeature.Action)
         case stepFour(OnBoardingStepFourFeature.Action)
         case setUpProfile
-        case setupProfileSuccessfully
+        case setupProfileSuccessfully(Int)
         case setupProfileFailure(NetworkError)
         case requestPermissions
         case permissionsRequestCompleted
@@ -202,16 +206,20 @@ public struct OnBoardingFeature {
                 
                 return .run { send in
                     do {
-                        try await onBoardingUseCase.setupOnBoardingProfileInfo(request: request)
-                        await send(.setupProfileSuccessfully)
+                        let memberID = try await onBoardingUseCase.setupOnBoardingProfileInfo(
+                            request: request
+                        )
+                        await send(.setupProfileSuccessfully(memberID))
                     } catch {
                         await send(.setupProfileFailure(error as? NetworkError ?? .unknown))
                     }
                 }
-            case .setupProfileSuccessfully:
+            case let .setupProfileSuccessfully(memberID):
                 state.isLoading = false
                 state.currentStep = .permission
-                return .none
+                return .run { _ in
+                    analyticsUseCase.setUserID(String(memberID))
+                }
             case let .setupProfileFailure(error):
                 return .send(.showAlert(.error(error)))
             case .requestPermissions:

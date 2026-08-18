@@ -1,0 +1,28 @@
+//
+//  AnalyticsUseCase.swift
+//  CoreAnalytics
+//
+//  Created by 김동준 on 8/17/26.
+//
+
+import CoreAnalyticsInterface
+
+public struct AnalyticsUseCase: AnalyticsUseCaseProtocol {
+    private let analyticsRepository: AnalyticsRepositoryProtocol
+
+    public init(analyticsRepository: AnalyticsRepositoryProtocol) {
+        self.analyticsRepository = analyticsRepository
+    }
+
+    public func setUserID(_ userID: String?) {
+        analyticsRepository.setUserID(userID)
+    }
+
+    public func log(_ event: AmplitudeLogEvent) {
+        analyticsRepository.log(event)
+    }
+
+    public func viewDidLoad(screenName: String) {
+        analyticsRepository.viewDidLoad(screenName: screenName)
+    }
+}

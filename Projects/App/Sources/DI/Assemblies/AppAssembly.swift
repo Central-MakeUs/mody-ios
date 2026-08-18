@@ -10,6 +10,7 @@ import Swinject
 struct AppAssembly: Assembly {
     func assemble(container: Container) {
         assembleFirebaseService(in: container)
+        assembleCoreAnalytics(in: container)
         assembleCoreNetwork(in: container)
         assembleCoreKakao(in: container)
         assembleCoreAuth(in: container)

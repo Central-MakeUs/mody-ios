@@ -22,6 +22,7 @@ public struct HealthDataSettingsView: View {
     public var body: some View {
         healthDataSettingsBody
             .background(Color.systemWhite)
+            .onAppear { store.send(.onAppear) }
     }
 }
 
