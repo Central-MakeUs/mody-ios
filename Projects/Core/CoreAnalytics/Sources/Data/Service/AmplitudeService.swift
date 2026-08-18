@@ -19,7 +19,14 @@ public final class AmplitudeService {
             return
         }
 
-        amplitude = Amplitude(configuration: Configuration(apiKey: apiKey))
+        amplitude = Amplitude(
+            configuration: Configuration(
+                apiKey: apiKey,
+                autocapture: [.sessions, .appLifecycles, .screenViews],
+                enableAutoCaptureRemoteConfig: false,
+                enableDiagnostics: false
+            )
+        )
     }
 
     func setUserID(_ userID: String?) {

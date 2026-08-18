@@ -28,7 +28,12 @@ public enum OnBoardingAgreementDocument: Equatable {
     }
 
     var effectiveDateNotice: String {
-        OnBoardingAgreementConstants.effectiveDateNotice
+        switch self {
+        case .privacyPolicy:
+            return OnBoardingAgreementConstants.privacyPolicyEffectiveDateNotice
+        case .termsOfService:
+            return OnBoardingAgreementConstants.termsOfServiceEffectiveDateNotice
+        }
     }
 }
 
@@ -38,7 +43,8 @@ struct OnBoardingAgreementSection: Equatable {
 }
 
 fileprivate enum OnBoardingAgreementConstants {
-    fileprivate static let effectiveDateNotice = "공고일: 2026년 8월 15일 | 시행일: 2026년 8월 16일"
+    fileprivate static let privacyPolicyEffectiveDateNotice = "공고일: 2026년 8월 11일 | 시행일: 2026년 8월 18일"
+    fileprivate static let termsOfServiceEffectiveDateNotice = "공고일: 2026년 8월 15일 | 시행일: 2026년 8월 16일"
 
     fileprivate static let privacyPolicySections: [OnBoardingAgreementSection] = [
         .init(
@@ -58,7 +64,18 @@ fileprivate enum OnBoardingAgreementConstants {
             • 기기 정보: 기기 식별자(FCM 토큰), 운영체제 및 앱 버전
             • 접속 로그: 서비스 이용 일시, 서비스 이용 기록
 
-            3. 건강 데이터 수집 (별도 동의)
+            3. 앱 이용 분석 및 오류 진단 과정에서 자동 수집
+            • 회원 식별 정보: 회사가 발급한 회원 ID
+            • 기기 식별 정보: Amplitude Device ID, IDFV, Session ID
+            • 네트워크 및 기기 정보: IP 주소, 통신사, 기기 제조사·모델, 운영체제 및 버전, 플랫폼, 언어
+            • IP 주소 기반 추정 정보: 국가, 지역, 도시, DMA 등 대략적인 위치 정보
+            • 앱 정보: 앱 버전, 빌드 번호
+            • 이용 정보: 앱 설치·업데이트·실행 기록, 세션 정보, 화면 조회 기록, 서비스 이용 일시
+            • 오류 진단 정보: HTTP 메서드, 숫자·UUID 식별자가 제거된 API 경로, query parameter 키 이름, request body 키 경로, 네트워크 오류 정보
+
+            HTTP 헤더, query parameter 값, request body 값, 인증·알림 토큰, 건강 데이터 및 이용자 콘텐츠는 Amplitude로 전송하지 않습니다.
+
+            4. 건강 데이터 수집 (별도 동의)
             회사는 걸음수 챌린지 기능 제공을 위해 이용자의 명시적 동의를 받아 건강 데이터를 수집합니다.
             • 수집 항목: 걸음수(일별 합계)
             • 수집 방법: iOS — Apple HealthKit API를 통한 읽기 / Android — Google Health Connect API를 통한 읽기
@@ -67,7 +84,7 @@ fileprivate enum OnBoardingAgreementConstants {
 
             중요: 건강 데이터는 걸음수 챌린지 기능 제공 목적으로만 사용되며, 마케팅·광고·제3자 제공·데이터 분석 등 다른 어떠한 목적으로도 사용하지 않습니다.
 
-            4. 접근 권한 안내
+            5. 접근 권한 안내
             서비스 이용을 위해 다음 접근 권한을 요청합니다. 모든 권한은 선택 사항이며, 허용하지 않아도 서비스 이용이 가능합니다. 단, 미허용 시 일부 기능이 제한될 수 있습니다.
             • 알림 (선택): 버디 인증, 챌린지 달성 등 알림 수신. 미허용 시 알림 기능 비활성화.
             • 카메라 (선택): 식단 및 운동, 주간 챌린지 사진 촬영. 미허용 시 갤러리 선택만 가능.
@@ -81,6 +98,8 @@ fileprivate enum OnBoardingAgreementConstants {
             • 회원 식별 및 인증: 소셜 로그인을 통한 계정 생성 및 로그인 처리
             • 서비스 제공: 피드 게시, 그룹 챌린지, 알림 발송
             • 걸음수 챌린지 운영: 이용자 걸음수를 읽어 그룹 합산 집계 및 챌린지 진행률 표시
+            • 이용 현황 분석: 앱 실행, 화면 조회 및 기능 이용 현황 분석
+            • 오류 진단: 앱 버전·빌드별 오류 및 API 오류 분석
             • 서비스 개선: 이용 현황 분석 및 기능 개선
             • 법적 의무 이행: 관련 법령에 따른 의무 이행
 
@@ -95,6 +114,7 @@ fileprivate enum OnBoardingAgreementConstants {
             1. 수집 및 이용 제한
             • 건강 데이터는 걸음수 챌린지 기능 제공 목적으로만 사용합니다.
             • 마케팅, 광고, 타겟팅, 프로파일링, 데이터 마이닝 등의 목적으로 사용하지 않습니다.
+            • 이용 분석 또는 오류 진단 목적으로 사용하거나 Amplitude로 전송하지 않습니다.
             • 제3자에게 제공하지 않습니다. (법령에 의한 경우 제외)
             • HealthKit에서 수집한 데이터는 Apple의 HealthKit 데이터 사용 정책을 준수합니다.
             • Health Connect에서 수집한 데이터는 Google의 Health Connect 데이터 사용 정책을 준수합니다.
@@ -114,11 +134,14 @@ fileprivate enum OnBoardingAgreementConstants {
         .init(
             title: "제4조 (개인정보의 보유 및 이용 기간)",
             body: """
-            회사는 이용자의 개인정보를 원칙적으로 회원 탈퇴 시 즉시 파기합니다. 단, 관계 법령에 따라 일정 기간 보관이 필요한 경우 해당 기간 동안 보관 후 파기합니다.
+            회사는 이용자의 개인정보를 원칙적으로 회원 탈퇴 시 지체 없이 파기합니다. 단, 관계 법령에 따라 일정 기간 보관이 필요한 경우 해당 기간 동안 보관 후 파기합니다.
             • 소비자 보호에 관한 법률: 계약 또는 청약철회에 관한 기록 5년
             • 전자상거래 등에서의 소비자보호에 관한 법률: 대금결제 및 재화 등의 공급에 관한 기록 5년
             • 통신비밀보호법: 로그인 기록 3개월
             • 건강 데이터(걸음수): 챌린지 종료 후 30일 이내 삭제, 회원 탈퇴 시 즉시 삭제
+            • 앱 이용 분석 및 오류 진단 정보: 수집일로부터 최대 12개월 또는 회원 탈퇴 시까지 중 먼저 도래하는 시점
+
+            회원 탈퇴 시 회사는 Amplitude User Privacy API 또는 관리 절차를 통해 과거 분석 데이터의 삭제 요청을 지체 없이 접수하며, Amplitude에 저장된 데이터는 삭제 요청일로부터 최대 30일 이내 삭제됩니다.
             """
         ),
         .init(
@@ -127,6 +150,8 @@ fileprivate enum OnBoardingAgreementConstants {
             • 파기 절차: 이용자가 회원 탈퇴를 신청하면 지체 없이 개인정보를 파기합니다. 단, 내부 방침 및 관련 법령에 따라 일정 기간 보관이 필요한 경우 별도 저장소에 이관 후 해당 기간 만료 시 파기합니다.
             • 파기 방법: 전자적 파일 형태로 저장된 정보는 복구 불가능한 방법으로 영구 삭제합니다.
             • 건강 데이터 파기: 수집 목적 달성(챌린지 종료) 즉시 또는 동의 철회 즉시 파기합니다.
+            • 이용 분석 데이터 파기: 회원 탈퇴 시 Amplitude에 삭제 요청을 지체 없이 접수하며, 삭제 요청일로부터 최대 30일 이내 처리됩니다.
+            • 로그아웃 처리: Amplitude User ID 연결을 해제하고 새로운 Device ID를 생성합니다.
             """
         ),
         .init(
@@ -143,33 +168,49 @@ fileprivate enum OnBoardingAgreementConstants {
             회사는 서비스 제공을 위해 다음과 같이 개인정보 처리 업무를 위탁합니다.
             • Google Cloud Platform (GCP) : 서버 운영 및 데이터 저장
             • Google Firebase (FCM): 푸시 알림 발송
+            • Amplitude, Inc.: 앱 이용 현황 분석, 세션 분석, 화면 조회 분석 및 오류 진단
             • 카카오: 카카오 로그인 인증 처리
             • Google: Google 로그인 인증 처리
             • Apple: Apple 로그인 인증 처리
 
-            건강 데이터는 위탁 처리하지 않으며, 회사 서버에서만 처리합니다.
+            건강 데이터는 Amplitude 등 이용 분석 및 오류 진단 서비스로 전송하지 않습니다.
             """
         ),
         .init(
-            title: "제8조 (이용자의 권리와 행사 방법)",
+            title: "제8조 (개인정보의 국외 이전)",
+            body: """
+            • 이전받는 자: Amplitude, Inc.
+            • 연락처: privacy@amplitude.com
+            • 이전 국가: 미국
+            • 이전 항목: 회원 ID, Amplitude Device ID, IDFV, Session ID, IP 주소, IP 기반 대략적 위치, 통신사, 기기·운영체제 정보, 앱 버전·빌드 번호, 앱 실행·세션·화면 조회 기록, API 경로·HTTP 메서드·query parameter 키·request body 키 경로·네트워크 오류 정보
+            • 이전 목적: 앱 이용 현황 분석, 세션 및 화면 조회 분석, 오류 진단 및 서비스 개선
+            • 이전 시점 및 방법: 앱 이용 또는 오류 발생 시 암호화된 네트워크를 통한 전송
+            • 보유 및 이용 기간: 수집일로부터 최대 12개월 또는 회원 탈퇴 시까지 중 먼저 도래하는 시점. 회원 탈퇴에 따른 삭제 요청은 최대 30일 이내 처리됩니다.
+
+            HTTP 헤더, query parameter 값, request body 값, 인증·알림 토큰, 건강 데이터 및 이용자 콘텐츠는 Amplitude로 이전하지 않습니다.
+            """
+        ),
+        .init(
+            title: "제9조 (이용자의 권리와 행사 방법)",
             body: """
             이용자는 언제든지 다음의 권리를 행사할 수 있습니다.
             • 개인정보 열람 요구
             • 개인정보 정정·삭제 요구
             • 개인정보 처리 정지 요구
+            • 이용 분석 데이터 삭제 요구
             • 건강 데이터 수집 동의 철회 (iOS: 설정 > 건강 > Mody 권한 해제 / Android: Health Connect > Mody 권한 해제)
             • 회원 탈퇴 (앱 내 마이페이지 > 설정 > 회원탈퇴)
             """
         ),
         .init(
-            title: "제9조 (개인정보 보호책임자)",
+            title: "제10조 (개인정보 보호책임자)",
             body: """
             • 성명: 이예은
             • 이메일: mody.jagsim@gmail.com
             """
         ),
         .init(
-            title: "제10조 (개인정보처리방침 변경)",
+            title: "제11조 (개인정보처리방침 변경)",
             body: "본 방침은 법령·정책 또는 보안 기술의 변경에 따라 내용이 추가·삭제·수정될 수 있습니다. 변경 시 최소 7일 전에 앱 공지사항을 통해 고지합니다. 중요한 변경이 있는 경우 30일 전에 고지합니다."
         )
     ]
@@ -279,7 +320,7 @@ fileprivate enum OnBoardingAgreementConstants {
             title: "제11조 (회원 탈퇴)",
             body: """
             • 이용자는 언제든지 앱 내 마이페이지 > 설정 > 회원탈퇴를 통해 탈퇴할 수 있습니다.
-            • 탈퇴 시 이용자의 게시물 및 개인정보는 즉시 삭제됩니다.
+            • 탈퇴 시 이용자의 게시물 및 개인정보는 개인정보처리방침과 관련 법령에서 정한 절차 및 기간에 따라 삭제됩니다.
             • 단, 그룹에 공유된 게시물은 그룹 내에서 삭제 처리됩니다.
             """
         ),

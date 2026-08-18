@@ -40,19 +40,13 @@ extension CoreNetworkClient {
         var properties: [String: Any] = [
             "http_method": endpoint.method.rawValue,
             "endpoint": analyticsEndpoint(endpoint.path),
-            "network_error": String(describing: networkError)
         ]
-
-#if DEV
-        properties["headers"] = compactJSONString(headers(endpoint: endpoint))
-        properties["query_parameters"] = compactJSONString(endpoint.queryParameters)
-        properties["request_body"] = compactJSONString(jsonObject(endpoint.bodyParameters))
-#else
+        
+        properties["network_error"] = String(describing: networkError)
         properties["query_parameters"] = compactJSONString(endpoint.queryParameters.keys.sorted())
         properties["request_body"] = compactJSONString(
             jsonKeyPaths(jsonObject(endpoint.bodyParameters))
         )
-#endif
 
         return AmplitudeLogEvent(
             name: "api_error",
@@ -118,16 +112,12 @@ private extension CoreNetworkClient {
     }
 
     func analyticsEndpoint(_ path: String) -> String {
-#if DEV
-        return path
-#else
         return path
             .split(separator: "/", omittingEmptySubsequences: false)
             .map { component in
                 isIdentifierPathComponent(String(component)) ? ":id" : String(component)
             }
             .joined(separator: "/")
-#endif
     }
 
     func isIdentifierPathComponent(_ component: String) -> Bool {
@@ -180,10 +170,13 @@ private extension CoreNetworkClient {
     }
 
     func shouldMask(key: String) -> Bool {
-        let lowercasedKey = key.lowercased()
+        let normalizedKey = key
+            .lowercased()
+            .filter { $0.isLetter || $0.isNumber }
 
-        return lowercasedKey.contains("token")
-            || lowercasedKey.contains("authorization")
+        return Self.sensitiveKeyFragments.contains {
+            normalizedKey.contains($0)
+        }
     }
 
     func indented(_ text: String, depth: Int) -> String {
@@ -193,5 +186,19 @@ private extension CoreNetworkClient {
             .split(separator: "\n", omittingEmptySubsequences: false)
             .map { "\(prefix)\($0)" }
             .joined(separator: "\n")
+    }
+
+    static var sensitiveKeyFragments: [String] {
+        [
+            "token", "authorization", "password", "secret", "credential", "cookie", "apikey",
+            "memberid", "userid", "deviceid", "sessionid", "identifier", "idfv", "idfa", "fcm",
+            "email", "phone", "name", "nickname", "birth", "gender", "sex", "age", "address",
+            "account", "profile", "resident", "passport", "code", "pin",
+            "weight", "height", "step", "health", "medical", "disease", "symptom",
+            "blood", "heart", "sleep", "calorie", "exercise", "workout", "meal", "food", "menu",
+            "latitude", "longitude", "location",
+            "photo", "image", "video", "file", "url",
+            "message", "memo", "content", "description", "proof", "date", "time"
+        ]
     }
 }

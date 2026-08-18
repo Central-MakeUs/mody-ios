@@ -243,7 +243,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .FirebaseService: .init(
             implementation: [
                 .external(.FirebaseCore),
-                .external(.FirebaseAnalytics),
                 .external(.FirebaseCrashlytics),
                 .external(.FirebaseRemoteConfig),
                 .module(.ModyLogger)
