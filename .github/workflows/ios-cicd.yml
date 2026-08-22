@@ -43,6 +43,8 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           API_BASE_URL_DEV: ${{ secrets.API_BASE_URL_DEV }}
           API_BASE_URL_PROD: ${{ secrets.API_BASE_URL_PROD }}
+          AMPLITUDE_API_KEY_DEV: ${{ secrets.AMPLITUDE_API_KEY_DEV }}
+          AMPLITUDE_API_KEY_PROD: ${{ secrets.AMPLITUDE_API_KEY_PROD }}
           KAKAO_NATIVE_APP_KEY_DEV: ${{ secrets.KAKAO_NATIVE_APP_KEY_DEV }}
           KAKAO_NATIVE_APP_KEY_PROD: ${{ secrets.KAKAO_NATIVE_APP_KEY_PROD }}
           KAKAO_SHARE_TEMPLATE_ID_DEV: ${{ secrets.KAKAO_SHARE_TEMPLATE_ID_DEV }}
