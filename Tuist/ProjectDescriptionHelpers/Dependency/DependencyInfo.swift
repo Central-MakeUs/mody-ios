@@ -147,7 +147,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
-                .microFeature(.CoreKakao)
+                .microFeature(.CoreKakao),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .Feed: .init(
@@ -166,7 +167,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.RxSwift),
                 .external(.RxCocoa),
                 .external(.RxRelay),
-                .microFeature(.CoreModyImage)
+                .microFeature(.CoreModyImage),
+                .microFeature(.CoreAnalytics)
             ],
             demo: [
                 .module(.DesignSystem),
@@ -182,6 +184,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreNotification),
                 .microFeature(.CoreModyImage),
+                .microFeature(.CoreAnalytics),
                 .module(.Base),
                 .module(.CommonDomain),
                 .module(.Util),
@@ -205,7 +208,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreModyImage),
-                .microFeature(.CoreHealth)
+                .microFeature(.CoreHealth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .MyPage: .init(

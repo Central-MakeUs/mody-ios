@@ -6,6 +6,7 @@
 //
 
 import CoreHealthInterface
+import CoreAnalyticsInterface
 import MyPage
 import MyPageInterface
 import Swinject
@@ -15,9 +16,11 @@ extension AppAssembly {
         container.register(HealthDataSettingsFeature.self) {
             (resolver: Resolver, router: MyPageHealthDataSettingsRouter) in
             let healthPermissionInterface: HealthPermissionInterface = resolver.resolve()
+            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return HealthDataSettingsFeature(
-                healthPermissionInterface: healthPermissionInterface
+                healthPermissionInterface: healthPermissionInterface,
+                analyticsUseCase: analyticsUseCase
             ) { [weak router] route in
                 router?.route(from: route)
             }
