@@ -263,9 +263,12 @@ public struct ProfileFeature {
                     await send(logout())
                 }
             case .logoutSuccessfully:
-                analyticsUseCase.setUserID(nil)
                 state.isLoading = false
-                return .send(.routeToSignIn)
+                return .run { send in
+                    analyticsUseCase.log(MyPageAnalyticsEvent.logoutSucceeded)
+                    analyticsUseCase.reset()
+                    await send(.routeToSignIn)
+                }
             case let .logoutFailed(error):
                 return .send(.showAlert(.error(error)))
             case .deleteAccountButtonTapped:
@@ -283,8 +286,11 @@ public struct ProfileFeature {
                     }
                 )
             case .deleteAccountSuccessfully:
-                analyticsUseCase.setUserID(nil)
-                return .send(.showAlert(.deleteCompleted))
+                return .run { send in
+                    analyticsUseCase.log(MyPageAnalyticsEvent.accountDeletionSucceeded)
+                    analyticsUseCase.reset()
+                    await send(.showAlert(.deleteCompleted))
+                }
             case let .deleteAccountFailed(error):
                 return .send(.showAlert(.error(error)))
             case .deleteAccountCompletionButtonTapped:

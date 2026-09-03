@@ -150,10 +150,12 @@ public struct SplashFeature {
             case .userInfoFetched(let userInfo):
                 state.isLoading = false
                 let destination = makeNavigationDestination(from: userInfo)
+                let loginType = splashUseCase.getAuthSession()?.socialLoginType
 
-                return .run { [analyticsUseCase, router] _ in
+                return .run { [router] _ in
                     analyticsUseCase.setUserID(String(userInfo.memberId))
                     analyticsUseCase.setUserNickname(userInfo.nickname)
+                    analyticsUseCase.log(SplashAnalyticsEvent.loginSucceeded(method: loginType))
                     await router(destination)
                 }
             case .userInfoFetchFailed:

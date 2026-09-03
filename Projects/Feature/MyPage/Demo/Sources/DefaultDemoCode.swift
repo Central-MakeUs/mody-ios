@@ -1,5 +1,6 @@
 import CommonDomain
 import CoreAuthInterface
+import CoreAnalyticsInterface
 import CoreModyImage
 import SwiftUI
 import MyPage
@@ -15,6 +16,7 @@ struct MyPageDemoApp: App {
                         myPageUseCase: MyPageUseCase(
                             myPageRepository: MyPageDemoRepository()
                         ),
+                        analyticsUseCase: MyPageDemoAnalyticsUseCase(),
                         router: { _ in },
                         output: { _ in }
                     )
@@ -23,6 +25,14 @@ struct MyPageDemoApp: App {
             )
         }
     }
+}
+
+private struct MyPageDemoAnalyticsUseCase: AnalyticsUseCaseProtocol {
+    func setUserID(_ userID: String) {}
+    func setUserNickname(_ nickname: String) {}
+    func reset() {}
+    func log(_ event: AmplitudeLogEvent) {}
+    func viewDidLoad(screenName: String) {}
 }
 
 private struct MyPageDemoAuthUseCase: AuthUseCaseProtocol {

@@ -8,6 +8,7 @@
 import Base
 import CommonDomain
 import ComposableArchitecture
+import CoreAnalyticsInterface
 import CoreNotificationInterface
 import Foundation
 import MyPageInterface
@@ -17,15 +18,18 @@ import Util
 public struct NotificationSettingsFeature {
     private let notificationPermission: NotificationPermissionInterface
     private let notificationSettingUseCase: MyPageNotificationSettingUseCase
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (MyPageNotificationSettingsRoute) -> Void
 
     public init(
         notificationPermission: NotificationPermissionInterface,
         notificationSettingUseCase: MyPageNotificationSettingUseCase,
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (MyPageNotificationSettingsRoute) -> Void
     ) {
         self.notificationPermission = notificationPermission
         self.notificationSettingUseCase = notificationSettingUseCase
+        self.analyticsUseCase = analyticsUseCase
         self.router = router
     }
 
@@ -329,11 +333,23 @@ public struct NotificationSettingsFeature {
             case .notificationSettingsUpdated(let notificationSetting):
                 state.isLoading = false
                 state.notificationSetting = notificationSetting
-                return .none
+                return .run { _ in
+                    analyticsUseCase.log(
+                        MyPageAnalyticsEvent.notificationSettingsUpdated(notificationSetting)
+                    )
+                }
             case let .notificationSettingsUpdateFailed(error):
                 return .send(.showAlert(.error(error)))
             case .schedulesUpdated:
-                return .send(.showAlert(.success))
+                let notificationSetting = state.notificationSetting
+                return .merge(
+                    .run { _ in
+                        analyticsUseCase.log(
+                            MyPageAnalyticsEvent.notificationSettingsUpdated(notificationSetting)
+                        )
+                    },
+                    .send(.showAlert(.success))
+                )
             case let .schedulesUpdateFailed(error):
                 return .send(.showAlert(.error(error)))
             case .setNotificationPermissionGranted(let isGranted):

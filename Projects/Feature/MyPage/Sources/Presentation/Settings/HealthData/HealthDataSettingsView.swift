@@ -72,6 +72,7 @@ private extension HealthDataSettingsView {
 
     func openHealthApp() {
         guard let healthAppURL = URL(string: "x-apple-health://") else { return }
+        store.send(.healthAppButtonTapped)
         openURL(healthAppURL)
     }
 }

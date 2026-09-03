@@ -6,8 +6,9 @@
 //
 
 public protocol AnalyticsUseCaseProtocol {
-    func setUserID(_ userID: String?)
+    func setUserID(_ userID: String)
     func setUserNickname(_ nickname: String)
+    func reset()
     func log(_ event: AmplitudeLogEvent)
     func viewDidLoad(screenName: String)
 }

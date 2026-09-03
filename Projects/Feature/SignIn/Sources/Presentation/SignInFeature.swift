@@ -120,26 +120,35 @@ public struct SignInFeature {
 
                 resetDemoLoginState(&state)
                 state.isLoading = true
+                state.loginType = .iosTest
                 return .run { send in
                     await send(signInWithDemo())
                 }
             case .kakaoLoginButtonTapped:
                 state.isLoading = true
+                state.loginType = .kakao
                 return .run { send in
+                    analyticsUseCase.log(SignInAnalyticsEvent.loginButtonClicked(method: .kakao))
                     await send(signInWithKakao())
                 }
             case .appleLoginButtonTapped:
                 state.isLoading = true
+                state.loginType = .apple
                 return .run { send in
+                    analyticsUseCase.log(SignInAnalyticsEvent.loginButtonClicked(method: .apple))
                     await send(signInWithApple())
                 }
             case .receiveLoginSessionSuccessfully(let session):
                 state.isLoading = false
                 let destination = makeNavigationDestination(from: session)
+                let method = state.loginType ?? session.socialLoginType
                 state.navigationDestination = destination
 
                 return .run { [router] _ in
                     analyticsUseCase.setUserID(String(session.id))
+                    analyticsUseCase.log(
+                        SignInAnalyticsEvent.loginSucceeded(method: method)
+                    )
 
                     if session.personalInfoCompleted,
                        let userInfo = try? await authUseCase.getUserInfo(needUpdateKeyChain: false) {
