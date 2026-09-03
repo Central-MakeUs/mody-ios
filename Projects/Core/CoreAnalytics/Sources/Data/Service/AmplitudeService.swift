@@ -29,16 +29,22 @@ public final class AmplitudeService {
         )
     }
 
-    func setUserID(_ userID: String?) {
+    func setUserID(_ userID: String) {
         guard let amplitude else { return }
 
-        guard let userID else {
-            amplitude.reset()
-            amplitude.setDeviceId(deviceId: UUID().uuidString)
-            return
-        }
-
         amplitude.setUserId(userId: userID)
+    }
+
+    func setUserNickname(_ nickname: String) {
+        guard let amplitude else { return }
+
+        let identify = Identify()
+        identify.set(property: PropertyKey.nickname, value: nickname)
+        amplitude.identify(identify: identify)
+    }
+
+    func reset() {
+        amplitude?.reset()
     }
 
     func log(_ event: AmplitudeLogEvent) {
@@ -62,6 +68,7 @@ private extension AmplitudeService {
     }
 
     enum PropertyKey {
+        static let nickname = "nickname"
         static let screenName = "screen_name"
     }
 }

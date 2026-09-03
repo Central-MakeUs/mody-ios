@@ -59,16 +59,18 @@ private extension ChallengeDetailView {
                     imageLoader: imageLoader
                 )
 
-                ChallengeDetailGroupOptionalSection(
-                    challengeList: store.currentWeeklyChallengeList,
-                    imageLoader: imageLoader,
-                    onChallengeTap: { challengeId, groupChallengeId in
-                        store.send(.weeklyChallengeTapped(
-                            challengeId: challengeId,
-                            groupChallengeId: groupChallengeId
-                        ))
-                    }
-                )
+                if store.currentWeeklyChallengeList?.isEmpty != true {
+                    ChallengeDetailGroupOptionalSection(
+                        challengeList: store.currentWeeklyChallengeList,
+                        imageLoader: imageLoader,
+                        onChallengeTap: { challengeId, groupChallengeId in
+                            store.send(.weeklyChallengeTapped(
+                                challengeId: challengeId,
+                                groupChallengeId: groupChallengeId
+                            ))
+                        }
+                    )
+                }
             }
         }
         .scrollIndicators(.visible)

@@ -14,8 +14,16 @@ public struct AnalyticsRepository: AnalyticsRepositoryProtocol {
         self.amplitudeService = amplitudeService
     }
 
-    public func setUserID(_ userID: String?) {
+    public func setUserID(_ userID: String) {
         amplitudeService.setUserID(userID)
+    }
+
+    public func setUserNickname(_ nickname: String) {
+        amplitudeService.setUserNickname(nickname)
+    }
+
+    public func reset() {
+        amplitudeService.reset()
     }
 
     public func log(_ event: AmplitudeLogEvent) {

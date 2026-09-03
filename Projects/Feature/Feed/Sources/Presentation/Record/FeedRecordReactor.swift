@@ -7,6 +7,7 @@
 
 import Foundation
 import CommonDomain
+import CoreAnalyticsInterface
 import CoreCameraInterface
 import CoreModyImageInterface
 import FeedInterface
@@ -19,6 +20,7 @@ public final class FeedRecordReactor: Reactor {
     private let feedUseCase: FeedUseCase
     private let imageUploadUseCase: ImageUploadUseCaseProtocol
     private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let output: @MainActor (FeedRecordOutput) -> Void
 
     public enum PhotoPresentation: Equatable {
@@ -96,12 +98,14 @@ public final class FeedRecordReactor: Reactor {
         feedUseCase: FeedUseCase,
         imageUploadUseCase: ImageUploadUseCaseProtocol,
         temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol,
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         output: @escaping @MainActor (FeedRecordOutput) -> Void
     ) {
         self.router = router
         self.feedUseCase = feedUseCase
         self.imageUploadUseCase = imageUploadUseCase
         self.temporaryImageFileUseCase = temporaryImageFileUseCase
+        self.analyticsUseCase = analyticsUseCase
         self.output = output
         self.initialState = State(
             recordType: recordType,
@@ -124,9 +128,23 @@ public final class FeedRecordReactor: Reactor {
         case .didDismissPhotoPresentation:
             return .just(.setPhotoPresentation(.none))
         case .didTapCamera:
-            return .just(.setPhotoPresentation(.capture(.camera)))
+            let source = CameraCaptureSource.camera
+            analyticsUseCase.log(
+                FeedAnalyticsEvent.recordPhotoSourceSelected(
+                    recordType: currentState.recordType,
+                    source: source.rawValue
+                )
+            )
+            return .just(.setPhotoPresentation(.capture(source)))
         case .didTapGallery:
-            return .just(.setPhotoPresentation(.capture(.photoLibrary)))
+            let source = CameraCaptureSource.photoLibrary
+            analyticsUseCase.log(
+                FeedAnalyticsEvent.recordPhotoSourceSelected(
+                    recordType: currentState.recordType,
+                    source: source.rawValue
+                )
+            )
+            return .just(.setPhotoPresentation(.capture(source)))
         case let .didCompletePhotoCapture(result):
             removeSelectedPhotoFile()
             return .just(.completePhotoCapture(result))
@@ -227,6 +245,9 @@ private extension FeedRecordReactor {
                         throw NetworkError.invalidResponse
                     }
                     try await self.feedUseCase.createRecord(request)
+                    self.analyticsUseCase.log(
+                        FeedAnalyticsEvent.recordCreated(recordType: state.recordType)
+                    )
                     try? self.temporaryImageFileUseCase.removeImage(
                         at: selectedPhoto.originalFile.fileURL
                     )

@@ -6,6 +6,7 @@
 //
 
 import Swinject
+import CoreAnalyticsInterface
 import CoreModyImageInterface
 import FeedInterface
 import Feed
@@ -17,6 +18,7 @@ extension AppAssembly {
                 let feedUseCase: FeedUseCase = resolver.resolve()
                 let imageUploadUseCase: ImageUploadUseCaseProtocol = resolver.resolve()
                 let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
+                let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
                 return FeedRecordReactor(
                     router: router,
@@ -24,6 +26,7 @@ extension AppAssembly {
                     feedUseCase: feedUseCase,
                     imageUploadUseCase: imageUploadUseCase,
                     temporaryImageFileUseCase: temporaryImageFileUseCase,
+                    analyticsUseCase: analyticsUseCase,
                     output: { [weak outputHandler] output in
                         outputHandler?.handle(output: output)
                     }

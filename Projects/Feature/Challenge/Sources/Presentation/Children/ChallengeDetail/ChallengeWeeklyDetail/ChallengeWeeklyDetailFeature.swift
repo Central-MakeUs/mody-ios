@@ -9,6 +9,7 @@ import Base
 import ChallengeInterface
 import CommonDomain
 import ComposableArchitecture
+import CoreAnalyticsInterface
 import CoreAuthInterface
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -20,6 +21,7 @@ public struct ChallengeWeeklyDetailFeature {
     private let challengeUseCase: ChallengeUseCase
     private let imageUploadUseCase: ImageUploadUseCaseProtocol
     private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (ChallengeWeeklyDetailRoute) -> Void
     private let output: @MainActor (ChallengeOutput) -> Void
 
@@ -28,6 +30,7 @@ public struct ChallengeWeeklyDetailFeature {
         challengeUseCase: ChallengeUseCase,
         imageUploadUseCase: ImageUploadUseCaseProtocol,
         temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol,
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (ChallengeWeeklyDetailRoute) -> Void,
         output: @escaping @MainActor (ChallengeOutput) -> Void
     ) {
@@ -35,6 +38,7 @@ public struct ChallengeWeeklyDetailFeature {
         self.challengeUseCase = challengeUseCase
         self.imageUploadUseCase = imageUploadUseCase
         self.temporaryImageFileUseCase = temporaryImageFileUseCase
+        self.analyticsUseCase = analyticsUseCase
         self.router = router
         self.output = output
     }
@@ -207,6 +211,7 @@ public struct ChallengeWeeklyDetailFeature {
                 let groupChallengeId = state.groupChallengeId
 
                 return .run { send in
+                    analyticsUseCase.log(ChallengeAnalyticsEvent.challengeShareClicked)
                     do {
                         let share = try await challengeUseCase.shareWeeklyChallenge(
                             groupId: groupId,
@@ -265,6 +270,7 @@ private extension ChallengeWeeklyDetailFeature {
                 groupChallengeId: groupChallengeId,
                 request: request
             )
+            analyticsUseCase.log(ChallengeAnalyticsEvent.weeklyChallengeProofCreated)
             let imageInfos = try await challengeUseCase.fetchWeeklyChallengeProofs(
                 groupId: groupId,
                 groupChallengeId: groupChallengeId

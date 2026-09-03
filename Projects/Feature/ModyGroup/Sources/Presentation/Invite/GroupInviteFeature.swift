@@ -6,13 +6,19 @@
 //
 
 import ComposableArchitecture
+import CoreAnalyticsInterface
 
 @Reducer
 public struct GroupInviteFeature {
     private let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol
+    private let analyticsUseCase: AnalyticsUseCaseProtocol
 
-    public init(shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol) {
+    public init(
+        shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol,
+        analyticsUseCase: AnalyticsUseCaseProtocol
+    ) {
         self.shareGroupInviteUseCase = shareGroupInviteUseCase
+        self.analyticsUseCase = analyticsUseCase
     }
 
     @ObservableState
@@ -38,7 +44,8 @@ public struct GroupInviteFeature {
         case copyButtonTapped
         case copyMessageExpired
         case shareButtonTapped
-        case shareFinished
+        case shareSucceeded
+        case shareFailed
         case doneButtonTapped
     }
 
@@ -73,12 +80,17 @@ public struct GroupInviteFeature {
                             code: inviteCode,
                             groupName: groupName
                         )
+                        await send(.shareSucceeded)
                     } catch {
-                        debugPrint("ModyGroup invite share failed: \(error)")
+                        await send(.shareFailed)
                     }
-                    await send(.shareFinished)
                 }
-            case .shareFinished:
+            case .shareSucceeded:
+                state.isLoading = false
+                return .run { _ in
+                    analyticsUseCase.log(ModyGroupAnalyticsEvent.inviteShareSucceeded)
+                }
+            case .shareFailed:
                 state.isLoading = false
                 return .none
             case .backButtonTapped, .doneButtonTapped:
