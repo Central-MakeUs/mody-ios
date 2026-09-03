@@ -41,6 +41,14 @@ public final class AmplitudeService {
         amplitude.setUserId(userId: userID)
     }
 
+    func setUserNickname(_ nickname: String) {
+        guard let amplitude else { return }
+
+        let identify = Identify()
+        identify.set(property: PropertyKey.nickname, value: nickname)
+        amplitude.identify(identify: identify)
+    }
+
     func log(_ event: AmplitudeLogEvent) {
         amplitude?.track(
             eventType: event.name,
@@ -62,6 +70,7 @@ private extension AmplitudeService {
     }
 
     enum PropertyKey {
+        static let nickname = "nickname"
         static let screenName = "screen_name"
     }
 }

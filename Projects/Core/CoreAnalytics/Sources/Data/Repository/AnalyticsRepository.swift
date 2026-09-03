@@ -18,6 +18,10 @@ public struct AnalyticsRepository: AnalyticsRepositoryProtocol {
         amplitudeService.setUserID(userID)
     }
 
+    public func setUserNickname(_ nickname: String) {
+        amplitudeService.setUserNickname(nickname)
+    }
+
     public func log(_ event: AmplitudeLogEvent) {
         amplitudeService.log(event)
     }

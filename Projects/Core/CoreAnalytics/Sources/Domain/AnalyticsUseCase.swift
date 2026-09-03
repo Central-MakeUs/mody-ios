@@ -18,6 +18,10 @@ public struct AnalyticsUseCase: AnalyticsUseCaseProtocol {
         analyticsRepository.setUserID(userID)
     }
 
+    public func setUserNickname(_ nickname: String) {
+        analyticsRepository.setUserNickname(nickname)
+    }
+
     public func log(_ event: AmplitudeLogEvent) {
         analyticsRepository.log(event)
     }

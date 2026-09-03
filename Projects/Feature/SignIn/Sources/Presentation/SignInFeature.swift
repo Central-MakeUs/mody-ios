@@ -138,8 +138,17 @@ public struct SignInFeature {
                 let destination = makeNavigationDestination(from: session)
                 state.navigationDestination = destination
 
-                return .run { [analyticsUseCase, router] _ in
+                return .run { [router] _ in
                     analyticsUseCase.setUserID(String(session.id))
+
+                    if session.personalInfoCompleted,
+                       let userInfo = try? await authUseCase.getUserInfo(needUpdateKeyChain: false) {
+
+                        if !userInfo.nickname.isEmpty {
+                            analyticsUseCase.setUserNickname(userInfo.nickname)
+                        }
+                    }
+
                     await router(destination)
                 }
             case let .kakaoLoginError(error),

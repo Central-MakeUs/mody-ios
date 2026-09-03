@@ -153,6 +153,7 @@ public struct SplashFeature {
 
                 return .run { [analyticsUseCase, router] _ in
                     analyticsUseCase.setUserID(String(userInfo.memberId))
+                    analyticsUseCase.setUserNickname(userInfo.nickname)
                     await router(destination)
                 }
             case .userInfoFetchFailed:
