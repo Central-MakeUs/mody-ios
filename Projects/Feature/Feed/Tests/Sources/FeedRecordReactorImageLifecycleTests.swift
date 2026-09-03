@@ -7,6 +7,7 @@
 
 import CommonDomain
 import CoreCameraInterface
+import CoreAnalyticsInterface
 import CoreModyImageInterface
 import FeedInterface
 import RxSwift
@@ -151,6 +152,7 @@ private extension FeedRecordReactorImageLifecycleTests {
             feedUseCase: FeedUseCase(feedRepository: dependencies.feedRepository),
             imageUploadUseCase: dependencies.imageUpload,
             temporaryImageFileUseCase: dependencies.temporaryFiles,
+            analyticsUseCase: FeedRecordAnalyticsUseCaseMock(),
             output: { [weak output = dependencies.output] event in
                 output?.handle(output: event)
             }
@@ -179,6 +181,14 @@ private extension FeedRecordReactorImageLifecycleTests {
             normalizedSelectionFrame: CGRect(x: 0, y: 0, width: 1, height: 1)
         )
     }
+}
+
+private struct FeedRecordAnalyticsUseCaseMock: AnalyticsUseCaseProtocol {
+    func setUserID(_ userID: String) {}
+    func setUserNickname(_ nickname: String) {}
+    func reset() {}
+    func log(_ event: AmplitudeLogEvent) {}
+    func viewDidLoad(screenName: String) {}
 }
 
 @MainActor

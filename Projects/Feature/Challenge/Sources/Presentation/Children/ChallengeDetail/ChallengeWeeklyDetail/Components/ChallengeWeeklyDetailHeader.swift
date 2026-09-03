@@ -27,7 +27,7 @@ struct ChallengeWeeklyDetailHeader: View {
                 .greedyWidth(.leading)
 
                 MText(
-                    "D-\(detail.remainingDays)",
+                    remainingDaysTitle(detail.remainingDays),
                     style: .c2,
                     color: .gray10
                 )
@@ -47,5 +47,12 @@ struct ChallengeWeeklyDetailHeader: View {
         .padding(16)
         .background(Color.main4)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+private extension ChallengeWeeklyDetailHeader {
+    func remainingDaysTitle(_ remainingDays: Int) -> String {
+        if remainingDays == 0 { return "D-Day" }
+        return "D-\(remainingDays)"
     }
 }

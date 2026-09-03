@@ -6,6 +6,7 @@
 //
 
 import Swinject
+import CoreAnalyticsInterface
 import Main
 import MainInterface
 import FeedInterface
@@ -29,6 +30,7 @@ extension AppAssembly {
             let myPageBuilder: MyPageBuildable = resolver.resolve()
             let modyGroupBuilder: ModyGroupBuildable = resolver.resolve()
             let notificationUseCase: NotificationUseCaseProtocol = resolver.resolve()
+            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
             let imageLoader: RemoteImageLoading = resolver.resolve()
 
             return MainBuilder(
@@ -37,6 +39,7 @@ extension AppAssembly {
                 myPageBuilder: myPageBuilder,
                 modyGroupBuilder: modyGroupBuilder,
                 notificationUseCase: notificationUseCase,
+                analyticsUseCase: analyticsUseCase,
                 imageLoader: imageLoader,
                 makeMainReactor: {
                     resolver.resolve()

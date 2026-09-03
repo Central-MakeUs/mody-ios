@@ -6,6 +6,7 @@
 //
 
 import Swinject
+import CoreAnalyticsInterface
 import CoreKakaoInterface
 import CoreNetworkInterface
 import ModyGroupInterface
@@ -36,16 +37,20 @@ extension AppAssembly {
                 makeModyGroupRootFeature: { router, outputHandler in
                     let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol = resolver.resolve()
                     let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
+                    let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
                     return ModyGroupRootFeature(
                         groupInviteFeature: GroupInviteFeature(
-                            shareGroupInviteUseCase: shareGroupInviteUseCase
+                            shareGroupInviteUseCase: shareGroupInviteUseCase,
+                            analyticsUseCase: analyticsUseCase
                         ),
                         groupParticipateFeature: GroupParticipateFeature(
-                            groupUseCase: groupUseCase
+                            groupUseCase: groupUseCase,
+                            analyticsUseCase: analyticsUseCase
                         ),
                         groupCreateFeature: GroupCreateFeature(
-                            groupUseCase: groupUseCase
+                            groupUseCase: groupUseCase,
+                            analyticsUseCase: analyticsUseCase
                         ),
                         output: { [weak outputHandler] output in
                             outputHandler?.handle(output: output)
