@@ -53,12 +53,11 @@ private extension ChallengeDetailGroupOptionalRowItemTitleView {
     }
     
     func chipView(isComplete: Bool, remainingDays: Int) -> some View {
-        let title: String = isComplete ? "완료" : "D-\(remainingDays)"
         let textColor: Color = isComplete ? Color.gray10 : Color.systemWhite
         let backgroundColor: Color = isComplete ? Color.main : Color.gray9
         
         return MText(
-            title,
+            chipTitle(isComplete: isComplete, remainingDays: remainingDays),
             style: .c2,
             color: textColor
         )
@@ -66,6 +65,12 @@ private extension ChallengeDetailGroupOptionalRowItemTitleView {
         .padding(.vertical, 2)
         .background(backgroundColor)
         .clipShape(Capsule())
+    }
+
+    func chipTitle(isComplete: Bool, remainingDays: Int) -> String {
+        if isComplete { return "완료" }
+        if remainingDays == 0 { return "D-Day" }
+        return "D-\(remainingDays)"
     }
 
     @ViewBuilder
