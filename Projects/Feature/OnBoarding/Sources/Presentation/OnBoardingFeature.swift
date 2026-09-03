@@ -217,8 +217,12 @@ public struct OnBoardingFeature {
             case let .setupProfileSuccessfully(memberID):
                 state.isLoading = false
                 state.currentStep = .permission
+                let nickname = state.request.nickname
                 return .run { _ in
                     analyticsUseCase.setUserID(String(memberID))
+                    if let nickname {
+                        analyticsUseCase.setUserNickname(nickname)
+                    }
                 }
             case let .setupProfileFailure(error):
                 return .send(.showAlert(.error(error)))

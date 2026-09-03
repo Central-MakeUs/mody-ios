@@ -13,6 +13,7 @@ import ChallengeInterface
 import MyPageInterface
 import ModyGroupInterface
 import CoreModyImageInterface
+import CoreAnalyticsInterface
 
 public final class MainCoordinator: MainCoordinating {
     public let navigationController: UINavigationController
@@ -30,6 +31,7 @@ public final class MainCoordinator: MainCoordinating {
     private let mainContainerBuilder: MainContainerBuildable
     let notificationBuilder: NotificationBuildable
     let imageLoader: RemoteImageLoading
+    let analyticsUseCase: AnalyticsUseCaseProtocol
 
     init(
         navigationController: UINavigationController = SwipeBackNavigationController(),
@@ -41,6 +43,7 @@ public final class MainCoordinator: MainCoordinating {
         mainContainerBuilder: MainContainerBuildable,
         notificationBuilder: NotificationBuildable,
         imageLoader: RemoteImageLoading,
+        analyticsUseCase: AnalyticsUseCaseProtocol,
         delegate: MainCoordinatorDelegate
     ) {
         self.navigationController = navigationController
@@ -52,6 +55,7 @@ public final class MainCoordinator: MainCoordinating {
         self.mainContainerBuilder = mainContainerBuilder
         self.notificationBuilder = notificationBuilder
         self.imageLoader = imageLoader
+        self.analyticsUseCase = analyticsUseCase
         self.delegate = delegate
         navigationController.setNavigationBarHidden(true, animated: false)
         print("⭕ MainCoordinator init!")
@@ -100,6 +104,7 @@ public final class MainCoordinator: MainCoordinating {
             self?.showGroupCreate(needBackButton: true)
         }
         mainContainerViewController.onAlarmTap = { [weak self] in
+            self?.analyticsUseCase.log(MainAnalyticsEvent.notificationCenterOpened)
             self?.showNotification()
         }
 

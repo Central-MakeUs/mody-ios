@@ -7,6 +7,7 @@
 
 import CommonDomain
 import CoreAuthInterface
+import CoreAnalyticsInterface
 import FeedInterface
 import ModyGroupInterface
 import RxSwift
@@ -360,6 +361,7 @@ private extension FeedReactorPaginationTests {
             authUseCase: FeedPaginationAuthUseCaseMock(),
             groupUseCase: groupUseCase,
             feedUseCase: FeedUseCase(feedRepository: feedRepository),
+            analyticsUseCase: FeedAnalyticsUseCaseMock(),
             router: router ?? FeedPaginationRouterMock(),
             output: { [weak outputHandler] output in
                 outputHandler?.handle(output: output)
@@ -430,6 +432,14 @@ private extension FeedReactorPaginationTests {
             recordingStreakDays: 1
         )
     }
+}
+
+private struct FeedAnalyticsUseCaseMock: AnalyticsUseCaseProtocol {
+    func setUserID(_ userID: String) {}
+    func setUserNickname(_ nickname: String) {}
+    func reset() {}
+    func log(_ event: AmplitudeLogEvent) {}
+    func viewDidLoad(screenName: String) {}
 }
 
 private actor FeedPaginationRepositoryMock: FeedRepositoryProtocol {
