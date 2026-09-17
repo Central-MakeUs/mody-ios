@@ -55,7 +55,8 @@ private extension FeedRecordUploadView {
         layer.cornerRadius = 16
         layer.masksToBounds = true
 
-        photoImageView.contentMode = .scaleAspectFill
+        photoImageView.contentMode = .scaleAspectFit
+        photoImageView.backgroundColor = .black
         photoImageView.clipsToBounds = true
         photoImageView.isHidden = true
         photoImageView.isUserInteractionEnabled = false

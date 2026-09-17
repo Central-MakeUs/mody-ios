@@ -60,6 +60,29 @@ struct CameraCapturedPhotoProcessor {
             at: capturedPhoto.originalFile.fileURL
         )
     }
+
+    func makeRotatedFile(
+        from capturedPhoto: CameraCapturedPhoto,
+        rotation: CameraImageRotation
+    ) throws -> TemporaryImageFile {
+        guard let originalImage = UIImage(contentsOfFile: capturedPhoto.originalFile.fileURL.path) else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        let rotatedImage = CameraImageRotator().rotate(originalImage, by: rotation)
+
+        guard let jpegData = rotatedImage.jpegData(compressionQuality: 0.95) else {
+            throw CocoaError(.fileWriteUnknown)
+        }
+
+        let rotatedFile = try temporaryImageFileUseCase.saveImage(
+            data: jpegData,
+            fileName: capturedPhoto.originalFile.fileName
+        )
+        try? temporaryImageFileUseCase.removeImage(
+            at: capturedPhoto.originalFile.fileURL
+        )
+        return rotatedFile
+    }
 }
 
 private extension CameraCapturedPhotoProcessor {

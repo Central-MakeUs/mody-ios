@@ -31,6 +31,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        appDependencyContainer.initializeAnalytics()
         DesignSystemFontFamily.registerAllCustomFonts()
         FirebaseApp.configure()
         configureNotifications(application)

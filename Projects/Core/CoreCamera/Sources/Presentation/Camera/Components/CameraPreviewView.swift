@@ -19,6 +19,7 @@ final class CameraPreviewView: UIView {
 
     func configure(session: AVCaptureSession) {
         previewLayer.session = session
-        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.videoGravity = .resizeAspect
+        backgroundColor = .black
     }
 }
