@@ -30,6 +30,19 @@ final class ROIOverlayView: UIView {
         updateLayers()
     }
 
+    func updateSelectableFrame(_ selectableFrame: CGRect?) {
+        self.selectableFrame = selectableFrame
+
+        guard currentSelectionFrame != .zero else {
+            currentSelectionFrame = defaultSelectionFrame()
+            updateLayers()
+            return
+        }
+
+        currentSelectionFrame = constrainedFrame(currentSelectionFrame)
+        updateLayers()
+    }
+
     init(selectionAspectRatio: CGSize?) {
         self.selectionAspectRatio = selectionAspectRatio
         super.init(frame: .zero)

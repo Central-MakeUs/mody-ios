@@ -23,8 +23,8 @@ public final class AmplitudeService {
             configuration: Configuration(
                 apiKey: apiKey,
                 autocapture: [.sessions, .appLifecycles, .screenViews],
-                enableAutoCaptureRemoteConfig: false,
-                enableDiagnostics: false
+                enableAutoCaptureRemoteConfig: true,
+                enableDiagnostics: true
             )
         )
     }

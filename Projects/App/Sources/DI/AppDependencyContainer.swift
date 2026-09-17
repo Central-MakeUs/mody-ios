@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreAnalyticsInterface
 import CoreModyImageInterface
 import CoreNotificationInterface
 import Swinject
@@ -29,5 +30,11 @@ final class AppDependencyContainer {
 
     func makeTemporaryImageFileUseCase() -> TemporaryImageFileUseCaseProtocol {
         assembler.resolver.resolve()
+    }
+}
+
+extension AppDependencyContainer {
+    func initializeAnalytics() {
+        let _: AnalyticsUseCaseProtocol = assembler.resolver.resolve()
     }
 }
