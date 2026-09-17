@@ -22,14 +22,21 @@ final class CameraContainerViewController: UIViewController {
     let sessionController = CameraCaptureSessionController()
     let capturedPhotoProcessor: CameraCapturedPhotoProcessor
 
-    private let previewView = CameraPreviewView()
+    let previewView = CameraPreviewView()
     let selectedImageView = UIImageView()
     let closeButton = UIButton(type: .system)
+    let rotateLeftButton = UIButton(type: .system)
+    let rotateRightButton = UIButton(type: .system)
+    private let topControlsStackView = UIStackView()
+    private let topControlsSpacerView = UIView()
     let bottomCameraShutterView = BottomCameraShutterView()
     let photoConfirmationContainerView = PhotoConfirmationContainerView()
     let roiOverlayView: ROIOverlayView
 
     var capturedPhoto: CameraCapturedPhoto?
+    var imageRotation: CameraImageRotation = .zero
+    var rotatedPreviewImage: UIImage?
+    var isRotatingPhoto = false
     var photoLibraryLoadProgress: Progress?
     var photoLibraryLoadID: UUID?
     private var didPresentInitialPhotoLibrary = false
@@ -68,6 +75,11 @@ final class CameraContainerViewController: UIViewController {
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateROISelectableFrame()
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
@@ -90,10 +102,21 @@ final class CameraContainerViewController: UIViewController {
 }
 
 private extension CameraContainerViewController {
+    func configureRotateButton(
+        _ button: UIButton,
+        systemName: String
+    ) {
+        button.setImage(UIImage(systemName: systemName), for: .normal)
+        button.tintColor = .systemWhite
+        button.backgroundColor = .gray10
+        button.layer.cornerRadius = 8
+    }
+
     func setupUI() {
         view.backgroundColor = .systemBlack
 
-        selectedImageView.contentMode = .scaleAspectFill
+        selectedImageView.contentMode = .scaleAspectFit
+        selectedImageView.backgroundColor = .black
         selectedImageView.clipsToBounds = true
         selectedImageView.isHidden = true
 
@@ -101,6 +124,25 @@ private extension CameraContainerViewController {
         closeButton.tintColor = .gray10
         closeButton.contentHorizontalAlignment = .fill
         closeButton.contentVerticalAlignment = .fill
+
+        configureRotateButton(
+            rotateLeftButton,
+            systemName: "rotate.left"
+        )
+        configureRotateButton(
+            rotateRightButton,
+            systemName: "rotate.right"
+        )
+        rotateLeftButton.isHidden = true
+        rotateRightButton.isHidden = true
+
+        topControlsStackView.axis = .horizontal
+        topControlsStackView.alignment = .fill
+        topControlsStackView.spacing = 12
+        topControlsStackView.addArrangedSubview(rotateLeftButton)
+        topControlsStackView.addArrangedSubview(rotateRightButton)
+        topControlsStackView.addArrangedSubview(topControlsSpacerView)
+        topControlsStackView.addArrangedSubview(closeButton)
 
         photoConfirmationContainerView.isHidden = true
         roiOverlayView.isHidden = true
@@ -110,7 +152,7 @@ private extension CameraContainerViewController {
         var subviews: [UIView] = [
             previewView,
             selectedImageView,
-            closeButton,
+            topControlsStackView,
             bottomCameraShutterView,
             photoConfirmationContainerView
         ]
@@ -135,10 +177,16 @@ private extension CameraContainerViewController {
             }
         }
 
-        closeButton.snp.makeConstraints {
+        topControlsStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(16)
-            $0.trailing.equalToSuperview().inset(24)
-            $0.size.equalTo(32)
+            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.height.equalTo(32)
+        }
+
+        [closeButton, rotateLeftButton, rotateRightButton].forEach {
+            $0.snp.makeConstraints {
+                $0.size.equalTo(32)
+            }
         }
 
         bottomCameraShutterView.snp.makeConstraints {
@@ -156,6 +204,8 @@ private extension CameraContainerViewController {
 
     func bindActions() {
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        rotateLeftButton.addTarget(self, action: #selector(rotateLeftTapped), for: .touchUpInside)
+        rotateRightButton.addTarget(self, action: #selector(rotateRightTapped), for: .touchUpInside)
 
         bottomCameraShutterView.onGalleryTap = { [weak self] in
             self?.presentPhotoLibrary()

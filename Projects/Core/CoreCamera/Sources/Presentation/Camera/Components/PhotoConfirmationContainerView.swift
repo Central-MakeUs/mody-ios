@@ -12,7 +12,6 @@ import UIKit
 final class PhotoConfirmationContainerView: UIView {
     var onRetakeTap: (() -> Void)?
     var onUploadTap: (() -> Void)?
-
     private let retakeButton = ConfirmationTextUIControl(
         title: "다시 찍기",
         backgroundColor: .gray10,
@@ -47,20 +46,16 @@ private extension PhotoConfirmationContainerView {
     }
 
     func setupLayout() {
-        [retakeButton, uploadButton].forEach {
-            addSubview($0)
-        }
+        [retakeButton, uploadButton].forEach { addSubview($0) }
 
         retakeButton.snp.makeConstraints {
-            $0.top.leading.equalToSuperview()
+            $0.top.bottom.leading.equalToSuperview()
             $0.width.equalTo(100)
-            $0.height.equalTo(40)
         }
 
         uploadButton.snp.makeConstraints {
-            $0.top.trailing.equalToSuperview()
+            $0.top.bottom.trailing.equalToSuperview()
             $0.width.equalTo(100)
-            $0.height.equalTo(40)
         }
     }
 

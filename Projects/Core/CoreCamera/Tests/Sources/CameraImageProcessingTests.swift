@@ -50,6 +50,22 @@ final class CameraImageProcessingTests: XCTestCase {
         )
     }
 
+    func testAspectFitCropIgnoresLetterboxedArea() throws {
+        let cropOutput = try XCTUnwrap(
+            CameraImageCropper().crop(
+                image: makeImage(size: CGSize(width: 300, height: 600)),
+                selectionFrame: CGRect(x: 0, y: 200, width: 300, height: 200),
+                containerSize: CGSize(width: 300, height: 800),
+                displayMode: .aspectFit
+            )
+        )
+
+        XCTAssertEqual(cropOutput.normalizedSelectionFrame.minX, 0, accuracy: 0.0001)
+        XCTAssertEqual(cropOutput.normalizedSelectionFrame.minY, 1.0 / 6.0, accuracy: 0.0001)
+        XCTAssertEqual(cropOutput.normalizedSelectionFrame.width, 1, accuracy: 0.0001)
+        XCTAssertEqual(cropOutput.normalizedSelectionFrame.height, 1.0 / 3.0, accuracy: 0.0001)
+    }
+
     @MainActor
     func testCropDisabledReturnsExistingPreviewAndFullFrame() throws {
         let previewImage = makeImage(size: CGSize(width: 300, height: 150))

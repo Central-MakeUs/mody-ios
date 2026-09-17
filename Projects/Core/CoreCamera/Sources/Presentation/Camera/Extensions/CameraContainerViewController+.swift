@@ -6,6 +6,7 @@
 //
 
 import CoreCameraInterface
+import CoreModyImageInterface
 import DesignSystem
 import PhotosUI
 import UIKit
@@ -50,12 +51,18 @@ extension CameraContainerViewController {
 
     func setCapturedPhoto(_ capturedPhoto: CameraCapturedPhoto) {
         clearCapturedPhoto(removingFile: true)
+        resetRotationState()
+        previewView.isHidden = true
         self.capturedPhoto = capturedPhoto
-        selectedImageView.image = capturedPhoto.previewImage
+        rotatedPreviewImage = capturedPhoto.previewImage
+        selectedImageView.image = rotatedPreviewImage
         selectedImageView.isHidden = false
+        rotateLeftButton.isHidden = false
+        rotateRightButton.isHidden = false
         bottomCameraShutterView.isHidden = true
         photoConfirmationContainerView.isHidden = false
         roiOverlayView.isHidden = !isCropEnabled
+        updateROISelectableFrame(resetSelection: true)
         closeButton.tintColor = .systemWhite
         sessionController.stop()
     }
@@ -63,7 +70,12 @@ extension CameraContainerViewController {
     func resetCapturedPhoto() {
         cancelPhotoLibraryLoad()
         clearCapturedPhoto(removingFile: true)
+        resetRotationState()
+        rotatedPreviewImage = nil
+        previewView.isHidden = false
         selectedImageView.isHidden = true
+        rotateLeftButton.isHidden = true
+        rotateRightButton.isHidden = true
         bottomCameraShutterView.isHidden = false
         photoConfirmationContainerView.isHidden = true
         roiOverlayView.isHidden = true
@@ -79,24 +91,41 @@ extension CameraContainerViewController {
 
             let previewImage: UIImage
             let normalizedSelectionFrame: CGRect
+            guard let rotatedPreviewImage = self.rotatedPreviewImage else {
+                return nil
+            }
 
             if isCropEnabled {
                 guard let cropOutput = CameraImageCropper().crop(
-                    image: capturedPhoto.previewImage,
+                    image: rotatedPreviewImage,
                     selectionFrame: roiOverlayView.selectionFrame,
-                    containerSize: roiOverlayView.bounds.size
+                    containerSize: roiOverlayView.bounds.size,
+                    displayMode: .aspectFit
                 ) else {
                     return nil
                 }
                 previewImage = cropOutput.croppedImage
                 normalizedSelectionFrame = cropOutput.normalizedSelectionFrame
             } else {
-                previewImage = capturedPhoto.previewImage
+                previewImage = rotatedPreviewImage
                 normalizedSelectionFrame = CGRect(x: 0, y: 0, width: 1, height: 1)
             }
 
+            let originalFile: TemporaryImageFile
+            if imageRotation == .zero {
+                originalFile = capturedPhoto.originalFile
+            } else {
+                guard let rotatedFile = try? capturedPhotoProcessor.makeRotatedFile(
+                    from: capturedPhoto,
+                    rotation: imageRotation
+                ) else {
+                    return nil
+                }
+                originalFile = rotatedFile
+            }
+
             let result = CameraCaptureResult(
-                originalFile: capturedPhoto.originalFile,
+                originalFile: originalFile,
                 croppedPreviewImage: previewImage,
                 normalizedSelectionFrame: normalizedSelectionFrame
             )
@@ -133,5 +162,77 @@ extension CameraContainerViewController {
         photoLibraryLoadProgress?.cancel()
         photoLibraryLoadProgress = nil
         photoLibraryLoadID = nil
+    }
+
+    func updateROISelectableFrame(resetSelection: Bool = false) {
+        guard isCropEnabled else { return }
+
+        let displayedFrame = rotatedPreviewImage.flatMap {
+            CameraDisplayedImageLayout.make(
+                imageSize: $0.size,
+                containerSize: roiOverlayView.bounds.size,
+                displayMode: .aspectFit
+            )?.displayedImageFrame
+        } ?? roiOverlayView.bounds
+
+        if resetSelection {
+            roiOverlayView.resetSelection(in: displayedFrame)
+        } else {
+            roiOverlayView.updateSelectableFrame(displayedFrame)
+        }
+    }
+
+    func rotateCapturedPhoto(clockwiseDegrees: Int) {
+        guard let capturedPhoto, !isRotatingPhoto else { return }
+
+        isRotatingPhoto = true
+        rotateLeftButton.isUserInteractionEnabled = false
+        rotateRightButton.isUserInteractionEnabled = false
+        imageRotation = imageRotation.adding(clockwise: clockwiseDegrees)
+        roiOverlayView.isHidden = true
+
+        let radians = CGFloat(clockwiseDegrees) * .pi / 180
+        UIView.animate(
+            withDuration: 0.28,
+            delay: 0,
+            options: [.curveEaseInOut, .beginFromCurrentState],
+            animations: { [weak self] in
+                self?.selectedImageView.transform = CGAffineTransform(rotationAngle: radians)
+            },
+            completion: { [weak self] _ in
+                guard let self else { return }
+
+                let rotatedImage = CameraImageRotator().rotate(
+                    capturedPhoto.previewImage,
+                    by: self.imageRotation
+                )
+                UIView.performWithoutAnimation {
+                    self.selectedImageView.transform = .identity
+                    self.rotatedPreviewImage = rotatedImage
+                    self.selectedImageView.image = rotatedImage
+                }
+                self.updateROISelectableFrame(resetSelection: true)
+                self.roiOverlayView.isHidden = !self.isCropEnabled
+                self.rotateLeftButton.isUserInteractionEnabled = true
+                self.rotateRightButton.isUserInteractionEnabled = true
+                self.isRotatingPhoto = false
+            }
+        )
+    }
+
+    func resetRotationState() {
+        imageRotation = .zero
+        isRotatingPhoto = false
+        rotateLeftButton.isUserInteractionEnabled = true
+        rotateRightButton.isUserInteractionEnabled = true
+        selectedImageView.transform = .identity
+    }
+
+    @objc func rotateLeftTapped() {
+        rotateCapturedPhoto(clockwiseDegrees: -90)
+    }
+
+    @objc func rotateRightTapped() {
+        rotateCapturedPhoto(clockwiseDegrees: 90)
     }
 }
