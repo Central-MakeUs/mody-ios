@@ -11,12 +11,12 @@ import UniformTypeIdentifiers
 /// 앨범 선택 결과를 앱 소유 임시 파일과 화면용 미리보기로 변환해 카메라 화면에 반영합니다.
 extension CameraContainerViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true)
-
         // 사용자가 선택하지 않고 닫았다면 중단된 카메라 세션을 다시 시작합니다.
         guard let result = results.first else {
             cancelPhotoLibraryLoad()
-            sessionController.start()
+            picker.dismiss(animated: true) { [weak self] in
+                self?.sessionController.start()
+            }
             return
         }
 
@@ -30,9 +30,13 @@ extension CameraContainerViewController: PHPickerViewControllerDelegate {
         }) ?? provider.registeredTypeIdentifiers.first(where: {
             UTType($0)?.conforms(to: .image) == true
         }) else {
-            sessionController.start()
+            picker.dismiss(animated: true) { [weak self] in
+                self?.sessionController.start()
+            }
             return
         }
+
+        picker.dismiss(animated: true)
 
         // 취소 이후에도 늦은 completion이 올 수 있으므로 요청별 ID로 현재 요청인지 판별합니다.
         let loadID = UUID()
