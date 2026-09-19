@@ -120,6 +120,7 @@ public struct ProfileFeature {
         case profileImageTapped
         case cameraSourceTapped
         case gallerySourceTapped
+        case cameraCaptureEventReceived(CameraCaptureEvent)
         case photoCaptureCompleted(CameraCaptureResult)
         case photoCaptureCancelled
         case profileFetched(MyPageProfile)
@@ -213,6 +214,12 @@ public struct ProfileFeature {
                 state.photoCaptureSource = .photoLibrary
                 state.isCameraPresented = true
                 return .none
+            case let .cameraCaptureEventReceived(.buttonClicked(button)):
+                return .run { _ in
+                    analyticsUseCase.log(
+                        MyPageAnalyticsEvent.cameraButtonClicked(button: button)
+                    )
+                }
             case let .photoCaptureCompleted(result):
                 let previousPhotoURL = state.selectedPhoto?.originalFile.fileURL
                 state.selectedPhoto = result
