@@ -17,6 +17,7 @@ final class CameraContainerViewController: UIViewController {
 
     private let initialSource: CameraCaptureSource
     let isCropEnabled: Bool
+    let onEvent: (CameraCaptureEvent) -> Void
     let onComplete: (CameraCaptureResult) -> Void
     let onCancel: () -> Void
     let sessionController = CameraCaptureSessionController()
@@ -25,8 +26,7 @@ final class CameraContainerViewController: UIViewController {
     let previewView = CameraPreviewView()
     let selectedImageView = UIImageView()
     let closeButton = UIButton(type: .system)
-    let rotateLeftButton = UIButton(type: .system)
-    let rotateRightButton = UIButton(type: .system)
+    let rotationControlsView = CameraRotationControlsView()
     private let topControlsStackView = UIStackView()
     private let topControlsSpacerView = UIView()
     let bottomCameraShutterView = BottomCameraShutterView()
@@ -46,6 +46,7 @@ final class CameraContainerViewController: UIViewController {
         isCropEnabled: Bool = true,
         cropAspectRatio: CGSize? = nil,
         capturedPhotoProcessor: CameraCapturedPhotoProcessor,
+        onEvent: @escaping (CameraCaptureEvent) -> Void,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
@@ -53,6 +54,7 @@ final class CameraContainerViewController: UIViewController {
         self.isCropEnabled = isCropEnabled
         self.roiOverlayView = ROIOverlayView(selectionAspectRatio: cropAspectRatio)
         self.capturedPhotoProcessor = capturedPhotoProcessor
+        self.onEvent = onEvent
         self.onComplete = onComplete
         self.onCancel = onCancel
         super.init(nibName: nil, bundle: nil)
@@ -102,16 +104,6 @@ final class CameraContainerViewController: UIViewController {
 }
 
 private extension CameraContainerViewController {
-    func configureRotateButton(
-        _ button: UIButton,
-        systemName: String
-    ) {
-        button.setImage(UIImage(systemName: systemName), for: .normal)
-        button.tintColor = .systemWhite
-        button.backgroundColor = .gray10
-        button.layer.cornerRadius = 8
-    }
-
     func setupUI() {
         view.backgroundColor = .systemBlack
 
@@ -125,22 +117,12 @@ private extension CameraContainerViewController {
         closeButton.contentHorizontalAlignment = .fill
         closeButton.contentVerticalAlignment = .fill
 
-        configureRotateButton(
-            rotateLeftButton,
-            systemName: "rotate.left"
-        )
-        configureRotateButton(
-            rotateRightButton,
-            systemName: "rotate.right"
-        )
-        rotateLeftButton.isHidden = true
-        rotateRightButton.isHidden = true
+        rotationControlsView.isHidden = true
 
         topControlsStackView.axis = .horizontal
         topControlsStackView.alignment = .fill
         topControlsStackView.spacing = 12
-        topControlsStackView.addArrangedSubview(rotateLeftButton)
-        topControlsStackView.addArrangedSubview(rotateRightButton)
+        topControlsStackView.addArrangedSubview(rotationControlsView)
         topControlsStackView.addArrangedSubview(topControlsSpacerView)
         topControlsStackView.addArrangedSubview(closeButton)
 
@@ -183,10 +165,12 @@ private extension CameraContainerViewController {
             $0.height.equalTo(32)
         }
 
-        [closeButton, rotateLeftButton, rotateRightButton].forEach {
-            $0.snp.makeConstraints {
-                $0.size.equalTo(32)
-            }
+        closeButton.snp.makeConstraints {
+            $0.size.equalTo(32)
+        }
+        rotationControlsView.snp.makeConstraints {
+            $0.width.equalTo(76)
+            $0.height.equalTo(32)
         }
 
         bottomCameraShutterView.snp.makeConstraints {
@@ -204,23 +188,33 @@ private extension CameraContainerViewController {
 
     func bindActions() {
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        rotateLeftButton.addTarget(self, action: #selector(rotateLeftTapped), for: .touchUpInside)
-        rotateRightButton.addTarget(self, action: #selector(rotateRightTapped), for: .touchUpInside)
 
         bottomCameraShutterView.onGalleryTap = { [weak self] in
+            self?.onEvent(.buttonClicked(.gallery))
             self?.presentPhotoLibrary()
         }
         bottomCameraShutterView.onCaptureTap = { [weak self] in
+            self?.onEvent(.buttonClicked(.takeAPicture))
             self?.capturePhoto()
         }
         bottomCameraShutterView.onSwitchCameraTap = { [weak self] in
+            self?.onEvent(.buttonClicked(.switchCamera))
             self?.sessionController.switchCamera()
         }
         photoConfirmationContainerView.onRetakeTap = { [weak self] in
+            self?.onEvent(.buttonClicked(.retake))
             self?.resetCapturedPhoto()
         }
         photoConfirmationContainerView.onUploadTap = { [weak self] in
             self?.completeCapture()
+        }
+        rotationControlsView.onRotateLeftTap = { [weak self] in
+            self?.onEvent(.buttonClicked(.rotateLeft))
+            self?.rotateCapturedPhoto(clockwiseDegrees: -90)
+        }
+        rotationControlsView.onRotateRightTap = { [weak self] in
+            self?.onEvent(.buttonClicked(.rotateRight))
+            self?.rotateCapturedPhoto(clockwiseDegrees: 90)
         }
     }
 }

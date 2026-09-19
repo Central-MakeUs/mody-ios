@@ -16,6 +16,9 @@ extension FeedRecordViewController {
             source: source,
             isCropEnabled: true,
             cropAspectRatio: nil,
+            onEvent: { [weak self] event in
+                self?.reactor?.action.onNext(.didReceiveCameraCaptureEvent(event))
+            },
             onComplete: { [weak self] result in
                 self?.dismissCameraCapture {
                     self?.reactor?.action.onNext(.didCompletePhotoCapture(result))

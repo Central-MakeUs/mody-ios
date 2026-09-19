@@ -57,8 +57,7 @@ extension CameraContainerViewController {
         rotatedPreviewImage = capturedPhoto.previewImage
         selectedImageView.image = rotatedPreviewImage
         selectedImageView.isHidden = false
-        rotateLeftButton.isHidden = false
-        rotateRightButton.isHidden = false
+        rotationControlsView.isHidden = false
         bottomCameraShutterView.isHidden = true
         photoConfirmationContainerView.isHidden = false
         roiOverlayView.isHidden = !isCropEnabled
@@ -74,8 +73,7 @@ extension CameraContainerViewController {
         rotatedPreviewImage = nil
         previewView.isHidden = false
         selectedImageView.isHidden = true
-        rotateLeftButton.isHidden = true
-        rotateRightButton.isHidden = true
+        rotationControlsView.isHidden = true
         bottomCameraShutterView.isHidden = false
         photoConfirmationContainerView.isHidden = true
         roiOverlayView.isHidden = true
@@ -186,8 +184,7 @@ extension CameraContainerViewController {
         guard let capturedPhoto, !isRotatingPhoto else { return }
 
         isRotatingPhoto = true
-        rotateLeftButton.isUserInteractionEnabled = false
-        rotateRightButton.isUserInteractionEnabled = false
+        rotationControlsView.isUserInteractionEnabled = false
         imageRotation = imageRotation.adding(clockwise: clockwiseDegrees)
         roiOverlayView.isHidden = true
 
@@ -213,8 +210,7 @@ extension CameraContainerViewController {
                 }
                 self.updateROISelectableFrame(resetSelection: true)
                 self.roiOverlayView.isHidden = !self.isCropEnabled
-                self.rotateLeftButton.isUserInteractionEnabled = true
-                self.rotateRightButton.isUserInteractionEnabled = true
+                self.rotationControlsView.isUserInteractionEnabled = true
                 self.isRotatingPhoto = false
             }
         )
@@ -223,16 +219,7 @@ extension CameraContainerViewController {
     func resetRotationState() {
         imageRotation = .zero
         isRotatingPhoto = false
-        rotateLeftButton.isUserInteractionEnabled = true
-        rotateRightButton.isUserInteractionEnabled = true
+        rotationControlsView.isUserInteractionEnabled = true
         selectedImageView.transform = .identity
-    }
-
-    @objc func rotateLeftTapped() {
-        rotateCapturedPhoto(clockwiseDegrees: -90)
-    }
-
-    @objc func rotateRightTapped() {
-        rotateCapturedPhoto(clockwiseDegrees: 90)
     }
 }

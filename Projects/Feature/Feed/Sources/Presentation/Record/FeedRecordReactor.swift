@@ -68,6 +68,7 @@ public final class FeedRecordReactor: Reactor {
         case didDismissPhotoPresentation
         case didTapCamera
         case didTapGallery
+        case didReceiveCameraCaptureEvent(CameraCaptureEvent)
         case didCompletePhotoCapture(CameraCaptureResult)
         case didChangeMealMenu(String)
         case didChangeMealTime(Date)
@@ -145,6 +146,11 @@ public final class FeedRecordReactor: Reactor {
                 )
             )
             return .just(.setPhotoPresentation(.capture(source)))
+        case let .didReceiveCameraCaptureEvent(.buttonClicked(button)):
+            analyticsUseCase.log(
+                FeedAnalyticsEvent.cameraButtonClicked(button: button)
+            )
+            return .empty()
         case let .didCompletePhotoCapture(result):
             removeSelectedPhotoFile()
             return .just(.completePhotoCapture(result))
