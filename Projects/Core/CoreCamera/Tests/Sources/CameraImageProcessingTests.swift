@@ -77,6 +77,7 @@ final class CameraImageProcessingTests: XCTestCase {
                 temporaryImageFileUseCase: CameraTemporaryImageFileUseCaseStub(),
                 previewMaxPixelSize: CameraContainerViewController.previewMaxPixelSize
             ),
+            onEvent: { _ in },
             onComplete: { capturedResult = $0 },
             onCancel: {}
         )

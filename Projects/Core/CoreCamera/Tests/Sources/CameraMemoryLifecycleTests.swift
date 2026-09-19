@@ -12,7 +12,7 @@ import XCTest
 
 final class CameraMemoryLifecycleTests: XCTestCase {
     @MainActor
-    func testCameraViewControllerDeallocatesAfterBindingActions() {
+    func testCameraViewControllerDeallocatesAfterBindingActions() async {
         weak var weakViewController: CameraContainerViewController?
 
         autoreleasepool {
@@ -22,6 +22,7 @@ final class CameraMemoryLifecycleTests: XCTestCase {
                     temporaryImageFileUseCase: TemporaryImageFileUseCaseStub(),
                     previewMaxPixelSize: 100
                 ),
+                onEvent: { _ in },
                 onComplete: { _ in },
                 onCancel: {}
             )
