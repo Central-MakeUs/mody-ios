@@ -95,7 +95,7 @@ final class CameraContainerViewController: UIViewController {
         sessionController.stop()
     }
 
-    deinit {
+    isolated deinit {
         photoLibraryLoadProgress?.cancel()
         removeCapturedPhotoFile()
     }
@@ -121,7 +121,7 @@ private extension CameraContainerViewController {
         selectedImageView.isHidden = true
 
         closeButton.setImage(UIImage.icMultiple, for: .normal)
-        closeButton.tintColor = .gray10
+        closeButton.tintColor = .systemWhite
         closeButton.contentHorizontalAlignment = .fill
         closeButton.contentVerticalAlignment = .fill
 

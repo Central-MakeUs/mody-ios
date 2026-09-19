@@ -17,8 +17,7 @@ extension CameraContainerViewController {
 
         sessionController.capture { [weak self, capturedPhotoProcessor] data in
             // AVFoundation 콜백 큐에서 파일 저장과 다운샘플링을 끝내고 UI만 main으로 넘깁니다.
-            guard self != nil,
-                  let data,
+            guard let data,
                   let capturedPhoto = try? capturedPhotoProcessor.makeCapturedPhoto(
                     data: data,
                     fileName: PhotoFileNameUtil.makeCameraFileName()
@@ -46,6 +45,7 @@ extension CameraContainerViewController {
 
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = self
+        picker.presentationController?.delegate = self
         present(picker, animated: true)
     }
 
@@ -79,7 +79,7 @@ extension CameraContainerViewController {
         bottomCameraShutterView.isHidden = false
         photoConfirmationContainerView.isHidden = true
         roiOverlayView.isHidden = true
-        closeButton.tintColor = .gray10
+        closeButton.tintColor = .systemWhite
         sessionController.start()
     }
 

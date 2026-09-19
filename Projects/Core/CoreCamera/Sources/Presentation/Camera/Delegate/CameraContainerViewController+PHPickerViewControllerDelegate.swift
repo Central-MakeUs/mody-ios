@@ -9,7 +9,8 @@ import PhotosUI
 import UniformTypeIdentifiers
 
 /// 앨범 선택 결과를 앱 소유 임시 파일과 화면용 미리보기로 변환해 카메라 화면에 반영합니다.
-extension CameraContainerViewController: PHPickerViewControllerDelegate {
+extension CameraContainerViewController: PHPickerViewControllerDelegate,
+                                         UIAdaptivePresentationControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         // 사용자가 선택하지 않고 닫았다면 중단된 카메라 세션을 다시 시작합니다.
         guard let result = results.first else {
@@ -76,5 +77,10 @@ extension CameraContainerViewController: PHPickerViewControllerDelegate {
                 self.setCapturedPhoto(capturedPhoto)
             }
         }
+    }
+
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        cancelPhotoLibraryLoad()
+        sessionController.start()
     }
 }
