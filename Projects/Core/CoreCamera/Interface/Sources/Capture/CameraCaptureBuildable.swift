@@ -13,6 +13,7 @@ public protocol CameraCaptureBuildable {
         source: CameraCaptureSource,
         isCropEnabled: Bool,
         cropAspectRatio: CGSize?,
+        onEvent: @escaping (CameraCaptureEvent) -> Void,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController

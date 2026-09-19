@@ -6,9 +6,22 @@
 //
 
 import CoreAnalyticsInterface
+import CoreCameraInterface
 import FeedInterface
 
 enum FeedAnalyticsEvent {
+    static func cameraButtonClicked(
+        button: CameraCaptureButton
+    ) -> AmplitudeLogEvent {
+        AmplitudeLogEvent(
+            name: "camera_button_clicked",
+            properties: [
+                "source": "feed",
+                "button": button.rawValue
+            ]
+        )
+    }
+
     static func recordPhotoSourceSelected(
         recordType: FeedRecordType,
         source: String

@@ -63,6 +63,7 @@ struct ChallengeWeeklyDetailView: View {
                         source: source,
                         cropAspectRatio: CGSize(width: 1, height: 1),
                         cameraCaptureBuilder: cameraCaptureBuilder,
+                        onEvent: { store.send(.cameraCaptureEventReceived($0)) },
                         onComplete: { store.send(.photoCaptureCompleted($0)) },
                         onCancel: { store.send(.photoCaptureCancelled) }
                     )
