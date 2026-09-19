@@ -94,6 +94,7 @@ public struct ChallengeWeeklyDetailFeature {
         case authenticationButtonTapped
         case cameraSourceTapped
         case gallerySourceTapped
+        case cameraCaptureEventReceived(CameraCaptureEvent)
         case photoCaptureCompleted(CameraCaptureResult)
         case photoCaptureCancelled
         case weeklyChallengeProofCreated([WeeklyChallengeImageInfo])
@@ -177,6 +178,12 @@ public struct ChallengeWeeklyDetailFeature {
                 state.photoCaptureSource = .photoLibrary
                 state.isCameraPresented = true
                 return .none
+            case let .cameraCaptureEventReceived(.buttonClicked(button)):
+                return .run { _ in
+                    analyticsUseCase.log(
+                        ChallengeAnalyticsEvent.cameraButtonClicked(button: button)
+                    )
+                }
             case let .photoCaptureCompleted(result):
                 guard !state.isLoading else { return .none }
 

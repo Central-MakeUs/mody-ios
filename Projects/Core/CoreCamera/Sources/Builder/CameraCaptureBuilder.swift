@@ -21,6 +21,7 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
         source: CameraCaptureSource,
         isCropEnabled: Bool,
         cropAspectRatio: CGSize?,
+        onEvent: @escaping (CameraCaptureEvent) -> Void,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) -> UIViewController {
@@ -34,6 +35,7 @@ public struct CameraCaptureBuilder: CameraCaptureBuildable {
             isCropEnabled: isCropEnabled,
             cropAspectRatio: cropAspectRatio,
             capturedPhotoProcessor: capturedPhotoProcessor,
+            onEvent: onEvent,
             onComplete: onComplete,
             onCancel: onCancel
         )

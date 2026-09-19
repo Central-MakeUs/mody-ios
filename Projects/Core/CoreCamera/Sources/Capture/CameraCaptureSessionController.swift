@@ -12,7 +12,7 @@ import Foundation
 final class CameraCaptureSessionController: NSObject, @unchecked Sendable {
     private struct PendingCapture {
         let uniqueID: Int64
-        let completion: (Data?) -> Void
+        let completion: @Sendable (Data?) -> Void
     }
 
     let session = AVCaptureSession()
@@ -56,7 +56,7 @@ extension CameraCaptureSessionController {
         }
     }
 
-    func capture(completion: @escaping (Data?) -> Void) {
+    func capture(completion: @escaping @Sendable (Data?) -> Void) {
         sessionQueue.async { [weak self] in
             guard let self, isConfigured else {
                 completion(nil)
@@ -141,7 +141,7 @@ private extension CameraCaptureSessionController {
     }
 
     func storeCaptureCompletionIfPossible(
-        _ completion: @escaping (Data?) -> Void,
+        _ completion: @escaping @Sendable (Data?) -> Void,
         uniqueID: Int64
     ) -> Bool {
         captureCompletionLock.lock()
@@ -155,7 +155,7 @@ private extension CameraCaptureSessionController {
         return true
     }
 
-    func takeCaptureCompletion(uniqueID: Int64) -> ((Data?) -> Void)? {
+    func takeCaptureCompletion(uniqueID: Int64) -> (@Sendable (Data?) -> Void)? {
         captureCompletionLock.lock()
         defer { captureCompletionLock.unlock() }
 

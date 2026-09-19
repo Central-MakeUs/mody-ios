@@ -297,6 +297,13 @@ private extension FeedViewController {
             return
         }
 
+        guard feedCollectionView.window != nil,
+              feedCollectionView.numberOfItems(inSection: 0) == previousRecordCount else {
+            feedCollectionView.reloadData()
+            feedCollectionView.collectionViewLayout.invalidateLayout()
+            return
+        }
+
         feedCollectionView.performBatchUpdates {
             feedCollectionView.insertItems(at: insertedIndexPaths)
         } completion: { [weak self] _ in

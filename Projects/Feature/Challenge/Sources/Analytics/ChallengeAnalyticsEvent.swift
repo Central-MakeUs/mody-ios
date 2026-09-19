@@ -6,8 +6,21 @@
 //
 
 import CoreAnalyticsInterface
+import CoreCameraInterface
 
 enum ChallengeAnalyticsEvent {
+    static func cameraButtonClicked(
+        button: CameraCaptureButton
+    ) -> AmplitudeLogEvent {
+        AmplitudeLogEvent(
+            name: "camera_button_clicked",
+            properties: [
+                "source": "weekly_challenge",
+                "button": button.rawValue
+            ]
+        )
+    }
+
     static let nudgeSucceeded = AmplitudeLogEvent(name: "nudge_succeeded")
     static let weeklyChallengeProofCreated = AmplitudeLogEvent(
         name: "weekly_challenge_created"

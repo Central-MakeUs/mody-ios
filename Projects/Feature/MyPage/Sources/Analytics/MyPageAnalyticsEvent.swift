@@ -6,8 +6,21 @@
 //
 
 import CoreAnalyticsInterface
+import CoreCameraInterface
 
 enum MyPageAnalyticsEvent {
+    static func cameraButtonClicked(
+        button: CameraCaptureButton
+    ) -> AmplitudeLogEvent {
+        AmplitudeLogEvent(
+            name: "camera_button_clicked",
+            properties: [
+                "source": "mypage",
+                "button": button.rawValue
+            ]
+        )
+    }
+
     static func notificationSettingsUpdated(
         _ notificationSetting: NotificationSettingState
     ) -> AmplitudeLogEvent {
