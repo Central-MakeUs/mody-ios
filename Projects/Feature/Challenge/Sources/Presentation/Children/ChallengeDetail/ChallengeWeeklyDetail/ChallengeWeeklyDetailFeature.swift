@@ -295,16 +295,18 @@ private extension ChallengeWeeklyDetailFeature {
         WeeklyChallengeProofCreateRequest(
             imageKey: imageKey,
             imageCropRegion: WeeklyChallengeProofImageCropRegionRequest(
-                x: clampedNormalizedValue(Double(normalizedCropRegion.origin.x)),
-                y: clampedNormalizedValue(Double(normalizedCropRegion.origin.y)),
-                width: clampedNormalizedValue(Double(normalizedCropRegion.width)),
-                height: clampedNormalizedValue(Double(normalizedCropRegion.height))
+                x: normalizedCropValue(Double(normalizedCropRegion.origin.x)),
+                y: normalizedCropValue(Double(normalizedCropRegion.origin.y)),
+                width: normalizedCropValue(Double(normalizedCropRegion.width)),
+                height: normalizedCropValue(Double(normalizedCropRegion.height))
             )
         )
     }
 
-    func clampedNormalizedValue(_ value: Double) -> Double {
-        min(max(value, 0), 1)
+    func normalizedCropValue(_ value: Double) -> Double {
+        let decimalScale = 100_000_000_000_000_000.0
+        let clampedValue = min(max(value, 0), 1)
+        return (clampedValue * decimalScale).rounded() / decimalScale
     }
 
     func fetchInitialData(
