@@ -8,11 +8,18 @@
 import ProjectDescription
 
 public extension Project {
-    static func module(moduleType: Module, hasDemo: Bool = false) -> Project {
+    static func module(
+        moduleType: Module,
+        hasDemo: Bool = false,
+        hasTests: Bool = false
+    ) -> Project {
         Project.implements(
             name: moduleType.name,
             targets: moduleType.targets(hasDemo: hasDemo),
-            schemes: moduleType.schemes(hasDemo: hasDemo),
+            schemes: moduleType.schemes(
+                hasDemo: hasDemo,
+                hasTests: hasTests
+            ),
             additionalFiles: moduleType.additionalFiles,
             resourceSynthesizers: moduleType.resourceSynthesizers
         )

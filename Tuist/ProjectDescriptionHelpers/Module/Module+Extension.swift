@@ -77,16 +77,23 @@ extension Module {
         }
     }
     
-    func schemes(hasDemo: Bool = false) -> [Scheme] {
+    func schemes(
+        hasDemo: Bool = false,
+        hasTests: Bool = false
+    ) -> [Scheme] {
         switch self {
         case .App:
-            .scheme(name: projectEnvironment.appName, environments: .all)
+            return .scheme(name: projectEnvironment.appName, environments: .all)
         case .DesignSystem:
-            [.implements(targetName: "\(self.name)Demo")]
+            return [.implements(targetName: "\(self.name)Demo")]
         case .MicroFeature(let module):
-            hasDemo ? [.implements(targetName: module.demoName)] : []
+            var schemes = hasDemo ? [Scheme.implements(targetName: module.demoName)] : []
+            if hasTests {
+                schemes.append(.tests(module))
+            }
+            return schemes
         default:
-            []
+            return []
         }
     }
     

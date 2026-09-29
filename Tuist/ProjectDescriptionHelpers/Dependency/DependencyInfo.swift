@@ -108,7 +108,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreAnalytics)
             ],
-            demo: [
+            testing: [
                 .module(.CommonDomain),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreAnalytics)
