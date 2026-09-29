@@ -6,7 +6,6 @@
 //
 
 import DesignSystem
-import SplashTesting
 import SwiftUI
 
 struct SplashScenarioControlView: View {

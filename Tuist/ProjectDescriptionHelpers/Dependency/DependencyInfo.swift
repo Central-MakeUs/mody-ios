@@ -107,6 +107,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreAnalytics)
+            ],
+            demo: [
+                .module(.CommonDomain),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .SignIn: .init(
