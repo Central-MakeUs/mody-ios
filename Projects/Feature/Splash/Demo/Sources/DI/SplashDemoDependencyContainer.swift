@@ -7,6 +7,7 @@
 
 import Splash
 import SplashInterface
+import SplashTesting
 
 @MainActor
 final class SplashDemoDependencyContainer {
@@ -18,8 +19,11 @@ final class SplashDemoDependencyContainer {
                         scenario: scenario
                     )
                 ),
-                authUseCase: SplashDemoAuthUseCaseStub(scenario: scenario),
-                analyticsUseCase: SplashDemoAnalyticsUseCaseStub(),
+                authUseCase: SplashAuthUseCaseStub(
+                    userInfoResult: scenario.userInfoResult,
+                    responseDelay: .milliseconds(700)
+                ),
+                analyticsUseCase: SplashAnalyticsUseCaseStub(),
                 router: { route in
                     router.route(from: route)
                 }

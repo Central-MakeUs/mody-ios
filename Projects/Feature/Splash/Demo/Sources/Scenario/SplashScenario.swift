@@ -91,27 +91,33 @@ enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
         }
     }
 
-    var userInfo: UserInfo? {
+    var userInfoResult: Result<UserInfo, Error> {
         switch self {
         case .signedOut:
-            nil
+            .failure(SplashDemoScenarioError.signedOut)
         case .onboardingRequired:
-            makeUserInfo(
-                personalInfoCompleted: false,
-                groupOnboardingCompleted: false,
-                mainAccessible: false
+            .success(
+                makeUserInfo(
+                    personalInfoCompleted: false,
+                    groupOnboardingCompleted: false,
+                    mainAccessible: false
+                )
             )
         case .groupOnboardingRequired:
-            makeUserInfo(
-                personalInfoCompleted: true,
-                groupOnboardingCompleted: false,
-                mainAccessible: false
+            .success(
+                makeUserInfo(
+                    personalInfoCompleted: true,
+                    groupOnboardingCompleted: false,
+                    mainAccessible: false
+                )
             )
         default:
-            makeUserInfo(
-                personalInfoCompleted: true,
-                groupOnboardingCompleted: true,
-                mainAccessible: true
+            .success(
+                makeUserInfo(
+                    personalInfoCompleted: true,
+                    groupOnboardingCompleted: true,
+                    mainAccessible: true
+                )
             )
         }
     }
@@ -133,4 +139,8 @@ private extension SplashScenario {
             mainAccessible: mainAccessible
         )
     }
+}
+
+private enum SplashDemoScenarioError: Error {
+    case signedOut
 }
