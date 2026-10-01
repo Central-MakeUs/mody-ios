@@ -108,4 +108,15 @@ GitHub Actions와 Fastlane을 이용해 태그 기반 빌드 및 배포 파이�
 
 ## Testing
 
-`Tests`와 `Testing` 타깃 구조를 갖추고 있습니다. `1.1.0`까지는 기능 개발에 집중했으며, 단위 테스트와 테스트 지원 코드는 추후 보강할 예정입니다.
+Micro Feature는 `Testing`과 `Tests` 타깃을 분리합니다. `Testing`은 여러 검증 환경에서 재사용할 Fixture와 외부 경계 Test Double을 제공하고, `Tests`는 실제 Feature Implementation을 SUT(System Under Test)로 실행해 상태 전이와 비즈니스 규칙을 검증합니다.
+
+| 종류 | 주요 목적 | 확인하는 것 |
+| --- | --- | --- |
+| Fixture | 테스트 데이터 제공 | 값 |
+| Stub | 정해진 결과 반환 | 입력에 대한 결과 |
+| Mock | 특정 상황·행동을 흉내 냄 | 반환값과 필요 시 호출 기대 |
+| Spy | 실제 호출을 기록 | 호출 횟수와 전달 인자 |
+
+`SplashTesting`은 `UserInfo`, `AuthSession` Fixture와 Auth·Analytics UseCase Stub을 제공합니다. Splash 구현 target을 import하지 않으며, Demo 한 곳에서만 사용하는 Scenario와 Repository Stub은 `SplashDemo`가 직접 소유합니다. 이 과정에서 테스트 편의를 위해 내부 UseCase Protocol이나 Domain 모델을 `SplashInterface`로 승격하지 않습니다.
+
+`SplashTests`는 `@testable import Splash`로 실제 `SplashUseCase`, `SplashRepository`, `SplashFeature`를 테스트 대상으로 사용하고 외부 시스템 경계만 Stub·Spy로 대체합니다. Xcode에서 `SplashTests` scheme을 실행해 검증할 수 있습니다.
