@@ -17,6 +17,25 @@ extension Array where Element == Scheme {
 }
 
 extension Scheme {
+    static func tests(_ module: MicroFeatureModule) -> Scheme {
+        .scheme(
+            name: module.testsName,
+            shared: true,
+            buildAction: .buildAction(targets: [
+                .target(module.name),
+                .target(module.testsName)
+            ]),
+            testAction: .targets(
+                [.testableTarget(target: .target(module.testsName))],
+                configuration: .init(stringLiteral: Environment.dev.name),
+                options: .options(
+                    coverage: true,
+                    codeCoverageTargets: [.target(module.name)]
+                )
+            )
+        )
+    }
+
     static func implements(
         targetName: String,
         environment: Environment? = nil
