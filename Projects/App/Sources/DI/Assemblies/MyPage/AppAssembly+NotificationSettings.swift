@@ -6,7 +6,6 @@
 //
 
 import CoreNotificationInterface
-import CoreAnalyticsInterface
 import CoreNetworkInterface
 import MyPage
 import MyPageInterface
@@ -30,12 +29,10 @@ extension AppAssembly {
             (resolver: Resolver, router: MyPageNotificationSettingsRouter) in
             let notificationPermission: NotificationPermissionInterface = resolver.resolve()
             let notificationSettingUseCase: MyPageNotificationSettingUseCase = resolver.resolve()
-            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return NotificationSettingsFeature(
                 notificationPermission: notificationPermission,
                 notificationSettingUseCase: notificationSettingUseCase,
-                analyticsUseCase: analyticsUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
                 }

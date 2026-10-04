@@ -26,7 +26,6 @@ final class OnBoardingDemoDependencyContainer {
                 cameraPermission: permission,
                 notificationPermission: permission,
                 healthPermission: permission,
-                analyticsUseCase: OnBoardingAnalyticsUseCaseStub(),
                 router: { route in router.route(from: route) }
             )
         }

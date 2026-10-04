@@ -6,7 +6,6 @@
 //
 
 import Alamofire
-import CoreAnalyticsInterface
 import Foundation
 import CoreNetworkInterface
 
@@ -16,21 +15,18 @@ public final class CoreNetworkClient: CoreNetworkProtocol {
     let requestInterceptor: CoreNetworkRequestInterceptor
     let defaultHeaders: [String: String]
     let decoder: JSONDecoder
-    let analyticsUseCase: AnalyticsUseCaseProtocol
 
     public init(
         tokenStore: CoreTokenStorage? = nil,
         refreshTokenEndpoint: CoreNetworkEndpoint? = nil,
         defaultHeaders: [String: String] = [:],
-        decoder: JSONDecoder = JSONDecoder(),
-        analyticsUseCase: AnalyticsUseCaseProtocol
+        decoder: JSONDecoder = JSONDecoder()
     ) {
         let baseURL = CoreNetworkBaseURLProvider.current
 
         self.baseURL = baseURL
         self.defaultHeaders = defaultHeaders
         self.decoder = decoder
-        self.analyticsUseCase = analyticsUseCase
 
         let tokenRefresher = Self.makeTokenRefresher(
             baseURL: baseURL,

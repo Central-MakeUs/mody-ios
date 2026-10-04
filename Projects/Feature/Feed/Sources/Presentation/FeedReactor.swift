@@ -8,7 +8,6 @@
 import Foundation
 import CoreAuthInterface
 import CommonDomain
-import CoreAnalyticsInterface
 import FeedInterface
 import ModyGroupInterface
 import ReactorKit
@@ -17,7 +16,6 @@ public final class FeedReactor: Reactor {
     private let authUseCase: AuthUseCaseProtocol
     private let groupUseCase: GroupUseCaseProtocol
     private let feedUseCase: FeedUseCase
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private weak var router: FeedRouter?
     private let output: @MainActor (FeedOutput) -> Void
 
@@ -94,14 +92,12 @@ public final class FeedReactor: Reactor {
         authUseCase: AuthUseCaseProtocol,
         groupUseCase: GroupUseCaseProtocol,
         feedUseCase: FeedUseCase,
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: FeedRouter,
         output: @escaping @MainActor (FeedOutput) -> Void
     ) {
         self.authUseCase = authUseCase
         self.groupUseCase = groupUseCase
         self.feedUseCase = feedUseCase
-        self.analyticsUseCase = analyticsUseCase
         self.router = router
         self.output = output
         let calendar = Date.koreanCalendar
@@ -180,11 +176,9 @@ public final class FeedReactor: Reactor {
                 fetchSelectedGroupContent()
             ])
         case .didTapPreviousWeek:
-            analyticsUseCase.log(FeedAnalyticsEvent.calendarNavigated(direction: "left"))
             return makeCalendarMutationWithActivityFetch(offset: currentState.weekOffset - 1)
         case .didTapNextWeek:
             guard currentState.weekCalendarViewState.canMoveNextWeek else { return .empty() }
-            analyticsUseCase.log(FeedAnalyticsEvent.calendarNavigated(direction: "right"))
             return makeCalendarMutationWithActivityFetch(offset: currentState.weekOffset + 1)
         case let .didTapCalendarDate(model):
             guard FeedWeekCalendarCalculator.isSelectable(
@@ -194,7 +188,6 @@ public final class FeedReactor: Reactor {
             ) else {
                 return .empty()
             }
-            analyticsUseCase.log(FeedAnalyticsEvent.calendarDateSelected(date: model.date))
 
             return .concat([
                 .just(.setSelectedCalendarDate(model.date)),

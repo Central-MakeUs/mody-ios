@@ -23,7 +23,6 @@ final class SplashDemoDependencyContainer {
                     userInfoResult: scenario.userInfoResult,
                     responseDelay: .milliseconds(700)
                 ),
-                analyticsUseCase: SplashAnalyticsUseCaseStub(),
                 router: { route in
                     router.route(from: route)
                 }

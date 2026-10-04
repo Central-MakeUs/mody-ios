@@ -117,6 +117,6 @@ Micro Feature는 `Testing`과 `Tests` 타깃을 분리합니다. `Testing`은 �
 | Mock | 특정 상황·행동을 흉내 냄 | 반환값과 필요 시 호출 기대 |
 | Spy | 실제 호출을 기록 | 호출 횟수와 전달 인자 |
 
-`SplashTesting`은 `UserInfo`, `AuthSession` Fixture와 Auth·Analytics UseCase Stub을 제공합니다. Splash 구현 target을 import하지 않으며, Demo 한 곳에서만 사용하는 Scenario와 Repository Stub은 `SplashDemo`가 직접 소유합니다. 이 과정에서 테스트 편의를 위해 내부 UseCase Protocol이나 Domain 모델을 `SplashInterface`로 승격하지 않습니다.
+`SplashTesting`은 `UserInfo`, `AuthSession` Fixture와 Auth UseCase Stub을 제공합니다. Splash 구현 target을 import하지 않으며, Demo 한 곳에서만 사용하는 Scenario와 Repository Stub은 `SplashDemo`가 직접 소유합니다. 이 과정에서 테스트 편의를 위해 내부 UseCase Protocol이나 Domain 모델을 `SplashInterface`로 승격하지 않습니다.
 
 `SplashTests`는 `@testable import Splash`로 실제 `SplashUseCase`, `SplashRepository`, `SplashFeature`를 테스트 대상으로 사용하고 외부 시스템 경계만 Stub·Spy로 대체합니다. Xcode에서 `SplashTests` scheme을 실행해 검증할 수 있습니다.

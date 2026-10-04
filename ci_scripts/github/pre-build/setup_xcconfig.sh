@@ -57,8 +57,6 @@ create_xcconfigs() {
   local kakao_native_app_key_prod
   local kakao_share_template_id_dev
   local kakao_share_template_id_prod
-  local amplitude_api_key_dev
-  local amplitude_api_key_prod
 
   raw_api_base_url_dev="${API_BASE_URL_DEV:-}"
   raw_api_base_url_prod="${API_BASE_URL_PROD:-}"
@@ -66,13 +64,9 @@ create_xcconfigs() {
   kakao_native_app_key_prod="${KAKAO_NATIVE_APP_KEY_PROD:-}"
   kakao_share_template_id_dev="${KAKAO_SHARE_TEMPLATE_ID_DEV:-}"
   kakao_share_template_id_prod="${KAKAO_SHARE_TEMPLATE_ID_PROD:-}"
-  amplitude_api_key_dev="${AMPLITUDE_API_KEY_DEV:-}"
-  amplitude_api_key_prod="${AMPLITUDE_API_KEY_PROD:-}"
 
   [[ -n "$raw_api_base_url_dev" ]] || fail "required XCConfig secret/env is missing: API_BASE_URL_DEV"
   [[ -n "$raw_api_base_url_prod" ]] || fail "required XCConfig secret/env is missing: API_BASE_URL_PROD"
-  [[ -n "$amplitude_api_key_dev" ]] || fail "required XCConfig secret/env is missing: AMPLITUDE_API_KEY_DEV"
-  [[ -n "$amplitude_api_key_prod" ]] || fail "required XCConfig secret/env is missing: AMPLITUDE_API_KEY_PROD"
   [[ -n "$kakao_native_app_key_dev" ]] || fail "required XCConfig secret/env is missing: KAKAO_NATIVE_APP_KEY_DEV"
   [[ -n "$kakao_native_app_key_prod" ]] || fail "required XCConfig secret/env is missing: KAKAO_NATIVE_APP_KEY_PROD"
   [[ -n "$kakao_share_template_id_dev" ]] || fail "required XCConfig secret/env is missing: KAKAO_SHARE_TEMPLATE_ID_DEV"
@@ -95,7 +89,6 @@ BUNDLE_IDENTIFIER = com.jagsim.mody-dev
 BUNDLE_NAME = MODY DEV
 ENV = Dev
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEV
-AMPLITUDE_API_KEY = ${amplitude_api_key_dev}
 BASE_URL = ${api_base_url_dev}
 KAKAO_NATIVE_APP_KEY = ${kakao_native_app_key_dev}
 KAKAO_SHARE_TEMPLATE_ID = ${kakao_share_template_id_dev}
@@ -108,7 +101,6 @@ BUNDLE_IDENTIFIER = com.jagsim.mody
 BUNDLE_NAME = MODY
 ENV = Prod
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = PROD
-AMPLITUDE_API_KEY = ${amplitude_api_key_prod}
 BASE_URL = ${api_base_url_prod}
 KAKAO_NATIVE_APP_KEY = ${kakao_native_app_key_prod}
 KAKAO_SHARE_TEMPLATE_ID = ${kakao_share_template_id_prod}
@@ -143,7 +135,7 @@ done
 if [[ "$dry_run" == true ]]; then
   echo "XCConfig setup dry-run"
   echo "files=XCConfig/Shared.xcconfig XCConfig/DEV.xcconfig XCConfig/PROD.xcconfig XCConfig/RELEASE.xcconfig"
-  echo "required_env=API_BASE_URL_DEV API_BASE_URL_PROD AMPLITUDE_API_KEY_DEV AMPLITUDE_API_KEY_PROD KAKAO_NATIVE_APP_KEY_DEV KAKAO_NATIVE_APP_KEY_PROD KAKAO_SHARE_TEMPLATE_ID_DEV KAKAO_SHARE_TEMPLATE_ID_PROD"
+  echo "required_env=API_BASE_URL_DEV API_BASE_URL_PROD KAKAO_NATIVE_APP_KEY_DEV KAKAO_NATIVE_APP_KEY_PROD KAKAO_SHARE_TEMPLATE_ID_DEV KAKAO_SHARE_TEMPLATE_ID_PROD"
   exit 0
 fi
 

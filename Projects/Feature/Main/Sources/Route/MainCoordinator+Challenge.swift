@@ -131,10 +131,6 @@ private extension MainCoordinator {
             activityItems: [image],
             applicationActivities: nil
         )
-        activityViewController.completionWithItemsHandler = { [weak self] _, completed, _, _ in
-            guard completed else { return }
-            self?.analyticsUseCase.log(MainAnalyticsEvent.challengeShareSucceeded)
-        }
         if let popoverPresentationController = activityViewController.popoverPresentationController {
             popoverPresentationController.sourceView = navigationController.view
             popoverPresentationController.sourceRect = CGRect(

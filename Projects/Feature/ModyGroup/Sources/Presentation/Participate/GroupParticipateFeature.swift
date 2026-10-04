@@ -8,13 +8,11 @@
 import Base
 import ComposableArchitecture
 import CommonDomain
-import CoreAnalyticsInterface
 import ModyGroupInterface
 
 @Reducer
 public struct GroupParticipateFeature {
     private let groupUseCase: GroupUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     
     @ObservableState
     public struct State: Equatable {
@@ -72,11 +70,9 @@ public struct GroupParticipateFeature {
     }
     
     public init(
-        groupUseCase: GroupUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol
+        groupUseCase: GroupUseCaseProtocol
     ) {
         self.groupUseCase = groupUseCase
-        self.analyticsUseCase = analyticsUseCase
     }
     
     public var body: some ReducerOf<Self> {
@@ -123,11 +119,7 @@ public struct GroupParticipateFeature {
                 }
             case .joinGroupSuccessfully:
                 state.isLoading = false
-                return .run { _ in
-                    analyticsUseCase.log(
-                        ModyGroupAnalyticsEvent.membershipSucceeded(action: "join")
-                    )
-                }
+                return .none
             case let .joinGroupFailure(error, code):
                 state.isLoading = false
                 guard state.inviteCode == code else { return .none }
