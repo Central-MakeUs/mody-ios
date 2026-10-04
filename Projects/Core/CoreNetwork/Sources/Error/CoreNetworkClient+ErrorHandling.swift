@@ -33,10 +33,6 @@ extension CoreNetworkClient {
             coreNetworkClientError: coreNetworkClientError,
             networkError: networkError
         ))
-        analyticsUseCase.log(apiFailureEvent(
-            endpoint: endpoint,
-            networkError: networkError
-        ))
 
         throw networkError
     }

@@ -7,7 +7,6 @@
 
 import CommonDomain
 import ComposableArchitecture
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import SignInInterface
 import SignInTesting
@@ -84,16 +83,14 @@ final class SignInFeatureTests: XCTestCase {
         state.isDemoLoginAlertPresented = true
         state.demoLoginPassword = "77777"
         let router = SignInRouterSpy()
-        let analytics = SignInAnalyticsUseCaseSpy()
         let auth = SignInAuthUseCaseSpy()
-        let store = makeStore(initialState: state, authUseCase: auth, analytics: analytics, router: router)
+        let store = makeStore(initialState: state, authUseCase: auth, router: router)
         let session = SignInAuthSessionFixture.make()
 
         await store.send(.demoLoginConfirmButtonTapped) {
             $0.demoLoginPassword = ""
             $0.isDemoLoginAlertPresented = false
             $0.isLoading = true
-            $0.loginType = .iosTest
         }
         await store.receive(\.receiveLoginSessionSuccessfully, session) {
             $0.isLoading = false
@@ -102,9 +99,6 @@ final class SignInFeatureTests: XCTestCase {
         await store.finish()
 
         XCTAssertEqual(router.routes, [.routeToMain])
-        XCTAssertEqual(analytics.userIDs, ["1"])
-        XCTAssertEqual(analytics.nicknames, ["모디"])
-        XCTAssertEqual(analytics.events.map(\.name), ["login_succeeded"])
         XCTAssertEqual(auth.signInRequests.count, 1)
         XCTAssertEqual(auth.signInRequests.first?.loginType, .iosTest)
         XCTAssertEqual(auth.signInRequests.first?.accessToken, "")
@@ -125,29 +119,24 @@ final class SignInFeatureTests: XCTestCase {
                 groupOnboardingCompleted: testCase.group
             )
             let router = SignInRouterSpy()
-            let analytics = SignInAnalyticsUseCaseSpy()
-            let store = makeStore(analytics: analytics, router: router)
+            let store = makeStore(router: router)
 
             await store.send(.receiveLoginSessionSuccessfully(session)) {
                 $0.navigationDestination = testCase.route
             }.finish()
 
             XCTAssertEqual(router.routes, [testCase.route])
-            XCTAssertEqual(analytics.userIDs, ["1"])
-            XCTAssertEqual(analytics.events.map(\.name), ["login_succeeded"])
         }
     }
 
-    func testKakaoLoginUsesSocialTokenAndRecordsSuccess() async {
+    func testKakaoLoginUsesSocialTokenAndRoutesToMain() async {
         let router = SignInRouterSpy()
-        let analytics = SignInAnalyticsUseCaseSpy()
         let auth = SignInAuthUseCaseSpy()
-        let store = makeStore(authUseCase: auth, analytics: analytics, router: router)
+        let store = makeStore(authUseCase: auth, router: router)
         let session = SignInAuthSessionFixture.make()
 
         await store.send(.kakaoLoginButtonTapped) {
             $0.isLoading = true
-            $0.loginType = .kakao
         }
         await store.receive(\.receiveLoginSessionSuccessfully, session) {
             $0.isLoading = false
@@ -156,22 +145,18 @@ final class SignInFeatureTests: XCTestCase {
         await store.finish()
 
         XCTAssertEqual(router.routes, [.routeToMain])
-        XCTAssertEqual(analytics.events.map(\.name), ["login_button_clicked", "login_succeeded"])
-        XCTAssertEqual(analytics.events.map { $0.properties["method"] as? String }, ["kakao", "kakao"])
         XCTAssertEqual(auth.signInRequests.count, 1)
         XCTAssertEqual(auth.signInRequests.first?.loginType, .kakao)
         XCTAssertEqual(auth.signInRequests.first?.accessToken, "social-token")
     }
 
-    func testAppleLoginRecordsAppleMethod() async {
-        let analytics = SignInAnalyticsUseCaseSpy()
+    func testAppleLoginUsesSocialTokenAndRoutesToMain() async {
         let auth = SignInAuthUseCaseSpy()
-        let store = makeStore(authUseCase: auth, analytics: analytics)
+        let store = makeStore(authUseCase: auth)
         let session = SignInAuthSessionFixture.make()
 
         await store.send(.appleLoginButtonTapped) {
             $0.isLoading = true
-            $0.loginType = .apple
         }
         await store.receive(\.receiveLoginSessionSuccessfully, session) {
             $0.isLoading = false
@@ -179,7 +164,6 @@ final class SignInFeatureTests: XCTestCase {
         }
         await store.finish()
 
-        XCTAssertEqual(analytics.events.map { $0.properties["method"] as? String }, ["apple", "apple"])
         XCTAssertEqual(auth.signInRequests.count, 1)
         XCTAssertEqual(auth.signInRequests.first?.loginType, .apple)
         XCTAssertEqual(auth.signInRequests.first?.accessToken, "social-token")
@@ -192,7 +176,6 @@ final class SignInFeatureTests: XCTestCase {
 
         await store.send(.kakaoLoginButtonTapped) {
             $0.isLoading = true
-            $0.loginType = .kakao
         }
         await store.receive(\.kakaoLoginError, .unknown)
         await store.receive(\.showAlert, .error(.unknown)) {
@@ -213,7 +196,6 @@ final class SignInFeatureTests: XCTestCase {
 
         await store.send(.appleLoginButtonTapped) {
             $0.isLoading = true
-            $0.loginType = .apple
         }
         await store.receive(\.appleLoginError, .networkUnavailable)
         await store.receive(\.showAlert, .error(.networkUnavailable)) {
@@ -224,46 +206,12 @@ final class SignInFeatureTests: XCTestCase {
         XCTAssertTrue(router.routes.isEmpty)
     }
 
-    func testProfileLookupFailureStillRoutesWithoutNickname() async {
-        let router = SignInRouterSpy()
-        let analytics = SignInAnalyticsUseCaseSpy()
-        let store = makeStore(
-            userInfoResult: .failure(NetworkError.networkUnavailable),
-            analytics: analytics,
-            router: router
-        )
-
-        await store.send(.receiveLoginSessionSuccessfully(SignInAuthSessionFixture.make())) {
-            $0.navigationDestination = .routeToMain
-        }.finish()
-
-        XCTAssertEqual(router.routes, [.routeToMain])
-        XCTAssertEqual(analytics.userIDs, ["1"])
-        XCTAssertTrue(analytics.nicknames.isEmpty)
-    }
-
-    func testEmptyNicknameIsNotRecorded() async {
-        let analytics = SignInAnalyticsUseCaseSpy()
-        let store = makeStore(
-            userInfoResult: .success(SignInUserInfoFixture.make(nickname: "")),
-            analytics: analytics
-        )
-
-        await store.send(.receiveLoginSessionSuccessfully(SignInAuthSessionFixture.make())) {
-            $0.navigationDestination = .routeToMain
-        }.finish()
-
-        XCTAssertTrue(analytics.nicknames.isEmpty)
-    }
-
     private func makeStore(
         initialState: SignInFeature.State = SignInFeature.State(),
         isDemoLoginEnabled: Bool = true,
         socialResult: Result<String?, Error> = .success("social-token"),
         signInResult: Result<AuthSession, Error> = .success(SignInAuthSessionFixture.make()),
-        userInfoResult: Result<UserInfo, Error> = .success(SignInUserInfoFixture.make()),
         authUseCase: AuthUseCaseProtocol? = nil,
-        analytics: AnalyticsUseCaseProtocol = SignInAnalyticsUseCaseStub(),
         router: SignInRouterSpy? = nil
     ) -> TestStoreOf<SignInFeature> {
         let router = router ?? SignInRouterSpy()
@@ -275,9 +223,8 @@ final class SignInFeatureTests: XCTestCase {
                 socialLoginUseCase: SignInSocialLoginStub(result: socialResult),
                 authUseCase: authUseCase ?? SignInAuthUseCaseStub(
                     signInResult: signInResult,
-                    userInfoResult: userInfoResult
+                    userInfoResult: .success(SignInUserInfoFixture.make())
                 ),
-                analyticsUseCase: analytics,
                 router: router.route
             )
         }

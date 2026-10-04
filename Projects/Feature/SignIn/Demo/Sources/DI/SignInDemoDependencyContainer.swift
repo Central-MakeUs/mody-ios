@@ -28,7 +28,6 @@ final class SignInDemoDependencyContainer {
                     userInfoResult: scenario.userInfoResult,
                     responseDelay: .milliseconds(500)
                 ),
-                analyticsUseCase: SignInAnalyticsUseCaseStub(),
                 router: { route in
                     router.route(from: route)
                 }

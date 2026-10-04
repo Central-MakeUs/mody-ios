@@ -7,7 +7,6 @@
 
 import ComposableArchitecture
 import CommonDomain
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import Foundation
 import MyPageInterface
@@ -16,20 +15,17 @@ import MyPageInterface
 public struct MyPageFeature {
     private let authUseCase: AuthUseCaseProtocol
     private let myPageUseCase: MyPageUseCase
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (MyPageRoute) -> Void
     private let output: @MainActor (MyPageOutput) -> Void
 
     public init(
         authUseCase: AuthUseCaseProtocol,
         myPageUseCase: MyPageUseCase,
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (MyPageRoute) -> Void,
         output: @escaping @MainActor (MyPageOutput) -> Void
     ) {
         self.authUseCase = authUseCase
         self.myPageUseCase = myPageUseCase
-        self.analyticsUseCase = analyticsUseCase
         self.router = router
         self.output = output
     }
@@ -170,7 +166,6 @@ public struct MyPageFeature {
                 }
 
                 return .run { [output] _ in
-                    analyticsUseCase.log(MyPageAnalyticsEvent.weightRecordCreated)
                     await output(.weightRecordSucceeded)
                 }
             case let .weightRecordFailed(error):
@@ -191,7 +186,6 @@ public struct MyPageFeature {
                 }
             case .healthDataSettingsButtonTapped:
                 return .run { [router] _ in
-                    analyticsUseCase.log(MyPageAnalyticsEvent.healthDataSettingsOpened)
                     await router(.routeToHealthDataSettings)
                 }
             }

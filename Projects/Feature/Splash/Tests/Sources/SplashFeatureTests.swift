@@ -6,7 +6,6 @@
 //
 
 import ComposableArchitecture
-import CoreAnalyticsInterface
 import SplashInterface
 import SplashTesting
 import XCTest
@@ -125,8 +124,7 @@ final class SplashFeatureTests: XCTestCase {
 
         for testCase in cases {
             let router = SplashRouterSpy()
-            let analytics = SplashAnalyticsUseCaseSpy()
-            let store = makeStore(analytics: analytics, router: router)
+            let store = makeStore(router: router)
             let userInfo = SplashUserInfoFixture.make(
                 memberID: 42,
                 nickname: "테스터",
@@ -140,16 +138,12 @@ final class SplashFeatureTests: XCTestCase {
             }.finish()
 
             XCTAssertEqual(router.routes, [testCase.route])
-            XCTAssertEqual(analytics.userIDs, ["42"])
-            XCTAssertEqual(analytics.nicknames, ["테스터"])
-            XCTAssertEqual(analytics.events.map(\.name), ["login_succeeded"])
         }
     }
 
     private func makeStore(
         initialState: SplashFeature.State = SplashFeature.State(),
         repository: SplashRepositoryProtocol = SplashRepositorySpy(),
-        analytics: AnalyticsUseCaseProtocol = SplashAnalyticsUseCaseStub(),
         router: SplashRouterSpy? = nil
     ) -> TestStoreOf<SplashFeature> {
         let router = router ?? SplashRouterSpy()
@@ -159,7 +153,6 @@ final class SplashFeatureTests: XCTestCase {
                 authUseCase: SplashAuthUseCaseStub(
                     userInfoResult: .success(SplashUserInfoFixture.make())
                 ),
-                analyticsUseCase: analytics,
                 router: router.route
             )
         }

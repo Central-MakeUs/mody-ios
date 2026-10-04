@@ -12,7 +12,6 @@ import FirebaseServiceInterface
 import CoreNetworkInterface
 import CoreKeyChainStorage
 import CoreKeyChainStorageInterface
-import CoreAnalyticsInterface
 import CoreAuthInterface
 
 extension AppAssembly {
@@ -38,12 +37,10 @@ extension AppAssembly {
         container.register(SplashFeature.self) { (resolver: Resolver, router: SplashRouter) in
             let splashUseCase: SplashUseCase = resolver.resolve()
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
-            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return SplashFeature(
                 splashUseCase: splashUseCase,
-                authUseCase: authUseCase,
-                analyticsUseCase: analyticsUseCase
+                authUseCase: authUseCase
             ) { [weak router] route in
                 router?.route(from: route)
             }

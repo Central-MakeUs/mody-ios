@@ -6,19 +6,15 @@
 //
 
 import ComposableArchitecture
-import CoreAnalyticsInterface
 
 @Reducer
 public struct GroupInviteFeature {
     private let shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
 
     public init(
-        shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol
+        shareGroupInviteUseCase: ShareGroupInviteUseCaseProtocol
     ) {
         self.shareGroupInviteUseCase = shareGroupInviteUseCase
-        self.analyticsUseCase = analyticsUseCase
     }
 
     @ObservableState
@@ -87,9 +83,7 @@ public struct GroupInviteFeature {
                 }
             case .shareSucceeded:
                 state.isLoading = false
-                return .run { _ in
-                    analyticsUseCase.log(ModyGroupAnalyticsEvent.inviteShareSucceeded)
-                }
+                return .none
             case .shareFailed:
                 state.isLoading = false
                 return .none

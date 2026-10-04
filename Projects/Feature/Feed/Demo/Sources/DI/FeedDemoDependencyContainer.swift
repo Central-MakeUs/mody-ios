@@ -6,7 +6,6 @@
 //
 
 import CoreAuthInterface
-import CoreAnalyticsInterface
 import CoreCamera
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -22,7 +21,6 @@ final class FeedDemoDependencyContainer {
     private let cameraCaptureBuilder: CameraCaptureBuildable
     private let imageUploadUseCase: ImageUploadUseCaseProtocol
     private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
 
     init(
         feedRepository: FeedRepositoryProtocol = FeedDemoMockRepository(),
@@ -38,7 +36,6 @@ final class FeedDemoDependencyContainer {
         self.groupUseCase = groupUseCase
         self.imageUploadUseCase = imageUploadUseCase
         self.temporaryImageFileUseCase = temporaryImageFileUseCase
-        self.analyticsUseCase = FeedDemoAnalyticsUseCase()
         self.cameraCaptureBuilder = CameraCaptureBuilder(
             temporaryImageFileUseCase: temporaryImageFileUseCase
         )
@@ -53,7 +50,6 @@ final class FeedDemoDependencyContainer {
                     authUseCase: self.authUseCase,
                     groupUseCase: self.groupUseCase,
                     feedUseCase: feedUseCase,
-                    analyticsUseCase: self.analyticsUseCase,
                     router: router,
                     output: { [weak outputHandler] output in
                         outputHandler?.handle(output: output)
@@ -70,7 +66,6 @@ final class FeedDemoDependencyContainer {
                     feedUseCase: feedUseCase,
                     imageUploadUseCase: self.imageUploadUseCase,
                     temporaryImageFileUseCase: self.temporaryImageFileUseCase,
-                    analyticsUseCase: self.analyticsUseCase,
                     output: { [weak outputHandler] output in
                         outputHandler?.handle(output: output)
                     }
@@ -80,12 +75,4 @@ final class FeedDemoDependencyContainer {
             imageLoader: NukeRemoteImageLoader.shared
         )
     }
-}
-
-private struct FeedDemoAnalyticsUseCase: AnalyticsUseCaseProtocol {
-    func setUserID(_ userID: String) {}
-    func setUserNickname(_ nickname: String) {}
-    func reset() {}
-    func log(_ event: AmplitudeLogEvent) {}
-    func viewDidLoad(screenName: String) {}
 }

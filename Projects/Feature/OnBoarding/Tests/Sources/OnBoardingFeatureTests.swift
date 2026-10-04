@@ -69,11 +69,9 @@ final class OnBoardingFeatureTests: XCTestCase {
 
     func testProfileSubmissionUsesCollectedValuesAndOpensPermissionStep() async {
         let repository = OnBoardingRepositorySpy()
-        let analytics = OnBoardingAnalyticsSpy()
         let store = makeStore(
             initialState: readyToSubmitState(),
-            repository: repository,
-            analytics: analytics
+            repository: repository
         )
 
         await store.send(.nextButtonTapped) {
@@ -83,7 +81,7 @@ final class OnBoardingFeatureTests: XCTestCase {
         await store.receive(\.setUpProfile) {
             $0.isLoading = true
         }
-        await store.receive(\.setupProfileSuccessfully, 42) {
+        await store.receive(\.setupProfileSuccessfully) {
             $0.isLoading = false
             $0.currentStep = .permission
         }
@@ -98,8 +96,6 @@ final class OnBoardingFeatureTests: XCTestCase {
         XCTAssertEqual(repository.requests.first?.exerciseSchedules, [
             ExerciseScheduleRequest(dayOfWeek: .monday, time: "09:00")
         ])
-        XCTAssertEqual(analytics.userIDs, ["42"])
-        XCTAssertEqual(analytics.nicknames, ["모디"])
     }
 
     func testProfileFailureShowsNetworkErrorAndKeepsCurrentStep() async {
@@ -185,7 +181,6 @@ final class OnBoardingFeatureTests: XCTestCase {
     private func makeStore(
         initialState: OnBoardingFeature.State = .init(),
         repository: OnBoardingRepositorySpy = .init(),
-        analytics: OnBoardingAnalyticsSpy = .init(),
         permission: OnBoardingPermissionSpy = .init(),
         router: OnBoardingRouterSpy? = nil
     ) -> TestStoreOf<OnBoardingFeature> {
@@ -196,7 +191,6 @@ final class OnBoardingFeatureTests: XCTestCase {
                 cameraPermission: permission,
                 notificationPermission: permission,
                 healthPermission: permission,
-                analyticsUseCase: analytics,
                 router: router.route
             )
         }

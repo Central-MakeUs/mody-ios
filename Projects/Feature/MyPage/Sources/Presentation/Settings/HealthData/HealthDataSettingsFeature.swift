@@ -6,23 +6,19 @@
 //
 
 import ComposableArchitecture
-import CoreAnalyticsInterface
 import CoreHealthInterface
 import MyPageInterface
 
 @Reducer
 public struct HealthDataSettingsFeature {
     private let healthPermissionInterface: HealthPermissionInterface
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (MyPageHealthDataSettingsRoute) -> Void
 
     public init(
         healthPermissionInterface: HealthPermissionInterface,
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (MyPageHealthDataSettingsRoute) -> Void
     ) {
         self.healthPermissionInterface = healthPermissionInterface
-        self.analyticsUseCase = analyticsUseCase
         self.router = router
     }
 
@@ -51,9 +47,7 @@ public struct HealthDataSettingsFeature {
                     await router(.back)
                 }
             case .healthAppButtonTapped:
-                return .run { _ in
-                    analyticsUseCase.log(MyPageAnalyticsEvent.healthAppOpenClicked)
-                }
+                return .none
             }
         }
     }

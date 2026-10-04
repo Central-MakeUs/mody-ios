@@ -6,7 +6,6 @@
 //
 
 import Swinject
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -35,12 +34,10 @@ extension AppAssembly {
             let (router, outputHandler) = arguments
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let myPageUseCase: MyPageUseCase = resolver.resolve()
-            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return MyPageFeature(
                 authUseCase: authUseCase,
                 myPageUseCase: myPageUseCase,
-                analyticsUseCase: analyticsUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
                 },

@@ -6,7 +6,6 @@
 //
 
 import Swinject
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -34,14 +33,12 @@ extension AppAssembly {
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
             let groupUseCase: GroupUseCaseProtocol = resolver.resolve()
             let feedUseCase: FeedUseCase = resolver.resolve()
-            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
             let (router, outputHandler) = arguments
 
             return FeedReactor(
                 authUseCase: authUseCase,
                 groupUseCase: groupUseCase,
                 feedUseCase: feedUseCase,
-                analyticsUseCase: analyticsUseCase,
                 router: router,
                 output: { [weak outputHandler] output in
                     outputHandler?.handle(output: output)
