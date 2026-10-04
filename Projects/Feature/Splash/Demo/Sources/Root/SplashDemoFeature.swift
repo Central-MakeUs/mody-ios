@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import SplashInterface
 
 @Reducer
 struct SplashDemoFeature {
@@ -14,6 +15,7 @@ struct SplashDemoFeature {
         var runningScenario = SplashScenario.mainAccessible
         var selectedScenario = SplashScenario.mainAccessible
         var isScenarioSheetPresented = false
+        var route: SplashRoute?
         var runID = 0
     }
 
@@ -21,6 +23,7 @@ struct SplashDemoFeature {
         case binding(BindingAction<State>)
         case runScenarioTapped
         case scenarioControlTapped
+        case routeReceived(SplashRoute)
     }
 
     var body: some ReducerOf<Self> {
@@ -33,11 +36,15 @@ struct SplashDemoFeature {
             case .runScenarioTapped:
                 state.runningScenario = state.selectedScenario
                 state.isScenarioSheetPresented = false
+                state.route = nil
                 state.runID += 1
                 return .none
             case .scenarioControlTapped:
                 state.selectedScenario = state.runningScenario
                 state.isScenarioSheetPresented = true
+                return .none
+            case let .routeReceived(route):
+                state.route = route
                 return .none
             }
         }

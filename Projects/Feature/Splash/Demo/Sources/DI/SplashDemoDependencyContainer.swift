@@ -30,8 +30,4 @@ final class SplashDemoDependencyContainer {
             )
         }
     }
-
-    func makeSplashRouter() -> SplashRouter {
-        SplashDemoRouter()
-    }
 }
