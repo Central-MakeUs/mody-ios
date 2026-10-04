@@ -1,34 +1,34 @@
 //
-//  SplashDemoRootView.swift
-//  SplashDemo
+//  SignInDemoRootView.swift
+//  SignInDemo
 //
-//  Created by 김동준 on 8/20/26.
+//  Created by 김동준 on 10/1/26.
 //
 
 import ComposableArchitecture
 import DesignSystem
-import SplashInterface
+import SignInInterface
 import SwiftUI
 
-struct SplashDemoRootView: View {
-    @Bindable private var store: StoreOf<SplashDemoFeature>
-    private let makeSplashBuilder: (SplashScenario) -> SplashBuildable
-    private let router: SplashRouter
+struct SignInDemoRootView: View {
+    @Bindable private var store: StoreOf<SignInDemoFeature>
+    private let makeSignInBuilder: (SignInScenario) -> SignInBuildable
+    private let router: SignInRouter
 
     init(
-        store: StoreOf<SplashDemoFeature>,
-        makeSplashBuilder: @escaping (SplashScenario) -> SplashBuildable,
-        router: SplashRouter
+        store: StoreOf<SignInDemoFeature>,
+        makeSignInBuilder: @escaping (SignInScenario) -> SignInBuildable,
+        router: SignInRouter
     ) {
         self.store = store
-        self.makeSplashBuilder = makeSplashBuilder
+        self.makeSignInBuilder = makeSignInBuilder
         self.router = router
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            SplashDemoBuilder(
-                builder: makeSplashBuilder(store.runningScenario),
+        ZStack(alignment: .topTrailing) {
+            SignInDemoBuilder(
+                builder: makeSignInBuilder(store.runningScenario),
                 router: router
             )
             .ignoresSafeArea()
@@ -38,7 +38,7 @@ struct SplashDemoRootView: View {
                 .padding(24)
         }
         .sheet(isPresented: $store.isScenarioSheetPresented) {
-            SplashScenarioControlView(
+            SignInScenarioControlView(
                 selection: $store.selectedScenario,
                 route: store.route,
                 onRun: { store.send(.runScenarioTapped) }
@@ -51,7 +51,7 @@ struct SplashDemoRootView: View {
     }
 }
 
-private extension SplashDemoRootView {
+private extension SignInDemoRootView {
     var scenarioControlButton: some View {
         Button {
             store.send(.scenarioControlTapped)

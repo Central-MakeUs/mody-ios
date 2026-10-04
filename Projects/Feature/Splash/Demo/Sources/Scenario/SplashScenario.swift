@@ -50,25 +50,48 @@ enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
     var summary: String {
         switch self {
         case .forceUpdate:
-            "Remote Config의 강제 업데이트 플래그가 활성화된 상태"
+            "실행 후 강제 업데이트 팝업을 확인합니다. 업데이트 버튼은 App Store를 엽니다."
         case .minimumSupportedVersion:
-            "현재 Demo 버전보다 최소 지원 버전이 높은 상태"
+            "실행 후 지원 종료 버전 팝업을 확인합니다. 업데이트 버튼은 App Store를 엽니다."
         case .skippableNotice:
-            "확인 후 앱 시작을 계속할 수 있는 공지"
+            "실행 후 공지의 확인 버튼을 누르면 앱 시작 절차를 계속합니다."
         case .blockingNotice:
-            "확인 버튼이 비활성화되어 Splash에 머무는 공지"
+            "실행 후 확인 버튼을 누를 수 없는 차단 공지를 확인합니다."
         case .serverUnstable:
-            "Health Check가 불안정 상태를 반환하는 경우"
+            "실행 후 서버 점검 상태를 반환해 오류 팝업을 표시합니다."
         case .healthCheckFailure:
-            "Health Check 요청 자체가 실패하는 경우"
+            "실행 후 Health Check 요청이 실패해 오류 팝업을 표시합니다."
         case .signedOut:
-            "사용자 정보 조회가 실패해 로그인으로 이동하는 경우"
+            "실행 후 사용자 정보 조회가 실패하면 로그인 경로를 요청합니다."
         case .onboardingRequired:
-            "개인 정보 입력이 완료되지 않은 사용자"
+            "실행 후 개인 정보 입력이 필요한 사용자의 온보딩 경로를 요청합니다."
         case .groupOnboardingRequired:
-            "개인 정보 입력 후 그룹 진입이 필요한 사용자"
+            "실행 후 그룹 진입이 필요한 사용자의 가입 완료 안내 경로를 요청합니다."
         case .mainAccessible:
-            "모든 시작 조건을 충족해 메인으로 이동하는 사용자"
+            "실행 후 모든 시작 조건을 통과해 메인 경로를 요청합니다."
+        }
+    }
+
+    var expectedNavigationDescription: String {
+        switch self {
+        case .forceUpdate:
+            "예상 이동: 없음 · 강제 업데이트 팝업"
+        case .minimumSupportedVersion:
+            "예상 이동: 없음 · 지원 종료 버전 팝업"
+        case .skippableNotice:
+            "예상 이동: 메인 · 공지 확인 후"
+        case .blockingNotice:
+            "예상 이동: 없음 · 차단 공지에서 Splash 유지"
+        case .serverUnstable, .healthCheckFailure:
+            "예상 이동: 없음 · 오류 팝업에서 Splash 유지"
+        case .signedOut:
+            "예상 이동: 로그인"
+        case .onboardingRequired:
+            "예상 이동: 개인 정보 입력(온보딩)"
+        case .groupOnboardingRequired:
+            "예상 이동: 그룹 진입 · 가입 완료 안내 표시"
+        case .mainAccessible:
+            "예상 이동: 메인"
         }
     }
 

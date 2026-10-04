@@ -12,17 +12,17 @@ import SwiftUI
 @main
 struct SplashDemoApp: App {
     private let store: StoreOf<SplashDemoFeature>
-    private let dependencyContainer: SplashDemoDependencyContainer
+    private let dependencyContainer = SplashDemoDependencyContainer()
     private let router: SplashRouter
 
     init() {
-        let dependencyContainer = SplashDemoDependencyContainer()
-
-        self.store = Store(initialState: SplashDemoFeature.State()) {
+        let store = Store(initialState: SplashDemoFeature.State()) {
             SplashDemoFeature()
         }
-        self.dependencyContainer = dependencyContainer
-        self.router = dependencyContainer.makeSplashRouter()
+        self.store = store
+        self.router = SplashDemoRouter { route in
+            store.send(.routeReceived(route))
+        }
     }
 
     var body: some Scene {

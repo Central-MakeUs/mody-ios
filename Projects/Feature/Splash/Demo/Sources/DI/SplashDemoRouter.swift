@@ -9,5 +9,13 @@ import SplashInterface
 
 @MainActor
 final class SplashDemoRouter: SplashRouter {
-    func route(from _: SplashRoute) {}
+    private let onRoute: (SplashRoute) -> Void
+
+    init(onRoute: @escaping (SplashRoute) -> Void) {
+        self.onRoute = onRoute
+    }
+
+    func route(from route: SplashRoute) {
+        onRoute(route)
+    }
 }

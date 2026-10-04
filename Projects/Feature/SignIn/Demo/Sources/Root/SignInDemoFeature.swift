@@ -1,29 +1,29 @@
 //
-//  SplashDemoFeature.swift
-//  SplashDemo
+//  SignInDemoFeature.swift
+//  SignInDemo
 //
-//  Created by 김동준 on 8/21/26.
+//  Created by 김동준 on 10/1/26.
 //
 
 import ComposableArchitecture
-import SplashInterface
+import SignInInterface
 
 @Reducer
-struct SplashDemoFeature {
+struct SignInDemoFeature {
     @ObservableState
     struct State: Equatable {
-        var runningScenario = SplashScenario.mainAccessible
-        var selectedScenario = SplashScenario.mainAccessible
+        var runningScenario = SignInScenario.mainAccessible
+        var selectedScenario = SignInScenario.mainAccessible
         var isScenarioSheetPresented = false
-        var route: SplashRoute?
+        var route: SignInRoute?
         var runID = 0
     }
 
     enum Action: BindableAction {
         case binding(BindingAction<State>)
-        case runScenarioTapped
         case scenarioControlTapped
-        case routeReceived(SplashRoute)
+        case runScenarioTapped
+        case routeReceived(SignInRoute)
     }
 
     var body: some ReducerOf<Self> {
@@ -33,15 +33,15 @@ struct SplashDemoFeature {
             switch action {
             case .binding:
                 return .none
+            case .scenarioControlTapped:
+                state.selectedScenario = state.runningScenario
+                state.isScenarioSheetPresented = true
+                return .none
             case .runScenarioTapped:
                 state.runningScenario = state.selectedScenario
                 state.isScenarioSheetPresented = false
                 state.route = nil
                 state.runID += 1
-                return .none
-            case .scenarioControlTapped:
-                state.selectedScenario = state.runningScenario
-                state.isScenarioSheetPresented = true
                 return .none
             case let .routeReceived(route):
                 state.route = route

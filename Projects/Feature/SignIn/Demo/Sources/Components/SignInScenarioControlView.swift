@@ -1,22 +1,22 @@
 //
-//  SplashScenarioControlView.swift
-//  SplashDemo
+//  SignInScenarioControlView.swift
+//  SignInDemo
 //
-//  Created by 김동준 on 8/20/26.
+//  Created by 김동준 on 10/1/26.
 //
 
 import DesignSystem
-import SplashInterface
+import SignInInterface
 import SwiftUI
 
-struct SplashScenarioControlView: View {
-    @Binding private var selection: SplashScenario
-    private let route: SplashRoute?
+struct SignInScenarioControlView: View {
+    @Binding private var selection: SignInScenario
+    private let route: SignInRoute?
     private let onRun: () -> Void
 
     init(
-        selection: Binding<SplashScenario>,
-        route: SplashRoute?,
+        selection: Binding<SignInScenario>,
+        route: SignInRoute?,
         onRun: @escaping () -> Void
     ) {
         self._selection = selection
@@ -27,14 +27,14 @@ struct SplashScenarioControlView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             MText(
-                "Splash Scenario",
+                "SignIn Scenario",
                 style: .b3,
                 color: .gray10,
                 alignment: .leading
             )
 
             Picker("시나리오", selection: $selection) {
-                ForEach(SplashScenario.allCases) { scenario in
+                ForEach(SignInScenario.allCases) { scenario in
                     Text(scenario.displayName)
                         .tag(scenario)
                 }
@@ -84,7 +84,6 @@ struct SplashScenarioControlView: View {
         switch route {
         case .none: "마지막 이동: 없음"
         case .some(.routeToMain): "마지막 이동: 메인"
-        case .some(.routeToSignIn): "마지막 이동: 로그인"
         case .some(.routeToOnBoarding): "마지막 이동: 온보딩"
         case let .some(.routeToModyGroup(showSignUpDoneContents)):
             showSignUpDoneContents
