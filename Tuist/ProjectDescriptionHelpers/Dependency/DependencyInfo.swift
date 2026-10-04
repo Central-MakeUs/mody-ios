@@ -122,6 +122,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreAnalytics)
+            ],
+            testing: [
+                .module(.CommonDomain),
+                .microFeature(.CoreAuth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .OnBoarding: .init(
