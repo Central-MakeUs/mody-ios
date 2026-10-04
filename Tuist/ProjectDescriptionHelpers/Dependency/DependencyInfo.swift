@@ -140,6 +140,12 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreHealth),
                 .microFeature(.CoreAnalytics),
                 .module(.Util)
+            ],
+            testing: [
+                .microFeature(.CoreCamera),
+                .microFeature(.CoreNotification),
+                .microFeature(.CoreHealth),
+                .microFeature(.CoreAnalytics)
             ]
         ),
         .SignUpDone: .init(
