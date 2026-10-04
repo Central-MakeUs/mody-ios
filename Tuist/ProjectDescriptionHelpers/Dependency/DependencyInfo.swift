@@ -97,42 +97,33 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
     microFeatureDependencies: [
         .Splash: .init(
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
                 .microFeature(.CoreNetwork),
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreKeyChainStorage),
-                .module(.CommonDomain),
                 .microFeature(.CoreAuth),
             ],
             testing: [
-                .module(.CommonDomain),
                 .microFeature(.CoreAuth),
             ]
         ),
         .SignIn: .init(
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreAuth),
             ],
             testing: [
-                .module(.CommonDomain),
                 .microFeature(.CoreAuth),
             ]
         ),
         .OnBoarding: .init(
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNotification),
                 .microFeature(.CoreHealth),
-                .module(.Util)
             ],
             testing: [
                 .microFeature(.CoreCamera),
@@ -142,8 +133,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         ),
         .SignUpDone: .init(
             implementation: [
-                .external(.ComposableArchitecture),
-                .module(.Base)
+                .external(.ComposableArchitecture)
             ]
         ),
         .ModyGroup: .init(
@@ -151,9 +141,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain)
             ],
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreKakao),
             ]
@@ -164,20 +152,14 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ],
             implementation: [
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.ModyGroup),
                 .external(.ReactorKit),
-                .external(.RxSwift),
                 .external(.RxCocoa),
-                .external(.RxRelay),
-                .microFeature(.CoreModyImage),
             ],
             demo: [
-                .module(.DesignSystem),
                 .module(.MicroFeature(.CoreCamera)),
                 .module(.MicroFeature(.CoreModyImage))
             ]
@@ -189,14 +171,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.MyPage),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreNotification),
-                .microFeature(.CoreModyImage),
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
-                .external(.ComposableArchitecture),
-                .external(.SnapKit),
                 .external(.ReactorKit),
-                .external(.RxSwift),
                 .external(.RxCocoa)
             ]
         ),
@@ -205,14 +181,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain)
             ],
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNetwork),
-                .microFeature(.CoreModyImage),
                 .microFeature(.CoreHealth),
             ]
         ),
@@ -221,21 +193,15 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain)
             ],
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreNotification),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreCamera),
-                .microFeature(.CoreModyImage),
                 .microFeature(.CoreHealth)
             ],
             demo: [
-                .module(.CommonDomain),
-                .microFeature(.CoreAuth),
                 .module(.MicroFeature(.CoreModyImage))
             ]
         ),
