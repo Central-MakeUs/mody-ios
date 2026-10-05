@@ -2,10 +2,10 @@ import Foundation
 import XCTest
 @testable import MyPage
 
-final class MyPageTests: XCTestCase {
+final class MyPageProfileUpdateRequestTests: XCTestCase {
     func testProfileUpdateRequestEncodesImageKeyWhenPresent() throws {
         let request = MyPageProfileUpdateRequest(
-            nickname: "민석",
+            nickname: "동준",
             birthDate: "2000-01-01",
             imageKey: "profiles/1/2026/07/profile.jpg"
         )
@@ -14,7 +14,7 @@ final class MyPageTests: XCTestCase {
                 as? [String: Any]
         )
 
-        XCTAssertEqual(json["nickname"] as? String, "민석")
+        XCTAssertEqual(json["nickname"] as? String, "동준")
         XCTAssertEqual(json["birthDate"] as? String, "2000-01-01")
         XCTAssertEqual(
             json["imageKey"] as? String,
@@ -24,7 +24,7 @@ final class MyPageTests: XCTestCase {
 
     func testProfileUpdateRequestOmitsImageKeyWhenAbsent() throws {
         let request = MyPageProfileUpdateRequest(
-            nickname: "민석",
+            nickname: "동준",
             birthDate: "2000-01-01"
         )
         let json = try XCTUnwrap(
