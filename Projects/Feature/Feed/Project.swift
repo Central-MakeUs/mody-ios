@@ -13,6 +13,20 @@ let project = Project.implements(
         .testing(.Feed),
         .tests(.Feed)
     ],
-    schemes: .scheme(name: "FeedDemo"),
+    schemes: .scheme(name: "FeedDemo") + [
+        .scheme(
+            name: "FeedTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["Feed", "FeedTests"]),
+            testAction: .targets(
+                [.testableTarget(target: "FeedTests")],
+                configuration: "DEV",
+                options: .options(
+                    coverage: true,
+                    codeCoverageTargets: ["Feed"]
+                )
+            )
+        )
+    ],
     resourceSynthesizers: []
 )
