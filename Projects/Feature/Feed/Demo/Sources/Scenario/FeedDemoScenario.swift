@@ -7,6 +7,7 @@
 
 enum FeedDemoScenario: String, CaseIterable, Identifiable {
     case records
+    case addRecord
     case noGroups
     case groupFailure
     case emptyFeed
@@ -21,6 +22,7 @@ enum FeedDemoScenario: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .records: "기록 · 그룹 · 페이지네이션"
+        case .addRecord: "게시물 바로 추가"
         case .noGroups: "가입한 그룹 없음"
         case .groupFailure: "그룹 조회 실패"
         case .emptyFeed: "선택 날짜 기록 없음"
@@ -36,6 +38,8 @@ enum FeedDemoScenario: String, CaseIterable, Identifiable {
         switch self {
         case .records:
             "두 그룹을 전환하고 그룹 추가를 누르세요. 날짜를 선택하고 목록을 끝까지 내려 다음 페이지를 확인하세요. 내 카드의 삭제, 다른 사람 카드의 신고, 식사·운동 기록도 실행할 수 있습니다."
+        case .addRecord:
+            "시나리오 버튼 오른쪽의 +를 누르면 사진이 있는 식사 게시물이 바로 추가됩니다. 기록 작성 화면을 거치지 않고 목록 변화를 확인하세요. 삭제는 게시물의 기존 삭제 메뉴를 사용하세요."
         case .noGroups:
             "그룹 조회 결과가 비었을 때 Feed의 빈 화면을 확인하세요."
         case .groupFailure:
@@ -57,6 +61,7 @@ enum FeedDemoScenario: String, CaseIterable, Identifiable {
 
     var expectedNavigation: String {
         switch self {
+        case .addRecord: "예상 이동: 없음 · +를 누르면 목록 새로고침"
         case .noGroups: "예상 이동: 없음"
         case .emptyFeed: "예상 이동: 챌린지 요청 (Demo 알림)"
         case .createFailure, .uploadFailure: "예상 이동: 기록 작성 화면 진입 후 오류 시 이동 없음"

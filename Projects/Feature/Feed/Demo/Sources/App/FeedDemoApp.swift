@@ -33,6 +33,7 @@ struct FeedDemoApp: App {
             FeedDemoRootView(
                 store: store,
                 makeBuilder: dependencyContainer.makeBuilder,
+                addDemoRecord: dependencyContainer.addDemoRecord,
                 router: router,
                 outputHandler: outputHandler
             )

@@ -13,17 +13,20 @@ import SwiftUI
 struct FeedDemoRootView: View {
     @Bindable private var store: StoreOf<FeedDemoFeature>
     private let makeBuilder: (FeedDemoScenario) -> FeedBuildable
+    private let addDemoRecord: @MainActor () async -> Void
     private let router: FeedDemoRouter
     private let outputHandler: FeedDemoOutputHandler
 
     init(
         store: StoreOf<FeedDemoFeature>,
         makeBuilder: @escaping (FeedDemoScenario) -> FeedBuildable,
+        addDemoRecord: @escaping @MainActor () async -> Void,
         router: FeedDemoRouter,
         outputHandler: FeedDemoOutputHandler
     ) {
         self.store = store
         self.makeBuilder = makeBuilder
+        self.addDemoRecord = addDemoRecord
         self.router = router
         self.outputHandler = outputHandler
     }
@@ -39,7 +42,12 @@ struct FeedDemoRootView: View {
             .id(store.runID)
             .ignoresSafeArea(.container)
 
-            scenarioControlButton
+            HStack(spacing: 12) {
+                scenarioControlButton
+                if store.runningScenario == .addRecord {
+                    addRecordButton
+                }
+            }
                 .padding(24)
                 .ignoresSafeArea(.container)
         }
@@ -69,6 +77,20 @@ private extension FeedDemoRootView {
                 .foregroundStyle(Color.gray10)
                 .frame(width: 56, height: 56)
                 .background(Color.main)
+                .clipShape(Circle())
+        }
+    }
+
+    var addRecordButton: some View {
+        Button {
+            Task {
+                await addDemoRecord()
+                router.sendFeedInput(.refreshGroups)
+            }
+        } label: {
+            MText("+", style: .h2, color: .systemWhite)
+                .frame(width: 56, height: 56)
+                .background(Color.gray10)
                 .clipShape(Circle())
         }
     }

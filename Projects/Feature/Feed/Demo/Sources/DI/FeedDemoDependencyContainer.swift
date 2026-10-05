@@ -16,9 +16,13 @@ import ModyGroupInterface
 
 @MainActor
 final class FeedDemoDependencyContainer {
+    private var repository: FeedDemoRepositoryStub?
+
     func makeBuilder(for scenario: FeedDemoScenario) -> FeedBuildable {
+        let repository = FeedDemoRepositoryStub(scenario: scenario)
+        self.repository = repository
         let feedUseCase = FeedUseCase(
-            feedRepository: FeedDemoRepositoryStub(scenario: scenario)
+            feedRepository: repository
         )
         let authUseCase: AuthUseCaseProtocol = FeedDemoAuthUseCaseStub()
         let groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCaseStub(scenario: scenario)
@@ -56,5 +60,9 @@ final class FeedDemoDependencyContainer {
             ),
             imageLoader: FeedDemoImageLoaderStub()
         )
+    }
+
+    func addDemoRecord() async {
+        await repository?.addDemoRecord()
     }
 }

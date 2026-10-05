@@ -13,6 +13,7 @@ import Foundation
 actor FeedDemoRepositoryStub: FeedRepositoryProtocol {
     private let scenario: FeedDemoScenario
     private var records: [FeedRecord]
+    private var nextRecordID = 801
 
     init(scenario: FeedDemoScenario) {
         self.scenario = scenario
@@ -36,7 +37,7 @@ actor FeedDemoRepositoryStub: FeedRepositoryProtocol {
             return FeedRecordPage(records: [], nextCursor: nil, hasNext: false)
         }
 
-        let groupRecords = records.filter { groupId == 1 || $0.memberId != 100 }
+        let groupRecords = records.filter { groupId == 1 || $0.memberId != 100 || $0.recordId >= 801 }
         let start = cursor.flatMap { value in groupRecords.firstIndex { $0.recordId == value }.map { $0 + 1 } } ?? 0
         let end = min(start + size, groupRecords.count)
         let page = Array(groupRecords[start..<end])
@@ -52,7 +53,7 @@ actor FeedDemoRepositoryStub: FeedRepositoryProtocol {
         if scenario == .createFailure { throw NetworkError.invalidResponse }
         records.insert(
             FeedRecord(
-                recordId: (records.first?.recordId ?? 0) + 1,
+                recordId: nextRecordID,
                 recordType: request.recordType == .meal ? .meal : .exercise,
                 memberId: 100,
                 nickname: "내 기록",
@@ -62,6 +63,29 @@ actor FeedDemoRepositoryStub: FeedRepositoryProtocol {
                 exerciseDurationMinutes: (request.exerciseDurationHours ?? 0) * 60 + (request.exerciseDurationMinutes ?? 0),
                 exerciseName: request.exerciseName ?? "",
                 imageUrl: "https://feed.demo/\(request.recordType == .meal ? "meal" : "exercise")/created",
+                imageCropRegion: nil,
+                recordingStreakDays: 1
+            ),
+            at: 0
+        )
+        nextRecordID += 1
+    }
+
+    func addDemoRecord() {
+        let recordID = nextRecordID
+        nextRecordID += 1
+        records.insert(
+            FeedRecord(
+                recordId: recordID,
+                recordType: .meal,
+                memberId: 100,
+                nickname: "내 기록",
+                profileImageUrl: nil,
+                recordedTime: "12:00",
+                menu: "추가한 식사 기록",
+                exerciseDurationMinutes: 0,
+                exerciseName: "",
+                imageUrl: "https://feed.demo/meal/\(recordID)",
                 imageCropRegion: nil,
                 recordingStreakDays: 1
             ),
