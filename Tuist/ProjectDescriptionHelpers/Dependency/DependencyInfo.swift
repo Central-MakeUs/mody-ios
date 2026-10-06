@@ -186,6 +186,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreHealth),
+            ],
+            demo: [
+                .module(.MicroFeature(.CoreModyImage))
             ]
         ),
         .MyPage: .init(
