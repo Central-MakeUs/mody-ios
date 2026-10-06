@@ -187,6 +187,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreHealth),
             ],
+            testing: [
+                .microFeature(.CoreAuth)
+            ],
             demo: [
                 .module(.MicroFeature(.CoreModyImage))
             ]

@@ -7,6 +7,8 @@
 
 import Challenge
 import ChallengeInterface
+import ChallengeTesting
+import CommonDomain
 
 @MainActor
 final class ChallengeDemoDependencyContainer {
@@ -14,7 +16,14 @@ final class ChallengeDemoDependencyContainer {
         let challengeUseCase = ChallengeUseCase(
             repository: ChallengeDemoRepositoryStub(scenario: scenario, data: data)
         )
-        let authUseCase = ChallengeDemoAuthStub(scenario: scenario)
+        let userInfo = UserInfo(
+            memberId: 1, nickname: "동준", profileImageUrl: nil, daysTogether: 24,
+            personalInfoCompleted: true, groupOnboardingCompleted: true, mainAccessible: true
+        )
+        let authUseCase = ChallengeAuthUseCaseStub(
+            userInfoResult: scenario == .authFailure ? .failure(.networkUnavailable) : .success(userInfo),
+            responseDelay: .milliseconds(500)
+        )
         let imageUseCase = ChallengeDemoImageStub(scenario: scenario)
 
         return ChallengeBuilder(

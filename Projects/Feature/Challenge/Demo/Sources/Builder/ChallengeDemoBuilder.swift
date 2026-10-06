@@ -13,38 +13,32 @@ import UIKit
 
 @MainActor
 struct ChallengeDemoBuilder: UIViewControllerRepresentable {
+    private let makeBuilder: (ChallengeDemoScenario, ChallengeDemoData) -> ChallengeBuildable
     private let scenario: ChallengeDemoScenario
     private let simulationTick: Int
-    private let onRoute: (String) -> Void
-    private let onOutput: (String) -> Void
+    private let router: ChallengeDemoRouter
 
     init(
+        makeBuilder: @escaping (ChallengeDemoScenario, ChallengeDemoData) -> ChallengeBuildable,
         scenario: ChallengeDemoScenario,
         simulationTick: Int,
-        onRoute: @escaping (String) -> Void,
-        onOutput: @escaping (String) -> Void
+        router: ChallengeDemoRouter
     ) {
+        self.makeBuilder = makeBuilder
         self.scenario = scenario
         self.simulationTick = simulationTick
-        self.onRoute = onRoute
-        self.onOutput = onOutput
+        self.router = router
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(
-            router: ChallengeDemoRouter(onRoute: onRoute, onOutput: onOutput),
-            simulationTick: simulationTick
-        )
+        Coordinator(simulationTick: simulationTick)
     }
 
     func makeUIViewController(context: Context) -> UIViewController {
         let navigationController = UINavigationController()
         navigationController.setNavigationBarHidden(true, animated: false)
 
-        let router = context.coordinator.router
-        let builder = ChallengeDemoDependencyContainer().makeBuilder(
-            for: scenario, data: context.coordinator.data
-        )
+        let builder = makeBuilder(scenario, context.coordinator.data)
         router.attach(builder: builder, navigationController: navigationController)
 
         let home: UIViewController
@@ -82,13 +76,11 @@ struct ChallengeDemoBuilder: UIViewControllerRepresentable {
     }
 
     final class Coordinator {
-        let router: ChallengeDemoRouter
         let data = ChallengeDemoData()
         let clock = TestClock()
         var appliedTick: Int
 
-        init(router: ChallengeDemoRouter, simulationTick: Int) {
-            self.router = router
+        init(simulationTick: Int) {
             appliedTick = simulationTick
         }
     }

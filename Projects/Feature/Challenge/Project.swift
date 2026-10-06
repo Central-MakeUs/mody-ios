@@ -13,6 +13,20 @@ let project = Project.implements(
         .testing(.Challenge),
         .tests(.Challenge)
     ],
-    schemes: .scheme(name: "ChallengeDemo"),
+    schemes: .scheme(name: "ChallengeDemo") + [
+        .scheme(
+            name: "ChallengeTests",
+            shared: true,
+            buildAction: .buildAction(targets: [.target("Challenge"), .target("ChallengeTests")]),
+            testAction: .targets(
+                [.testableTarget(target: .target("ChallengeTests"))],
+                configuration: "DEV",
+                options: .options(
+                    coverage: true,
+                    codeCoverageTargets: [.target("Challenge")]
+                )
+            )
+        )
+    ],
     resourceSynthesizers: []
 )

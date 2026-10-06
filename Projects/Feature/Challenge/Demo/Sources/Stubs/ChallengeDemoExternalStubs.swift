@@ -6,7 +6,6 @@
 //
 
 import CommonDomain
-import CoreAuthInterface
 import CoreCameraInterface
 import CoreHealthInterface
 import CoreModyImage
@@ -15,34 +14,6 @@ import DesignSystem
 import Foundation
 import SwiftUI
 import UIKit
-
-struct ChallengeDemoAuthStub: AuthUseCaseProtocol {
-    private let scenario: ChallengeDemoScenario
-
-    init(scenario: ChallengeDemoScenario) { self.scenario = scenario }
-
-    func signIn(loginType: SocialLoginType, accessToken: String) async throws -> AuthSession {
-        try await Task.sleep(for: .milliseconds(500))
-        throw CancellationError()
-    }
-
-    func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo {
-        try await Task.sleep(for: .milliseconds(500))
-        if scenario == .authFailure { throw NetworkError.networkUnavailable }
-        return UserInfo(
-            memberId: 1, nickname: "동준", profileImageUrl: nil, daysTogether: 24,
-            personalInfoCompleted: true, groupOnboardingCompleted: true, mainAccessible: true
-        )
-    }
-
-    func logout() async throws {
-        try await Task.sleep(for: .milliseconds(500))
-    }
-
-    func deleteAccount() async throws {
-        try await Task.sleep(for: .milliseconds(500))
-    }
-}
 
 struct ChallengeDemoHealthStub: HealthUseCaseProtocol {
     private let scenario: ChallengeDemoScenario

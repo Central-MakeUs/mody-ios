@@ -7,23 +7,32 @@
 
 import ComposableArchitecture
 import CommonDomain
+import ChallengeInterface
 import DesignSystem
 import SwiftUI
 
 struct ChallengeDemoRootView: View {
     @Bindable private var store: StoreOf<ChallengeDemoFeature>
+    private let makeBuilder: (ChallengeDemoScenario, ChallengeDemoData) -> ChallengeBuildable
+    private let router: ChallengeDemoRouter
 
-    init(store: StoreOf<ChallengeDemoFeature>) {
+    init(
+        store: StoreOf<ChallengeDemoFeature>,
+        makeBuilder: @escaping (ChallengeDemoScenario, ChallengeDemoData) -> ChallengeBuildable,
+        router: ChallengeDemoRouter
+    ) {
         self.store = store
+        self.makeBuilder = makeBuilder
+        self.router = router
     }
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             ChallengeDemoBuilder(
+                makeBuilder: makeBuilder,
                 scenario: store.runningScenario,
                 simulationTick: store.simulationTick,
-                onRoute: { store.send(.routeReceived($0)) },
-                onOutput: { store.send(.outputReceived($0)) }
+                router: router
             )
             .ignoresSafeArea(.container)
             .id(store.runID)
