@@ -72,3 +72,6 @@ Tuist/.build
 
 XCConfig/
 GoogleService-info*
+
+.codex/
+AGENTS.md
