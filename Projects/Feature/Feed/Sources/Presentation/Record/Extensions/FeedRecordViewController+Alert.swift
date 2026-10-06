@@ -14,7 +14,7 @@ extension FeedRecordViewController {
     func configureRecordLoadingView() {
         let loadingView = MLoadingIndicatorView()
             .greedyFrame()
-            .background(Color.systemBlack.opacity(0.6))
+            .background(Color.systemBlack.opacity(0.6).ignoresSafeArea())
         let hostingController = UIHostingController(rootView: AnyView(loadingView))
         
         hostingController.view.backgroundColor = .clear

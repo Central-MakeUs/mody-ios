@@ -1,0 +1,10 @@
+FeedDemo sample photos (offline fixtures)
+
+FeedDemoMeal.jpg — Garley Gibson / Pexels
+https://www.pexels.com/photo/photo-of-a-salad-in-a-bowl-15481521/
+
+FeedDemoExercise.jpg — Anna Kester / Pexels
+https://www.pexels.com/photo/person-walking-in-a-forest-10375769/
+
+License: https://www.pexels.com/license/
+Downloaded on 2026-10-05 at 1200px width. Used only as FeedDemo sample content.
