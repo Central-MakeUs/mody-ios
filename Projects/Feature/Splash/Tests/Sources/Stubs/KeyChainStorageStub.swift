@@ -6,7 +6,6 @@
 //
 
 import CoreKeyChainStorageInterface
-import SplashTesting
 
 struct KeyChainStorageStub: CoreKeyChainStorageInterface {
     private let values: [String: Any]
@@ -19,7 +18,7 @@ struct KeyChainStorageStub: CoreKeyChainStorageInterface {
 
     func read<T: Decodable>(key: String) throws -> T {
         guard let value = values[key] as? T else {
-            throw SplashTestingError.expectedFailure
+            throw SplashTestError.expectedFailure
         }
         return value
     }
