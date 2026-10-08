@@ -6,13 +6,10 @@
 //
 
 import CommonDomain
-import CoreCameraInterface
 import CoreHealthInterface
 import CoreModyImage
 import CoreModyImageInterface
-import DesignSystem
 import Foundation
-import SwiftUI
 import UIKit
 
 struct ChallengeDemoHealthStub: HealthUseCaseProtocol {
@@ -86,43 +83,5 @@ final class ChallengeDemoImageLoader: RemoteImageLoading, @unchecked Sendable {
             maximumPixelSize: request.maximumPixelSize,
             processing: request.processing
         ))
-    }
-}
-
-private enum ChallengeDemoProofImage {
-    static func load() -> UIImage? {
-        guard let url = Bundle.main.url(forResource: "ChallengeDemoDongjun", withExtension: "png") else {
-            return nil
-        }
-        return UIImage(contentsOfFile: url.path)
-    }
-}
-
-struct ChallengeDemoCameraStub: CameraCaptureBuildable {
-    @MainActor
-    func makeCameraViewController(
-        source: CameraCaptureSource,
-        isCropEnabled: Bool,
-        cropAspectRatio: CGSize?,
-        onEvent: @escaping (CameraCaptureEvent) -> Void,
-        onComplete: @escaping (CameraCaptureResult) -> Void,
-        onCancel: @escaping () -> Void
-    ) -> UIViewController {
-        UIHostingController(rootView: VStack {
-            Spacer()
-            MButton("데모 사진 선택") {
-                onComplete(CameraCaptureResult(
-                    originalFile: TemporaryImageFile(
-                        fileURL: URL(fileURLWithPath: "/tmp/challenge-demo-proof.jpg"),
-                        fileName: "challenge-demo-proof.jpg", contentType: "image/jpeg"
-                    ),
-                    croppedPreviewImage: ChallengeDemoProofImage.load() ?? UIImage(),
-                    normalizedSelectionFrame: CGRect(x: 0, y: 0, width: 1, height: 1)
-                ))
-            }
-            .padding(24)
-            MButton("데모 촬영 취소", action: onCancel)
-                .padding(24)
-        })
     }
 }

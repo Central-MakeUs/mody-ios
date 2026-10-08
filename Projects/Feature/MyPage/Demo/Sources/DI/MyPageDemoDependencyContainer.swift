@@ -7,6 +7,8 @@
 
 import CommonDomain
 import CoreAuthTesting
+import CoreCameraTesting
+import UIKit
 import CoreModyImage
 import MyPage
 import MyPageInterface
@@ -37,6 +39,18 @@ final class MyPageDemoDependencyContainer {
         let notificationUseCase = MyPageNotificationSettingUseCase(
             repository: MyPageDemoNotificationRepositoryStub(scenario: scenario)
         )
+
+        let cameraCaptureBuilder: CameraCaptureBuilderStub
+        if scenario == .photoCaptureCancel {
+            cameraCaptureBuilder = CameraCaptureBuilderStub(captureResult: nil)
+        } else {
+            cameraCaptureBuilder = CameraCaptureBuilderStub {
+                CameraCaptureResultFixture.make(
+                    previewImage: UIImage(systemName: "person.crop.circle") ?? UIImage(),
+                    fileName: "mypage-demo-profile.jpg"
+                )
+            }
+        }
 
         return MyPageBuilder(
             makeMyPageFeature: { router, output in
@@ -80,7 +94,7 @@ final class MyPageDemoDependencyContainer {
                 )
             },
             imageLoader: NukeRemoteImageLoader.shared,
-            cameraCaptureBuilder: MyPageDemoCameraStub(scenario: scenario)
+            cameraCaptureBuilder: cameraCaptureBuilder
         )
     }
 }

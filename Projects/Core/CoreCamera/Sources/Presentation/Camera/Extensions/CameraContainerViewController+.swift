@@ -85,7 +85,7 @@ extension CameraContainerViewController {
         cancelPhotoLibraryLoad()
 
         guard let result = autoreleasepool(invoking: { () -> CameraCaptureResult? in
-            guard let capturedPhoto else { return nil }
+            guard let capturedPhoto, !isRotatingPhoto else { return nil }
 
             let previewImage: UIImage
             let normalizedSelectionFrame: CGRect
@@ -189,15 +189,13 @@ extension CameraContainerViewController {
         roiOverlayView.isHidden = true
 
         let radians = CGFloat(clockwiseDegrees) * .pi / 180
-        UIView.animate(
-            withDuration: 0.28,
-            delay: 0,
-            options: [.curveEaseInOut, .beginFromCurrentState],
-            animations: { [weak self] in
+        animateRotation(
+            { [weak self] in
                 self?.selectedImageView.transform = CGAffineTransform(rotationAngle: radians)
             },
-            completion: { [weak self] _ in
-                guard let self else { return }
+            { [weak self] _ in
+                guard let self, self.isRotatingPhoto,
+                      self.capturedPhoto?.originalFile.fileURL == capturedPhoto.originalFile.fileURL else { return }
 
                 let rotatedImage = CameraImageRotator().rotate(
                     capturedPhoto.previewImage,

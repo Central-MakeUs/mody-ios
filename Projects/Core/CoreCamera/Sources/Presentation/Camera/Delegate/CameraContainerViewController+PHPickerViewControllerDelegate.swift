@@ -25,19 +25,35 @@ extension CameraContainerViewController: PHPickerViewControllerDelegate,
         let originalFileName = PhotoFileNameUtil.makePhotoLibraryFileName(from: result)
         let provider = result.itemProvider
 
-        // JPEG 표현을 우선 사용하고, 없다면 provider가 제공하는 이미지 타입 중 하나를 사용합니다.
-        guard let imageTypeIdentifier = provider.registeredTypeIdentifiers.first(where: {
-            UTType($0) == .jpeg
-        }) ?? provider.registeredTypeIdentifiers.first(where: {
-            UTType($0)?.conforms(to: .image) == true
-        }) else {
+        guard Self.preferredImageType(in: provider.registeredTypeIdentifiers) != nil else {
             picker.dismiss(animated: true) { [weak self] in
                 self?.sessionController.start()
             }
             return
         }
-
         picker.dismiss(animated: true)
+        loadPhotoLibraryImage(from: provider, fileName: originalFileName)
+    }
+
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        cancelPhotoLibraryLoad()
+        sessionController.start()
+    }
+}
+
+extension CameraContainerViewController {
+    static func preferredImageType(in identifiers: [String]) -> String? {
+        identifiers.first { UTType($0) == .jpeg }
+            ?? identifiers.first { UTType($0)?.conforms(to: .image) == true }
+    }
+
+    func loadPhotoLibraryImage(from provider: NSItemProvider, fileName: String) {
+        cancelPhotoLibraryLoad()
+        // JPEG 표현을 우선 사용하고, 없다면 provider가 제공하는 이미지 타입 중 하나를 사용합니다.
+        guard let imageTypeIdentifier = Self.preferredImageType(in: provider.registeredTypeIdentifiers) else {
+            sessionController.start()
+            return
+        }
 
         // 취소 이후에도 늦은 completion이 올 수 있으므로 요청별 ID로 현재 요청인지 판별합니다.
         let loadID = UUID()
@@ -52,7 +68,7 @@ extension CameraContainerViewController: PHPickerViewControllerDelegate,
                   let fileURL,
                   let capturedPhoto = try? capturedPhotoProcessor.makeCapturedPhoto(
                     fileURL: fileURL,
-                    fileName: originalFileName
+                    fileName: fileName
                   ) else {
                 DispatchQueue.main.async { [weak self] in
                     guard self?.photoLibraryLoadID == loadID else { return }
@@ -77,10 +93,5 @@ extension CameraContainerViewController: PHPickerViewControllerDelegate,
                 self.setCapturedPhoto(capturedPhoto)
             }
         }
-    }
-
-    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        cancelPhotoLibraryLoad()
-        sessionController.start()
     }
 }

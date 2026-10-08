@@ -18,8 +18,8 @@ struct ROISelectionFrameCalculator {
               aspectRatio.height > 0,
               selectableFrame.width.isFinite,
               selectableFrame.height.isFinite,
-              selectableFrame.width > 0,
-              selectableFrame.height > 0 else {
+              selectableFrame.size.width > 0,
+              selectableFrame.size.height > 0 else {
             return .zero
         }
 

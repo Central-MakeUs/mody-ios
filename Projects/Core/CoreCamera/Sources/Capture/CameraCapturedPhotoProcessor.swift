@@ -21,15 +21,18 @@ struct CameraCapturedPhotoProcessor {
     private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
     private let thumbnailGenerator: CameraImageThumbnailGenerator
     private let previewMaxPixelSize: Int
+    private let encodeJPEG: (UIImage) -> Data?
 
     init(
         temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol,
         thumbnailGenerator: CameraImageThumbnailGenerator = CameraImageThumbnailGenerator(),
-        previewMaxPixelSize: Int
+        previewMaxPixelSize: Int,
+        encodeJPEG: @escaping (UIImage) -> Data? = { $0.jpegData(compressionQuality: 0.95) }
     ) {
         self.temporaryImageFileUseCase = temporaryImageFileUseCase
         self.thumbnailGenerator = thumbnailGenerator
         self.previewMaxPixelSize = previewMaxPixelSize
+        self.encodeJPEG = encodeJPEG
     }
 
     func makeCapturedPhoto(
@@ -70,7 +73,7 @@ struct CameraCapturedPhotoProcessor {
         }
         let rotatedImage = CameraImageRotator().rotate(originalImage, by: rotation)
 
-        guard let jpegData = rotatedImage.jpegData(compressionQuality: 0.95) else {
+        guard let jpegData = encodeJPEG(rotatedImage) else {
             throw CocoaError(.fileWriteUnknown)
         }
 
