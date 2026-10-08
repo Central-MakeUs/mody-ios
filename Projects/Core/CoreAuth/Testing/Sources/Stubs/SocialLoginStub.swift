@@ -1,20 +1,17 @@
 //
-//  SignInSocialLoginStub.swift
-//  SignInTesting
+//  SocialLoginStub.swift
+//  CoreAuthTesting
 //
-//  Created by 김동준 on 10/1/26.
+//  Created by 김동준 on 10/8/26.
 //
 
 import CoreAuthInterface
 
-public struct SignInSocialLoginStub: SocialLoginInterface {
+public struct SocialLoginStub: SocialLoginInterface {
     private let result: Result<String?, Error>
     private let responseDelay: Duration
 
-    public init(
-        result: Result<String?, Error>,
-        responseDelay: Duration = .zero
-    ) {
+    public init(result: Result<String?, Error>, responseDelay: Duration = .zero) {
         self.result = result
         self.responseDelay = responseDelay
     }

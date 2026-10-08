@@ -15,18 +15,10 @@ final class AppleSignDelegate: NSObject {
     init(continuation: CheckedContinuation<String, Error>) {
         self.continuation = continuation
     }
-}
 
-extension AppleSignDelegate: ASAuthorizationControllerDelegate {
-    func authorizationController(
-        controller: ASAuthorizationController,
-        didCompleteWithAuthorization authorization: ASAuthorization
-    ) {
-        guard
-            let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-            let identityToken = credential.identityToken,
-            let token = String(data: identityToken, encoding: .utf8)
-        else {
+    func completeSignIn(identityToken: Data?) {
+        guard let identityToken,
+              let token = String(data: identityToken, encoding: .utf8) else {
             continuation?.resume(throwing: CoreAuthErrorModel.unKnownError)
             continuation = nil
             return
@@ -34,6 +26,16 @@ extension AppleSignDelegate: ASAuthorizationControllerDelegate {
 
         continuation?.resume(returning: token)
         continuation = nil
+    }
+}
+
+extension AppleSignDelegate: ASAuthorizationControllerDelegate {
+    func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithAuthorization authorization: ASAuthorization
+    ) {
+        let credential = authorization.credential as? ASAuthorizationAppleIDCredential
+        completeSignIn(identityToken: credential?.identityToken)
     }
 
     func authorizationController(

@@ -5,9 +5,9 @@
 //  Created by 김동준 on 9/29/26.
 //
 
+import CoreAuthTesting
 import Splash
 import SplashInterface
-import SplashTesting
 
 @MainActor
 final class SplashDemoDependencyContainer {
@@ -19,7 +19,7 @@ final class SplashDemoDependencyContainer {
                         scenario: scenario
                     )
                 ),
-                authUseCase: SplashAuthUseCaseStub(
+                authUseCase: AuthUseCaseStub(
                     userInfoResult: scenario.userInfoResult,
                     responseDelay: .milliseconds(700)
                 ),
