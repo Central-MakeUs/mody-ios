@@ -10,5 +10,6 @@ import ProjectDescriptionHelpers
 
 let project = Project.module(
     moduleType: .MicroFeature(.CoreCamera),
-    hasDemo: false
+    hasDemo: false,
+    hasTests: true
 )

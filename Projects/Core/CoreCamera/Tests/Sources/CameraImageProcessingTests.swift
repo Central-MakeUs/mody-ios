@@ -18,7 +18,7 @@ final class CameraImageProcessingTests: XCTestCase {
             .appendingPathExtension("png")
         defer { try? FileManager.default.removeItem(at: fileURL) }
 
-        let sourceImage = makeImage(size: CGSize(width: 300, height: 150))
+        let sourceImage = CameraImageFixture.image(size: CGSize(width: 300, height: 150))
         try XCTUnwrap(sourceImage.pngData()).write(to: fileURL)
 
         let thumbnail = try XCTUnwrap(
@@ -36,7 +36,7 @@ final class CameraImageProcessingTests: XCTestCase {
     func testCropUsesScaleOneAndNormalizedCoordinates() throws {
         let cropOutput = try XCTUnwrap(
             CameraImageCropper().crop(
-                image: makeImage(size: CGSize(width: 200, height: 100)),
+                image: CameraImageFixture.image(size: CGSize(width: 200, height: 100)),
                 selectionFrame: CGRect(x: 50, y: 25, width: 100, height: 50),
                 containerSize: CGSize(width: 200, height: 100)
             )
@@ -53,7 +53,7 @@ final class CameraImageProcessingTests: XCTestCase {
     func testAspectFitCropIgnoresLetterboxedArea() throws {
         let cropOutput = try XCTUnwrap(
             CameraImageCropper().crop(
-                image: makeImage(size: CGSize(width: 300, height: 600)),
+                image: CameraImageFixture.image(size: CGSize(width: 300, height: 600)),
                 selectionFrame: CGRect(x: 0, y: 200, width: 300, height: 200),
                 containerSize: CGSize(width: 300, height: 800),
                 displayMode: .aspectFit
@@ -68,13 +68,13 @@ final class CameraImageProcessingTests: XCTestCase {
 
     @MainActor
     func testCropDisabledReturnsExistingPreviewAndFullFrame() throws {
-        let previewImage = makeImage(size: CGSize(width: 300, height: 150))
+        let previewImage = CameraImageFixture.image(size: CGSize(width: 300, height: 150))
         var capturedResult: CameraCaptureResult?
         let viewController = CameraContainerViewController(
             initialSource: .photoLibrary,
             isCropEnabled: false,
             capturedPhotoProcessor: CameraCapturedPhotoProcessor(
-                temporaryImageFileUseCase: CameraTemporaryImageFileUseCaseStub(),
+                temporaryImageFileUseCase: CameraTemporaryImageFileSpy(),
                 previewMaxPixelSize: CameraContainerViewController.previewMaxPixelSize
             ),
             onEvent: { _ in },
@@ -103,35 +103,4 @@ final class CameraImageProcessingTests: XCTestCase {
             CGRect(x: 0, y: 0, width: 1, height: 1)
         )
     }
-}
-
-private extension CameraImageProcessingTests {
-    func makeImage(size: CGSize) -> UIImage {
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        return UIGraphicsImageRenderer(size: size, format: format).image { context in
-            UIColor.systemOrange.setFill()
-            context.fill(CGRect(origin: .zero, size: size))
-        }
-    }
-}
-
-private struct CameraTemporaryImageFileUseCaseStub: TemporaryImageFileUseCaseProtocol {
-    func saveImage(
-        data: Data,
-        fileName: String
-    ) throws -> TemporaryImageFile {
-        throw CocoaError(.featureUnsupported)
-    }
-
-    func copyImage(
-        at sourceURL: URL,
-        fileName: String
-    ) throws -> TemporaryImageFile {
-        throw CocoaError(.featureUnsupported)
-    }
-
-    func removeImage(at fileURL: URL) throws {}
-
-    func removeExpiredImages(olderThan expirationInterval: TimeInterval) throws {}
 }

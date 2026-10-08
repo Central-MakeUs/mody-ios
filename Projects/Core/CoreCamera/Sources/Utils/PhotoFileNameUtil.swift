@@ -10,27 +10,35 @@ import Photos
 import PhotosUI
 
 struct PhotoFileNameUtil {
-    static func makeCameraFileName() -> String {
-        makeGeneratedFileName(prefix: "MODY_PHOTO")
+    static func makeCameraFileName(date: Date = Date(), identifier: UUID = UUID()) -> String {
+        makeGeneratedFileName(prefix: "MODY_PHOTO", date: date, identifier: identifier)
     }
 
     static func makePhotoLibraryFileName(from result: PHPickerResult) -> String {
-        if let originalFileName = fetchOriginalFileName(from: result) {
-            return originalFileName
-        }
+        makePhotoLibraryFileName(originalFileName: fetchOriginalFileName(from: result))
+    }
 
-        return makeGeneratedFileName(prefix: "MODY_PHOTO_LIBRARY")
+    static func makePhotoLibraryFileName(
+        originalFileName: String?,
+        date: Date = Date(),
+        identifier: UUID = UUID()
+    ) -> String {
+        originalFileName ?? makeGeneratedFileName(prefix: "MODY_PHOTO_LIBRARY", date: date, identifier: identifier)
+    }
+
+    static func preferredFileName(resources: [(type: PHAssetResourceType, name: String)]) -> String? {
+        resources.first { $0.type == .photo || $0.type == .fullSizePhoto }?.name ?? resources.first?.name
     }
 }
 
 private extension PhotoFileNameUtil {
-    static func makeGeneratedFileName(prefix: String) -> String {
+    static func makeGeneratedFileName(prefix: String, date: Date, identifier: UUID) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyyMMdd_HHmmss"
 
-        let timestamp = formatter.string(from: Date())
-        let suffix = UUID().uuidString.prefix(6).uppercased()
+        let timestamp = formatter.string(from: date)
+        let suffix = identifier.uuidString.prefix(6).uppercased()
         return "\(prefix)_\(timestamp)_\(suffix).jpg"
     }
 
@@ -44,8 +52,6 @@ private extension PhotoFileNameUtil {
         guard let asset = fetchResult.firstObject else { return nil }
 
         let resources = PHAssetResource.assetResources(for: asset)
-        return resources.first {
-            $0.type == .photo || $0.type == .fullSizePhoto
-        }?.originalFilename ?? resources.first?.originalFilename
+        return preferredFileName(resources: resources.map { ($0.type, $0.originalFilename) })
     }
 }
