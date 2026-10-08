@@ -6,6 +6,7 @@
 //
 
 import CoreNetworkInterface
+import SplashTesting
 
 final class CoreNetworkSpy: CoreNetworkProtocol {
     private(set) var requestedEndpoints: [CoreNetworkEndpoint] = []
@@ -15,7 +16,7 @@ final class CoreNetworkSpy: CoreNetworkProtocol {
     ) async throws -> Response {
         requestedEndpoints.append(endpoint)
         guard let response = CoreNetworkResponse<[String: String]>() as? Response else {
-            throw SplashTestError.expectedFailure
+            throw SplashTestingError.expectedFailure
         }
         return response
     }

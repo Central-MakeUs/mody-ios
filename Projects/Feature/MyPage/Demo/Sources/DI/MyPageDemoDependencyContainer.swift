@@ -5,8 +5,6 @@
 //  Created by 김동준 on 10/4/26.
 //
 
-import CommonDomain
-import CoreAuthTesting
 import CoreModyImage
 import MyPage
 import MyPageInterface
@@ -15,19 +13,7 @@ import MyPageInterface
 final class MyPageDemoDependencyContainer {
     func makeBuilder(for scenario: MyPageScenario) -> MyPageBuildable {
         let profileData = MyPageDemoProfileData()
-        let auth = AuthUseCaseStub(
-            signIn: { _, _ in throw CancellationError() },
-            getUserInfo: { _ in
-                if scenario == .userLookupFailure { throw NetworkError.networkUnavailable }
-                return UserInfoFixture.make(nickname: await profileData.name, daysTogether: 20)
-            },
-            logout: {
-                if scenario == .logoutFailure { throw NetworkError.networkUnavailable }
-            },
-            deleteAccount: {
-                if scenario == .deleteFailure { throw NetworkError.networkUnavailable }
-            }
-        )
+        let auth = MyPageDemoAuthStub(scenario: scenario, profileData: profileData)
         let myPageUseCase = MyPageUseCase(
             myPageRepository: MyPageDemoRepositoryStub(
                 scenario: scenario,

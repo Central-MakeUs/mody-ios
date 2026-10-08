@@ -6,10 +6,10 @@
 //
 
 import CommonDomain
-import CoreAuthTesting
 import CoreKeyChainStorageInterface
 import CoreNetworkInterface
 import FirebaseServiceInterface
+import SplashTesting
 import XCTest
 @testable import Splash
 
@@ -28,7 +28,7 @@ final class SplashRepositoryTests: XCTestCase {
     }
 
     func testFetchAndActivateIgnoresFirebaseFailure() async {
-        let firebase = FirebaseServiceSpy(fetchError: SplashTestError.expectedFailure)
+        let firebase = FirebaseServiceSpy(fetchError: SplashTestingError.expectedFailure)
         let repository = makeRepository(firebase: firebase)
 
         await repository.fetchAndActivate()
@@ -70,10 +70,8 @@ final class SplashRepositoryTests: XCTestCase {
 
         XCTAssertEqual(
             repository.getStoredAuthSession(),
-            AuthSessionFixture.make(
+            SplashAuthSessionFixture.make(
                 id: 0,
-                accessToken: "access-token",
-                refreshToken: "refresh-token",
                 mainAccessible: false,
                 socialLoginType: .apple
             )

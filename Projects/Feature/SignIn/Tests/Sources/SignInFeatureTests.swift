@@ -8,8 +8,8 @@
 import CommonDomain
 import ComposableArchitecture
 import CoreAuthInterface
-import CoreAuthTesting
 import SignInInterface
+import SignInTesting
 import XCTest
 @testable import SignIn
 
@@ -85,7 +85,7 @@ final class SignInFeatureTests: XCTestCase {
         let router = SignInRouterSpy()
         let auth = SignInAuthUseCaseSpy()
         let store = makeStore(initialState: state, authUseCase: auth, router: router)
-        let session = AuthSessionFixture.make()
+        let session = SignInAuthSessionFixture.make()
 
         await store.send(.demoLoginConfirmButtonTapped) {
             $0.demoLoginPassword = ""
@@ -113,7 +113,7 @@ final class SignInFeatureTests: XCTestCase {
         ]
 
         for testCase in cases {
-            let session = AuthSessionFixture.make(
+            let session = SignInAuthSessionFixture.make(
                 personalInfoCompleted: testCase.personal,
                 mainAccessible: testCase.main,
                 groupOnboardingCompleted: testCase.group
@@ -133,7 +133,7 @@ final class SignInFeatureTests: XCTestCase {
         let router = SignInRouterSpy()
         let auth = SignInAuthUseCaseSpy()
         let store = makeStore(authUseCase: auth, router: router)
-        let session = AuthSessionFixture.make()
+        let session = SignInAuthSessionFixture.make()
 
         await store.send(.kakaoLoginButtonTapped) {
             $0.isLoading = true
@@ -153,7 +153,7 @@ final class SignInFeatureTests: XCTestCase {
     func testAppleLoginUsesSocialTokenAndRoutesToMain() async {
         let auth = SignInAuthUseCaseSpy()
         let store = makeStore(authUseCase: auth)
-        let session = AuthSessionFixture.make()
+        let session = SignInAuthSessionFixture.make()
 
         await store.send(.appleLoginButtonTapped) {
             $0.isLoading = true
@@ -210,7 +210,7 @@ final class SignInFeatureTests: XCTestCase {
         initialState: SignInFeature.State = SignInFeature.State(),
         isDemoLoginEnabled: Bool = true,
         socialResult: Result<String?, Error> = .success("social-token"),
-        signInResult: Result<AuthSession, Error> = .success(AuthSessionFixture.make()),
+        signInResult: Result<AuthSession, Error> = .success(SignInAuthSessionFixture.make()),
         authUseCase: AuthUseCaseProtocol? = nil,
         router: SignInRouterSpy? = nil
     ) -> TestStoreOf<SignInFeature> {
@@ -220,10 +220,10 @@ final class SignInFeatureTests: XCTestCase {
                 signInUseCase: SignInUseCase(
                     signInRepository: SignInRepositoryStub(isEnabled: isDemoLoginEnabled)
                 ),
-                socialLoginUseCase: SocialLoginStub(result: socialResult),
-                authUseCase: authUseCase ?? AuthUseCaseStub(
+                socialLoginUseCase: SignInSocialLoginStub(result: socialResult),
+                authUseCase: authUseCase ?? SignInAuthUseCaseStub(
                     signInResult: signInResult,
-                    userInfoResult: .success(UserInfoFixture.make())
+                    userInfoResult: .success(SignInUserInfoFixture.make())
                 ),
                 router: router.route
             )

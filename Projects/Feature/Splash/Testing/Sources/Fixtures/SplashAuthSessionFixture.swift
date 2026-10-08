@@ -1,21 +1,21 @@
 //
-//  AuthSessionFixture.swift
-//  CoreAuthTesting
+//  SplashAuthSessionFixture.swift
+//  SplashTesting
 //
-//  Created by 김동준 on 10/8/26.
+//  Created by 김동준 on 9/29/26.
 //
 
 import CommonDomain
 
-public enum AuthSessionFixture {
+public enum SplashAuthSessionFixture {
     public static func make(
         id: Int = 1,
-        accessToken: String = "demo-access-token",
-        refreshToken: String = "demo-refresh-token",
+        accessToken: String = "access-token",
+        refreshToken: String = "refresh-token",
         personalInfoCompleted: Bool = true,
         mainAccessible: Bool = true,
         groupOnboardingCompleted: Bool = true,
-        socialLoginType: SocialLoginType? = nil
+        socialLoginType: SocialLoginType? = .kakao
     ) -> AuthSession {
         AuthSession(
             id: id,

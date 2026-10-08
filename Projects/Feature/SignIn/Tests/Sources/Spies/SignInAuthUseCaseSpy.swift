@@ -7,18 +7,18 @@
 
 import CommonDomain
 import CoreAuthInterface
-import CoreAuthTesting
+import SignInTesting
 
 final class SignInAuthUseCaseSpy: AuthUseCaseProtocol {
     private(set) var signInRequests: [(loginType: SocialLoginType, accessToken: String)] = []
 
     func signIn(loginType: SocialLoginType, accessToken: String) async throws -> AuthSession {
         signInRequests.append((loginType, accessToken))
-        return AuthSessionFixture.make()
+        return SignInAuthSessionFixture.make()
     }
 
     func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo {
-        UserInfoFixture.make()
+        SignInUserInfoFixture.make()
     }
 
     func logout() async throws {}

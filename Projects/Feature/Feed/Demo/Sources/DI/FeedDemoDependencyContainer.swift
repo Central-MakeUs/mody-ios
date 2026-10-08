@@ -5,8 +5,7 @@
 //  Created by 김동준 on 10/5/26.
 //
 
-import CommonDomain
-import CoreAuthTesting
+import CoreAuthInterface
 import CoreCamera
 import CoreCameraInterface
 import CoreModyImage
@@ -25,15 +24,7 @@ final class FeedDemoDependencyContainer {
         let feedUseCase = FeedUseCase(
             feedRepository: repository
         )
-        let authUseCase = AuthUseCaseStub(
-            signInResult: .failure(CancellationError()),
-            userInfoResult: .success(UserInfoFixture.make(
-                memberId: 100, nickname: "내 기록", profileImageUrl: "", daysTogether: 1
-            )),
-            logoutResult: .success(()),
-            deleteAccountResult: .success(()),
-            responseDelay: .milliseconds(500)
-        )
+        let authUseCase: AuthUseCaseProtocol = FeedDemoAuthUseCaseStub()
         let groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCaseStub(scenario: scenario)
         let imageUploadUseCase: ImageUploadUseCaseProtocol = FeedDemoImageUploadUseCaseStub(scenario: scenario)
         let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = TemporaryImageFileUseCase(

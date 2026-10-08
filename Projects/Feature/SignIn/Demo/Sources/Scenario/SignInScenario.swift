@@ -6,7 +6,7 @@
 //
 
 import CommonDomain
-import CoreAuthTesting
+import SignInTesting
 
 enum SignInScenario: String, CaseIterable, Hashable, Identifiable {
     case onboardingRequired
@@ -155,29 +155,29 @@ enum SignInScenario: String, CaseIterable, Hashable, Identifiable {
         case .profileLookupFailure:
             .failure(NetworkError.networkUnavailable)
         case .emptyNickname:
-            .success(UserInfoFixture.make(nickname: ""))
+            .success(SignInUserInfoFixture.make(nickname: ""))
         default:
-            .success(UserInfoFixture.make())
+            .success(SignInUserInfoFixture.make())
         }
     }
 
     private var authSession: AuthSession {
         switch self {
         case .onboardingRequired:
-            AuthSessionFixture.make(
+            SignInAuthSessionFixture.make(
                 personalInfoCompleted: false,
                 mainAccessible: false,
                 groupOnboardingCompleted: false
             )
         case .groupOnboardingRequired:
-            AuthSessionFixture.make(
+            SignInAuthSessionFixture.make(
                 mainAccessible: false,
                 groupOnboardingCompleted: false
             )
         case .groupEntry:
-            AuthSessionFixture.make(mainAccessible: false)
+            SignInAuthSessionFixture.make(mainAccessible: false)
         default:
-            AuthSessionFixture.make()
+            SignInAuthSessionFixture.make()
         }
     }
 }

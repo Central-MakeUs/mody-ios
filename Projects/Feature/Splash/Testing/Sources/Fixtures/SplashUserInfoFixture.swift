@@ -1,27 +1,25 @@
 //
-//  UserInfoFixture.swift
-//  CoreAuthTesting
+//  SplashUserInfoFixture.swift
+//  SplashTesting
 //
-//  Created by 김동준 on 10/8/26.
+//  Created by 김동준 on 9/29/26.
 //
 
 import CommonDomain
 
-public enum UserInfoFixture {
+public enum SplashUserInfoFixture {
     public static func make(
-        memberId: Int = 1,
+        memberID: Int = 1,
         nickname: String = "모디",
-        profileImageUrl: String? = nil,
-        daysTogether: Int = 0,
         personalInfoCompleted: Bool = true,
         groupOnboardingCompleted: Bool = true,
         mainAccessible: Bool = true
     ) -> UserInfo {
         UserInfo(
-            memberId: memberId,
+            memberId: memberID,
             nickname: nickname,
-            profileImageUrl: profileImageUrl,
-            daysTogether: daysTogether,
+            profileImageUrl: nil,
+            daysTogether: 0,
             personalInfoCompleted: personalInfoCompleted,
             groupOnboardingCompleted: groupOnboardingCompleted,
             mainAccessible: mainAccessible

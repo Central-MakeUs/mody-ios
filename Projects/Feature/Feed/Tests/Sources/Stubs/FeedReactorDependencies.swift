@@ -6,8 +6,23 @@
 //
 
 import CommonDomain
+import CoreAuthInterface
 import FeedInterface
 import ModyGroupInterface
+
+final class FeedAuthUseCaseStub: AuthUseCaseProtocol {
+    func signIn(loginType: SocialLoginType, accessToken: String) async throws -> AuthSession {
+        throw NetworkError.unknown
+    }
+
+    func getUserInfo(needUpdateKeyChain: Bool) async throws -> UserInfo {
+        throw NetworkError.unknown
+    }
+
+    func logout() async throws { throw NetworkError.unknown }
+
+    func deleteAccount() async throws { throw NetworkError.unknown }
+}
 
 final class FeedGroupUseCaseStub: GroupUseCaseProtocol {
     func createGroup(name: String) async throws -> String { throw NetworkError.unknown }

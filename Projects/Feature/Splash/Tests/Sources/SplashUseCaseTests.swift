@@ -6,7 +6,7 @@
 //
 
 import CommonDomain
-import CoreAuthTesting
+import SplashTesting
 import XCTest
 @testable import Splash
 
@@ -70,11 +70,7 @@ final class SplashUseCaseTests: XCTestCase {
     }
 
     func testForwardsRepositoryValues() async throws {
-        let session = AuthSessionFixture.make(
-            accessToken: "access-token",
-            refreshToken: "refresh-token",
-            socialLoginType: .kakao
-        )
+        let session = SplashAuthSessionFixture.make()
         let notice = NoticePopupInfo(
             title: "공지",
             contents: "내용",

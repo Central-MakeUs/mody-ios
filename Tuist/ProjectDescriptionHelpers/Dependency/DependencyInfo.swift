@@ -103,11 +103,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreKeyChainStorage),
                 .microFeature(.CoreAuth),
             ],
-            tests: [
-                .microFeatureTesting(.CoreAuth)
-            ],
-            demo: [
-                .microFeatureTesting(.CoreAuth)
+            testing: [
+                .microFeature(.CoreAuth),
             ]
         ),
         .SignIn: .init(
@@ -116,11 +113,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreAuth),
             ],
-            tests: [
-                .microFeatureTesting(.CoreAuth)
-            ],
-            demo: [
-                .microFeatureTesting(.CoreAuth)
+            testing: [
+                .microFeature(.CoreAuth),
             ]
         ),
         .OnBoarding: .init(
@@ -165,11 +159,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.ReactorKit),
                 .external(.RxCocoa),
             ],
-            tests: [
-                .microFeatureTesting(.CoreAuth)
-            ],
             demo: [
-                .microFeatureTesting(.CoreAuth),
                 .module(.MicroFeature(.CoreCamera)),
                 .module(.MicroFeature(.CoreModyImage))
             ]
@@ -197,11 +187,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreHealth),
             ],
-            tests: [
-                .microFeatureTesting(.CoreAuth)
+            testing: [
+                .microFeature(.CoreAuth)
             ],
             demo: [
-                .microFeatureTesting(.CoreAuth),
                 .module(.MicroFeature(.CoreModyImage))
             ]
         ),
@@ -218,11 +207,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreHealth)
             ],
-            tests: [
-                .microFeatureTesting(.CoreAuth)
-            ],
             demo: [
-                .microFeatureTesting(.CoreAuth),
                 .module(.MicroFeature(.CoreModyImage))
             ]
         ),

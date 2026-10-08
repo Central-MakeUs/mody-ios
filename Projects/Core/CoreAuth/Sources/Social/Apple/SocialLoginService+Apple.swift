@@ -20,7 +20,7 @@ extension SocialLoginService {
             let controller = ASAuthorizationController(authorizationRequests: [request])
             appleSignDelegate = AppleSignDelegate(continuation: continuation)
             controller.delegate = appleSignDelegate
-            performAppleRequest(controller)
+            controller.performRequests()
         }
     }
 }
