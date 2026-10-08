@@ -6,34 +6,10 @@
 //
 
 import CommonDomain
-import CoreHealthInterface
 import CoreModyImage
 import CoreModyImageInterface
 import Foundation
 import UIKit
-
-struct ChallengeDemoHealthStub: HealthUseCaseProtocol {
-    private let scenario: ChallengeDemoScenario
-    private let data: ChallengeDemoData
-
-    init(scenario: ChallengeDemoScenario, data: ChallengeDemoData) {
-        self.scenario = scenario
-        self.data = data
-    }
-
-    func getStepCount(from startDate: Date, to endDate: Date) async throws -> Int {
-        try await Task.sleep(for: .milliseconds(500))
-        if scenario == .stepCompetition || scenario == .stepLive {
-            return await data.simulatedSelfStepCount(for: scenario)
-        }
-        return 3_400
-    }
-
-    func getCurrentMonthStepCount() async throws -> Int {
-        try await Task.sleep(for: .milliseconds(500))
-        return 42_000
-    }
-}
 
 struct ChallengeDemoImageStub: ImageUploadUseCaseProtocol, TemporaryImageFileUseCaseProtocol {
     private let scenario: ChallengeDemoScenario
