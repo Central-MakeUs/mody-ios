@@ -15,7 +15,10 @@ public extension Project {
     ) -> Project {
         Project.implements(
             name: moduleType.name,
-            targets: moduleType.targets(hasDemo: hasDemo),
+            targets: moduleType.targets(
+                hasDemo: hasDemo,
+                hasTests: hasTests
+            ),
             schemes: moduleType.schemes(
                 hasDemo: hasDemo,
                 hasTests: hasTests
