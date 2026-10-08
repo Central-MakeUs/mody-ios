@@ -8,6 +8,7 @@
 import CommonDomain
 import CoreAuthTesting
 import CoreCameraTesting
+import CoreHealthTesting
 import UIKit
 import CoreModyImage
 import MyPage
@@ -87,8 +88,9 @@ final class MyPageDemoDependencyContainer {
             },
             makeHealthDataSettingsFeature: { router in
                 HealthDataSettingsFeature(
-                    healthPermissionInterface: MyPageDemoHealthPermissionStub(
-                        shouldRequest: scenario == .healthPermissionPrompt
+                    healthPermissionInterface: HealthPermissionStub(
+                        shouldShowPrompt: scenario == .healthPermissionPrompt,
+                        requestResult: true
                     ),
                     router: { router.route(from: $0) }
                 )
