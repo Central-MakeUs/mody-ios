@@ -5,6 +5,9 @@
 //  Created by 김동준 on 10/4/26.
 //
 
+import CoreNetworkInterface
+import CoreNetworkTesting
+import Foundation
 import CommonDomain
 import ModyGroupInterface
 
@@ -161,3 +164,23 @@ enum ModyGroupScenario: String, CaseIterable, Hashable, Identifiable {
 }
 
 private struct ModyGroupDemoUnexpectedError: Error {}
+
+extension ModyGroupScenario {
+    func networkResponse(to endpoint: CoreNetworkEndpoint) async throws -> Data {
+        switch (endpoint.method, endpoint.path) {
+        case (.POST, "api/v1/groups"):
+            try await Task.sleep(for: .milliseconds(500))
+            return try CoreNetworkJSONFixture.response(result: ["code": self.createResult.get()])
+        case (.POST, "api/v1/groups/join"):
+            try await Task.sleep(for: .milliseconds(500))
+            try self.joinResult.get()
+            return try CoreNetworkJSONFixture.response(result: [String: Any]())
+        case (.GET, "api/v1/groups"):
+            return try CoreNetworkJSONFixture.response(result: ["groups": [Any]()])
+        case (.DELETE, _) where endpoint.path.hasPrefix("api/v1/groups/") && endpoint.path.hasSuffix("/members/me"):
+            return try CoreNetworkJSONFixture.response()
+        default:
+            throw URLError(.unsupportedURL)
+        }
+    }
+}

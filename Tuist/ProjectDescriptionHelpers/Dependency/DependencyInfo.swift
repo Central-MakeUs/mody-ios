@@ -107,6 +107,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeatureTesting(.CoreAuth)
             ],
             demo: [
+                .microFeatureTesting(.CoreNetwork),
                 .microFeatureTesting(.CoreAuth)
             ]
         ),
@@ -135,6 +136,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNotification),
             ],
             demo: [
+                .microFeatureTesting(.CoreNetwork),
                 .microFeatureTesting(.CoreCamera),
                 .microFeatureTesting(.CoreHealth)
             ]
@@ -152,6 +154,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.Base),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreKakao),
+            ],
+            demo: [
+                .microFeatureTesting(.CoreNetwork)
             ]
         ),
         .Feed: .init(
@@ -171,6 +176,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeatureTesting(.CoreAuth)
             ],
             demo: [
+                .microFeatureTesting(.CoreNetwork),
                 .microFeatureTesting(.CoreModyImage),
                 .microFeatureTesting(.CoreAuth),
                 .module(.MicroFeature(.CoreCamera)),
@@ -205,6 +211,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeatureTesting(.CoreAuth)
             ],
             demo: [
+                .microFeatureTesting(.CoreNetwork),
                 .microFeatureTesting(.CoreModyImage),
                 .microFeatureTesting(.CoreAuth),
                 .microFeatureTesting(.CoreCamera),
@@ -229,6 +236,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeatureTesting(.CoreAuth)
             ],
             demo: [
+                .microFeatureTesting(.CoreNetwork),
                 .microFeatureTesting(.CoreModyImage),
                 .microFeatureTesting(.CoreAuth),
                 .microFeatureTesting(.CoreCamera),

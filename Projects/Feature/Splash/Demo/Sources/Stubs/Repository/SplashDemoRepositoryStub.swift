@@ -6,24 +6,23 @@
 //
 
 import CommonDomain
+import CoreNetworkInterface
 import Splash
 
 struct SplashDemoRepositoryStub: SplashRepositoryProtocol {
     private let scenario: SplashScenario
+    private let network: CoreNetworkProtocol
 
-    init(scenario: SplashScenario) {
+    init(scenario: SplashScenario, network: CoreNetworkProtocol) {
         self.scenario = scenario
+        self.network = network
     }
 
     func getHealthCheck() async throws -> Bool {
-        switch scenario {
-        case .serverUnstable:
-            false
-        case .healthCheckFailure:
-            throw SplashDemoRepositoryError.healthCheckFailed
-        default:
-            true
-        }
+        let _: CoreNetworkResponse<[String: String]> = try await network.request(
+            CoreNetworkEndpoint(path: "health", requiresAuthorization: false)
+        )
+        return scenario != .serverUnstable
     }
 
     func fetchAndActivate() async {
@@ -68,8 +67,4 @@ struct SplashDemoRepositoryStub: SplashRepositoryProtocol {
             for: .milliseconds(700)
         )
     }
-}
-
-private enum SplashDemoRepositoryError: Error {
-    case healthCheckFailed
 }

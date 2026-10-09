@@ -20,12 +20,13 @@ final class CoreNetworkTokenRefresher {
         baseURL: URL,
         refreshTokenEndpoint: CoreNetworkEndpoint,
         tokenStore: CoreTokenStorage,
-        decoder: JSONDecoder
+        decoder: JSONDecoder,
+        session: Session? = nil
     ) {
         self.baseURL = baseURL
         self.refreshTokenEndpoint = refreshTokenEndpoint
         self.tokenStore = tokenStore
-        self.session = Session(eventMonitors: [CoreNetworkEventMonitor()])
+        self.session = session ?? Session(eventMonitors: [CoreNetworkEventMonitor()])
         self.decoder = decoder
     }
 

@@ -25,46 +25,24 @@ struct MyPageDemoNotificationPermissionStub: NotificationPermissionInterface {
     func requestNotificationPermission() async -> Bool { true }
 }
 
-struct MyPageDemoNotificationRepositoryStub: MyPageNotificationSettingRepositoryProtocol {
-    private let scenario: MyPageScenario
+struct MyPageDemoNotificationRepository: MyPageNotificationSettingRepositoryProtocol {
+    private let repository: MyPageNotificationSettingRepository
 
-    init(scenario: MyPageScenario) {
-        self.scenario = scenario
+    init(repository: MyPageNotificationSettingRepository) {
+        self.repository = repository
     }
 
     func getNotificationSettings() async throws -> NotificationSettingState {
-        if scenario == .notificationLookupFailure {
-            throw NetworkError.networkUnavailable
-        }
-        return NotificationSettingState(
-            mealAndExerciseEnabled: scenario != .notificationSaveDisabled,
-            commentNotificationEnabled: true,
-            challengeNotificationEnabled: true,
-            mealSchedules: MealType.allCases.map {
-                MealScheduleRequest(mealType: $0, time: "09:00", skipped: false)
-            },
-            exerciseSchedules: [
-                ExerciseScheduleRequest(dayOfWeek: .monday, time: "09:00")
-            ]
-        )
+        try await repository.getNotificationSettings()
     }
 
-    func patchNotificationSettings(
-        _ notificationSetting: NotificationSettingState
-    ) async throws -> NotificationSettingState {
-        try await Task.sleep(for: .milliseconds(500))
-        if scenario == .notificationToggleFailure {
-            throw NetworkError.networkUnavailable
-        }
+    func patchNotificationSettings(_ notificationSetting: NotificationSettingState) async throws -> NotificationSettingState {
+        _ = try await repository.patchNotificationSettings(notificationSetting)
+        // Demo의 토글 변경은 아직 저장하지 않은 일정 입력을 유지한다.
         return notificationSetting
     }
 
-    func putSchedules(
-        mealSchedules: [MealScheduleRequest],
-        exerciseSchedules: [ExerciseScheduleRequest]
-    ) async throws {
-        if scenario == .notificationSaveFailure {
-            throw NetworkError.networkUnavailable
-        }
+    func putSchedules(mealSchedules: [MealScheduleRequest], exerciseSchedules: [ExerciseScheduleRequest]) async throws {
+        try await repository.putSchedules(mealSchedules: mealSchedules, exerciseSchedules: exerciseSchedules)
     }
 }
