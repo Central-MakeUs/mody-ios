@@ -104,11 +104,13 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreAuth),
             ],
             tests: [
-                .microFeatureTesting(.CoreAuth)
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
             ],
             demo: [
                 .microFeatureTesting(.CoreNetwork),
-                .microFeatureTesting(.CoreAuth)
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
             ]
         ),
         .SignIn: .init(
@@ -118,10 +120,12 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreAuth),
             ],
             tests: [
-                .microFeatureTesting(.CoreAuth)
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
             ],
             demo: [
-                .microFeatureTesting(.CoreAuth)
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
             ]
         ),
         .OnBoarding: .init(

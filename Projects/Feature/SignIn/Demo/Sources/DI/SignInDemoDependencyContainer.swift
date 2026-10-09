@@ -6,6 +6,8 @@
 //
 
 import CoreAuthTesting
+import CommonDomain
+import FirebaseServiceTesting
 import SignIn
 import SignInInterface
 
@@ -15,8 +17,10 @@ final class SignInDemoDependencyContainer {
         SignInBuilder { router in
             SignInFeature(
                 signInUseCase: SignInUseCase(
-                    signInRepository: SignInDemoRepositoryStub(
-                        isDemoLoginEnabled: scenario.isDemoLoginEnabled
+                    signInRepository: SignInRepository(
+                        firebaseService: FirebaseServiceStub(
+                            bools: [RemoteConfigKeys.guestLogin.rawValue: scenario.isDemoLoginEnabled]
+                        )
                     )
                 ),
                 socialLoginUseCase: SocialLoginStub(

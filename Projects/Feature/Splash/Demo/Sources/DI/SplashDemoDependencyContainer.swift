@@ -7,6 +7,7 @@
 
 import CoreAuthTesting
 import CoreNetworkTesting
+import FirebaseServiceTesting
 import Splash
 import SplashInterface
 
@@ -20,7 +21,8 @@ final class SplashDemoDependencyContainer {
                         scenario: scenario,
                         network: CoreNetworkStub { endpoint in
                             try scenario.networkResponse(to: endpoint)
-                        }
+                        },
+                        firebaseService: scenario.firebaseService
                     )
                 ),
                 authUseCase: AuthUseCaseStub(
