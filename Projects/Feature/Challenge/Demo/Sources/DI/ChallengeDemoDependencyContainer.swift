@@ -11,6 +11,9 @@ import CommonDomain
 import CoreAuthTesting
 import CoreCameraTesting
 import CoreHealthTesting
+import CoreModyImage
+import CoreModyImageInterface
+import CoreModyImageTesting
 import UIKit
 
 @MainActor
@@ -24,7 +27,29 @@ final class ChallengeDemoDependencyContainer {
             userInfoResult: scenario == .authFailure ? .failure(NetworkError.networkUnavailable) : .success(userInfo),
             responseDelay: .milliseconds(500)
         )
-        let imageUseCase = ChallengeDemoImageStub(scenario: scenario)
+        let imageUpload = ImageUploadUseCaseStub(
+            result: scenario == .weeklyUploadFailure
+                ? .failure(NetworkError.networkUnavailable) : .success("challenge-demo-proof"),
+            responseDelay: .milliseconds(500)
+        )
+        let temporaryFiles = TemporaryImageFileUseCaseStub.metadataOnly()
+        let imageLoader = NukeRemoteImageLoader()
+        let remoteImages = RemoteImageLoaderStub(loadImage: { request in
+            let resource: String
+            switch request.url.lastPathComponent {
+            case "donggyu.jpg": resource = "ChallengeDemoDonggyu"
+            case "dongjun.jpg", "mine.jpg": resource = "ChallengeDemoDongjun"
+            default: resource = "ChallengeDemoWalking"
+            }
+            let fileExtension = resource == "ChallengeDemoWalking" ? "jpg" : "png"
+            guard let url = Bundle.main.url(forResource: resource, withExtension: fileExtension) else {
+                throw CocoaError(.fileNoSuchFile)
+            }
+            return try await imageLoader.loadImage(with: RemoteImageRequest(
+                url: url, variantIdentifier: request.variantIdentifier,
+                maximumPixelSize: request.maximumPixelSize, processing: request.processing
+            ))
+        }, responseDelay: .milliseconds(500))
         let healthUseCase = HealthUseCaseStub(
             getStepCount: { _, _ in
                 if scenario == .stepCompetition || scenario == .stepLive {
@@ -56,13 +81,13 @@ final class ChallengeDemoDependencyContainer {
                 ChallengeWeeklyDetailFeature(
                     authUseCase: authUseCase,
                     challengeUseCase: challengeUseCase,
-                    imageUploadUseCase: imageUseCase,
-                    temporaryImageFileUseCase: imageUseCase,
+                    imageUploadUseCase: imageUpload,
+                    temporaryImageFileUseCase: temporaryFiles,
                     router: { [weak router] in router?.route(from: $0) },
                     output: { [weak output] in output?.handle(output: $0) }
                 )
             },
-            imageLoader: ChallengeDemoImageLoader(),
+            imageLoader: remoteImages,
             cameraCaptureBuilder: CameraCaptureBuilderStub {
                 let image = Bundle.main.url(forResource: "ChallengeDemoDongjun", withExtension: "png")
                     .flatMap { UIImage(contentsOfFile: $0.path) } ?? UIImage()
