@@ -5,22 +5,20 @@
 //
 
 import CoreNetworkInterface
+import CoreNetworkTesting
 
 actor CoreTokenStorageSpy: CoreTokenStorage {
-    private var access: String?
-    private var refresh: String?
+    private let storage: CoreTokenStorageStub
     private(set) var savedTokens: [(String, String?)] = []
 
     init(access: String? = "old-access", refresh: String? = "old-refresh") {
-        self.access = access
-        self.refresh = refresh
+        storage = CoreTokenStorageStub(accessToken: access, refreshToken: refresh)
     }
 
-    func accessToken() -> String? { access }
-    func refreshToken() -> String? { refresh }
-    func save(accessToken: String, refreshToken: String?) {
+    func accessToken() async -> String? { await storage.accessToken() }
+    func refreshToken() async -> String? { await storage.refreshToken() }
+    func save(accessToken: String, refreshToken: String?) async {
         savedTokens.append((accessToken, refreshToken))
-        access = accessToken
-        if let refreshToken { refresh = refreshToken }
+        await storage.save(accessToken: accessToken, refreshToken: refreshToken)
     }
 }

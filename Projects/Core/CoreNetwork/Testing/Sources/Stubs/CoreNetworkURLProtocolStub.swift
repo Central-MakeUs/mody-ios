@@ -1,32 +1,32 @@
 //  CoreNetworkURLProtocolStub.swift
-//  CoreNetworkTests
+//  CoreNetworkTesting
 //
 //  Created by 김동준 on 10/9/26.
 //
 
 import Foundation
 
-final class CoreNetworkURLProtocolStub: URLProtocol {
-    typealias Handler = (URLRequest) throws -> (Int, Data)
+public final class CoreNetworkURLProtocolStub: URLProtocol {
+    public typealias Handler = (URLRequest) throws -> (Int, Data)
     private static let lock = NSLock()
     private static var handlers: [String: Handler] = [:]
 
-    static func register(host: String, handler: @escaping Handler) {
+    public static func register(host: String, handler: @escaping Handler) {
         lock.lock()
         defer { lock.unlock() }
         handlers[host] = handler
     }
 
-    static func unregister(host: String) {
+    public static func unregister(host: String) {
         lock.lock()
         defer { lock.unlock() }
         handlers[host] = nil
     }
 
-    override class func canInit(with request: URLRequest) -> Bool { true }
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    public override class func canInit(with request: URLRequest) -> Bool { true }
+    public override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
 
-    override func startLoading() {
+    public override func startLoading() {
         Self.lock.lock()
         let handler = Self.handlers[request.url?.host ?? ""]
         Self.lock.unlock()
@@ -43,5 +43,5 @@ final class CoreNetworkURLProtocolStub: URLProtocol {
         }
     }
 
-    override func stopLoading() {}
+    public override func stopLoading() {}
 }

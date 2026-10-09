@@ -5,6 +5,7 @@
 //  Created by 김동준 on 10/4/26.
 //
 
+import CoreNetworkTesting
 import ModyGroup
 import ModyGroupInterface
 
@@ -13,7 +14,9 @@ final class ModyGroupDemoDependencyContainer {
     func makeBuilder(for scenario: ModyGroupScenario) -> ModyGroupBuildable {
         ModyGroupBuilder { router, outputHandler in
             let groupUseCase = GroupUseCase(
-                groupRepository: ModyGroupDemoRepositoryStub(scenario: scenario)
+                groupRepository: GroupRepository(network: CoreNetworkStub { endpoint in
+                    try await scenario.networkResponse(to: endpoint)
+                })
             )
             return ModyGroupRootFeature(
                 groupInviteFeature: GroupInviteFeature(

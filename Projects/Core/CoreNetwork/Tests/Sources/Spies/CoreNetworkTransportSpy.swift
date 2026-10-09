@@ -5,6 +5,7 @@
 //
 
 import Alamofire
+import CoreNetworkTesting
 import Foundation
 
 final class CoreNetworkTransportSpy {
