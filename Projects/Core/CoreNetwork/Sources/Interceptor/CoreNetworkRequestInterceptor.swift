@@ -52,6 +52,12 @@ final class CoreNetworkRequestInterceptor: RequestInterceptor {
         dueTo error: Error,
         completion: @escaping (RetryResult) -> Void
     ) {
+        if let afError = error as? AFError,
+           case .requestRetryFailed = afError {
+            completion(.doNotRetry)
+            return
+        }
+
         guard
             request.retryCount == 0,
             request.response?.statusCode == 401,
