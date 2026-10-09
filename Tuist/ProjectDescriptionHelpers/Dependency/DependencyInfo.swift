@@ -132,13 +132,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreNotification),
                 .microFeature(.CoreHealth),
             ],
-            testing: [
-                .microFeature(.CoreNotification),
-            ],
             demo: [
                 .microFeatureTesting(.CoreNetwork),
                 .microFeatureTesting(.CoreCamera),
-                .microFeatureTesting(.CoreHealth)
+                .microFeatureTesting(.CoreHealth),
+                .microFeatureTesting(.CoreNotification)
             ]
         ),
         .SignUpDone: .init(
@@ -241,6 +239,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeatureTesting(.CoreAuth),
                 .microFeatureTesting(.CoreCamera),
                 .microFeatureTesting(.CoreHealth),
+                .microFeatureTesting(.CoreNotification),
                 .module(.MicroFeature(.CoreModyImage))
             ]
         ),
