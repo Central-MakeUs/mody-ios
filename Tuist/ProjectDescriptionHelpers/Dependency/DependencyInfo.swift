@@ -283,6 +283,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             implementation: [
                 .microFeature(.CoreKeyChainStorage),
                 .microFeature(.CoreNetwork)
+            ],
+            tests: [
+                .microFeatureTesting(.CoreNetwork)
             ]
         ),
         .CoreCamera: .init(
