@@ -171,6 +171,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeatureTesting(.CoreAuth)
             ],
             demo: [
+                .microFeatureTesting(.CoreModyImage),
                 .microFeatureTesting(.CoreAuth),
                 .module(.MicroFeature(.CoreCamera)),
                 .module(.MicroFeature(.CoreModyImage))
@@ -200,9 +201,11 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.CoreHealth),
             ],
             tests: [
+                .microFeatureTesting(.CoreModyImage),
                 .microFeatureTesting(.CoreAuth)
             ],
             demo: [
+                .microFeatureTesting(.CoreModyImage),
                 .microFeatureTesting(.CoreAuth),
                 .microFeatureTesting(.CoreCamera),
                 .microFeatureTesting(.CoreHealth),
@@ -226,6 +229,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeatureTesting(.CoreAuth)
             ],
             demo: [
+                .microFeatureTesting(.CoreModyImage),
                 .microFeatureTesting(.CoreAuth),
                 .microFeatureTesting(.CoreCamera),
                 .microFeatureTesting(.CoreHealth),

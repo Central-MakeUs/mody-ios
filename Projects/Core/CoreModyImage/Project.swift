@@ -10,5 +10,6 @@ import ProjectDescriptionHelpers
 
 let project = Project.module(
     moduleType: .MicroFeature(.CoreModyImage),
-    hasDemo: false
+    hasDemo: false,
+    hasTests: true
 )

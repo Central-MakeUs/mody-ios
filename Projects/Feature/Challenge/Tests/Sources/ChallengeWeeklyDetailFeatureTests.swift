@@ -11,6 +11,7 @@ import CoreAuthInterface
 import CoreAuthTesting
 import CoreCameraInterface
 import CoreModyImageInterface
+import CoreModyImageTesting
 import Foundation
 import UIKit
 import XCTest
@@ -141,7 +142,7 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
         state.photoCaptureSource = .photoLibrary
         state.weeklyChallengeImageInfos = []
         let store = makeWeeklyStore(
-            state: state, repository: repository, imageUseCase: image,
+            state: state, repository: repository, imageUploadUseCase: image, temporaryImageFileUseCase: image,
             output: { outputs.append($0) }
         )
         let result = cameraResult(crop: CGRect(x: -0.2, y: 0.25, width: 1.2, height: 0.5))
@@ -181,7 +182,7 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
         let image = ChallengeImageSpy(uploadResult: .failure(.networkUnavailable))
         var outputs: [ChallengeOutput] = []
         let store = makeWeeklyStore(
-            repository: repository, imageUseCase: image,
+            repository: repository, imageUploadUseCase: image, temporaryImageFileUseCase: image,
             output: { outputs.append($0) }
         )
         store.exhaustivity = .off(showSkippedAssertions: false)
@@ -204,7 +205,7 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
         let repository = ChallengeFeatureRepositorySpy()
         await repository.setProofCreateError(.serverUnavailable)
         let image = ChallengeImageSpy()
-        let store = makeWeeklyStore(repository: repository, imageUseCase: image)
+        let store = makeWeeklyStore(repository: repository, imageUploadUseCase: image, temporaryImageFileUseCase: image)
         store.exhaustivity = .off(showSkippedAssertions: false)
         let result = cameraResult()
 
@@ -296,7 +297,8 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
         state: ChallengeWeeklyDetailFeature.State = .init(groupId: 12, challengeId: 7, groupChallengeId: 34),
         repository: ChallengeFeatureRepositorySpy,
         authUseCase: AuthUseCaseProtocol = AuthUseCaseStub(userInfoResult: .failure(NetworkError.unknown)),
-        imageUseCase: ImageUploadUseCaseProtocol & TemporaryImageFileUseCaseProtocol = ChallengeImageDummy(),
+        imageUploadUseCase: ImageUploadUseCaseProtocol = ImageUploadUseCaseStub(),
+        temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = TemporaryImageFileUseCaseStub(),
         router: @escaping @MainActor (ChallengeWeeklyDetailRoute) -> Void = { _ in },
         output: @escaping @MainActor (ChallengeOutput) -> Void = { _ in }
     ) -> TestStoreOf<ChallengeWeeklyDetailFeature> {
@@ -304,33 +306,11 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
             ChallengeWeeklyDetailFeature(
                 authUseCase: authUseCase,
                 challengeUseCase: ChallengeUseCase(repository: repository),
-                imageUploadUseCase: imageUseCase,
-                temporaryImageFileUseCase: imageUseCase,
+                imageUploadUseCase: imageUploadUseCase,
+                temporaryImageFileUseCase: temporaryImageFileUseCase,
                 router: router,
                 output: output
             )
         }
-    }
-}
-
-private struct ChallengeImageDummy: ImageUploadUseCaseProtocol, TemporaryImageFileUseCaseProtocol {
-    func uploadImage(fileURL: URL, fileName: String, domain: ImageUploadDomain) async throws -> String {
-        XCTFail("Unexpected image upload")
-        throw NetworkError.unknown
-    }
-
-    func saveImage(data: Data, fileName: String) throws -> TemporaryImageFile {
-        XCTFail("Unexpected image save")
-        throw NetworkError.unknown
-    }
-
-    func copyImage(at sourceURL: URL, fileName: String) throws -> TemporaryImageFile {
-        XCTFail("Unexpected image copy")
-        throw NetworkError.unknown
-    }
-
-    func removeImage(at fileURL: URL) throws { XCTFail("Unexpected image removal") }
-    func removeExpiredImages(olderThan expirationInterval: TimeInterval) throws {
-        XCTFail("Unexpected image cleanup")
     }
 }

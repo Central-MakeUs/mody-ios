@@ -11,8 +11,10 @@ import CoreCamera
 import CoreCameraInterface
 import CoreModyImage
 import CoreModyImageInterface
+import CoreModyImageTesting
 import Feed
 import FeedInterface
+import Foundation
 import ModyGroupInterface
 
 @MainActor
@@ -35,7 +37,11 @@ final class FeedDemoDependencyContainer {
             responseDelay: .milliseconds(500)
         )
         let groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCaseStub(scenario: scenario)
-        let imageUploadUseCase: ImageUploadUseCaseProtocol = FeedDemoImageUploadUseCaseStub(scenario: scenario)
+        let imageLoader = NukeRemoteImageLoader()
+        let imageUploadUseCase: ImageUploadUseCaseProtocol = ImageUploadUseCaseStub(uploadImage: { _, fileName, domain in
+            if scenario == .uploadFailure { throw NetworkError.invalidResponse }
+            return "demo/\(domain.rawValue)/\(fileName)"
+        }, responseDelay: .milliseconds(500))
         let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = TemporaryImageFileUseCase(
             repository: TemporaryImageFileRepository()
         )
@@ -67,7 +73,17 @@ final class FeedDemoDependencyContainer {
             cameraCaptureBuilder: CameraCaptureBuilder(
                 temporaryImageFileUseCase: temporaryImageFileUseCase
             ),
-            imageLoader: FeedDemoImageLoaderStub()
+            imageLoader: RemoteImageLoaderStub(loadImage: { request in
+                let name = request.url.deletingLastPathComponent().lastPathComponent == "exercise"
+                    ? "FeedDemoExercise" : "FeedDemoMeal"
+                guard let url = Bundle.main.url(forResource: name, withExtension: "jpg") else {
+                    throw CocoaError(.fileNoSuchFile)
+                }
+                return try await imageLoader.loadImage(with: RemoteImageRequest(
+                    url: url, variantIdentifier: request.variantIdentifier,
+                    maximumPixelSize: request.maximumPixelSize, processing: request.processing
+                ))
+            }, responseDelay: .milliseconds(500))
         )
     }
 

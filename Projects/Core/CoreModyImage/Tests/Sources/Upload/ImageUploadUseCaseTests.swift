@@ -2,64 +2,72 @@
 //  ImageUploadUseCaseTests.swift
 //  CoreModyImageTests
 //
-//  Created by 김동준 on 7/26/26.
+//  Created by 김동준 on 10/9/26.
 //
 
+import CommonDomain
 import CoreModyImageInterface
 import Foundation
 import XCTest
 @testable import CoreModyImage
 
 final class ImageUploadUseCaseTests: XCTestCase {
-    func testProfileUploadAppliesInternal640PixelPolicy() async throws {
-        let repository = ImageUploadRepositoryMock()
+    private let sourceURL = URL(fileURLWithPath: "/tmp/original.heic")
+
+    func testProfileUploadConvertsOnlyFileNameAndUses640PixelPolicy() async throws {
+        let repository = ImageUploadRepositorySpy()
         let useCase = ImageUploadUseCase(repository: repository)
+        let result = try await useCase.uploadImage(fileURL: sourceURL, fileName: "my.profile.heic", domain: .profile)
 
-        _ = try await useCase.uploadImage(
-            fileURL: URL(fileURLWithPath: "/tmp/profile.heic"),
-            fileName: "profile.heic",
-            domain: .profile
-        )
-
-        XCTAssertEqual(repository.presignedFileName, "profile.jpg")
-        XCTAssertEqual(repository.maximumPixelSize, 640)
+        XCTAssertEqual(result, "image-key")
+        XCTAssertEqual(repository.presignedCalls, [.init(domain: .profile, fileName: "my.profile.jpg")])
+        XCTAssertEqual(repository.uploads, [.init(
+            fileURL: sourceURL, destinationURL: URL(string: "https://upload.invalid/image")!, maximumPixelSize: 640
+        )])
+        XCTAssertEqual(repository.events, ["presigned", "upload"])
     }
 
-    func testRecordUploadKeepsOriginalUploadPolicy() async throws {
-        let repository = ImageUploadRepositoryMock()
+    func testRecordUploadPreservesFileNameAndOriginalUploadPolicy() async throws {
+        let repository = ImageUploadRepositorySpy()
         let useCase = ImageUploadUseCase(repository: repository)
+        let result = try await useCase.uploadImage(fileURL: sourceURL, fileName: "record.heic", domain: .record)
 
-        _ = try await useCase.uploadImage(
-            fileURL: URL(fileURLWithPath: "/tmp/record.heic"),
-            fileName: "record.heic",
-            domain: .record
-        )
-
-        XCTAssertEqual(repository.presignedFileName, "record.heic")
-        XCTAssertNil(repository.maximumPixelSize)
-    }
-}
-
-private final class ImageUploadRepositoryMock: ImageUploadRepositoryProtocol {
-    private(set) var presignedFileName: String?
-    private(set) var maximumPixelSize: Int?
-
-    func postPresignedURL(
-        domain: ImageUploadDomain,
-        fileName: String
-    ) async throws -> PresignedImageUpload {
-        presignedFileName = fileName
-        return PresignedImageUpload(
-            url: URL(string: "https://example.com/upload")!,
-            imageKey: "image-key"
-        )
+        XCTAssertEqual(result, "image-key")
+        XCTAssertEqual(repository.presignedCalls, [.init(domain: .record, fileName: "record.heic")])
+        XCTAssertEqual(repository.uploads.first?.fileURL, sourceURL)
+        XCTAssertNil(repository.uploads.first?.maximumPixelSize)
+        XCTAssertEqual(repository.events, ["presigned", "upload"])
     }
 
-    func putImage(
-        fileURL: URL,
-        to url: URL,
-        maximumPixelSize: Int?
-    ) async throws {
-        self.maximumPixelSize = maximumPixelSize
+    func testProfileNameWithoutExtensionGetsJPEGExtension() async throws {
+        let repository = ImageUploadRepositorySpy()
+        _ = try await ImageUploadUseCase(repository: repository).uploadImage(
+            fileURL: sourceURL, fileName: "profile", domain: .profile
+        )
+        XCTAssertEqual(repository.presignedCalls.first?.fileName, "profile.jpg")
+    }
+
+    func testPresignedFailurePropagatesAndDoesNotUpload() async {
+        let repository = ImageUploadRepositorySpy()
+        repository.presignedResult = .failure(.timeout)
+        await assertNetworkError(.timeout) {
+            _ = try await ImageUploadUseCase(repository: repository).uploadImage(
+                fileURL: sourceURL, fileName: "record.heic", domain: .record
+            )
+        }
+        XCTAssertEqual(repository.events, ["presigned"])
+        XCTAssertTrue(repository.uploads.isEmpty)
+    }
+
+    func testUploadFailurePropagatesAfterPresignedRequest() async {
+        let repository = ImageUploadRepositorySpy()
+        repository.uploadError = .networkUnavailable
+        await assertNetworkError(.networkUnavailable) {
+            _ = try await ImageUploadUseCase(repository: repository).uploadImage(
+                fileURL: sourceURL, fileName: "profile.heic", domain: .profile
+            )
+        }
+        XCTAssertEqual(repository.events, ["presigned", "upload"])
+        XCTAssertEqual(repository.uploads.count, 1)
     }
 }
