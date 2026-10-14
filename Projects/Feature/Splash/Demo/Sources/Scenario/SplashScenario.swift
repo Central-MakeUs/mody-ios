@@ -6,6 +6,7 @@
 //
 
 import CommonDomain
+import CoreAuthTesting
 import Splash
 
 enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
@@ -120,7 +121,7 @@ enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
             .failure(SplashDemoScenarioError.signedOut)
         case .onboardingRequired:
             .success(
-                makeUserInfo(
+                UserInfoFixture.make(
                     personalInfoCompleted: false,
                     groupOnboardingCompleted: false,
                     mainAccessible: false
@@ -128,7 +129,7 @@ enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
             )
         case .groupOnboardingRequired:
             .success(
-                makeUserInfo(
+                UserInfoFixture.make(
                     personalInfoCompleted: true,
                     groupOnboardingCompleted: false,
                     mainAccessible: false
@@ -136,31 +137,13 @@ enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
             )
         default:
             .success(
-                makeUserInfo(
+                UserInfoFixture.make(
                     personalInfoCompleted: true,
                     groupOnboardingCompleted: true,
                     mainAccessible: true
                 )
             )
         }
-    }
-}
-
-private extension SplashScenario {
-    func makeUserInfo(
-        personalInfoCompleted: Bool,
-        groupOnboardingCompleted: Bool,
-        mainAccessible: Bool
-    ) -> UserInfo {
-        UserInfo(
-            memberId: 1,
-            nickname: "모디",
-            profileImageUrl: nil,
-            daysTogether: 0,
-            personalInfoCompleted: personalInfoCompleted,
-            groupOnboardingCompleted: groupOnboardingCompleted,
-            mainAccessible: mainAccessible
-        )
     }
 }
 

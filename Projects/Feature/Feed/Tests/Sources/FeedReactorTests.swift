@@ -5,6 +5,7 @@
 //  Created by 김동준 on 10/5/26.
 //
 
+import CoreAuthTesting
 import FeedInterface
 import XCTest
 @testable import Feed
@@ -86,7 +87,7 @@ final class FeedReactorTests: XCTestCase {
         output: @escaping @MainActor (FeedOutput) -> Void = { _ in }
     ) -> FeedReactor {
         FeedReactor(
-            authUseCase: FeedAuthUseCaseStub(),
+            authUseCase: AuthUseCaseStub(),
             groupUseCase: FeedGroupUseCaseStub(),
             feedUseCase: FeedUseCase(feedRepository: FeedRepositorySpy()),
             router: router ?? FeedRouterSpy(),

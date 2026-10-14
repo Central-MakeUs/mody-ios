@@ -7,8 +7,10 @@
 
 import Challenge
 import ChallengeInterface
-import ChallengeTesting
 import CommonDomain
+import CoreAuthTesting
+import CoreCameraTesting
+import UIKit
 
 @MainActor
 final class ChallengeDemoDependencyContainer {
@@ -16,12 +18,9 @@ final class ChallengeDemoDependencyContainer {
         let challengeUseCase = ChallengeUseCase(
             repository: ChallengeDemoRepositoryStub(scenario: scenario, data: data)
         )
-        let userInfo = UserInfo(
-            memberId: 1, nickname: "동준", profileImageUrl: nil, daysTogether: 24,
-            personalInfoCompleted: true, groupOnboardingCompleted: true, mainAccessible: true
-        )
-        let authUseCase = ChallengeAuthUseCaseStub(
-            userInfoResult: scenario == .authFailure ? .failure(.networkUnavailable) : .success(userInfo),
+        let userInfo = UserInfoFixture.make(nickname: "동준", daysTogether: 24)
+        let authUseCase = AuthUseCaseStub(
+            userInfoResult: scenario == .authFailure ? .failure(NetworkError.networkUnavailable) : .success(userInfo),
             responseDelay: .milliseconds(500)
         )
         let imageUseCase = ChallengeDemoImageStub(scenario: scenario)
@@ -53,7 +52,14 @@ final class ChallengeDemoDependencyContainer {
                 )
             },
             imageLoader: ChallengeDemoImageLoader(),
-            cameraCaptureBuilder: ChallengeDemoCameraStub()
+            cameraCaptureBuilder: CameraCaptureBuilderStub {
+                let image = Bundle.main.url(forResource: "ChallengeDemoDongjun", withExtension: "png")
+                    .flatMap { UIImage(contentsOfFile: $0.path) } ?? UIImage()
+                return CameraCaptureResultFixture.make(
+                    previewImage: image,
+                    fileName: "challenge-demo-proof.jpg"
+                )
+            }
         )
     }
 }

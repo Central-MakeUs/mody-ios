@@ -5,10 +5,10 @@
 //
 
 import ChallengeInterface
-import ChallengeTesting
 import CommonDomain
 import ComposableArchitecture
 import CoreAuthInterface
+import CoreAuthTesting
 import CoreCameraInterface
 import CoreModyImageInterface
 import Foundation
@@ -47,10 +47,7 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
         let repository = ChallengeFeatureRepositorySpy()
         let store = makeWeeklyStore(
             repository: repository,
-            authUseCase: ChallengeAuthUseCaseStub(userInfoResult: .success(UserInfo(
-                memberId: 1, nickname: "동준", profileImageUrl: nil, daysTogether: 10,
-                personalInfoCompleted: true, groupOnboardingCompleted: true, mainAccessible: true
-            )))
+            authUseCase: AuthUseCaseStub(userInfoResult: .success(UserInfoFixture.make(nickname: "동준", daysTogether: 10)))
         )
         store.exhaustivity = .off(showSkippedAssertions: false)
 
@@ -229,7 +226,7 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
         let repository = ChallengeFeatureRepositorySpy()
         let store = makeWeeklyStore(
             repository: repository,
-            authUseCase: ChallengeAuthUseCaseStub(userInfoResult: .failure(.networkUnavailable))
+            authUseCase: AuthUseCaseStub(userInfoResult: .failure(NetworkError.networkUnavailable))
         )
         store.exhaustivity = .off(showSkippedAssertions: false)
 
@@ -298,7 +295,7 @@ final class ChallengeWeeklyDetailFeatureTests: XCTestCase {
     private func makeWeeklyStore(
         state: ChallengeWeeklyDetailFeature.State = .init(groupId: 12, challengeId: 7, groupChallengeId: 34),
         repository: ChallengeFeatureRepositorySpy,
-        authUseCase: AuthUseCaseProtocol = ChallengeAuthUseCaseStub(userInfoResult: .failure(.unknown)),
+        authUseCase: AuthUseCaseProtocol = AuthUseCaseStub(userInfoResult: .failure(NetworkError.unknown)),
         imageUseCase: ImageUploadUseCaseProtocol & TemporaryImageFileUseCaseProtocol = ChallengeImageDummy(),
         router: @escaping @MainActor (ChallengeWeeklyDetailRoute) -> Void = { _ in },
         output: @escaping @MainActor (ChallengeOutput) -> Void = { _ in }

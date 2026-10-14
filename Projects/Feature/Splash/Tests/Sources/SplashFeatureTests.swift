@@ -6,8 +6,8 @@
 //
 
 import ComposableArchitecture
+import CoreAuthTesting
 import SplashInterface
-import SplashTesting
 import XCTest
 @testable import Splash
 
@@ -125,8 +125,8 @@ final class SplashFeatureTests: XCTestCase {
         for testCase in cases {
             let router = SplashRouterSpy()
             let store = makeStore(router: router)
-            let userInfo = SplashUserInfoFixture.make(
-                memberID: 42,
+            let userInfo = UserInfoFixture.make(
+                memberId: 42,
                 nickname: "테스터",
                 personalInfoCompleted: testCase.personal,
                 groupOnboardingCompleted: testCase.group,
@@ -150,8 +150,8 @@ final class SplashFeatureTests: XCTestCase {
         return TestStore(initialState: initialState) {
             SplashFeature(
                 splashUseCase: SplashUseCase(splashRepository: repository),
-                authUseCase: SplashAuthUseCaseStub(
-                    userInfoResult: .success(SplashUserInfoFixture.make())
+                authUseCase: AuthUseCaseStub(
+                    userInfoResult: .success(UserInfoFixture.make())
                 ),
                 router: router.route
             )

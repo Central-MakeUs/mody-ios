@@ -5,6 +5,10 @@
 //  Created by 김동준 on 10/4/26.
 //
 
+import CommonDomain
+import CoreAuthTesting
+import CoreCameraTesting
+import UIKit
 import CoreModyImage
 import MyPage
 import MyPageInterface
@@ -13,7 +17,19 @@ import MyPageInterface
 final class MyPageDemoDependencyContainer {
     func makeBuilder(for scenario: MyPageScenario) -> MyPageBuildable {
         let profileData = MyPageDemoProfileData()
-        let auth = MyPageDemoAuthStub(scenario: scenario, profileData: profileData)
+        let auth = AuthUseCaseStub(
+            signIn: { _, _ in throw CancellationError() },
+            getUserInfo: { _ in
+                if scenario == .userLookupFailure { throw NetworkError.networkUnavailable }
+                return UserInfoFixture.make(nickname: await profileData.name, daysTogether: 20)
+            },
+            logout: {
+                if scenario == .logoutFailure { throw NetworkError.networkUnavailable }
+            },
+            deleteAccount: {
+                if scenario == .deleteFailure { throw NetworkError.networkUnavailable }
+            }
+        )
         let myPageUseCase = MyPageUseCase(
             myPageRepository: MyPageDemoRepositoryStub(
                 scenario: scenario,
@@ -23,6 +39,18 @@ final class MyPageDemoDependencyContainer {
         let notificationUseCase = MyPageNotificationSettingUseCase(
             repository: MyPageDemoNotificationRepositoryStub(scenario: scenario)
         )
+
+        let cameraCaptureBuilder: CameraCaptureBuilderStub
+        if scenario == .photoCaptureCancel {
+            cameraCaptureBuilder = CameraCaptureBuilderStub(captureResult: nil)
+        } else {
+            cameraCaptureBuilder = CameraCaptureBuilderStub {
+                CameraCaptureResultFixture.make(
+                    previewImage: UIImage(systemName: "person.crop.circle") ?? UIImage(),
+                    fileName: "mypage-demo-profile.jpg"
+                )
+            }
+        }
 
         return MyPageBuilder(
             makeMyPageFeature: { router, output in
@@ -66,7 +94,7 @@ final class MyPageDemoDependencyContainer {
                 )
             },
             imageLoader: NukeRemoteImageLoader.shared,
-            cameraCaptureBuilder: MyPageDemoCameraStub(scenario: scenario)
+            cameraCaptureBuilder: cameraCaptureBuilder
         )
     }
 }
