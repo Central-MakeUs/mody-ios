@@ -6,24 +6,7 @@
 //
 
 import CommonDomain
-import CoreNotificationInterface
 import MyPage
-
-struct MyPageDemoNotificationPermissionStub: NotificationPermissionInterface {
-    private let scenario: MyPageScenario
-
-    init(scenario: MyPageScenario) {
-        self.scenario = scenario
-    }
-
-    func isNotificationPermissionNotDetermined() async -> Bool {
-        scenario == .notificationPermissionRequest
-    }
-    func isNotificationPermissionGranted() async -> Bool {
-        scenario != .notificationPermissionDenied
-    }
-    func requestNotificationPermission() async -> Bool { true }
-}
 
 struct MyPageDemoNotificationRepository: MyPageNotificationSettingRepositoryProtocol {
     private let repository: MyPageNotificationSettingRepository

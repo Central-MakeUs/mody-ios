@@ -8,15 +8,17 @@
 import CoreCameraTesting
 import CoreHealthTesting
 import CoreNetworkTesting
+import CoreNotificationTesting
 import OnBoarding
 import OnBoardingInterface
-import OnBoardingTesting
 
 @MainActor
 final class OnBoardingDemoDependencyContainer {
     func makeOnBoardingBuilder(for scenario: OnBoardingScenario) -> OnBoardingBuildable {
         OnBoardingBuilder { router in
-            let notificationPermission = OnBoardingNotificationPermissionStub(
+            let notificationPermission = NotificationPermissionStub(
+                isNotDetermined: true,
+                isGranted: scenario.permissionRequestResult,
                 requestResult: scenario.permissionRequestResult
             )
             return OnBoardingFeature(

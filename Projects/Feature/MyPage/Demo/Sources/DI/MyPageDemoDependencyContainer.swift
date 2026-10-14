@@ -10,6 +10,7 @@ import CoreAuthTesting
 import CoreCameraTesting
 import CoreHealthTesting
 import CoreNetworkTesting
+import CoreNotificationTesting
 import UIKit
 import CoreModyImage
 import CoreModyImageTesting
@@ -79,7 +80,11 @@ final class MyPageDemoDependencyContainer {
             },
             makeNotificationSettingsFeature: { router in
                 NotificationSettingsFeature(
-                    notificationPermission: MyPageDemoNotificationPermissionStub(scenario: scenario),
+                    notificationPermission: NotificationPermissionStub(
+                        isNotDetermined: scenario == .notificationPermissionRequest,
+                        isGranted: scenario != .notificationPermissionDenied,
+                        requestResult: true
+                    ),
                     notificationSettingUseCase: notificationUseCase,
                     router: { router.route(from: $0) }
                 )
