@@ -19,7 +19,7 @@ final class CameraMemoryLifecycleTests: XCTestCase {
             var viewController: CameraContainerViewController? = CameraContainerViewController(
                 initialSource: .photoLibrary,
                 capturedPhotoProcessor: CameraCapturedPhotoProcessor(
-                    temporaryImageFileUseCase: TemporaryImageFileUseCaseStub(),
+                    temporaryImageFileUseCase: CameraTemporaryImageFileSpy(),
                     previewMaxPixelSize: 100
                 ),
                 onEvent: { _ in },
@@ -33,24 +33,4 @@ final class CameraMemoryLifecycleTests: XCTestCase {
 
         XCTAssertNil(weakViewController)
     }
-}
-
-private struct TemporaryImageFileUseCaseStub: TemporaryImageFileUseCaseProtocol {
-    func saveImage(
-        data: Data,
-        fileName: String
-    ) throws -> TemporaryImageFile {
-        throw CocoaError(.featureUnsupported)
-    }
-
-    func copyImage(
-        at sourceURL: URL,
-        fileName: String
-    ) throws -> TemporaryImageFile {
-        throw CocoaError(.featureUnsupported)
-    }
-
-    func removeImage(at fileURL: URL) throws {}
-
-    func removeExpiredImages(olderThan expirationInterval: TimeInterval) throws {}
 }

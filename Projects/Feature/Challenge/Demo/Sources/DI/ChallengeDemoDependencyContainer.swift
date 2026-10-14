@@ -9,6 +9,8 @@ import Challenge
 import ChallengeInterface
 import CommonDomain
 import CoreAuthTesting
+import CoreCameraTesting
+import UIKit
 
 @MainActor
 final class ChallengeDemoDependencyContainer {
@@ -50,7 +52,14 @@ final class ChallengeDemoDependencyContainer {
                 )
             },
             imageLoader: ChallengeDemoImageLoader(),
-            cameraCaptureBuilder: ChallengeDemoCameraStub()
+            cameraCaptureBuilder: CameraCaptureBuilderStub {
+                let image = Bundle.main.url(forResource: "ChallengeDemoDongjun", withExtension: "png")
+                    .flatMap { UIImage(contentsOfFile: $0.path) } ?? UIImage()
+                return CameraCaptureResultFixture.make(
+                    previewImage: image,
+                    fileName: "challenge-demo-proof.jpg"
+                )
+            }
         )
     }
 }

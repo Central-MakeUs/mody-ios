@@ -12,7 +12,7 @@ enum CameraImageRotation: Int {
     case twoSeventy = 270
 
     func adding(clockwise degrees: Int) -> CameraImageRotation {
-        CameraImageRotation(rawValue: (rawValue + degrees + 360) % 360) ?? .zero
+        CameraImageRotation(rawValue: (rawValue + degrees % 360 + 360) % 360) ?? .zero
     }
 }
 

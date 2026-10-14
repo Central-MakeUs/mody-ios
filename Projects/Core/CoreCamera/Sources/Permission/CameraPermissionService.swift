@@ -9,17 +9,33 @@ import AVFoundation
 import CoreCameraInterface
 
 public struct CameraPermissionService: CameraPermissionInterface {
-    public init() {}
+    private let authorizationStatus: () -> AVAuthorizationStatus
+    private let requestAccess: () async -> Bool
+
+    public init() {
+        self.init(
+            authorizationStatus: { AVCaptureDevice.authorizationStatus(for: .video) },
+            requestAccess: { await AVCaptureDevice.requestAccess(for: .video) }
+        )
+    }
+
+    init(
+        authorizationStatus: @escaping () -> AVAuthorizationStatus,
+        requestAccess: @escaping () async -> Bool
+    ) {
+        self.authorizationStatus = authorizationStatus
+        self.requestAccess = requestAccess
+    }
 
     public func isCameraPermissionNotDetermined() -> Bool {
-        AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined
+        authorizationStatus() == .notDetermined
     }
 
     public func isCameraPermissionGranted() -> Bool {
-        AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+        authorizationStatus() == .authorized
     }
 
     public func requestCameraPermission() async -> Bool {
-        await AVCaptureDevice.requestAccess(for: .video)
+        await requestAccess()
     }
 }

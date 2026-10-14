@@ -5,11 +5,10 @@
 //  Created by 김동준 on 10/4/26.
 //
 
-import CoreCameraInterface
 import CoreHealthInterface
 import CoreNotificationInterface
 
-public struct OnBoardingPermissionStub: CameraPermissionInterface, NotificationPermissionInterface, HealthPermissionInterface {
+public struct OnBoardingPermissionStub: NotificationPermissionInterface, HealthPermissionInterface {
     private let shouldPromptForHealth: Bool
     private let requestResult: Bool
 
@@ -17,10 +16,6 @@ public struct OnBoardingPermissionStub: CameraPermissionInterface, NotificationP
         self.shouldPromptForHealth = shouldPromptForHealth
         self.requestResult = requestResult
     }
-
-    public func isCameraPermissionNotDetermined() -> Bool { true }
-    public func isCameraPermissionGranted() -> Bool { requestResult }
-    public func requestCameraPermission() async -> Bool { requestResult }
 
     public func isNotificationPermissionNotDetermined() async -> Bool { true }
     public func isNotificationPermissionGranted() async -> Bool { requestResult }
