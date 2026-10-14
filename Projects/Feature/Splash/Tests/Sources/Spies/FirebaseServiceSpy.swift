@@ -6,12 +6,10 @@
 //
 
 import FirebaseServiceInterface
+import FirebaseServiceTesting
 
 final class FirebaseServiceSpy: FirebaseServiceInterface {
-    private let fetchError: Error?
-    private let strings: [String: String]
-    private let bools: [String: Bool]
-    private let jsonValues: [String: Any]
+    private let stub: FirebaseServiceStub
 
     private(set) var fetchAndActivateCallCount = 0
 
@@ -19,33 +17,35 @@ final class FirebaseServiceSpy: FirebaseServiceInterface {
         fetchError: Error? = nil,
         strings: [String: String] = [:],
         bools: [String: Bool] = [:],
-        jsonValues: [String: Any] = [:]
+        jsonValues: [String: any Decodable] = [:]
     ) {
-        self.fetchError = fetchError
-        self.strings = strings
-        self.bools = bools
-        self.jsonValues = jsonValues
+        self.stub = FirebaseServiceStub(
+            strings: strings,
+            bools: bools,
+            jsonValues: jsonValues,
+            fetchAndActivate: {
+                if let fetchError { throw fetchError }
+            }
+        )
     }
 
     func fetchAndActivate() async throws {
         fetchAndActivateCallCount += 1
-        if let fetchError {
-            throw fetchError
-        }
+        try await stub.fetchAndActivate()
     }
 
     func getString(forKey key: String) -> String {
-        strings[key, default: ""]
+        stub.getString(forKey: key)
     }
 
     func getBool(forKey key: String) -> Bool {
-        bools[key, default: false]
+        stub.getBool(forKey: key)
     }
 
     func getJson<Value: Decodable>(
         forKey key: String,
         as type: Value.Type
     ) -> Value? {
-        jsonValues[key] as? Value
+        stub.getJson(forKey: key, as: type)
     }
 }

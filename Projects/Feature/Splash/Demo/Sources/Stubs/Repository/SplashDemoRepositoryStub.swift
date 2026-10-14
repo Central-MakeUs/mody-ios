@@ -7,15 +7,22 @@
 
 import CommonDomain
 import CoreNetworkInterface
+import FirebaseServiceInterface
 import Splash
 
 struct SplashDemoRepositoryStub: SplashRepositoryProtocol {
     private let scenario: SplashScenario
     private let network: CoreNetworkProtocol
+    private let firebaseService: FirebaseServiceInterface
 
-    init(scenario: SplashScenario, network: CoreNetworkProtocol) {
+    init(
+        scenario: SplashScenario,
+        network: CoreNetworkProtocol,
+        firebaseService: FirebaseServiceInterface
+    ) {
         self.scenario = scenario
         self.network = network
+        self.firebaseService = firebaseService
     }
 
     func getHealthCheck() async throws -> Bool {
@@ -26,45 +33,22 @@ struct SplashDemoRepositoryStub: SplashRepositoryProtocol {
     }
 
     func fetchAndActivate() async {
-        await waitForConfiguredDelay()
+        try? await firebaseService.fetchAndActivate()
     }
 
     func getRemoteConfigBool(for key: RemoteConfigKeys) -> Bool {
-        switch key {
-        case .forceUpdate:
-            scenario == .forceUpdate
-        case .guestLogin,
-             .notice,
-             .minimumSupportedVersion,
-             .appStoreURL:
-            false
-        }
+        firebaseService.getBool(forKey: key.rawValue)
     }
 
     func getRemoteConfigString(for key: RemoteConfigKeys) -> String {
-        switch key {
-        case .minimumSupportedVersion:
-            scenario == .minimumSupportedVersion ? "99.0.0" : "0.0.0"
-        case .appStoreURL:
-            "https://apps.apple.com/kr/"
-        case .forceUpdate,
-             .guestLogin,
-             .notice:
-            ""
-        }
+        firebaseService.getString(forKey: key.rawValue)
     }
 
     func getNoticePopupInfo() -> NoticePopupInfo? {
-        scenario.notice
+        firebaseService.getJson(forKey: RemoteConfigKeys.notice.rawValue, as: NoticePopupInfo.self)
     }
 
     func getStoredAuthSession() -> AuthSession? {
         nil
-    }
-
-    private func waitForConfiguredDelay() async {
-        try? await Task.sleep(
-            for: .milliseconds(700)
-        )
     }
 }

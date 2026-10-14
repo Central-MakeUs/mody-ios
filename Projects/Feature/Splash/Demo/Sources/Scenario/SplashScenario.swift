@@ -10,6 +10,7 @@ import CoreNetworkTesting
 import Foundation
 import CommonDomain
 import CoreAuthTesting
+import FirebaseServiceTesting
 import Splash
 
 enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
@@ -155,6 +156,18 @@ private enum SplashDemoScenarioError: Error {
 }
 
 extension SplashScenario {
+    var firebaseService: FirebaseServiceStub {
+        FirebaseServiceStub(
+            strings: [
+                RemoteConfigKeys.minimumSupportedVersion.rawValue: self == .minimumSupportedVersion ? "99.0.0" : "0.0.0",
+                RemoteConfigKeys.appStoreURL.rawValue: "https://apps.apple.com/kr/"
+            ],
+            bools: [RemoteConfigKeys.forceUpdate.rawValue: self == .forceUpdate],
+            jsonValues: notice.map { [RemoteConfigKeys.notice.rawValue: $0] } ?? [:],
+            fetchAndActivate: { try await Task.sleep(for: .milliseconds(700)) }
+        )
+    }
+
     func networkResponse(to endpoint: CoreNetworkEndpoint) throws -> Data {
         guard endpoint.path == "health", endpoint.method == .GET else {
             throw URLError(.unsupportedURL)
