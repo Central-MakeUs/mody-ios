@@ -9,6 +9,7 @@ import CommonDomain
 import CoreAuthTesting
 import CoreCameraTesting
 import CoreHealthTesting
+import CoreNetworkTesting
 import UIKit
 import CoreModyImage
 import CoreModyImageTesting
@@ -19,6 +20,9 @@ import MyPageInterface
 final class MyPageDemoDependencyContainer {
     func makeBuilder(for scenario: MyPageScenario) -> MyPageBuildable {
         let profileData = MyPageDemoProfileData()
+        let network = CoreNetworkStub { endpoint in
+            try await profileData.response(to: endpoint, scenario: scenario)
+        }
         let auth = AuthUseCaseStub(
             signIn: { _, _ in throw CancellationError() },
             getUserInfo: { _ in
@@ -33,13 +37,10 @@ final class MyPageDemoDependencyContainer {
             }
         )
         let myPageUseCase = MyPageUseCase(
-            myPageRepository: MyPageDemoRepositoryStub(
-                scenario: scenario,
-                profileData: profileData
-            )
+            myPageRepository: MyPageRepository(network: network)
         )
         let notificationUseCase = MyPageNotificationSettingUseCase(
-            repository: MyPageDemoNotificationRepositoryStub(scenario: scenario)
+            repository: MyPageDemoNotificationRepository(repository: MyPageNotificationSettingRepository(network: network))
         )
 
         let cameraCaptureBuilder: CameraCaptureBuilderStub

@@ -11,6 +11,7 @@ import CommonDomain
 import CoreAuthTesting
 import CoreCameraTesting
 import CoreHealthTesting
+import CoreNetworkTesting
 import CoreModyImage
 import CoreModyImageInterface
 import CoreModyImageTesting
@@ -20,7 +21,9 @@ import UIKit
 final class ChallengeDemoDependencyContainer {
     func makeBuilder(for scenario: ChallengeDemoScenario, data: ChallengeDemoData) -> ChallengeBuildable {
         let challengeUseCase = ChallengeUseCase(
-            repository: ChallengeDemoRepositoryStub(scenario: scenario, data: data)
+            repository: ChallengeRepository(network: CoreNetworkStub(responseDelay: .milliseconds(500)) { endpoint in
+                try await data.response(to: endpoint, scenario: scenario)
+            })
         )
         let userInfo = UserInfoFixture.make(nickname: "동준", daysTogether: 24)
         let authUseCase = AuthUseCaseStub(

@@ -6,6 +6,7 @@
 //
 
 import CoreAuthTesting
+import CoreNetworkTesting
 import Splash
 import SplashInterface
 
@@ -16,7 +17,10 @@ final class SplashDemoDependencyContainer {
             SplashFeature(
                 splashUseCase: SplashUseCase(
                     splashRepository: SplashDemoRepositoryStub(
-                        scenario: scenario
+                        scenario: scenario,
+                        network: CoreNetworkStub { endpoint in
+                            try scenario.networkResponse(to: endpoint)
+                        }
                     )
                 ),
                 authUseCase: AuthUseCaseStub(

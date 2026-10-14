@@ -5,6 +5,9 @@
 //  Created by 김동준 on 10/4/26.
 //
 
+import CoreNetworkInterface
+import CoreNetworkTesting
+import Foundation
 import CommonDomain
 
 enum OnBoardingScenario: String, CaseIterable, Hashable, Identifiable {
@@ -66,3 +69,12 @@ enum OnBoardingScenario: String, CaseIterable, Hashable, Identifiable {
 }
 
 private struct OnBoardingDemoUnexpectedError: Error {}
+
+extension OnBoardingScenario {
+    func networkResponse(to endpoint: CoreNetworkEndpoint) throws -> Data {
+        guard endpoint.path == "api/v1/onboarding/profile", endpoint.method == .POST else {
+            throw URLError(.unsupportedURL)
+        }
+        return try CoreNetworkJSONFixture.response(result: ["memberId": self.profileResult.get()])
+    }
+}

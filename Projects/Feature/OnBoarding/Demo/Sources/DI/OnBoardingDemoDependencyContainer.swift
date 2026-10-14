@@ -7,6 +7,7 @@
 
 import CoreCameraTesting
 import CoreHealthTesting
+import CoreNetworkTesting
 import OnBoarding
 import OnBoardingInterface
 import OnBoardingTesting
@@ -20,9 +21,9 @@ final class OnBoardingDemoDependencyContainer {
             )
             return OnBoardingFeature(
                 onBoardingUseCase: OnBoardingUseCase(
-                    onBoardingRepository: OnBoardingDemoRepositoryStub(
-                        result: scenario.profileResult
-                    )
+                    onBoardingRepository: OnBoardingRepository(network: CoreNetworkStub(responseDelay: .milliseconds(500)) { endpoint in
+                        try scenario.networkResponse(to: endpoint)
+                    })
                 ),
                 cameraPermission: CameraPermissionStub(
                     isNotDetermined: true,

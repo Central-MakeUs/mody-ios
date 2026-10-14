@@ -5,6 +5,9 @@
 //  Created by 김동준 on 9/29/26.
 //
 
+import CoreNetworkInterface
+import CoreNetworkTesting
+import Foundation
 import CommonDomain
 import CoreAuthTesting
 import Splash
@@ -149,4 +152,14 @@ enum SplashScenario: String, CaseIterable, Hashable, Identifiable {
 
 private enum SplashDemoScenarioError: Error {
     case signedOut
+}
+
+extension SplashScenario {
+    func networkResponse(to endpoint: CoreNetworkEndpoint) throws -> Data {
+        guard endpoint.path == "health", endpoint.method == .GET else {
+            throw URLError(.unsupportedURL)
+        }
+        if self == .healthCheckFailure { throw URLError(.cannotConnectToHost) }
+        return try CoreNetworkJSONFixture.response(result: [String: String]())
+    }
 }

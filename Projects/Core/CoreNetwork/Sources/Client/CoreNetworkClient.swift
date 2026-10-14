@@ -16,30 +16,53 @@ public final class CoreNetworkClient: CoreNetworkProtocol {
     let defaultHeaders: [String: String]
     let decoder: JSONDecoder
 
-    public init(
+    public convenience init(
         tokenStore: CoreTokenStorage? = nil,
         refreshTokenEndpoint: CoreNetworkEndpoint? = nil,
         defaultHeaders: [String: String] = [:],
         decoder: JSONDecoder = JSONDecoder()
     ) {
-        let baseURL = CoreNetworkBaseURLProvider.current
+        self.init(
+            baseURL: CoreNetworkBaseURLProvider.current,
+            session: Self.makeSession(),
+            tokenStore: tokenStore,
+            refreshTokenEndpoint: refreshTokenEndpoint,
+            defaultHeaders: defaultHeaders,
+            decoder: decoder
+        )
+    }
 
+    init(
+        baseURL: URL,
+        session: Session,
+        refreshSession: Session? = nil,
+        tokenStore: CoreTokenStorage? = nil,
+        refreshTokenEndpoint: CoreNetworkEndpoint? = nil,
+        defaultHeaders: [String: String] = [:],
+        decoder: JSONDecoder = JSONDecoder()
+    ) {
         self.baseURL = baseURL
+        self.session = session
         self.defaultHeaders = defaultHeaders
         self.decoder = decoder
 
-        let tokenRefresher = Self.makeTokenRefresher(
-            baseURL: baseURL,
-            tokenStore: tokenStore,
-            refreshTokenEndpoint: refreshTokenEndpoint,
-            decoder: decoder
-        )
-        self.requestInterceptor = Self.makeRequestInterceptor(
+        let tokenRefresher: CoreNetworkTokenRefresher?
+        if let tokenStore, let refreshTokenEndpoint {
+            tokenRefresher = CoreNetworkTokenRefresher(
+                baseURL: baseURL,
+                refreshTokenEndpoint: refreshTokenEndpoint,
+                tokenStore: tokenStore,
+                decoder: decoder,
+                session: refreshSession
+            )
+        } else {
+            tokenRefresher = nil
+        }
+        self.requestInterceptor = CoreNetworkRequestInterceptor(
             tokenStore: tokenStore,
             tokenRefresher: tokenRefresher,
             defaultHeaders: defaultHeaders
         )
-        self.session = Self.makeSession()
     }
 
     public func request<Response: Decodable>(_ endpoint: CoreNetworkEndpoint) async throws -> Response {
@@ -48,35 +71,6 @@ public final class CoreNetworkClient: CoreNetworkProtocol {
 }
 
 private extension CoreNetworkClient {
-    static func makeTokenRefresher(
-        baseURL: URL,
-        tokenStore: CoreTokenStorage?,
-        refreshTokenEndpoint: CoreNetworkEndpoint?,
-        decoder: JSONDecoder
-    ) -> CoreNetworkTokenRefresher? {
-        guard let tokenStore,
-              let refreshTokenEndpoint else { return nil }
-
-        return CoreNetworkTokenRefresher(
-            baseURL: baseURL,
-            refreshTokenEndpoint: refreshTokenEndpoint,
-            tokenStore: tokenStore,
-            decoder: decoder
-        )
-    }
-
-    static func makeRequestInterceptor(
-        tokenStore: CoreTokenStorage?,
-        tokenRefresher: CoreNetworkTokenRefresher?,
-        defaultHeaders: [String: String]
-    ) -> CoreNetworkRequestInterceptor {
-        CoreNetworkRequestInterceptor(
-            tokenStore: tokenStore,
-            tokenRefresher: tokenRefresher,
-            defaultHeaders: defaultHeaders
-        )
-    }
-
     static func makeSession() -> Session {
         Session(
             configuration: makeSessionConfiguration(),

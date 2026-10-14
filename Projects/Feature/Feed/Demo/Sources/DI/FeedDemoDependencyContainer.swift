@@ -7,6 +7,7 @@
 
 import CommonDomain
 import CoreAuthTesting
+import CoreNetworkTesting
 import CoreCamera
 import CoreCameraInterface
 import CoreModyImage
@@ -19,11 +20,14 @@ import ModyGroupInterface
 
 @MainActor
 final class FeedDemoDependencyContainer {
-    private var repository: FeedDemoRepositoryStub?
+    private var data: FeedDemoNetworkData?
 
     func makeBuilder(for scenario: FeedDemoScenario) -> FeedBuildable {
-        let repository = FeedDemoRepositoryStub(scenario: scenario)
-        self.repository = repository
+        let data = FeedDemoNetworkData(scenario: scenario)
+        self.data = data
+        let repository = FeedRepository(network: CoreNetworkStub(responseDelay: .milliseconds(500)) { endpoint in
+            try await data.response(to: endpoint)
+        })
         let feedUseCase = FeedUseCase(
             feedRepository: repository
         )
@@ -88,6 +92,6 @@ final class FeedDemoDependencyContainer {
     }
 
     func addDemoRecord() async {
-        await repository?.addDemoRecord()
+        await data?.addDemoRecord()
     }
 }
