@@ -10,6 +10,7 @@ import ChallengeInterface
 import CommonDomain
 import CoreAuthTesting
 import CoreCameraTesting
+import CoreHealthTesting
 import UIKit
 
 @MainActor
@@ -24,12 +25,22 @@ final class ChallengeDemoDependencyContainer {
             responseDelay: .milliseconds(500)
         )
         let imageUseCase = ChallengeDemoImageStub(scenario: scenario)
+        let healthUseCase = HealthUseCaseStub(
+            getStepCount: { _, _ in
+                if scenario == .stepCompetition || scenario == .stepLive {
+                    return await data.simulatedSelfStepCount(for: scenario)
+                }
+                return 3_400
+            },
+            getCurrentMonthStepCount: { 42_000 },
+            responseDelay: .milliseconds(500)
+        )
 
         return ChallengeBuilder(
             makeChallengeFeature: { router, output in
                 ChallengeFeature(
                     challengeUseCase: challengeUseCase,
-                    healthUseCase: ChallengeDemoHealthStub(scenario: scenario, data: data),
+                    healthUseCase: healthUseCase,
                     router: { [weak router] in router?.route(from: $0) },
                     output: { [weak output] in output?.handle(output: $0) }
                 )

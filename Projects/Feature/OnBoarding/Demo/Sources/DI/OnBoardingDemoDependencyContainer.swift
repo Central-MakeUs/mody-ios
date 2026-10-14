@@ -6,6 +6,7 @@
 //
 
 import CoreCameraTesting
+import CoreHealthTesting
 import OnBoarding
 import OnBoardingInterface
 import OnBoardingTesting
@@ -14,8 +15,7 @@ import OnBoardingTesting
 final class OnBoardingDemoDependencyContainer {
     func makeOnBoardingBuilder(for scenario: OnBoardingScenario) -> OnBoardingBuildable {
         OnBoardingBuilder { router in
-            let permission = OnBoardingPermissionStub(
-                shouldPromptForHealth: scenario.shouldPromptForHealth,
+            let notificationPermission = OnBoardingNotificationPermissionStub(
                 requestResult: scenario.permissionRequestResult
             )
             return OnBoardingFeature(
@@ -29,8 +29,11 @@ final class OnBoardingDemoDependencyContainer {
                     isGranted: scenario.permissionRequestResult,
                     requestResult: scenario.permissionRequestResult
                 ),
-                notificationPermission: permission,
-                healthPermission: permission,
+                notificationPermission: notificationPermission,
+                healthPermission: HealthPermissionStub(
+                    shouldShowPrompt: scenario.shouldPromptForHealth,
+                    requestResult: scenario.permissionRequestResult
+                ),
                 router: { route in router.route(from: route) }
             )
         }
