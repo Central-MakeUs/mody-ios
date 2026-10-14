@@ -11,6 +11,7 @@ import CoreCameraTesting
 import CoreHealthTesting
 import UIKit
 import CoreModyImage
+import CoreModyImageTesting
 import MyPage
 import MyPageInterface
 
@@ -66,8 +67,11 @@ final class MyPageDemoDependencyContainer {
                 ProfileFeature(
                     authUseCase: auth,
                     myPageUseCase: myPageUseCase,
-                    imageUploadUseCase: MyPageDemoImageStub(scenario: scenario),
-                    temporaryImageFileUseCase: MyPageDemoImageStub(),
+                    imageUploadUseCase: ImageUploadUseCaseStub(
+                        result: scenario == .photoUploadFailure
+                            ? .failure(NetworkError.networkUnavailable) : .success("demo-profile-image")
+                    ),
+                    temporaryImageFileUseCase: TemporaryImageFileUseCaseStub.metadataOnly(),
                     router: { router.route(from: $0) },
                     output: { output.handle(output: $0) }
                 )
