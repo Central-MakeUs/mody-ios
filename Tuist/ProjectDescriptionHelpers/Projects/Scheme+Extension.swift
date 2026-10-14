@@ -18,19 +18,24 @@ extension Array where Element == Scheme {
 
 extension Scheme {
     static func tests(_ module: MicroFeatureModule) -> Scheme {
-        .scheme(
-            name: module.testsName,
+        tests(moduleName: module.name)
+    }
+
+    static func tests(moduleName: String) -> Scheme {
+        let testsName = "\(moduleName)Tests"
+        return .scheme(
+            name: testsName,
             shared: true,
             buildAction: .buildAction(targets: [
-                .target(module.name),
-                .target(module.testsName)
+                .target(moduleName),
+                .target(testsName)
             ]),
             testAction: .targets(
-                [.testableTarget(target: .target(module.testsName))],
+                [.testableTarget(target: .target(testsName))],
                 configuration: .init(stringLiteral: Environment.dev.name),
                 options: .options(
                     coverage: true,
-                    codeCoverageTargets: [.target(module.name)]
+                    codeCoverageTargets: [.target(moduleName)]
                 )
             )
         )

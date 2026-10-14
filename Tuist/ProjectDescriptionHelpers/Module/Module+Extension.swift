@@ -17,7 +17,7 @@ extension Module {
         }
     }
     
-    func targets(hasDemo: Bool = false) -> [Target] {
+    func targets(hasDemo: Bool = false, hasTests: Bool = false) -> [Target] {
         switch self {
         case .App:
             return [.target(moduleType: self)]
@@ -35,7 +35,9 @@ extension Module {
             
             return targets
         default:
-            return [.target(moduleType: self)]
+            return hasTests
+                ? [.target(moduleType: self), .tests(moduleType: self)]
+                : [.target(moduleType: self)]
         }
     }
     
@@ -93,7 +95,7 @@ extension Module {
             }
             return schemes
         default:
-            return []
+            return hasTests ? [.tests(moduleName: name)] : []
         }
     }
     
