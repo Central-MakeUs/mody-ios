@@ -1,5 +1,5 @@
 {
-  "enabled": true,
+  "enabled": false,
   "modules": [
     {
       "name": "CoreAuth",
@@ -88,7 +88,7 @@
     {
       "name": "SignIn",
       "projectPath": "Projects/Feature/SignIn",
-      "enabled": false,
+      "enabled": true,
       "minimumCoverage": 45
     },
     {
