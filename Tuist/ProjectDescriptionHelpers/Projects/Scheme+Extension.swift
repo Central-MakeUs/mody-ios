@@ -77,4 +77,25 @@ extension Scheme {
             analyzeAction: .analyzeAction(configuration: configurationName)
         )
     }
+
+    static func allTests(
+        implementationTargets: [TargetReference],
+        testTargets: [TargetReference]
+    ) -> Scheme {
+        .scheme(
+            name: "ModyAllTests",
+            shared: true,
+            buildAction: .buildAction(
+                targets: implementationTargets + testTargets
+            ),
+            testAction: .targets(
+                testTargets.map { .testableTarget(target: $0) },
+                configuration: .init(stringLiteral: Environment.dev.name),
+                options: .options(
+                    coverage: true,
+                    codeCoverageTargets: implementationTargets
+                )
+            )
+        )
+    }
 }
