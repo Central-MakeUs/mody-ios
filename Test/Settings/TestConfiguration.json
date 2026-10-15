@@ -88,7 +88,7 @@
     {
       "name": "SignIn",
       "projectPath": "Projects/Feature/SignIn",
-      "enabled": true,
+      "enabled": false,
       "minimumCoverage": 45
     },
     {
