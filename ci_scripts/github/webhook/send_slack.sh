@@ -17,7 +17,7 @@ Options:
   --help         Show this help
 
 Environment:
-  Slack delivery is temporarily disabled; SLACK_WEBHOOK_URL is not required.
+  SLACK_WEBHOOK_URL is required unless --dry-run is used.
 USAGE
 }
 
@@ -184,18 +184,15 @@ if [[ "$dry_run" == true ]]; then
   exit 0
 fi
 
-# Temporarily disabled. Uncomment this block to restore Slack delivery.
-# [[ -n "${SLACK_WEBHOOK_URL:-}" ]] || die "SLACK_WEBHOOK_URL is required"
-#
-# curl \
-#   --fail \
-#   --silent \
-#   --show-error \
-#   --request POST \
-#   --header "Content-Type: application/json" \
-#   --data "$payload" \
-#   "$SLACK_WEBHOOK_URL" >/dev/null
-#
-# echo "Slack notification sent"
+[[ -n "${SLACK_WEBHOOK_URL:-}" ]] || die "SLACK_WEBHOOK_URL is required"
 
-echo "Slack notifications are temporarily disabled"
+curl \
+  --fail \
+  --silent \
+  --show-error \
+  --request POST \
+  --header "Content-Type: application/json" \
+  --data "$payload" \
+  "$SLACK_WEBHOOK_URL" >/dev/null
+
+echo "Slack notification sent"
