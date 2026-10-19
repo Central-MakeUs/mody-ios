@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Foundation
+import CoreCameraInterface
 
 /// 세션 구성과 실행은 전용 직렬 큐에서 처리하며, 촬영 완료 콜백은 main queue를 보장하지 않습니다.
 final class CameraCaptureSessionController: NSObject, @unchecked Sendable {
@@ -15,16 +16,26 @@ final class CameraCaptureSessionController: NSObject, @unchecked Sendable {
         let completion: @Sendable (Data?) -> Void
     }
 
-    let session = AVCaptureSession()
+    var session: AVCaptureSession { hardware.session }
 
-    private let permissionService = CameraPermissionService()
-    private let photoOutput = AVCapturePhotoOutput()
-    private let sessionQueue = DispatchQueue(label: "com.mody.core-camera.capture-session")
+    private let permissionService: CameraPermissionInterface
+    private let hardware: CameraCaptureSessionHardware
+    private let sessionQueue: DispatchQueue
     private let captureCompletionLock = NSLock()
 
-    private var videoInput: AVCaptureDeviceInput?
     private var pendingCapture: PendingCapture?
     private var isConfigured = false
+
+    init(
+        permissionService: CameraPermissionInterface = CameraPermissionService(),
+        hardware: CameraCaptureSessionHardware = AVCameraCaptureSessionHardware(),
+        sessionQueue: DispatchQueue = DispatchQueue(label: "com.mody.core-camera.capture-session")
+    ) {
+        self.permissionService = permissionService
+        self.hardware = hardware
+        self.sessionQueue = sessionQueue
+        super.init()
+    }
 }
 
 extension CameraCaptureSessionController {
@@ -42,17 +53,17 @@ extension CameraCaptureSessionController {
 
             sessionQueue.async { [weak self] in
                 guard let self else { return }
-                configureSessionIfNeeded()
-                guard isConfigured, !session.isRunning else { return }
-                session.startRunning()
+                if !isConfigured { isConfigured = hardware.configure() }
+                guard isConfigured, !hardware.isRunning else { return }
+                hardware.startRunning()
             }
         }
     }
 
     func stop() {
         sessionQueue.async { [weak self] in
-            guard let self, session.isRunning else { return }
-            session.stopRunning()
+            guard let self, hardware.isRunning else { return }
+            hardware.stopRunning()
         }
     }
 
@@ -64,7 +75,7 @@ extension CameraCaptureSessionController {
             }
 
             let settings: AVCapturePhotoSettings
-            if photoOutput.availablePhotoCodecTypes.contains(.jpeg) {
+            if hardware.availablePhotoCodecTypes.contains(.jpeg) {
                 settings = AVCapturePhotoSettings(
                     format: [AVVideoCodecKey: AVVideoCodecType.jpeg]
                 )
@@ -78,7 +89,7 @@ extension CameraCaptureSessionController {
                 completion(nil)
                 return
             }
-            photoOutput.capturePhoto(with: settings, delegate: self)
+            hardware.capturePhoto(with: settings, delegate: self)
         }
     }
 
@@ -90,56 +101,17 @@ extension CameraCaptureSessionController {
 
     func switchCamera() {
         sessionQueue.async { [weak self] in
-            guard let self,
-                  let currentInput = videoInput else { return }
-
-            let nextPosition: AVCaptureDevice.Position =
-                currentInput.device.position == .back ? .front : .back
-            guard let device = makeCamera(position: nextPosition),
-                  let nextInput = try? AVCaptureDeviceInput(device: device) else { return }
-
-            session.beginConfiguration()
-            session.removeInput(currentInput)
-
-            if session.canAddInput(nextInput) {
-                session.addInput(nextInput)
-                videoInput = nextInput
-            } else {
-                session.addInput(currentInput)
-            }
-
-            session.commitConfiguration()
+            self?.hardware.switchCamera()
         }
+    }
+
+    func finishCapture(uniqueID: Int64, error: Error?, data: () -> Data?) {
+        guard let completion = takeCaptureCompletion(uniqueID: uniqueID) else { return }
+        completion(error == nil ? autoreleasepool(invoking: data) : nil)
     }
 }
 
 private extension CameraCaptureSessionController {
-    func configureSessionIfNeeded() {
-        guard !isConfigured else { return }
-
-        session.beginConfiguration()
-        session.sessionPreset = .photo
-        defer { session.commitConfiguration() }
-
-        guard let device = makeCamera(position: .back),
-              let input = try? AVCaptureDeviceInput(device: device),
-              session.canAddInput(input),
-              session.canAddOutput(photoOutput) else { return }
-
-        session.addInput(input)
-        session.addOutput(photoOutput)
-        videoInput = input
-        isConfigured = true
-    }
-
-    func makeCamera(position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-        AVCaptureDevice.default(
-            .builtInWideAngleCamera,
-            for: .video,
-            position: position
-        )
-    }
-
     func storeCaptureCompletionIfPossible(
         _ completion: @escaping @Sendable (Data?) -> Void,
         uniqueID: Int64
@@ -177,15 +149,8 @@ extension CameraCaptureSessionController: AVCapturePhotoCaptureDelegate {
         didFinishProcessingPhoto photo: AVCapturePhoto,
         error: Error?
     ) {
-        guard let completion = takeCaptureCompletion(
-            uniqueID: photo.resolvedSettings.uniqueID
-        ) else {
-            return
+        finishCapture(uniqueID: photo.resolvedSettings.uniqueID, error: error) {
+            photo.fileDataRepresentation()
         }
-
-        let data = autoreleasepool {
-            error == nil ? photo.fileDataRepresentation() : nil
-        }
-        completion(data)
     }
 }

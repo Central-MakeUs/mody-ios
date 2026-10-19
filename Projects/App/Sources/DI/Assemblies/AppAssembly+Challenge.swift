@@ -8,7 +8,6 @@
 import Swinject
 import ChallengeInterface
 import Challenge
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import CoreCameraInterface
 import CoreHealthInterface
@@ -36,12 +35,10 @@ extension AppAssembly {
             let (router, outputHandler) = arguments
             let challengeUseCase: ChallengeUseCase = resolver.resolve()
             let healthUseCase: HealthUseCaseProtocol = resolver.resolve()
-            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return ChallengeFeature(
                 challengeUseCase: challengeUseCase,
                 healthUseCase: healthUseCase,
-                analyticsUseCase: analyticsUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
                 },
@@ -78,14 +75,12 @@ extension AppAssembly {
             let challengeUseCase: ChallengeUseCase = resolver.resolve()
             let imageUploadUseCase: ImageUploadUseCaseProtocol = resolver.resolve()
             let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = resolver.resolve()
-            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return ChallengeWeeklyDetailFeature(
                 authUseCase: authUseCase,
                 challengeUseCase: challengeUseCase,
                 imageUploadUseCase: imageUploadUseCase,
                 temporaryImageFileUseCase: temporaryImageFileUseCase,
-                analyticsUseCase: analyticsUseCase,
                 router: { [weak router] route in
                     router?.route(from: route)
                 },

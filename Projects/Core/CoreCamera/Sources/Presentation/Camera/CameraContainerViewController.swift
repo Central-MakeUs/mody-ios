@@ -20,8 +20,9 @@ final class CameraContainerViewController: UIViewController {
     let onEvent: (CameraCaptureEvent) -> Void
     let onComplete: (CameraCaptureResult) -> Void
     let onCancel: () -> Void
-    let sessionController = CameraCaptureSessionController()
+    let sessionController: CameraCaptureSessionController
     let capturedPhotoProcessor: CameraCapturedPhotoProcessor
+    let animateRotation: (@escaping () -> Void, @escaping (Bool) -> Void) -> Void
 
     let previewView = CameraPreviewView()
     let selectedImageView = UIImageView()
@@ -46,10 +47,16 @@ final class CameraContainerViewController: UIViewController {
         isCropEnabled: Bool = true,
         cropAspectRatio: CGSize? = nil,
         capturedPhotoProcessor: CameraCapturedPhotoProcessor,
+        sessionController: CameraCaptureSessionController = CameraCaptureSessionController(),
+        animateRotation: @escaping (@escaping () -> Void, @escaping (Bool) -> Void) -> Void = { animations, completion in
+            UIView.animate(withDuration: 0.28, delay: 0, options: [.curveEaseInOut, .beginFromCurrentState], animations: animations, completion: completion)
+        },
         onEvent: @escaping (CameraCaptureEvent) -> Void,
         onComplete: @escaping (CameraCaptureResult) -> Void,
         onCancel: @escaping () -> Void
     ) {
+        self.animateRotation = animateRotation
+        self.sessionController = sessionController
         self.initialSource = initialSource
         self.isCropEnabled = isCropEnabled
         self.roiOverlayView = ROIOverlayView(selectionAspectRatio: cropAspectRatio)

@@ -8,13 +8,11 @@
 import Base
 import ComposableArchitecture
 import CommonDomain
-import CoreAnalyticsInterface
 import ModyGroupInterface
 
 @Reducer
 public struct GroupCreateFeature {
     private let groupUseCase: GroupUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
 
     @ObservableState
     public struct State: Equatable {
@@ -58,11 +56,9 @@ public struct GroupCreateFeature {
     }
 
     public init(
-        groupUseCase: GroupUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol
+        groupUseCase: GroupUseCaseProtocol
     ) {
         self.groupUseCase = groupUseCase
-        self.analyticsUseCase = analyticsUseCase
     }
     
     public var body: some ReducerOf<Self> {
@@ -103,11 +99,7 @@ public struct GroupCreateFeature {
                 }
             case .createGroupSuccessfully:
                 state.isLoading = false
-                return .run { _ in
-                    analyticsUseCase.log(
-                        ModyGroupAnalyticsEvent.membershipSucceeded(action: "create")
-                    )
-                }
+                return .none
             case .backButtonTapped:
                 return .none
             }

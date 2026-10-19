@@ -6,7 +6,6 @@
 //
 
 import ComposableArchitecture
-import CoreAnalyticsInterface
 import CoreNotificationInterface
 import SwiftUI
 import UIKit
@@ -20,14 +19,11 @@ protocol NotificationBuildable {
 
 struct NotificationBuilder: NotificationBuildable {
     private let notificationUseCase: NotificationUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
 
     init(
-        notificationUseCase: NotificationUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol
+        notificationUseCase: NotificationUseCaseProtocol
     ) {
         self.notificationUseCase = notificationUseCase
-        self.analyticsUseCase = analyticsUseCase
     }
 
     func makeNotificationViewController(
@@ -38,7 +34,6 @@ struct NotificationBuilder: NotificationBuildable {
         ) {
             NotificationFeature(
                 notificationUseCase: notificationUseCase,
-                analyticsUseCase: analyticsUseCase,
                 router: router
             )
         }

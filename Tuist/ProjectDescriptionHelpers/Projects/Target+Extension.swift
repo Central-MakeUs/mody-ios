@@ -101,6 +101,20 @@ public extension Target {
             settings: .settings(configurations: .default)
         )
     }
+
+    static func tests(moduleType: Module) -> Target {
+        .target(
+            name: "\(moduleType.name)Tests",
+            destinations: projectEnvironment.destination,
+            product: .unitTests,
+            bundleId: "\(moduleType.bundleID).tests",
+            deploymentTargets: projectEnvironment.deploymentTargets,
+            infoPlist: .default,
+            sources: .tests,
+            dependencies: [.target(name: moduleType.name)],
+            settings: .settings(configurations: .default)
+        )
+    }
 }
 
 // MARK: Implement

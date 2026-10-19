@@ -17,6 +17,30 @@ extension Array where Element == Scheme {
 }
 
 extension Scheme {
+    static func tests(_ module: MicroFeatureModule) -> Scheme {
+        tests(moduleName: module.name)
+    }
+
+    static func tests(moduleName: String) -> Scheme {
+        let testsName = "\(moduleName)Tests"
+        return .scheme(
+            name: testsName,
+            shared: true,
+            buildAction: .buildAction(targets: [
+                .target(moduleName),
+                .target(testsName)
+            ]),
+            testAction: .targets(
+                [.testableTarget(target: .target(testsName))],
+                configuration: .init(stringLiteral: Environment.dev.name),
+                options: .options(
+                    coverage: true,
+                    codeCoverageTargets: [.target(moduleName)]
+                )
+            )
+        )
+    }
+
     static func implements(
         targetName: String,
         environment: Environment? = nil
@@ -51,6 +75,27 @@ extension Scheme {
             archiveAction: .archiveAction(configuration: configurationName),
             profileAction: .profileAction(configuration: configurationName, executable: .executable("\(targetName)")),
             analyzeAction: .analyzeAction(configuration: configurationName)
+        )
+    }
+
+    static func allTests(
+        implementationTargets: [TargetReference],
+        testTargets: [TargetReference]
+    ) -> Scheme {
+        .scheme(
+            name: "ModyAllTests",
+            shared: true,
+            buildAction: .buildAction(
+                targets: implementationTargets + testTargets
+            ),
+            testAction: .targets(
+                testTargets.map { .testableTarget(target: $0) },
+                configuration: .init(stringLiteral: Environment.dev.name),
+                options: .options(
+                    coverage: true,
+                    codeCoverageTargets: implementationTargets
+                )
+            )
         )
     }
 }

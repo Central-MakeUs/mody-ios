@@ -8,7 +8,6 @@
 import ComposableArchitecture
 import Base
 import CommonDomain
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import SignInInterface
 import ModyLogger
@@ -18,20 +17,17 @@ public struct SignInFeature {
     private let signInUseCase: SignInUseCase
     private let socialLoginUseCase: SocialLoginInterface
     private let authUseCase: AuthUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (SignInRoute) -> Void
     
     public init(
         signInUseCase: SignInUseCase,
         socialLoginUseCase: SocialLoginInterface,
         authUseCase: AuthUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (SignInRoute) -> Void
     ) {
         self.signInUseCase = signInUseCase
         self.socialLoginUseCase = socialLoginUseCase
         self.authUseCase = authUseCase
-        self.analyticsUseCase = analyticsUseCase
         self.router = router
     }
 
@@ -42,7 +38,6 @@ public struct SignInFeature {
         }
 
         var isLoading: Bool = false
-        var loginType: SocialLoginType?
         var navigationDestination: SignInRoute?
         var alertCase: AlertCase?
         var alertState = AlertFeature.State()
@@ -120,44 +115,25 @@ public struct SignInFeature {
 
                 resetDemoLoginState(&state)
                 state.isLoading = true
-                state.loginType = .iosTest
                 return .run { send in
                     await send(signInWithDemo())
                 }
             case .kakaoLoginButtonTapped:
                 state.isLoading = true
-                state.loginType = .kakao
                 return .run { send in
-                    analyticsUseCase.log(SignInAnalyticsEvent.loginButtonClicked(method: .kakao))
                     await send(signInWithKakao())
                 }
             case .appleLoginButtonTapped:
                 state.isLoading = true
-                state.loginType = .apple
                 return .run { send in
-                    analyticsUseCase.log(SignInAnalyticsEvent.loginButtonClicked(method: .apple))
                     await send(signInWithApple())
                 }
             case .receiveLoginSessionSuccessfully(let session):
                 state.isLoading = false
                 let destination = makeNavigationDestination(from: session)
-                let method = state.loginType ?? session.socialLoginType
                 state.navigationDestination = destination
 
                 return .run { [router] _ in
-                    analyticsUseCase.setUserID(String(session.id))
-                    analyticsUseCase.log(
-                        SignInAnalyticsEvent.loginSucceeded(method: method)
-                    )
-
-                    if session.personalInfoCompleted,
-                       let userInfo = try? await authUseCase.getUserInfo(needUpdateKeyChain: false) {
-
-                        if !userInfo.nickname.isEmpty {
-                            analyticsUseCase.setUserNickname(userInfo.nickname)
-                        }
-                    }
-
                     await router(destination)
                 }
             case let .kakaoLoginError(error),

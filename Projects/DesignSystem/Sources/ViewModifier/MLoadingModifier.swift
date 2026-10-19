@@ -23,7 +23,7 @@ struct MLoadingModifier: ViewModifier {
                     MLoadingIndicatorView()
                 }
                 .greedyFrame()
-                .background(Color.black.opacity(0.6))
+                .background(Color.black.opacity(0.6).ignoresSafeArea())
             }
         }
     }

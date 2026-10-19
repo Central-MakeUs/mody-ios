@@ -365,7 +365,8 @@ private extension FeedViewController {
         groupHeaderView.addSubview(groupButton)
 
         groupHeaderView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
+            $0.top.equalTo(view.safeAreaLayoutGuide)
+            $0.leading.trailing.equalToSuperview()
         }
 
         groupButton.snp.makeConstraints {

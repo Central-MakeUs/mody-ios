@@ -5,7 +5,7 @@ module:
 
 generate:
 	tuist install
-	tuist generate
+	TUIST_CONFIG_CACHE_MANIFESTS=false tuist generate
 
 clean:
 	rm -rf Projects/**/*.xcodeproj

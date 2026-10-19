@@ -8,7 +8,6 @@
 import ComposableArchitecture
 import Base
 import CommonDomain
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import CoreCameraInterface
 import CoreModyImageInterface
@@ -18,7 +17,6 @@ import ModyLogger
 
 @Reducer
 public struct ProfileFeature {
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let authUseCase: AuthUseCaseProtocol
     private let myPageUseCase: MyPageUseCase
     private let imageUploadUseCase: ImageUploadUseCaseProtocol
@@ -27,7 +25,6 @@ public struct ProfileFeature {
     private let output: @MainActor (MyPageOutput) -> Void
 
     public init(
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         authUseCase: AuthUseCaseProtocol,
         myPageUseCase: MyPageUseCase,
         imageUploadUseCase: ImageUploadUseCaseProtocol,
@@ -35,7 +32,6 @@ public struct ProfileFeature {
         router: @escaping @MainActor (MyPageProfileRoute) -> Void,
         output: @escaping @MainActor (MyPageOutput) -> Void
     ) {
-        self.analyticsUseCase = analyticsUseCase
         self.authUseCase = authUseCase
         self.myPageUseCase = myPageUseCase
         self.imageUploadUseCase = imageUploadUseCase
@@ -120,7 +116,6 @@ public struct ProfileFeature {
         case profileImageTapped
         case cameraSourceTapped
         case gallerySourceTapped
-        case cameraCaptureEventReceived(CameraCaptureEvent)
         case photoCaptureCompleted(CameraCaptureResult)
         case photoCaptureCancelled
         case profileFetched(MyPageProfile)
@@ -214,12 +209,6 @@ public struct ProfileFeature {
                 state.photoCaptureSource = .photoLibrary
                 state.isCameraPresented = true
                 return .none
-            case let .cameraCaptureEventReceived(.buttonClicked(button)):
-                return .run { _ in
-                    analyticsUseCase.log(
-                        MyPageAnalyticsEvent.cameraButtonClicked(button: button)
-                    )
-                }
             case let .photoCaptureCompleted(result):
                 let previousPhotoURL = state.selectedPhoto?.originalFile.fileURL
                 state.selectedPhoto = result
@@ -272,8 +261,6 @@ public struct ProfileFeature {
             case .logoutSuccessfully:
                 state.isLoading = false
                 return .run { send in
-                    analyticsUseCase.log(MyPageAnalyticsEvent.logoutSucceeded)
-                    analyticsUseCase.reset()
                     await send(.routeToSignIn)
                 }
             case let .logoutFailed(error):
@@ -294,8 +281,6 @@ public struct ProfileFeature {
                 )
             case .deleteAccountSuccessfully:
                 return .run { send in
-                    analyticsUseCase.log(MyPageAnalyticsEvent.accountDeletionSucceeded)
-                    analyticsUseCase.reset()
                     await send(.showAlert(.deleteCompleted))
                 }
             case let .deleteAccountFailed(error):

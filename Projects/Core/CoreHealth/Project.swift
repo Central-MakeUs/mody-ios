@@ -3,5 +3,6 @@ import ProjectDescriptionHelpers
 
 let project = Project.module(
     moduleType: .MicroFeature(.CoreHealth),
-    hasDemo: false
+    hasDemo: false,
+    hasTests: true
 )

@@ -43,8 +43,6 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           API_BASE_URL_DEV: ${{ secrets.API_BASE_URL_DEV }}
           API_BASE_URL_PROD: ${{ secrets.API_BASE_URL_PROD }}
-          AMPLITUDE_API_KEY_DEV: ${{ secrets.AMPLITUDE_API_KEY_DEV }}
-          AMPLITUDE_API_KEY_PROD: ${{ secrets.AMPLITUDE_API_KEY_PROD }}
           KAKAO_NATIVE_APP_KEY_DEV: ${{ secrets.KAKAO_NATIVE_APP_KEY_DEV }}
           KAKAO_NATIVE_APP_KEY_PROD: ${{ secrets.KAKAO_NATIVE_APP_KEY_PROD }}
           KAKAO_SHARE_TEMPLATE_ID_DEV: ${{ secrets.KAKAO_SHARE_TEMPLATE_ID_DEV }}
@@ -78,9 +76,39 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: ci_scripts/github/pre-build/setup_tuist.sh
 
+      - name: Run module test gate
+        id: test-gate
+        if: steps.setup-tuist.outcome == 'success'
+        timeout-minutes: 60
+        run: ci_scripts/github/pre-build/run_tests.sh
+
+      - name: Publish test summary
+        if: always() && steps.test-gate.outcome != 'skipped'
+        env:
+          TEST_RESULT_DIRECTORY: ${{ steps.test-gate.outputs.result_directory }}
+        run: |
+          if [[ -n "$TEST_RESULT_DIRECTORY" && -f "$TEST_RESULT_DIRECTORY/summary.md" ]]; then
+            cat "$TEST_RESULT_DIRECTORY/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Module test gate did not finish. Deployment is blocked. See the test gate step and any partial artifact." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload test results
+        if: always() && steps.test-gate.outputs.result_directory != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: tests-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.test-gate.outputs.result_directory }}/
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Setup Ruby
         id: setup-ruby
-        if: steps.setup-tuist.outcome == 'success'
+        if: >-
+          steps.setup-tuist.outcome == 'success' &&
+          steps.test-gate.outcome == 'success' &&
+          steps.test-gate.outputs.execution_mode == 'execute' &&
+          (steps.test-gate.outputs.decision == 'passed' || steps.test-gate.outputs.decision == 'disabled')
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: ci_scripts/github/distribution/setup_ruby.sh
@@ -100,7 +128,11 @@ jobs:
 
       - name: Build and distribute app
         id: build-and-distribute-app
-        if: steps.setup-ruby.outcome == 'success' && steps.install-ios-signing-assets.outcome == 'success'
+        if: >-
+          steps.setup-ruby.outcome == 'success' && steps.install-ios-signing-assets.outcome == 'success' &&
+          steps.test-gate.outcome == 'success' &&
+          steps.test-gate.outputs.execution_mode == 'execute' &&
+          (steps.test-gate.outputs.decision == 'passed' || steps.test-gate.outputs.decision == 'disabled')
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

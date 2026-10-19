@@ -22,6 +22,11 @@ public struct ImageUploadRepository: ImageUploadRepositoryProtocol {
         self.uploadSession = .default
     }
 
+    init(network: CoreNetworkProtocol, uploadSession: Session) {
+        self.network = network
+        self.uploadSession = uploadSession
+    }
+
     public func postPresignedURL(
         domain: ImageUploadDomain,
         fileName: String
