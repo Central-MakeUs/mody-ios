@@ -72,3 +72,9 @@ Tuist/.build
 
 XCConfig/
 GoogleService-info*
+
+.codex/
+AGENTS.md
+
+# Per-run test bundles, logs and build outputs
+/Test/Result/

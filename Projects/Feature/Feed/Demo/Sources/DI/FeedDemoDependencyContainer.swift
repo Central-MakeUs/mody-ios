@@ -2,90 +2,96 @@
 //  FeedDemoDependencyContainer.swift
 //  FeedDemo
 //
-//  Created by 김동준 on 7/22/26.
+//  Created by 김동준 on 10/5/26.
 //
 
-import CoreAuthInterface
-import CoreAnalyticsInterface
+import CommonDomain
+import CoreAuthTesting
+import CoreNetworkTesting
 import CoreCamera
 import CoreCameraInterface
+import CoreModyImage
 import CoreModyImageInterface
+import CoreModyImageTesting
 import Feed
 import FeedInterface
-import CoreModyImage
+import Foundation
 import ModyGroupInterface
 
+@MainActor
 final class FeedDemoDependencyContainer {
-    private let feedRepository: FeedRepositoryProtocol
-    private let authUseCase: AuthUseCaseProtocol
-    private let groupUseCase: GroupUseCaseProtocol
-    private let cameraCaptureBuilder: CameraCaptureBuildable
-    private let imageUploadUseCase: ImageUploadUseCaseProtocol
-    private let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
+    private var data: FeedDemoNetworkData?
 
-    init(
-        feedRepository: FeedRepositoryProtocol = FeedDemoMockRepository(),
-        authUseCase: AuthUseCaseProtocol = FeedDemoAuthUseCase(),
-        groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCase(),
-        imageUploadUseCase: ImageUploadUseCaseProtocol = FeedDemoImageUploadUseCase(),
-        temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = TemporaryImageFileUseCase(
+    func makeBuilder(for scenario: FeedDemoScenario) -> FeedBuildable {
+        let data = FeedDemoNetworkData(scenario: scenario)
+        self.data = data
+        let repository = FeedRepository(network: CoreNetworkStub(responseDelay: .milliseconds(500)) { endpoint in
+            try await data.response(to: endpoint)
+        })
+        let feedUseCase = FeedUseCase(
+            feedRepository: repository
+        )
+        let authUseCase = AuthUseCaseStub(
+            signInResult: .failure(CancellationError()),
+            userInfoResult: .success(UserInfoFixture.make(
+                memberId: 100, nickname: "내 기록", profileImageUrl: "", daysTogether: 1
+            )),
+            logoutResult: .success(()),
+            deleteAccountResult: .success(()),
+            responseDelay: .milliseconds(500)
+        )
+        let groupUseCase: GroupUseCaseProtocol = FeedDemoGroupUseCaseStub(scenario: scenario)
+        let imageLoader = NukeRemoteImageLoader()
+        let imageUploadUseCase: ImageUploadUseCaseProtocol = ImageUploadUseCaseStub(uploadImage: { _, fileName, domain in
+            if scenario == .uploadFailure { throw NetworkError.invalidResponse }
+            return "demo/\(domain.rawValue)/\(fileName)"
+        }, responseDelay: .milliseconds(500))
+        let temporaryImageFileUseCase: TemporaryImageFileUseCaseProtocol = TemporaryImageFileUseCase(
             repository: TemporaryImageFileRepository()
         )
-    ) {
-        self.feedRepository = feedRepository
-        self.authUseCase = authUseCase
-        self.groupUseCase = groupUseCase
-        self.imageUploadUseCase = imageUploadUseCase
-        self.temporaryImageFileUseCase = temporaryImageFileUseCase
-        self.analyticsUseCase = FeedDemoAnalyticsUseCase()
-        self.cameraCaptureBuilder = CameraCaptureBuilder(
-            temporaryImageFileUseCase: temporaryImageFileUseCase
-        )
-    }
-
-    func makeFeedBuildable() -> FeedBuildable {
-        let feedUseCase = FeedUseCase(feedRepository: feedRepository)
 
         return FeedBuilder(
             makeFeedReactor: { router, outputHandler in
                 FeedReactor(
-                    authUseCase: self.authUseCase,
-                    groupUseCase: self.groupUseCase,
+                    authUseCase: authUseCase,
+                    groupUseCase: groupUseCase,
                     feedUseCase: feedUseCase,
-                    analyticsUseCase: self.analyticsUseCase,
                     router: router,
                     output: { [weak outputHandler] output in
                         outputHandler?.handle(output: output)
                     }
                 )
             },
-            makeFeedRecordReactor: {
-                router,
-                recordType,
-                outputHandler in
+            makeFeedRecordReactor: { router, recordType, outputHandler in
                 FeedRecordReactor(
                     router: router,
                     recordType: recordType,
                     feedUseCase: feedUseCase,
-                    imageUploadUseCase: self.imageUploadUseCase,
-                    temporaryImageFileUseCase: self.temporaryImageFileUseCase,
-                    analyticsUseCase: self.analyticsUseCase,
+                    imageUploadUseCase: imageUploadUseCase,
+                    temporaryImageFileUseCase: temporaryImageFileUseCase,
                     output: { [weak outputHandler] output in
                         outputHandler?.handle(output: output)
                     }
                 )
             },
-            cameraCaptureBuilder: cameraCaptureBuilder,
-            imageLoader: NukeRemoteImageLoader.shared
+            cameraCaptureBuilder: CameraCaptureBuilder(
+                temporaryImageFileUseCase: temporaryImageFileUseCase
+            ),
+            imageLoader: RemoteImageLoaderStub(loadImage: { request in
+                let name = request.url.deletingLastPathComponent().lastPathComponent == "exercise"
+                    ? "FeedDemoExercise" : "FeedDemoMeal"
+                guard let url = Bundle.main.url(forResource: name, withExtension: "jpg") else {
+                    throw CocoaError(.fileNoSuchFile)
+                }
+                return try await imageLoader.loadImage(with: RemoteImageRequest(
+                    url: url, variantIdentifier: request.variantIdentifier,
+                    maximumPixelSize: request.maximumPixelSize, processing: request.processing
+                ))
+            }, responseDelay: .milliseconds(500))
         )
     }
-}
 
-private struct FeedDemoAnalyticsUseCase: AnalyticsUseCaseProtocol {
-    func setUserID(_ userID: String) {}
-    func setUserNickname(_ nickname: String) {}
-    func reset() {}
-    func log(_ event: AmplitudeLogEvent) {}
-    func viewDidLoad(screenName: String) {}
+    func addDemoRecord() async {
+        await data?.addDemoRecord()
+    }
 }

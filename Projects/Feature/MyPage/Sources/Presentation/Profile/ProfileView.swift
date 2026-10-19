@@ -56,7 +56,7 @@ public struct ProfileView: View {
                     ProfileCameraCaptureView(
                         source: source,
                         cameraCaptureBuilder: cameraCaptureBuilder,
-                        onEvent: { store.send(.cameraCaptureEventReceived($0)) },
+                        onEvent: { _ in },
                         onComplete: { store.send(.photoCaptureCompleted($0)) },
                         onCancel: { store.send(.photoCaptureCancelled) }
                     )

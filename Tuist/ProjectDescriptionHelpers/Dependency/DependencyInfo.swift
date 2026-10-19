@@ -60,7 +60,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .module(.MicroFeature(.CoreNotification)),
             .module(.MicroFeature(.CoreModyImage)),
             .module(.MicroFeature(.CoreHealth)),
-            .module(.MicroFeature(.CoreAnalytics)),
 
             .external(.FirebaseCore),
             .external(.FirebaseMessaging),
@@ -73,7 +72,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .microFeature(.CoreNotification),
             .microFeature(.CoreModyImage),
             .microFeature(.CoreHealth),
-            .microFeature(.CoreAnalytics),
             .microFeature(.Main)
         ],
         .Root: [
@@ -99,43 +97,55 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
     microFeatureDependencies: [
         .Splash: .init(
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
                 .microFeature(.CoreNetwork),
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreKeyChainStorage),
-                .module(.CommonDomain),
                 .microFeature(.CoreAuth),
-                .microFeature(.CoreAnalytics)
+            ],
+            tests: [
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
+            ],
+            demo: [
+                .microFeatureTesting(.CoreNetwork),
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
             ]
         ),
         .SignIn: .init(
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
                 .microFeature(.FirebaseService),
                 .microFeature(.CoreAuth),
-                .microFeature(.CoreAnalytics)
+            ],
+            tests: [
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
+            ],
+            demo: [
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.FirebaseService)
             ]
         ),
         .OnBoarding: .init(
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNotification),
                 .microFeature(.CoreHealth),
-                .microFeature(.CoreAnalytics),
-                .module(.Util)
+            ],
+            demo: [
+                .microFeatureTesting(.CoreNetwork),
+                .microFeatureTesting(.CoreCamera),
+                .microFeatureTesting(.CoreHealth),
+                .microFeatureTesting(.CoreNotification)
             ]
         ),
         .SignUpDone: .init(
             implementation: [
-                .external(.ComposableArchitecture),
-                .module(.Base)
+                .external(.ComposableArchitecture)
             ]
         ),
         .ModyGroup: .init(
@@ -143,12 +153,12 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain)
             ],
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreKakao),
-                .microFeature(.CoreAnalytics)
+            ],
+            demo: [
+                .microFeatureTesting(.CoreNetwork)
             ]
         ),
         .Feed: .init(
@@ -157,21 +167,20 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             ],
             implementation: [
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreCamera),
                 .microFeature(.ModyGroup),
                 .external(.ReactorKit),
-                .external(.RxSwift),
                 .external(.RxCocoa),
-                .external(.RxRelay),
-                .microFeature(.CoreModyImage),
-                .microFeature(.CoreAnalytics)
+            ],
+            tests: [
+                .microFeatureTesting(.CoreAuth)
             ],
             demo: [
-                .module(.DesignSystem),
+                .microFeatureTesting(.CoreNetwork),
+                .microFeatureTesting(.CoreModyImage),
+                .microFeatureTesting(.CoreAuth),
                 .module(.MicroFeature(.CoreCamera)),
                 .module(.MicroFeature(.CoreModyImage))
             ]
@@ -183,15 +192,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .microFeature(.MyPage),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreNotification),
-                .microFeature(.CoreModyImage),
-                .microFeature(.CoreAnalytics),
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
-                .external(.ComposableArchitecture),
-                .external(.SnapKit),
                 .external(.ReactorKit),
-                .external(.RxSwift),
                 .external(.RxCocoa)
             ]
         ),
@@ -200,16 +202,23 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain)
             ],
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreCamera),
                 .microFeature(.CoreNetwork),
-                .microFeature(.CoreModyImage),
                 .microFeature(.CoreHealth),
-                .microFeature(.CoreAnalytics)
+            ],
+            tests: [
+                .microFeatureTesting(.CoreModyImage),
+                .microFeatureTesting(.CoreAuth)
+            ],
+            demo: [
+                .microFeatureTesting(.CoreNetwork),
+                .microFeatureTesting(.CoreModyImage),
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.CoreCamera),
+                .microFeatureTesting(.CoreHealth),
+                .module(.MicroFeature(.CoreModyImage))
             ]
         ),
         .MyPage: .init(
@@ -217,22 +226,24 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.CommonDomain)
             ],
             implementation: [
-                .external(.ComposableArchitecture),
                 .module(.Base),
-                .module(.CommonDomain),
-                .module(.Util),
-                .microFeature(.CoreAnalytics),
                 .microFeature(.CoreAuth),
                 .microFeature(.CoreNetwork),
                 .microFeature(.CoreNotification),
                 .microFeature(.ModyGroup),
                 .microFeature(.CoreCamera),
-                .microFeature(.CoreModyImage),
                 .microFeature(.CoreHealth)
             ],
+            tests: [
+                .microFeatureTesting(.CoreAuth)
+            ],
             demo: [
-                .module(.CommonDomain),
-                .microFeature(.CoreAuth),
+                .microFeatureTesting(.CoreNetwork),
+                .microFeatureTesting(.CoreModyImage),
+                .microFeatureTesting(.CoreAuth),
+                .microFeatureTesting(.CoreCamera),
+                .microFeatureTesting(.CoreHealth),
+                .microFeatureTesting(.CoreNotification),
                 .module(.MicroFeature(.CoreModyImage))
             ]
         ),
@@ -241,7 +252,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.Alamofire),
                 .module(.CommonDomain),
                 .module(.ModyLogger),
-                .microFeature(.CoreAnalytics)
             ]
         ),
         .FirebaseService: .init(
@@ -276,6 +286,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             implementation: [
                 .microFeature(.CoreKeyChainStorage),
                 .microFeature(.CoreNetwork)
+            ],
+            tests: [
+                .microFeatureTesting(.CoreNetwork)
             ]
         ),
         .CoreCamera: .init(
@@ -286,6 +299,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .module(.DesignSystem),
                 .microFeature(.CoreModyImage),
                 .external(.SnapKit)
+            ],
+            testing: [
+                .module(.DesignSystem)
             ]
         ),
         .CoreModyImage: .init(
@@ -296,11 +312,6 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
                 .external(.Nuke)
             ]
         ),
-        .CoreHealth: .init(),
-        .CoreAnalytics: .init(
-            implementation: [
-                .external(.AmplitudeSwift)
-            ]
-        )
+        .CoreHealth: .init()
     ]
 )

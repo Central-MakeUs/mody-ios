@@ -29,10 +29,14 @@ struct CameraDisplayedImageLayout {
     ) -> CameraDisplayedImageLayout? {
         let originalImageBounds = CGRect(origin: .zero, size: imageSize)
 
-        guard containerSize.width > 0,
+        guard containerSize.width.isFinite,
+              containerSize.height.isFinite,
+              imageSize.width.isFinite,
+              imageSize.height.isFinite,
+              containerSize.width > 0,
               containerSize.height > 0,
-              originalImageBounds.width > 0,
-              originalImageBounds.height > 0 else { return nil }
+              imageSize.width > 0,
+              imageSize.height > 0 else { return nil }
 
         let scale: CGFloat
         switch displayMode {

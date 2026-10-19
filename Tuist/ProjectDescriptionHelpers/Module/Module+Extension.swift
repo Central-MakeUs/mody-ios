@@ -17,7 +17,7 @@ extension Module {
         }
     }
     
-    func targets(hasDemo: Bool = false) -> [Target] {
+    func targets(hasDemo: Bool = false, hasTests: Bool = false) -> [Target] {
         switch self {
         case .App:
             return [.target(moduleType: self)]
@@ -35,7 +35,9 @@ extension Module {
             
             return targets
         default:
-            return [.target(moduleType: self)]
+            return hasTests
+                ? [.target(moduleType: self), .tests(moduleType: self)]
+                : [.target(moduleType: self)]
         }
     }
     
@@ -77,16 +79,23 @@ extension Module {
         }
     }
     
-    func schemes(hasDemo: Bool = false) -> [Scheme] {
+    func schemes(
+        hasDemo: Bool = false,
+        hasTests: Bool = false
+    ) -> [Scheme] {
         switch self {
         case .App:
-            .scheme(name: projectEnvironment.appName, environments: .all)
+            return .scheme(name: projectEnvironment.appName, environments: .all)
         case .DesignSystem:
-            [.implements(targetName: "\(self.name)Demo")]
+            return [.implements(targetName: "\(self.name)Demo")]
         case .MicroFeature(let module):
-            hasDemo ? [.implements(targetName: module.demoName)] : []
+            var schemes = hasDemo ? [Scheme.implements(targetName: module.demoName)] : []
+            if hasTests {
+                schemes.append(.tests(module))
+            }
+            return schemes
         default:
-            []
+            return hasTests ? [.tests(moduleName: name)] : []
         }
     }
     
