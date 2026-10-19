@@ -8,7 +8,6 @@
 import Base
 import CommonDomain
 import ComposableArchitecture
-import CoreAnalyticsInterface
 import CoreNotificationInterface
 import FeedInterface
 import Foundation
@@ -16,16 +15,13 @@ import Foundation
 @Reducer
 struct NotificationFeature {
     private let notificationUseCase: NotificationUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (NotificationRoute) -> Void
 
     init(
         notificationUseCase: NotificationUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (NotificationRoute) -> Void
     ) {
         self.notificationUseCase = notificationUseCase
-        self.analyticsUseCase = analyticsUseCase
         self.router = router
     }
 
@@ -79,9 +75,6 @@ struct NotificationFeature {
                 }
             case let .notificationTapped(item):
                 guard item.type != .commentCreated else { return .none }
-                analyticsUseCase.log(
-                    MainAnalyticsEvent.notificationNavigationSelected(type: item.type)
-                )
                 return route(for: item.type)
             case .onAppear:
                 guard !state.didLoad else { return .none }

@@ -6,7 +6,6 @@
 //
 
 import ChallengeInterface
-import CoreAnalyticsInterface
 import CoreNotificationInterface
 import CoreModyImageInterface
 import FeedInterface
@@ -20,7 +19,6 @@ public struct MainBuilder: MainBuildable {
     private let myPageBuilder: MyPageBuildable
     private let modyGroupBuilder: ModyGroupBuildable
     private let notificationUseCase: NotificationUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let imageLoader: RemoteImageLoading
     private let makeMainReactor: () -> MainReactor
 
@@ -30,7 +28,6 @@ public struct MainBuilder: MainBuildable {
         myPageBuilder: MyPageBuildable,
         modyGroupBuilder: ModyGroupBuildable,
         notificationUseCase: NotificationUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         imageLoader: RemoteImageLoading,
         makeMainReactor: @escaping () -> MainReactor
     ) {
@@ -39,7 +36,6 @@ public struct MainBuilder: MainBuildable {
         self.myPageBuilder = myPageBuilder
         self.modyGroupBuilder = modyGroupBuilder
         self.notificationUseCase = notificationUseCase
-        self.analyticsUseCase = analyticsUseCase
         self.imageLoader = imageLoader
         self.makeMainReactor = makeMainReactor
     }
@@ -48,8 +44,7 @@ public struct MainBuilder: MainBuildable {
     public func makeMainCoordinator(delegate: MainCoordinatorDelegate) -> MainCoordinating {
         let mainContainerBuilder = MainContainerBuilder(makeMainReactor: makeMainReactor)
         let notificationBuilder = NotificationBuilder(
-            notificationUseCase: notificationUseCase,
-            analyticsUseCase: analyticsUseCase
+            notificationUseCase: notificationUseCase
         )
 
         return MainCoordinator(
@@ -60,7 +55,6 @@ public struct MainBuilder: MainBuildable {
             mainContainerBuilder: mainContainerBuilder,
             notificationBuilder: notificationBuilder,
             imageLoader: imageLoader,
-            analyticsUseCase: analyticsUseCase,
             delegate: delegate
         )
     }

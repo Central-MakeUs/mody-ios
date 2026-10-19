@@ -8,27 +8,23 @@
 import ComposableArchitecture
 import ChallengeInterface
 import CommonDomain
-import CoreAnalyticsInterface
 import CoreHealthInterface
 
 @Reducer
 public struct ChallengeFeature {
     private let challengeUseCase: ChallengeUseCase
     private let healthUseCase: HealthUseCaseProtocol
-    private let analyticsUseCase: AnalyticsUseCaseProtocol
     private let router: @MainActor (ChallengeRoute) -> Void
     private let output: @MainActor (ChallengeOutput) -> Void
 
     public init(
         challengeUseCase: ChallengeUseCase,
         healthUseCase: HealthUseCaseProtocol,
-        analyticsUseCase: AnalyticsUseCaseProtocol,
         router: @escaping @MainActor (ChallengeRoute) -> Void,
         output: @escaping @MainActor (ChallengeOutput) -> Void
     ) {
         self.challengeUseCase = challengeUseCase
         self.healthUseCase = healthUseCase
-        self.analyticsUseCase = analyticsUseCase
         self.router = router
         self.output = output
     }
@@ -109,7 +105,6 @@ private extension ChallengeFeature {
             }
         case let .nudgeCompleted(_, _, nickname):
             return .run { [output] _ in
-                analyticsUseCase.log(ChallengeAnalyticsEvent.nudgeSucceeded)
                 await output(.nudgeSucceeded(nickname: nickname))
             }
         case .showAlert(let error):
@@ -129,9 +124,7 @@ private extension ChallengeFeature {
     ) -> Effect<Action> {
         switch action {
         case .refreshStepButtonTapped:
-            return .run { _ in
-                analyticsUseCase.log(ChallengeAnalyticsEvent.stepRefreshClicked)
-            }
+            return .none
         case .showAlert(let error):
             return .run { [output] _ in
                 await output(.showAlert(error))

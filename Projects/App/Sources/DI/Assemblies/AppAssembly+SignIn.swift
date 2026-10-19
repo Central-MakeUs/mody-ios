@@ -6,7 +6,6 @@
 //
 
 import Swinject
-import CoreAnalyticsInterface
 import CoreAuthInterface
 import FirebaseServiceInterface
 import SignInInterface
@@ -30,13 +29,11 @@ extension AppAssembly {
             let signInUseCase: SignInUseCase = resolver.resolve()
             let socialLoginUseCase: SocialLoginInterface = resolver.resolve()
             let authUseCase: AuthUseCaseProtocol = resolver.resolve()
-            let analyticsUseCase: AnalyticsUseCaseProtocol = resolver.resolve()
 
             return SignInFeature(
                 signInUseCase: signInUseCase,
                 socialLoginUseCase: socialLoginUseCase,
-                authUseCase: authUseCase,
-                analyticsUseCase: analyticsUseCase
+                authUseCase: authUseCase
             ) { [weak router] route in
                 router?.route(from: route)
             }

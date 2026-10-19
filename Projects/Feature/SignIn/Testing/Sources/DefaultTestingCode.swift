@@ -1,5 +1,8 @@
-import SignInInterface
+//
+//  DefaultTestingCode.swift
+//  SignInTesting
+//
+//  Created by 김동준 on 10/8/26.
+//
 
-public struct SignInTesting {
-    public init() {}
-}
+import SignInInterface

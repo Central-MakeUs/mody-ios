@@ -1,0 +1,147 @@
+{
+  "enabled": true,
+  "modules": [
+    {
+      "name": "CoreAuth",
+      "projectPath": "Projects/Core/CoreAuth",
+      "enabled": true,
+      "minimumCoverage": 95
+    },
+    {
+      "name": "CoreCamera",
+      "projectPath": "Projects/Core/CoreCamera",
+      "enabled": true,
+      "minimumCoverage": 85
+    },
+    {
+      "name": "CoreHealth",
+      "projectPath": "Projects/Core/CoreHealth",
+      "enabled": true,
+      "minimumCoverage": 10
+    },
+    {
+      "name": "CoreKakao",
+      "projectPath": "Projects/Core/CoreKakao",
+      "enabled": true,
+      "minimumCoverage": 5
+    },
+    {
+      "name": "CoreKeyChainStorage",
+      "projectPath": "Projects/Core/CoreKeyChainStorage",
+      "enabled": true,
+      "minimumCoverage": 90
+    },
+    {
+      "name": "CoreModyImage",
+      "projectPath": "Projects/Core/CoreModyImage",
+      "enabled": true,
+      "minimumCoverage": 95
+    },
+    {
+      "name": "CoreNetwork",
+      "projectPath": "Projects/Core/CoreNetwork",
+      "enabled": true,
+      "minimumCoverage": 75
+    },
+    {
+      "name": "CoreNotification",
+      "projectPath": "Projects/Core/CoreNotification",
+      "enabled": true,
+      "minimumCoverage": 90
+    },
+    {
+      "name": "FirebaseService",
+      "projectPath": "Projects/Core/FirebaseService",
+      "enabled": true,
+      "minimumCoverage": 80
+    },
+    {
+      "name": "Challenge",
+      "projectPath": "Projects/Feature/Challenge",
+      "enabled": true,
+      "minimumCoverage": 35
+    },
+    {
+      "name": "Feed",
+      "projectPath": "Projects/Feature/Feed",
+      "enabled": true,
+      "minimumCoverage": 15
+    },
+    {
+      "name": "ModyGroup",
+      "projectPath": "Projects/Feature/ModyGroup",
+      "enabled": true,
+      "minimumCoverage": 35
+    },
+    {
+      "name": "MyPage",
+      "projectPath": "Projects/Feature/MyPage",
+      "enabled": true,
+      "minimumCoverage": 35
+    },
+    {
+      "name": "OnBoarding",
+      "projectPath": "Projects/Feature/OnBoarding",
+      "enabled": true,
+      "minimumCoverage": 20
+    },
+    {
+      "name": "SignIn",
+      "projectPath": "Projects/Feature/SignIn",
+      "enabled": true,
+      "minimumCoverage": 45
+    },
+    {
+      "name": "Splash",
+      "projectPath": "Projects/Feature/Splash",
+      "enabled": true,
+      "minimumCoverage": 50
+    },
+    {
+      "name": "Util",
+      "projectPath": "Projects/Shared/Util",
+      "enabled": true,
+      "minimumCoverage": 95
+    },
+    {
+      "name": "Root",
+      "projectPath": "Projects/Feature/Root",
+      "enabled": false
+    },
+    {
+      "name": "Main",
+      "projectPath": "Projects/Feature/Main",
+      "enabled": false
+    },
+    {
+      "name": "App",
+      "projectPath": "Projects/App",
+      "enabled": false
+    },
+    {
+      "name": "DesignSystem",
+      "projectPath": "Projects/DesignSystem",
+      "enabled": false
+    },
+    {
+      "name": "CommonDomain",
+      "projectPath": "Projects/Domain/CommonDomain",
+      "enabled": false
+    },
+    {
+      "name": "Base",
+      "projectPath": "Projects/Feature/Base",
+      "enabled": false
+    },
+    {
+      "name": "ModyLogger",
+      "projectPath": "Projects/Shared/ModyLogger",
+      "enabled": false
+    },
+    {
+      "name": "SignUpDone",
+      "projectPath": "Projects/Feature/SignUpDone",
+      "enabled": false
+    }
+  ]
+}

@@ -3,5 +3,6 @@ import ProjectDescriptionHelpers
 
 let project = Project.module(
     moduleType: .MicroFeature(.MyPage),
-    hasDemo: true
+    hasDemo: true,
+    hasTests: true
 )
